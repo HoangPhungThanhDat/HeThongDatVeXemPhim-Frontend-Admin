@@ -1,0 +1,707 @@
+/* Cinema User Detail Page Styles */
+
+.cinema-user-detail {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0a0e27 0%, #1a1d3a 50%, #0a0e27 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.cinema-user-detail::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+      circle at 20% 30%,
+      rgba(231, 76, 60, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 70%,
+      rgba(52, 152, 219, 0.1) 0%,
+      transparent 50%
+    );
+  pointer-events: none;
+}
+
+/* ========== Loading Styles ========== */
+.loading-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.loading-content {
+  text-align: center;
+}
+
+.cinema-loader {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.film-reel {
+  width: 60px;
+  height: 60px;
+  border: 6px solid rgba(231, 76, 60, 0.2);
+  border-top-color: #e74c3c;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.film-reel:nth-child(2) {
+  animation-delay: -0.5s;
+  border-top-color: #3498db;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-text {
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+/* ========== Error & Empty States ========== */
+.error-container,
+.empty-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.error-content,
+.empty-container {
+  text-align: center;
+  color: #fff;
+}
+
+.error-icon,
+.empty-icon {
+  font-size: 5rem;
+  color: #e74c3c;
+  margin-bottom: 20px;
+  opacity: 0.8;
+}
+
+.error-content h3 {
+  font-size: 2rem;
+  margin-bottom: 15px;
+}
+
+.error-content p {
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 30px;
+}
+
+.btn-retry {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 25px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+}
+
+.btn-retry:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+}
+
+/* ========== Hero Section ========== */
+.user-hero-section {
+  position: relative;
+  padding: 80px 20px 60px;
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  overflow: hidden;
+}
+
+.user-hero-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="none"/><path d="M0 50 Q25 40, 50 50 T100 50" stroke="rgba(255,255,255,0.05)" fill="none" stroke-width="2"/></svg>');
+  opacity: 0.3;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    circle at center,
+    transparent 0%,
+    rgba(0, 0, 0, 0.3) 100%
+  );
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.user-avatar-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 30px;
+}
+
+.avatar-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.3) 0%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+.user-avatar-hero {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  border: 5px solid rgba(255, 255, 255, 0.9);
+  object-fit: cover;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.status-badge {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  z-index: 3;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: blink 2s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.status-badge.status-active {
+  color: #27ae60;
+}
+
+.status-badge.status-active .status-dot {
+  background: #27ae60;
+}
+
+.status-badge.status-inactive {
+  color: #f39c12;
+}
+
+.status-badge.status-inactive .status-dot {
+  background: #f39c12;
+}
+
+.status-badge.status-banned {
+  color: #e74c3c;
+}
+
+.status-badge.status-banned .status-dot {
+  background: #e74c3c;
+}
+
+.user-name-hero {
+  color: white;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 15px 0;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  letter-spacing: 1px;
+}
+
+.user-role-badge {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  padding: 10px 20px;
+  border-radius: 25px;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* ========== Content Wrapper ========== */
+.user-content-wrapper {
+  position: relative;
+  z-index: 1;
+  margin-top: -40px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* ========== Info Grid ========== */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+/* ========== Info Card ========== */
+.info-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.info-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  border-color: rgba(231, 76, 60, 0.3);
+}
+
+.card-header {
+  background: linear-gradient(
+    135deg,
+    rgba(231, 76, 60, 0.2),
+    rgba(192, 57, 43, 0.2)
+  );
+  padding: 20px 25px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.card-header i {
+  font-size: 1.5rem;
+  color: #e74c3c;
+}
+
+.card-header h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 0.5px;
+}
+
+.card-body {
+  padding: 25px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.info-label i {
+  color: #e74c3c;
+  font-size: 1rem;
+  width: 20px;
+}
+
+.info-value {
+  color: white;
+  font-weight: 600;
+  text-align: right;
+}
+
+/* ========== Pills ========== */
+.role-pill,
+.status-pill {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.role-pill.role-admin {
+  background: linear-gradient(135deg, #f39c12, #e67e22);
+  color: white;
+  box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
+}
+
+.role-pill.role-user {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+}
+
+.status-pill.status-active {
+  background: linear-gradient(135deg, #27ae60, #229954);
+  color: white;
+  box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+}
+
+.status-pill.status-inactive {
+  background: linear-gradient(135deg, #f39c12, #e67e22);
+  color: white;
+  box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
+}
+
+.status-pill.status-banned {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+}
+
+/* ========== Action Buttons ========== */
+.action-buttons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  padding: 20px 0 60px;
+}
+
+.btn-cinema {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 30px;
+  border-radius: 25px;
+  border: none;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+}
+
+.btn-cinema i {
+  font-size: 1.1rem;
+}
+
+.btn-cinema.btn-primary {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+}
+
+.btn-cinema.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(231, 76, 60, 0.4);
+}
+
+.btn-cinema.btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-cinema.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* ========== Responsive Design ========== */
+@media (max-width: 768px) {
+  .user-name-hero {
+    font-size: 2rem;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .btn-cinema {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .user-hero-section {
+    padding: 60px 20px 40px;
+  }
+
+  .info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .info-value {
+    text-align: left;
+  }
+}
+
+@media (max-width: 480px) {
+  .user-avatar-hero {
+    width: 120px;
+    height: 120px;
+  }
+
+  .avatar-glow {
+    width: 150px;
+    height: 150px;
+  }
+
+  .user-name-hero {
+    font-size: 1.75rem;
+  }
+
+  .card-header {
+    padding: 15px 20px;
+  }
+
+  .card-body {
+    padding: 20px;
+  }
+}
+
+/* Loading Spinner Animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Hero Section - Orange Theme */
+.user-hero-section {
+  background: linear-gradient(135deg, #f7931e 0%, #e67e22 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-overlay {
+  background: radial-gradient(
+    circle at 30% 50%,
+    rgba(255, 255, 255, 0.1) 0%,
+    transparent 60%
+  );
+}
+
+.avatar-glow {
+  background: radial-gradient(
+    circle,
+    rgba(247, 147, 30, 0.4) 0%,
+    transparent 70%
+  );
+  filter: blur(30px);
+}
+
+.user-avatar-hero {
+  border: 5px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 20px 60px rgba(247, 147, 30, 0.5);
+}
+
+.status-badge.status-active {
+  background: rgba(34, 197, 94, 0.2);
+  border: 2px solid #22c55e;
+  color: #22c55e;
+}
+
+.status-badge.status-inactive {
+  background: rgba(239, 68, 68, 0.2);
+  border: 2px solid #ef4444;
+  color: #ef4444;
+}
+
+.status-dot {
+  background: currentColor;
+  box-shadow: 0 0 10px currentColor;
+}
+
+.user-name-hero {
+  text-shadow: 2px 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.user-role-badge {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 8px 24px;
+  border-radius: 30px;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* Info Cards - Orange Accent */
+.info-card {
+  background: rgba(30, 41, 59, 0.6);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(247, 147, 30, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.info-card:hover {
+  border-color: rgba(247, 147, 30, 0.4);
+  box-shadow: 0 12px 40px rgba(247, 147, 30, 0.2);
+  transform: translateY(-4px);
+}
+
+.card-header {
+  background: linear-gradient(
+    135deg,
+    rgba(247, 147, 30, 0.15) 0%,
+    rgba(230, 126, 34, 0.1) 100%
+  );
+  border-bottom: 2px solid rgba(247, 147, 30, 0.3);
+  color: #f7931e;
+}
+
+.card-header i {
+  color: #f7931e;
+  filter: drop-shadow(0 0 8px rgba(247, 147, 30, 0.3));
+}
+
+.info-label i {
+  color: #f7931e;
+  filter: drop-shadow(0 0 4px rgba(247, 147, 30, 0.2));
+}
+
+.role-pill {
+  background: linear-gradient(
+    135deg,
+    rgba(247, 147, 30, 0.2) 0%,
+    rgba(230, 126, 34, 0.15) 100%
+  );
+  color: #f7931e;
+  border: 1px solid rgba(247, 147, 30, 0.3);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 13px;
+  box-shadow: 0 4px 12px rgba(247, 147, 30, 0.2);
+}
+
+.status-pill.status-active {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.status-pill.status-inactive {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Action Buttons - Orange Theme */
+.btn-cinema {
+  transition: all 0.3s ease;
+  font-weight: 700;
+  border-radius: 12px;
+  padding: 14px 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-cinema.btn-primary {
+  background: linear-gradient(135deg, #f7931e 0%, #e67e22 100%);
+  color: white;
+  box-shadow: 0 8px 24px rgba(247, 147, 30, 0.4);
+}
+
+.btn-cinema.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(247, 147, 30, 0.5);
+}
+
+.btn-cinema.btn-secondary {
+  background: rgba(71, 85, 105, 0.5);
+  color: #e2e8f0;
+  border: 2px solid rgba(148, 163, 184, 0.2);
+}
+
+.btn-cinema.btn-secondary:hover {
+  background: rgba(71, 85, 105, 0.7);
+  border-color: rgba(148, 163, 184, 0.4);
+  transform: translateY(-2px);
+}
