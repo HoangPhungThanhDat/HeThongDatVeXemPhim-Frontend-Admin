@@ -134,155 +134,138 @@ export default function ShowtimeSeat() {
                 </div>
               </div>
 
-              {/* Form thêm */}
-              {/* Form thêm trạng thái ghế theo suất chiếu - CINEMA STYLE */}
-              <AnimatePresence>
-                {showForm && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -30 }}
-                    transition={{ duration: 0.4 }}
-                    className="cinema-add-form"
-                  >
-                    {/* Form Header */}
-                    <div className="cinema-form-header">
-                      <div className="cinema-form-title">
-                        <div className="cinema-form-icon">
-                          <i className="fas fa-chair"></i>
-                        </div>
-                        <div className="cinema-form-title-text">
-                          <h4>Thêm trạng thái ghế theo suất chiếu</h4>
-                          <p className="cinema-form-subtitle">
-                            Quản lý tình trạng ghế cho từng suất chiếu
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+        {/* Form thêm trạng thái ghế theo suất chiếu */}
+<AnimatePresence>
+  {showForm && (
+    <motion.div
+      initial={{ y: -100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: -100, opacity: 0 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      className="card border-0 shadow-lg rounded-4 mb-4 form-add-user"
+    >
+      <div className="card-body p-4">
+        <h4 className="fw-bold mb-4 text-primary d-flex align-items-center">
+          <i className="fas fa-chair me-2"></i> Thêm trạng thái ghế theo suất chiếu
+        </h4>
 
-                    {/* Form Body */}
-                    <div className="cinema-form-body">
-                      <form onSubmit={handleAddShowtimeSeat}>
-                        <div className="cinema-form-grid">
-                          {/* Suất chiếu */}
-                          <div className="cinema-form-group cinema-form-grid-full">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-clock"></i>
-                              Suất chiếu
-                              <span className="required">*</span>
-                            </label>
-                            <select
-                              className="cinema-select"
-                              value={newShowtimeSeat.ShowtimeId}
-                              onChange={(e) =>
-                                setNewShowtimeSeat({
-                                  ...newShowtimeSeat,
-                                  ShowtimeId: e.target.value,
-                                })
-                              }
-                              required
-                            >
-                              <option value="">-- Chọn suất chiếu --</option>
-                              {showtimes.map((s) => (
-                                <option key={s.ShowtimeId} value={s.ShowtimeId}>
-                                  🎬 {s.MovieId?.Title || "Không rõ phim"} - 🕐{" "}
-                                  {new Date(s.StartTime).toLocaleString(
-                                    "vi-VN"
-                                  )}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
+        <form onSubmit={handleAddShowtimeSeat}>
+          <div className="row g-4">
+            
+            {/* Suất chiếu */}
+            <div className="col-12">
+              <label className="form-label fw-bold">
+                <i className="fas fa-clock me-2 text-primary"></i>
+                Suất chiếu
+              </label>
+              <select
+                className="form-select custom-input"
+                value={newShowtimeSeat.ShowtimeId}
+                onChange={(e) =>
+                  setNewShowtimeSeat({
+                    ...newShowtimeSeat,
+                    ShowtimeId: e.target.value,
+                  })
+                }
+                required
+              >
+                <option value="">-- Chọn suất chiếu --</option>
+                {showtimes.map((s) => (
+                  <option key={s.ShowtimeId} value={s.ShowtimeId}>
+                    🎬 {s.MovieId?.Title || "Không rõ phim"} - 🕐{" "}
+                    {new Date(s.StartTime).toLocaleString("vi-VN")}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-                          {/* Ghế */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-couch"></i>
-                              Chọn ghế
-                              <span className="required">*</span>
-                            </label>
-                            <select
-                              className="cinema-select"
-                              value={newShowtimeSeat.SeatId}
-                              onChange={(e) =>
-                                setNewShowtimeSeat({
-                                  ...newShowtimeSeat,
-                                  SeatId: e.target.value,
-                                })
-                              }
-                              required
-                            >
-                              <option value="">-- Chọn ghế --</option>
-                              {seats.map((seat) => (
-                                <option key={seat.SeatId} value={seat.SeatId}>
-                                  🪑 Hàng {seat.Row} - Ghế {seat.Number} (
-                                  {seat.SeatType})
-                                </option>
-                              ))}
-                            </select>
-                          </div>
+            {/* Ghế */}
+            <div className="col-md-6">
+              <label className="form-label fw-bold">
+                <i className="fas fa-couch me-2 text-danger"></i>
+                Chọn ghế
+              </label>
+              <select
+                className="form-select custom-input"
+                value={newShowtimeSeat.SeatId}
+                onChange={(e) =>
+                  setNewShowtimeSeat({
+                    ...newShowtimeSeat,
+                    SeatId: e.target.value,
+                  })
+                }
+                required
+              >
+                <option value="">-- Chọn ghế --</option>
+                {seats.map((seat) => (
+                  <option key={seat.SeatId} value={seat.SeatId}>
+                    🪑 Hàng {seat.Row} - Ghế {seat.Number} ({seat.SeatType})
+                  </option>
+                ))}
+              </select>
+            </div>
 
-                          {/* Trạng thái */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-info-circle"></i>
-                              Trạng thái ghế
-                              <span className="required">*</span>
-                            </label>
-                            <select
-                              className="cinema-select"
-                              value={newShowtimeSeat.Status}
-                              onChange={(e) =>
-                                setNewShowtimeSeat({
-                                  ...newShowtimeSeat,
-                                  Status: e.target.value,
-                                })
-                              }
-                              required
-                            >
-                              <option value="">-- Chọn trạng thái --</option>
-                              <option value="Available">✅ Còn trống</option>
-                              <option value="Reserved">🎫 Đã đặt</option>
-                              <option value="Broken">⚠️ Ghế hỏng</option>
-                            </select>
-                          </div>
+            {/* Trạng thái */}
+            <div className="col-md-6">
+              <label className="form-label fw-bold">
+                <i className="fas fa-info-circle me-2 text-success"></i>
+                Trạng thái ghế
+              </label>
+              <select
+                className="form-select custom-input"
+                value={newShowtimeSeat.Status}
+                onChange={(e) =>
+                  setNewShowtimeSeat({
+                    ...newShowtimeSeat,
+                    Status: e.target.value,
+                  })
+                }
+                required
+              >
+                <option value="">-- Chọn trạng thái --</option>
+                <option value="Available">✅ Còn trống</option>
+                <option value="Reserved">🎫 Đã đặt</option>
+                <option value="Broken">⚠️ Ghế hỏng</option>
+              </select>
+            </div>
 
-                          {/* Info box - Full width */}
-                          {newShowtimeSeat.ShowtimeId &&
-                            newShowtimeSeat.SeatId && (
-                              <div className="cinema-form-group cinema-form-grid-full">
-                                <div className="cinema-helper-text">
-                                  <i className="fas fa-check-circle"></i>
-                                  Bạn đang cập nhật trạng thái ghế cho suất
-                                  chiếu đã chọn
-                                </div>
-                              </div>
-                            )}
-                        </div>
+            {/* Info box */}
+            {newShowtimeSeat.ShowtimeId && newShowtimeSeat.SeatId && (
+              <div className="col-12">
+                <div className="alert alert-info d-flex align-items-center" role="alert">
+                  <i className="fas fa-check-circle me-2"></i>
+                  Bạn đang cập nhật trạng thái ghế cho suất chiếu đã chọn
+                </div>
+              </div>
+            )}
 
-                        {/* Action Buttons */}
-                        <div className="cinema-form-actions">
-                          <button
-                            type="submit"
-                            className="cinema-btn cinema-btn-primary"
-                          >
-                            <i className="fas fa-save"></i>
-                            Lưu trạng thái
-                          </button>
-                          <button
-                            type="button"
-                            className="cinema-btn cinema-btn-secondary"
-                            onClick={() => setShowForm(false)}
-                          >
-                            <i className="fas fa-times"></i>
-                            Hủy bỏ
-                          </button>
-                        </div>
-                      </form>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+          </div>
+
+          {/* Nút hành động */}
+          <div className="col-12 text-end mt-3">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              type="submit"
+              className="btn btn-gradient-success me-2 rounded-pill px-4"
+            >
+              <i className="fas fa-save me-1"></i> Lưu
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              type="button"
+              className="btn btn-gradient-secondary rounded-pill px-4"
+              onClick={() => setShowForm(false)}
+            >
+              <i className="fas fa-times me-1"></i> Hủy
+            </motion.button>
+          </div>
+        </form>
+      </div>
+    </motion.div>
+  )}
+</AnimatePresence>
 
               {/* Card chứa bảng */}
               <div className="card border-0 shadow-sm rounded-4 animate__animated animate__fadeIn">

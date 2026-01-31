@@ -19,13 +19,14 @@ export default function BannerEdit() {
     LinkUrl: "",
     Position: "",
     Status: "",
-    ImageFile: null, // 📌 thêm thuộc tính để lưu file ảnh
+    ImageFile: null,
   });
 
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // 👇 GIỮ NGUYÊN LOGIC CŨ
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -35,7 +36,6 @@ export default function BannerEdit() {
         }
         setLoading(true);
         const currentUserId = localStorage.getItem("UserId") || "";
-        const currentFullName = localStorage.getItem("fullname") || "";
 
         const [bannerRes, userRes] = await Promise.all([
           BannerApi.getById(BannerId),
@@ -46,7 +46,7 @@ export default function BannerEdit() {
           ...prev,
           ...b,
           UserId: currentUserId,
-          ImageFile: null, // reset file khi load
+          ImageFile: null,
         }));
         setUsers(userRes.data.data || []);
       } catch (err) {
@@ -59,24 +59,23 @@ export default function BannerEdit() {
     fetchData();
   }, [BannerId]);
 
+  // 👇 GIỮ NGUYÊN LOGIC CŨ
   const handleChange = (e) => {
     const { name, value } = e.target;
     setBanner((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 📌 Khi người dùng chọn file
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setBanner((prev) => ({
         ...prev,
         ImageFile: file,
-        ImageUrl: URL.createObjectURL(file), // để preview ảnh
+        ImageUrl: URL.createObjectURL(file),
       }));
     }
   };
 
-  // 📤 Gửi dữ liệu có file
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -90,13 +89,10 @@ export default function BannerEdit() {
       formData.append("Position", banner.Position);
       formData.append("Status", banner.Status);
 
-      // 📁 Chỉ append file nếu có ảnh mới
       if (banner.ImageFile) {
         formData.append("ImageUrl", banner.ImageFile);
       }
-      // Nếu không chọn ảnh → không append gì cả
 
-      // 👀 Kiểm tra dữ liệu gửi đi
       for (let [k, v] of formData.entries()) {
         console.log(k + ":", v);
       }
@@ -126,57 +122,64 @@ export default function BannerEdit() {
     }
   };
 
+  // Helper functions
+  const getStatusInfo = (status) => {
+    switch (status) {
+      case "Active":
+        return { label: "Hoạt động", class: "pill-active", icon: "fa-check-circle" };
+      case "Inactive":
+        return { label: "Không hoạt động", class: "pill-inactive", icon: "fa-times-circle" };
+      default:
+        return { label: "Không xác định", class: "pill-inactive", icon: "fa-question-circle" };
+    }
+  };
+
+  // 👇 CHỈ THAY ĐỔI GIAO DIỆN TỪ ĐÂY
   if (loading) {
     return (
       <MainLayout>
         <div className="main-container">
-          <div className="container role-show-container">
-            <div className="d-flex flex-column align-items-center justify-content-center p-5">
-              <div
-                className="spinner-border text-primary mb-3"
-                role="status"
-                style={{ width: "4rem", height: "4rem" }}
-              ></div>
-              <h5 className="text-primary">Đang tải dữ liệu banner...</h5>
-              <p className="text-muted mt-2">Vui lòng chờ trong giây lát</p>
-              <div className="card shadow-sm border-0 mt-4 w-75">
-                <div className="card-body">
-                  <div className="row">
-                    <div className="col-md-4 text-center">
-                      <div
-                        className="bg-light rounded-circle mx-auto"
-                        style={{ width: "120px", height: "120px" }}
-                      ></div>
-                      <div
-                        className="bg-light mt-3 rounded"
-                        style={{
-                          width: "80%",
-                          height: "20px",
-                          margin: "0 auto",
-                        }}
-                      ></div>
-                    </div>
-                    <div className="col-md-8">
-                      <div
-                        className="bg-light rounded mb-3"
-                        style={{ width: "60%", height: "20px" }}
-                      ></div>
-                      <div
-                        className="bg-light rounded mb-2"
-                        style={{ width: "100%", height: "15px" }}
-                      ></div>
-                      <div
-                        className="bg-light rounded mb-2"
-                        style={{ width: "90%", height: "15px" }}
-                      ></div>
-                      <div
-                        className="bg-light rounded mb-2"
-                        style={{ width: "80%", height: "15px" }}
-                      ></div>
-                      <div
-                        className="bg-light rounded mb-2"
-                        style={{ width: "70%", height: "15px" }}
-                      ></div>
+          <div className="pd-ltr-20">
+            <div className="container role-show-container">
+              <div className="d-flex flex-column align-items-center justify-content-center p-5">
+                <div
+                  className="spinner-border text-primary mb-3"
+                  role="status"
+                  style={{ width: "4rem", height: "4rem" }}
+                ></div>
+                <h5 className="text-primary">Đang tải dữ liệu banner...</h5>
+                <p className="text-muted mt-2">Vui lòng chờ trong giây lát</p>
+                <div className="card shadow-sm border-0 mt-4 w-75">
+                  <div className="card-body">
+                    <div className="row">
+                      <div className="col-md-4 text-center">
+                        <div
+                          className="bg-light rounded-circle mx-auto"
+                          style={{ width: "120px", height: "120px" }}
+                        ></div>
+                        <div
+                          className="bg-light mt-3 rounded"
+                          style={{
+                            width: "80%",
+                            height: "20px",
+                            margin: "0 auto",
+                          }}
+                        ></div>
+                      </div>
+                      <div className="col-md-8">
+                        <div
+                          className="bg-light rounded mb-3"
+                          style={{ width: "60%", height: "20px" }}
+                        ></div>
+                        <div
+                          className="bg-light rounded mb-2"
+                          style={{ width: "100%", height: "15px" }}
+                        ></div>
+                        <div
+                          className="bg-light rounded mb-2"
+                          style={{ width: "90%", height: "15px" }}
+                        ></div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -191,18 +194,13 @@ export default function BannerEdit() {
   if (error) {
     return (
       <MainLayout>
-        <div className="main-container">
-          <div className="container role-show-container">
-            <div className="text-center p-5 text-danger">
-              <i className="fa fa-exclamation-circle fa-3x mb-3"></i>
-              <h5>{error}</h5>
-              <button
-                className="btn btn-outline-primary mt-3"
-                onClick={() => window.location.reload()}
-              >
-                <i className="fa fa-sync-alt me-2"></i> Thử lại
-              </button>
-            </div>
+        <div className="modern-cinema-page">
+          <div className="error-container">
+            <i className="fas fa-exclamation-circle error-icon"></i>
+            <h5 className="error-title">{error}</h5>
+            <button className="retry-btn" onClick={() => window.location.reload()}>
+              <i className="fas fa-sync-alt me-2"></i> Thử lại
+            </button>
           </div>
         </div>
       </MainLayout>
@@ -212,146 +210,264 @@ export default function BannerEdit() {
   if (!banner) {
     return (
       <MainLayout>
-        <div className="main-container">
-          <div className="container role-show-container">
-            <div className="text-center p-5 text-muted">
-              <i className="fa fa-image fa-2x mb-2"></i>
-              <p>Không có dữ liệu banner.</p>
-            </div>
+        <div className="modern-cinema-page">
+          <div className="error-container">
+            <i className="fas fa-image empty-icon"></i>
+            <p className="empty-text">Không có dữ liệu banner.</p>
           </div>
         </div>
       </MainLayout>
     );
   }
 
+  const statusInfo = getStatusInfo(banner.Status);
+
   return (
     <MainLayout>
-      <div className="main-container fade-in">
-        <div className="container role-edit-container py-5">
-          <div className="card edit-card shadow-lg border-0 rounded-4 animate-card">
-            <div className="card-header bg-gradient text-white text-center py-4 rounded-top-4 header-glow">
-              <h3 className="mb-0 fw-bold">
-                <i className="fas fa-image me-2"></i>Cập nhật Banner
-              </h3>
-            </div>
-            <div className="card-body p-5">
-              <form onSubmit={handleSubmit} className="row g-4">
-                {/* Người tạo */}
-                <div className="col-md-6">
-                  <label className="form-label fw-bold mb-2">
-                    <i className="fas fa-user me-2 text-primary"></i>Người tạo
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control form-control-lg"
-                    value={
-                      localStorage.getItem("fullname") || "Người dùng hiện tại"
-                    }
-                    disabled
-                  />
-                </div>
+      <div className="modern-cinema-page">
+        <div className="cinema-container">
+          {/* Breadcrumb */}
+          <div className="breadcrumb-nav">
+            <span className="breadcrumb-item" onClick={() => navigate("/")}>
+              <i className="fas fa-home"></i> Trang chủ
+            </span>
+            <span className="breadcrumb-separator">/</span>
+            <span className="breadcrumb-item" onClick={() => navigate("/banner")}>
+              Quản lý banner
+            </span>
+            <span className="breadcrumb-separator">/</span>
+            <span className="breadcrumb-item active">Cập nhật banner</span>
+          </div>
 
-                {/* Tiêu đề */}
-                <div className="col-md-6">
-                  <label className="form-label fw-bold mb-2">
-                    <i className="fas fa-heading me-2 text-info"></i>Tiêu đề
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control form-control-lg"
-                    name="Title"
-                    value={banner.Title}
-                    onChange={handleChange}
-                    required
-                  />
+          <div className="content-wrapper">
+            {/* Form Section */}
+            <div className="form-section">
+              <div className="section-header">
+                <div className="header-icon">
+                  <i className="fas fa-image"></i>
                 </div>
-                {/* Hình ảnh */}
-                <div className="col-md-6">
-                  <label className="form-label fw-bold mb-2">
-                    <i className="fas fa-image me-2 text-warning"></i>Hình ảnh
-                  </label>
-                  <input
-                    type="file"
-                    className="form-control form-control-lg"
-                    name="ImageUrl"
-                    onChange={handleFileChange}
-                  />
-                  {banner.ImageUrl && (
-                    <div className="mt-2">
-                      <img
-                        src={banner.ImageUrl}
-                        alt="Preview"
-                        style={{ maxWidth: "150px", borderRadius: "8px" }}
+                <div className="header-text">
+                  <h1 className="section-title">Cập nhật banner</h1>
+                  <p className="section-subtitle">Chỉnh sửa thông tin chi tiết banner</p>
+                </div>
+              </div>
+
+              <div className="form-card">
+                <form onSubmit={handleSubmit}>
+                  {/* Tiêu đề */}
+                  <div className="form-group">
+                    <label className="field-label">
+                      <i className="fas fa-heading label-icon"></i>
+                      Tiêu đề banner
+                    </label>
+                    <input
+                      type="text"
+                      className="modern-input"
+                      name="Title"
+                      value={banner.Title}
+                      onChange={handleChange}
+                      placeholder="Nhập tiêu đề banner"
+                      required
+                    />
+                  </div>
+
+                  {/* Vị trí & Liên kết */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                    <div className="form-group">
+                      <label className="field-label">
+                        <i className="fas fa-map-marker-alt label-icon"></i>
+                        Vị trí hiển thị
+                      </label>
+                      <select
+                        className="modern-input"
+                        name="Position"
+                        value={banner.Position}
+                        onChange={handleChange}
+                        required
+                      >
+                        <option value="">-- Chọn vị trí --</option>
+                        <option value="Home">Trang chủ</option>
+                        <option value="MoviePage">Trang phim</option>
+                        <option value="PromotionPage">Trang khuyến mãi</option>
+                      </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="field-label">
+                        <i className="fas fa-link label-icon"></i>
+                        Liên kết (URL)
+                      </label>
+                      <input
+                        type="text"
+                        className="modern-input"
+                        name="LinkUrl"
+                        value={banner.LinkUrl}
+                        onChange={handleChange}
+                        placeholder="https://example.com"
                       />
                     </div>
-                  )}
-                </div>
+                  </div>
 
-                {/* Liên kết */}
-                <div className="col-md-6">
-                  <label className="form-label fw-bold mb-2">
-                    <i className="fas fa-link me-2 text-secondary"></i>Liên kết
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control form-control-lg"
-                    name="LinkUrl"
-                    value={banner.LinkUrl}
-                    onChange={handleChange}
-                  />
+                  {/* Hình ảnh Banner */}
+                  <div className="form-group">
+                    <label className="field-label">
+                      <i className="fas fa-image label-icon"></i>
+                      Hình ảnh banner
+                    </label>
+                    <input
+                      type="file"
+                      className="modern-input"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                    />
+                    {banner.ImageUrl && (
+                      <div style={{ marginTop: '15px', textAlign: 'center' }}>
+                        <img
+                          src={banner.ImageUrl}
+                          alt="banner preview"
+                          style={{
+                            width: '100%',
+                            maxWidth: '600px',
+                            borderRadius: '12px',
+                            boxShadow: '0 4px 15px rgba(0,0,0,0.3)'
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Status - 2 options */}
+                  <div className="form-group">
+                    <label className="field-label">
+                      <i className="fas fa-toggle-on label-icon"></i>
+                      Trạng thái banner
+                    </label>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' }}>
+                      {/* Active */}
+                      <div
+                        className={`status-option ${banner.Status === 'Active' ? 'active' : ''}`}
+                        onClick={() => setBanner(prev => ({ ...prev, Status: 'Active' }))}
+                      >
+                        <div className="status-radio">
+                          {banner.Status === 'Active' && <div className="status-dot"></div>}
+                        </div>
+                        <div className="status-content">
+                          <div className="status-badge active-badge">
+                            <i className="fas fa-check-circle"></i>
+                          </div>
+                          <span className="status-label">Hoạt động</span>
+                        </div>
+                      </div>
+
+                      {/* Inactive */}
+                      <div
+                        className={`status-option ${banner.Status === 'Inactive' ? 'active' : ''}`}
+                        onClick={() => setBanner(prev => ({ ...prev, Status: 'Inactive' }))}
+                      >
+                        <div className="status-radio">
+                          {banner.Status === 'Inactive' && <div className="status-dot"></div>}
+                        </div>
+                        <div className="status-content">
+                          <div className="status-badge inactive-badge">
+                            <i className="fas fa-times-circle"></i>
+                          </div>
+                          <span className="status-label">Không hoạt động</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Form Actions */}
+                  <div className="form-actions">
+                    <button type="submit" className="btn-cinema btn-save">
+                      <i className="fas fa-save"></i>
+                      <span>Lưu thay đổi</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => navigate("/banner")}
+                      className="btn-cinema btn-cancel"
+                    >
+                      <i className="fas fa-times"></i>
+                      <span>Hủy bỏ</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            {/* Info Section */}
+            <div className="info-section">
+              {/* Highlight Card */}
+              <div className="info-card highlight-card">
+                <div className="info-icon-wrapper">
+                  <i className="fas fa-lightbulb"></i>
                 </div>
-                {/* Vị trí hiển thị */}
-                <div className="col-md-6">
-                  <label className="form-label fw-bold mb-2">
-                    <i className="fas fa-map-marker-alt me-2 text-danger"></i>Vị
-                    trí hiển thị
-                  </label>
-                  <select
-                    className="form-select form-select-lg"
-                    name="Position"
-                    value={banner.Position}
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="">-- Chọn vị trí --</option>
-                    <option value="Home">Trang chủ</option>
-                    <option value="MoviePage">Trang phim</option>
-                    <option value="PromotionPage">Trang khuyến mãi</option>
-                  </select>
+                <h3 className="info-title">Lưu ý quan trọng</h3>
+                <p className="info-text">
+                  Đảm bảo banner có kích thước phù hợp và nội dung rõ ràng để thu hút người dùng.
+                </p>
+              </div>
+
+              {/* Tips Card */}
+              <div className="info-card tips-card">
+                <div className="info-header">
+                  <i className="fas fa-check-circle"></i>
+                  Gợi ý hữu ích
                 </div>
-                {/* Trạng thái */}
-                <div className="col-md-6">
-                  <label className="form-label fw-bold mb-2">
-                    <i className="fas fa-toggle-on me-2 text-success"></i>Trạng
-                    thái
-                  </label>
-                  <select
-                    className="form-select form-select-lg"
-                    name="Status"
-                    value={banner.Status}
-                    onChange={handleChange}
-                  >
-                    <option value="Active">Hoạt động</option>
-                    <option value="Inactive">Không hoạt động</option>
-                  </select>
+                <div className="tip-item">
+                  <i className="fas fa-check tip-icon"></i>
+                  <p>Banner nên có kích thước tối thiểu 1920x600px cho desktop</p>
                 </div>
-                {/* Nút hành động */}
-                <div className="col-12 text-center mt-5">
-                  <button
-                    type="submit"
-                    className="btn btn-gradient btn-xl px-5 me-4 shadow-lg action-btn"
-                  >
-                    <i className="fas fa-save me-2"></i>Lưu
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => navigate("/banner")}
-                    className="btn btn-secondary btn-xl px-5 shadow-lg action-btn cancel-btn"
-                  >
-                    <i className="fas fa-undo me-2"></i>Hủy
-                  </button>
+                <div className="tip-item">
+                  <i className="fas fa-check tip-icon"></i>
+                  <p>Sử dụng hình ảnh chất lượng cao, định dạng JPG hoặc PNG</p>
                 </div>
-              </form>
+                <div className="tip-item">
+                  <i className="fas fa-check tip-icon"></i>
+                  <p>Thêm liên kết để chuyển hướng người dùng khi click vào banner</p>
+                </div>
+                <div className="tip-item">
+                  <i className="fas fa-check tip-icon"></i>
+                  <p>Chọn vị trí hiển thị phù hợp với mục đích banner</p>
+                </div>
+              </div>
+
+              {/* Info Details */}
+              <div className="info-card">
+                <div className="info-header">
+                  <i className="fas fa-info-circle"></i>
+                  Thông tin banner
+                </div>
+                <div className="info-list">
+                  <div className="info-item">
+                    <span className="info-key">Mã banner:</span>
+                    <span className="info-value">#{banner.BannerId}</span>
+                  </div>
+                  <div className="info-item">
+                    <span className="info-key">Trạng thái:</span>
+                    <span className={`status-pill ${statusInfo.class}`}>
+                      <i className={`fas ${statusInfo.icon} me-1`}></i>
+                      {statusInfo.label}
+                    </span>
+                  </div>
+                  <div className="info-item">
+                    <span className="info-key">Vị trí:</span>
+                    <span className="info-value">
+                      {banner.Position === 'Home' ? 'Trang chủ' : 
+                       banner.Position === 'MoviePage' ? 'Trang phim' : 
+                       banner.Position === 'PromotionPage' ? 'Trang khuyến mãi' : 
+                       banner.Position}
+                    </span>
+                  </div>
+                  <div className="info-item">
+                    <span className="info-key">Người tạo:</span>
+                    <span className="info-value">
+                      {localStorage.getItem("fullname") || "N/A"}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -130,159 +130,144 @@ export default function MovieCast() {
                 </div>
               </div>
 
-              {/* Form thêm */}
-              {/* Form thêm thành viên đoàn phim - CINEMA STYLE */}
-              <AnimatePresence>
-                {showForm && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -30 }}
-                    transition={{ duration: 0.4 }}
-                    className="cinema-add-form"
+{/* Form thêm thành viên đoàn phim */}
+<AnimatePresence>
+  {showForm && (
+    <motion.div
+      initial={{ y: -100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: -100, opacity: 0 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      className="card border-0 shadow-lg rounded-4 mb-4 form-add-user"
+    >
+      <div className="card-body p-4">
+        <h4 className="fw-bold mb-4 text-primary d-flex align-items-center">
+          <i className="fas fa-users me-2"></i> Thêm thành viên đoàn phim
+        </h4>
+
+        <form onSubmit={handleAddCast}>
+          <div className="row g-4">
+            
+            {/* Chọn phim */}
+            <div className="col-md-6">
+              <label className="form-label fw-bold">
+                <i className="fas fa-film me-2 text-primary"></i>
+                Chọn phim
+              </label>
+              <select
+                className="form-select custom-input"
+                value={newCast.MovieId}
+                onChange={(e) =>
+                  setNewCast({
+                    ...newCast,
+                    MovieId: e.target.value,
+                  })
+                }
+                required
+              >
+                <option value="">-- Chọn phim --</option>
+                {movies.map((movie) => (
+                  <option
+                    key={movie.MovieId}
+                    value={movie.MovieId}
                   >
-                    {/* Form Header */}
-                    <div className="cinema-form-header">
-                      <div className="cinema-form-title">
-                        <div className="cinema-form-icon">
-                          <i className="fas fa-users"></i>
-                        </div>
-                        <div className="cinema-form-title-text">
-                          <h4>Thêm thành viên đoàn phim</h4>
-                          <p className="cinema-form-subtitle">
-                            Thêm diễn viên hoặc đạo diễn cho phim
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                    {movie.Title}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-                    {/* Form Body */}
-                    <div className="cinema-form-body">
-                      <form onSubmit={handleAddCast}>
-                        <div className="cinema-form-grid">
-                          {/* Chọn phim */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-film"></i>
-                              Chọn phim
-                              <span className="required">*</span>
-                            </label>
-                            <select
-                              className="cinema-select"
-                              value={newCast.MovieId}
-                              onChange={(e) =>
-                                setNewCast({
-                                  ...newCast,
-                                  MovieId: e.target.value,
-                                })
-                              }
-                              required
-                            >
-                              <option value="">-- Chọn phim --</option>
-                              {movies.map((movie) => (
-                                <option
-                                  key={movie.MovieId}
-                                  value={movie.MovieId}
-                                >
-                                  {movie.Title}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
+            {/* Vai trò */}
+            <div className="col-md-6">
+              <label className="form-label fw-bold">
+                <i className="fas fa-user-tag me-2 text-success"></i>
+                Vai trò
+              </label>
+              <select
+                className="form-select custom-input"
+                value={newCast.Role}
+                onChange={(e) =>
+                  setNewCast({ ...newCast, Role: e.target.value })
+                }
+                required
+              >
+                <option value="">-- Chọn vai trò --</option>
+                <option value="Actor">🎭 Diễn viên</option>
+                <option value="Director">🎬 Đạo diễn</option>
+              </select>
+            </div>
 
-                          {/* Tên thành viên */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-user"></i>
-                              Tên thành viên
-                              <span className="required">*</span>
-                            </label>
-                            <div className="cinema-input-wrapper">
-                              <input
-                                type="text"
-                                className="cinema-input"
-                                placeholder="VD: Tom Cruise, Christopher Nolan..."
-                                value={newCast.Name}
-                                onChange={(e) =>
-                                  setNewCast({
-                                    ...newCast,
-                                    Name: e.target.value,
-                                  })
-                                }
-                                required
-                              />
-                            </div>
-                          </div>
+            {/* Tên thành viên */}
+            <div className="col-md-6">
+              <label className="form-label fw-bold">
+                <i className="fas fa-user me-2 text-danger"></i>
+                Tên thành viên
+              </label>
+              <input
+                type="text"
+                className="form-control custom-input"
+                placeholder="VD: Tom Cruise, Christopher Nolan..."
+                value={newCast.Name}
+                onChange={(e) =>
+                  setNewCast({
+                    ...newCast,
+                    Name: e.target.value,
+                  })
+                }
+                required
+              />
+            </div>
 
-                          {/* Vai trò */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-user-tag"></i>
-                              Vai trò
-                              <span className="required">*</span>
-                            </label>
-                            <select
-                              className="cinema-select"
-                              value={newCast.Role}
-                              onChange={(e) =>
-                                setNewCast({ ...newCast, Role: e.target.value })
-                              }
-                              required
-                            >
-                              <option value="">-- Chọn vai trò --</option>
-                              <option value="Actor">🎭 Diễn viên</option>
-                              <option value="Director">🎬 Đạo diễn</option>
-                            </select>
-                          </div>
+            {/* Trạng thái */}
+            <div className="col-md-6">
+              <label className="form-label fw-bold">
+                <i className="fas fa-toggle-on me-2 text-info"></i>
+                Trạng thái
+              </label>
+              <select
+                className="form-select custom-input"
+                value={newCast.Status}
+                onChange={(e) =>
+                  setNewCast({
+                    ...newCast,
+                    Status: e.target.value,
+                  })
+                }
+                required
+              >
+                <option value="">-- Chọn trạng thái --</option>
+                <option value="Active">✅ Hoạt động</option>
+                <option value="Inactive">⏸️ Tạm khóa</option>
+              </select>
+            </div>
 
-                          {/* Trạng thái */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-toggle-on"></i>
-                              Trạng thái
-                              <span className="required">*</span>
-                            </label>
-                            <select
-                              className="cinema-select"
-                              value={newCast.Status}
-                              onChange={(e) =>
-                                setNewCast({
-                                  ...newCast,
-                                  Status: e.target.value,
-                                })
-                              }
-                              required
-                            >
-                              <option value="">-- Chọn trạng thái --</option>
-                              <option value="Active">✅ Hoạt động</option>
-                              <option value="Inactive">⏸️ Tạm khóa</option>
-                            </select>
-                          </div>
-                        </div>
+            {/* Nút hành động */}
+            <div className="col-12 text-end mt-3">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                type="submit"
+                className="btn btn-gradient-success me-2 rounded-pill px-4"
+              >
+                <i className="fas fa-save me-1"></i> Lưu
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                type="button"
+                className="btn btn-gradient-secondary rounded-pill px-4"
+                onClick={() => setShowForm(false)}
+              >
+                <i className="fas fa-times me-1"></i> Hủy
+              </motion.button>
+            </div>
 
-                        {/* Action Buttons */}
-                        <div className="cinema-form-actions">
-                          <button
-                            type="submit"
-                            className="cinema-btn cinema-btn-primary"
-                          >
-                            <i className="fas fa-save"></i>
-                            Lưu thành viên
-                          </button>
-                          <button
-                            type="button"
-                            className="cinema-btn cinema-btn-secondary"
-                            onClick={() => setShowForm(false)}
-                          >
-                            <i className="fas fa-times"></i>
-                            Hủy bỏ
-                          </button>
-                        </div>
-                      </form>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+          </div>
+        </form>
+      </div>
+    </motion.div>
+  )}
+</AnimatePresence>
 
               {/* Bảng MovieCast */}
               <div className="card border-0 shadow-sm rounded-4 animate__animated animate__fadeIn">

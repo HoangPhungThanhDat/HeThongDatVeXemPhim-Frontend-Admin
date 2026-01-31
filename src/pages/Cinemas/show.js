@@ -1,16 +1,32 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import "@fortawesome/fontawesome-free/css/all.min.css";
 import MainLayout from "../../layouts/MainLayout";
-import "../../styles/Show.css";
 import CinemasApi from "../../api/CinemasApi";
+import {
+  Building,
+  Edit3,
+  ArrowLeft,
+  CheckCircle,
+  XCircle,
+  User,
+  Calendar,
+  Clock,
+  MapPin,
+  Phone,
+  Mail,
+  Sparkles,
+  Activity,
+  Image as ImageIcon,
+} from "lucide-react";
+import "../../styles/Role/Show.css";
 
 export default function CinemasShow() {
   const { CinemaId } = useParams();
+  const navigate = useNavigate();
+
   const [cinema, setCinema] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -36,43 +52,27 @@ export default function CinemasShow() {
       <MainLayout>
         <div className="main-container">
           <div className="pd-ltr-20">
-            <div className="wishlist-show-loading-container">
-              <div
-                className="spinner-border text-primary wishlist-show-spinner"
-                role="status"
-              ></div>
-              <h5 className="text-primary">Đang tải dữ liệu rạp chiếu...</h5>
-              <p className="text-muted mt-2">Vui lòng chờ trong giây lát</p>
+            <div className="loading-container">
+              <div className="spinner-border text-primary mb-3" role="status">
+                <span className="sr-only">Loading...</span>
+              </div>
+              <h5 className="loading-title">Đang tải dữ liệu rạp chiếu...</h5>
+              <p className="loading-subtitle">Vui lòng chờ trong giây lát</p>
 
-              {/* Skeleton */}
-              <div className="card shadow-sm border-0 wishlist-show-skeleton-card">
-                <div className="card-body">
+              {/* Skeleton giả lập khi đang tải */}
+              <div className="skeleton-card">
+                <div className="skeleton-body">
                   <div className="row">
                     <div className="col-md-4 text-center">
-                      <div className="wishlist-show-skeleton-avatar"></div>
-                      <div className="wishlist-show-skeleton-text"></div>
+                      <div className="skeleton-avatar"></div>
+                      <div className="skeleton-text-short"></div>
                     </div>
                     <div className="col-md-8">
-                      <div
-                        className="wishlist-show-skeleton-line"
-                        style={{ width: "60%" }}
-                      ></div>
-                      <div
-                        className="wishlist-show-skeleton-line"
-                        style={{ width: "100%" }}
-                      ></div>
-                      <div
-                        className="wishlist-show-skeleton-line"
-                        style={{ width: "90%" }}
-                      ></div>
-                      <div
-                        className="wishlist-show-skeleton-line"
-                        style={{ width: "80%" }}
-                      ></div>
-                      <div
-                        className="wishlist-show-skeleton-line"
-                        style={{ width: "70%" }}
-                      ></div>
+                      <div className="skeleton-text-60"></div>
+                      <div className="skeleton-text-100"></div>
+                      <div className="skeleton-text-90"></div>
+                      <div className="skeleton-text-80"></div>
+                      <div className="skeleton-text-70"></div>
                     </div>
                   </div>
                 </div>
@@ -90,17 +90,14 @@ export default function CinemasShow() {
       <MainLayout>
         <div className="main-container">
           <div className="pd-ltr-20">
-            <div className="wishlist-show-error-container">
-              <div className="wishlist-show-error-content">
-                <div className="wishlist-show-error-card">
-                  <div className="wishlist-show-error-icon-wrapper">
-                    <XCircle size={40} />
+            <div className="error-container">
+              <div className="error-content">
+                <div className="error-card">
+                  <div className="error-icon">
+                    <XCircle size={40} color="#ef4444" />
                   </div>
-                  <h3 className="wishlist-show-error-title">{error}</h3>
-                  <button
-                    onClick={() => window.location.reload()}
-                    className="wishlist-show-error-button"
-                  >
+                  <h3 className="error-title">{error}</h3>
+                  <button onClick={() => window.location.reload()} className="error-button">
                     Thử lại
                   </button>
                 </div>
@@ -118,12 +115,10 @@ export default function CinemasShow() {
       <MainLayout>
         <div className="main-container">
           <div className="pd-ltr-20">
-            <div className="wishlist-show-no-data-container">
-              <div className="wishlist-show-no-data-content">
-                <Film size={64} className="wishlist-show-no-data-icon" />
-                <p className="wishlist-show-no-data-text">
-                  Không có dữ liệu rạp chiếu.
-                </p>
+            <div className="no-data-container">
+              <div className="no-data-content">
+                <Building size={64} className="no-data-icon" />
+                <p className="no-data-text">Không có dữ liệu rạp chiếu.</p>
               </div>
             </div>
           </div>
@@ -136,181 +131,209 @@ export default function CinemasShow() {
 
   return (
     <MainLayout>
-      <div className="wishlist-show-main-container" style={{ marginLeft: '250px', marginTop: '70px' }}>
-        <div className="wishlist-show-bg-effect"></div>
-        
-        <div className="wishlist-show-content-wrapper">
-          {/* Header */}
-          <div className="wishlist-show-header">
-            <div>
-              <button
-                className="wishlist-show-back-button"
-                onClick={() => navigate("/cinemas")}
-              >
-                <i className="fas fa-arrow-left"></i>
-                Quay lại danh sách
-              </button>
-              <h1 className="wishlist-show-title">Chi tiết rạp chiếu</h1>
-              <p className="wishlist-show-subtitle">
-                Xem thông tin chi tiết về rạp chiếu phim
-              </p>
-            </div>
-            <div className="wishlist-show-actions">
-              <button
-                className="wishlist-show-edit-button"
-                onClick={() => navigate(`/cinemas/edit/${cinema.CinemaId}`)}
-              >
-                <i className="fas fa-edit"></i>
-                <span>Chỉnh sửa</span>
-              </button>
-            </div>
-          </div>
+      <div className="main-container">
+        <div className="pd-ltr-20">
+          <div className="role-show-container">
+            {/* Background Effects */}
+            <div className="background-effect"></div>
 
-          {/* Main Grid */}
-          <div className="wishlist-show-grid">
-            {/* Left Column - Cinema Summary */}
-            <div className="wishlist-show-summary-card">
-              <div className={`wishlist-show-icon-wrapper ${isActive ? 'active' : 'inactive'}`}>
-                <i className="fas fa-building fa-4x text-white"></i>
+            <div className="role-show-content">
+              {/* Header */}
+              <div className="header-section">
+                <div>
+                  <button onClick={() => navigate("/cinemas")} className="back-button">
+                    <ArrowLeft size={16} />
+                    Quay lại danh sách
+                  </button>
+                  <h1 className="page-title">Chi Tiết Rạp Chiếu</h1>
+                  <p className="page-subtitle">
+                    Xem thông tin chi tiết và quản lý rạp chiếu phim
+                  </p>
+                </div>
+
+                <div className="header-actions">
+                  <button
+                    onClick={() => navigate(`/cinemas/edit/${CinemaId}`)}
+                    className="edit-button"
+                  >
+                    <Edit3 size={18} />
+                    Chỉnh sửa
+                  </button>
+                </div>
               </div>
 
-              <h2 className="wishlist-show-user-name">{cinema.Name}</h2>
-              <p className="wishlist-show-movie-title">{cinema.City}</p>
+              {/* Main Content */}
+              <div className="main-grid">
+                {/* Left Column - Cinema Summary */}
+                <div className="role-summary-card">
+                  {/* Cinema Image or Icon */}
+                  {cinema.ImageUrl ? (
+                    <div style={{ 
+                      width: '100%', 
+                      borderRadius: '12px', 
+                      overflow: 'hidden',
+                      marginBottom: '20px',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                    }}>
+                      <img
+                        src={cinema.ImageUrl}
+                        alt={cinema.Name}
+                        style={{ 
+                          width: '100%', 
+                          height: 'auto',
+                          display: 'block'
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <div className={`role-icon ${isActive ? 'active' : 'inactive'}`}>
+                      <Building size={56} color="white" strokeWidth={2} />
+                    </div>
+                  )}
 
-              <div className={`wishlist-show-status-badge ${isActive ? 'active' : 'inactive'}`}>
-                <i className={`fas ${isActive ? 'fa-check-circle' : 'fa-times-circle'}`}></i>
-                {isActive ? "Đang hoạt động" : "Ngừng hoạt động"}
-              </div>
+                  {/* Cinema Name */}
+                  <h2 className="role-name">{cinema.Name}</h2>
 
-              <div className="wishlist-show-id-box">
-                <div className="wishlist-show-id-label">Mã rạp</div>
-                <div className="wishlist-show-id-value">#{cinema.CinemaId}</div>
-              </div>
-            </div>
-
-            {/* Right Column - Details */}
-            <div className="wishlist-show-details-column">
-              {/* Cinema Information */}
-              <div className="wishlist-show-info-card">
-                <div className="wishlist-show-info-header">
-                  <div className="wishlist-show-info-icon user">
-                    <i className="fas fa-building fa-lg text-white"></i>
+                  {/* Status Badge */}
+                  <div className={`status-badge ${isActive ? 'active' : 'inactive'}`}>
+                    {isActive ? <CheckCircle size={16} /> : <XCircle size={16} />}
+                    {isActive ? "Hoạt động" : "Không hoạt động"}
                   </div>
-                  <div>
-                    <h3 className="wishlist-show-info-title">Thông tin rạp</h3>
-                    <p className="wishlist-show-info-subtitle">Chi tiết về rạp chiếu phim</p>
+
+                  {/* City */}
+                  <div className="description-box">
+                    <div className="description-header">
+                      <MapPin size={18} color="#6b7280" />
+                      <span className="description-label">Thành phố</span>
+                    </div>
+                    <p className="description-text">
+                      {cinema.City || "Không có thông tin"}
+                    </p>
+                  </div>
+
+                  {/* Address */}
+                  <div className="description-box">
+                    <div className="description-header">
+                      <MapPin size={18} color="#6b7280" />
+                      <span className="description-label">Địa chỉ</span>
+                    </div>
+                    <p className="description-text">
+                      {cinema.Address || "Không có địa chỉ"}
+                    </p>
+                  </div>
+
+                  {/* Cinema ID */}
+                  <div className="role-id-box">
+                    <div className="role-id-label">ID Rạp Chiếu</div>
+                    <div className="role-id-value">{cinema.CinemaId}</div>
                   </div>
                 </div>
 
-                <div className="wishlist-show-info-list">
-                  <div className="wishlist-show-info-item">
-                    <i className="fas fa-map-marker-alt fa-lg text-warning"></i>
-                    <div className="wishlist-show-info-item-content">
-                      <div className="wishlist-show-info-item-label">Địa chỉ</div>
-                      <div className="wishlist-show-info-item-value">{cinema.Address}</div>
-                    </div>
-                  </div>
-
-                  <div className="wishlist-show-info-item">
-                    <i className="fas fa-city fa-lg text-info"></i>
-                    <div className="wishlist-show-info-item-content">
-                      <div className="wishlist-show-info-item-label">Thành phố</div>
-                      <div className="wishlist-show-info-item-value">{cinema.City}</div>
-                    </div>
-                  </div>
-
-                  <div className="wishlist-show-info-item">
-                    <i className="fas fa-phone fa-lg text-success"></i>
-                    <div className="wishlist-show-info-item-content">
-                      <div className="wishlist-show-info-item-label">Số điện thoại</div>
-                      <div className="wishlist-show-info-item-value">{cinema.Phone}</div>
-                    </div>
-                  </div>
-
-                  <div className="wishlist-show-info-item">
-                    <i className="fas fa-envelope fa-lg text-danger"></i>
-                    <div className="wishlist-show-info-item-content">
-                      <div className="wishlist-show-info-item-label">Email</div>
-                      <div className="wishlist-show-info-item-value">
-                        {cinema.Email || <span className="text-muted">Không có</span>}
+                {/* Right Column - Details */}
+                <div className="details-column">
+                  {/* Contact Info */}
+                  <div className="info-card">
+                    <div className="info-header">
+                      <div className="info-icon">
+                        <Phone size={24} color="white" />
+                      </div>
+                      <div>
+                        <h3 className="info-title">Thông Tin Liên Hệ</h3>
+                        <p className="info-subtitle">Chi tiết liên lạc của rạp chiếu</p>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </div>
 
-              {/* Cinema Image */}
-              {cinema.ImageUrl && (
-                <div className="wishlist-show-info-card">
-                  <div className="wishlist-show-info-header">
-                    <div className="wishlist-show-info-icon movie">
-                      <i className="fas fa-image fa-lg text-white"></i>
-                    </div>
-                    <div>
-                      <h3 className="wishlist-show-info-title">Hình ảnh rạp</h3>
-                      <p className="wishlist-show-info-subtitle">Ảnh đại diện của rạp chiếu</p>
-                    </div>
-                  </div>
+                    <div className="info-items">
+                      <div className="info-item">
+                        <Phone size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Số điện thoại</div>
+                          <div className="info-item-value">{cinema.Phone || "N/A"}</div>
+                        </div>
+                      </div>
 
-                  <div style={{ textAlign: 'center' }}>
-                    <img
-                      src={cinema.ImageUrl}
-                      alt={cinema.Name}
-                      style={{
-                        maxWidth: '50%',
-                        borderRadius: '16px',
-                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
+                      <div className="info-item">
+                        <Mail size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Email</div>
+                          <div className="info-item-value">{cinema.Email || "N/A"}</div>
+                        </div>
+                      </div>
 
-              {/* Timestamp Information */}
-              <div className="wishlist-show-info-card">
-                <div className="wishlist-show-info-header">
-                  <div className="wishlist-show-info-icon time">
-                    <i className="fas fa-clock fa-lg text-white"></i>
-                  </div>
-                  <div>
-                    <h3 className="wishlist-show-info-title">Thông tin hệ thống</h3>
-                    <p className="wishlist-show-info-subtitle">Lịch sử tạo và cập nhật</p>
-                  </div>
-                </div>
-
-                <div className="wishlist-show-info-list">
-                  <div className="wishlist-show-info-item">
-                    <i className="fas fa-user-plus fa-lg text-primary"></i>
-                    <div className="wishlist-show-info-item-content">
-                      <div className="wishlist-show-info-item-label">Người tạo</div>
-                      <div className="wishlist-show-info-item-value">{cinema.CreatedBy || 'N/A'}</div>
-                    </div>
-                  </div>
-
-                  <div className="wishlist-show-info-item">
-                    <i className="fas fa-calendar-plus fa-lg text-success"></i>
-                    <div className="wishlist-show-info-item-content">
-                      <div className="wishlist-show-info-item-label">Ngày tạo</div>
-                      <div className="wishlist-show-info-item-value">
-                        {cinema.CreatedAt ? new Date(cinema.CreatedAt).toLocaleString('vi-VN') : 'N/A'}
+                      <div className="info-item">
+                        <MapPin size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Địa chỉ đầy đủ</div>
+                          <div className="info-item-value">
+                            {cinema.Address}, {cinema.City}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="wishlist-show-info-item">
-                    <i className="fas fa-user-edit fa-lg text-warning"></i>
-                    <div className="wishlist-show-info-item-content">
-                      <div className="wishlist-show-info-item-label">Người cập nhật</div>
-                      <div className="wishlist-show-info-item-value">{cinema.UpdatedBy || 'N/A'}</div>
+                  {/* Created Info */}
+                  <div className="info-card">
+                    <div className="info-header">
+                      <div className="info-icon">
+                        <Sparkles size={24} color="white" />
+                      </div>
+                      <div>
+                        <h3 className="info-title">Thông Tin Tạo</h3>
+                        <p className="info-subtitle">Chi tiết về người tạo rạp chiếu</p>
+                      </div>
+                    </div>
+
+                    <div className="info-items">
+                      <div className="info-item">
+                        <User size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Người tạo</div>
+                          <div className="info-item-value">{cinema.CreatedBy || "N/A"}</div>
+                        </div>
+                      </div>
+
+                      <div className="info-item">
+                        <Calendar size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Ngày tạo</div>
+                          <div className="info-item-value">
+                            {cinema.CreatedAt ? new Date(cinema.CreatedAt).toLocaleString('vi-VN') : "N/A"}
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="wishlist-show-info-item">
-                    <i className="fas fa-calendar-check fa-lg text-info"></i>
-                    <div className="wishlist-show-info-item-content">
-                      <div className="wishlist-show-info-item-label">Cập nhật lần cuối</div>
-                      <div className="wishlist-show-info-item-value">
-                        {cinema.UpdatedAt ? new Date(cinema.UpdatedAt).toLocaleString('vi-VN') : 'N/A'}
+                  {/* Updated Info */}
+                  <div className="info-card">
+                    <div className="info-header">
+                      <div className="info-icon">
+                        <Activity size={24} color="white" />
+                      </div>
+                      <div>
+                        <h3 className="info-title">Cập Nhật Gần Nhất</h3>
+                        <p className="info-subtitle">Lịch sử thay đổi rạp chiếu</p>
+                      </div>
+                    </div>
+
+                    <div className="info-items">
+                      <div className="info-item">
+                        <User size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Người cập nhật</div>
+                          <div className="info-item-value">{cinema.UpdatedBy || "N/A"}</div>
+                        </div>
+                      </div>
+
+                      <div className="info-item">
+                        <Clock size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Ngày cập nhật</div>
+                          <div className="info-item-value">
+                            {cinema.UpdatedAt ? new Date(cinema.UpdatedAt).toLocaleString('vi-VN') : "N/A"}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>

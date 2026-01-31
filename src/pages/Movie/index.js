@@ -167,77 +167,48 @@ export default function Movie() {
               <AnimatePresence>
                 {showForm && (
                   <motion.div
-                    initial={{ opacity: 0, y: -30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -30 }}
-                    transition={{ duration: 0.4 }}
-                    className="cinema-add-form"
+                    initial={{ y: -100, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -100, opacity: 0 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    className="card border-0 shadow-lg rounded-4 mb-4 form-add-user"
                   >
-                    {formLoading && (
-                      <div className="cinema-loading-overlay">
-                        <div className="cinema-loader"></div>
-                      </div>
-                    )}
+                    <div className="card-body p-4">
+                      <h4 className="fw-bold mb-4 text-primary d-flex align-items-center">
+                        <i className="fas fa-film me-2"></i> Thêm phim mới
+                      </h4>
 
-                    {/* Form Header */}
-                    <div className="cinema-form-header">
-                      <div className="cinema-form-title">
-                        <div className="cinema-form-icon">
-                          <i className="fas fa-film"></i>
-                        </div>
-                        <div className="cinema-form-title-text">
-                          <h4>Thêm phim mới</h4>
-                          <p className="cinema-form-subtitle">
-                            Điền thông tin chi tiết về bộ phim
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Form Body */}
-                    <div className="cinema-form-body">
                       <form onSubmit={handleAddMovie}>
-                        <div className="cinema-form-grid">
-                          
+                        <div className="row g-4">
                           {/* Tên phim */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-ticket-alt"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-ticket-alt me-2 text-primary"></i>
                               Tên phim
-                              <span className="required">*</span>
                             </label>
-                            <div className="cinema-input-wrapper">
-                              <input
-                                type="text"
-                                className="cinema-input"
-                                placeholder="VD: Avengers: Endgame"
-                                value={newMovie.Title}
-                                onChange={(e) =>
-                                  setNewMovie({
-                                    ...newMovie,
-                                    Title: e.target.value,
-                                  })
-                                }
-                                required
-                              />
-                            </div>
-                            {newMovie.Title && (
-                              <div className="cinema-slug-preview">
-                                <i className="fas fa-link"></i>
-                                URL: {generateSlug(newMovie.Title)}
-                              </div>
-                            )}
+                            <input
+                              type="text"
+                              className="form-control custom-input"
+                              placeholder="VD: Avengers: Endgame"
+                              value={newMovie.Title}
+                              onChange={(e) =>
+                                setNewMovie({
+                                  ...newMovie,
+                                  Title: e.target.value,
+                                })
+                              }
+                              required
+                            />
                           </div>
 
                           {/* Thể loại */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-theater-masks"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-theater-masks me-2 text-danger"></i>
                               Thể loại
-                              <span className="required">*</span>
                             </label>
                             <select
-                              className="cinema-select"
+                              className="form-select custom-input"
                               value={newMovie.GenreId}
                               onChange={(e) =>
                                 setNewMovie({
@@ -249,45 +220,26 @@ export default function Movie() {
                             >
                               <option value="">-- Chọn thể loại --</option>
                               {genres.map((genre) => (
-                                <option key={genre.GenreId} value={genre.GenreId}>
+                                <option
+                                  key={genre.GenreId}
+                                  value={genre.GenreId}
+                                >
                                   {genre.Name}
                                 </option>
                               ))}
                             </select>
                           </div>
 
-                          {/* Mô tả - Full width */}
-                          <div className="cinema-form-group cinema-form-grid-full">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-align-left"></i>
-                              Mô tả phim
-                              <span className="required">*</span>
-                            </label>
-                            <textarea
-                              className="cinema-textarea"
-                              placeholder="Nhập mô tả chi tiết về cốt truyện, diễn viên, đạo diễn..."
-                              value={newMovie.Description}
-                              onChange={(e) =>
-                                setNewMovie({
-                                  ...newMovie,
-                                  Description: e.target.value,
-                                })
-                              }
-                              required
-                            />
-                          </div>
-
                           {/* Thời lượng */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-clock"></i>
-                              Thời lượng
-                              <span className="required">*</span>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-clock me-2 text-success"></i>
+                              Thời lượng (phút)
                             </label>
                             <input
                               type="number"
-                              className="cinema-input"
-                              placeholder="Nhập số phút (VD: 120)"
+                              className="form-control custom-input"
+                              placeholder="VD: 120"
                               min="1"
                               value={newMovie.Duration}
                               onChange={(e) =>
@@ -301,15 +253,14 @@ export default function Movie() {
                           </div>
 
                           {/* Ngày phát hành */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-calendar-alt"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-calendar-alt me-2 text-warning"></i>
                               Ngày phát hành
-                              <span className="required">*</span>
                             </label>
                             <input
                               type="date"
-                              className="cinema-input"
+                              className="form-control custom-input"
                               value={newMovie.ReleaseDate}
                               onChange={(e) =>
                                 setNewMovie({
@@ -321,66 +272,44 @@ export default function Movie() {
                             />
                           </div>
 
-                          {/* Poster Upload */}
-                          <div className="cinema-form-group cinema-form-grid-full">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-image"></i>
-                              Ảnh poster
-                              <span className="required">*</span>
+                          {/* Giới hạn độ tuổi */}
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-user-shield me-2 text-info"></i>
+                              Giới hạn độ tuổi
                             </label>
-                            <div className="cinema-file-upload">
-                              <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => {
-                                  const file = e.target.files[0];
-                                  if (file) {
-                                    setSelectedPoster(file);
-                                    setNewMovie({
-                                      ...newMovie,
-                                      PosterUrl: URL.createObjectURL(file),
-                                    });
-                                  }
-                                }}
-                                required
-                              />
-                              <div className="cinema-file-upload-content">
-                                <div className="cinema-file-upload-icon">
-                                  <i className="fas fa-cloud-upload-alt"></i>
-                                </div>
-                                <div className="cinema-file-upload-text">
-                                  Click để tải ảnh poster lên
-                                </div>
-                                <div className="cinema-file-upload-hint">
-                                  PNG, JPG, WEBP (Tối đa 5MB)
-                                </div>
-                              </div>
-                            </div>
-                            {newMovie.PosterUrl && (
-                              <div className="cinema-image-preview">
-                                <img
-                                  src={newMovie.PosterUrl}
-                                  alt="preview"
-                                  className="cinema-preview-image"
-                                />
-                                <div className="cinema-preview-label">
-                                  <i className="fas fa-check-circle"></i>
-                                  Ảnh đã được tải lên
-                                </div>
-                              </div>
-                            )}
+                            <select
+                              className="form-select custom-input"
+                              value={newMovie.Rated}
+                              onChange={(e) =>
+                                setNewMovie({
+                                  ...newMovie,
+                                  Rated: e.target.value,
+                                })
+                              }
+                              required
+                            >
+                              <option value="">
+                                -- Chọn giới hạn độ tuổi --
+                              </option>
+                              <option value="P">
+                                P - Phổ biến (Mọi lứa tuổi)
+                              </option>
+                              <option value="C13">C13 - Trên 13 tuổi</option>
+                              <option value="C16">C16 - Trên 16 tuổi</option>
+                              <option value="C18">C18 - Trên 18 tuổi</option>
+                            </select>
                           </div>
 
                           {/* Trailer YouTube ID */}
-                          <div className="cinema-form-group cinema-form-grid-full">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-play-circle"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-play-circle me-2 text-danger"></i>
                               Trailer YouTube ID
-                              <span className="required">*</span>
                             </label>
                             <input
                               type="text"
-                              className="cinema-input"
+                              className="form-control custom-input"
                               placeholder="VD: dQw4w9WgXcQ"
                               value={newMovie.TrailerUrl}
                               onChange={(e) =>
@@ -391,86 +320,122 @@ export default function Movie() {
                               }
                               required
                             />
-                            {newMovie.TrailerUrl && (
-                              <div className="cinema-helper-text">
-                                <i className="fas fa-info-circle"></i>
-                                ID Trailer: <strong>{newMovie.TrailerUrl}</strong>
-                              </div>
-                            )}
                           </div>
 
-                          {/* Ngôn ngữ */}
-                          <div className="cinema-form-group cinema-form-grid-full">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-language"></i>
-                              Ngôn ngữ phụ đề
+                          {/* Mô tả */}
+                          <div className="col-12">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-align-left me-2 text-primary"></i>
+                              Mô tả phim
                             </label>
-                            <div className="cinema-checkbox-group">
-                              {["Vietsub", "Lồng tiếng", "Phụ đề Anh"].map((lang) => (
-                                <div key={lang} className="cinema-checkbox-item">
-                                  <input
-                                    type="checkbox"
-                                    id={lang}
-                                    checked={newMovie.Language.includes(lang)}
-                                    onChange={() => handleLanguageChange(lang)}
-                                  />
-                                  <label className="cinema-checkbox-label" htmlFor={lang}>
-                                    {lang}
-                                  </label>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-
-                          {/* Giới hạn độ tuổi */}
-                          <div className="cinema-form-group cinema-form-grid-full">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-user-shield"></i>
-                              Giới hạn độ tuổi
-                              <span className="required">*</span>
-                            </label>
-                            <select
-                              className="cinema-select"
-                              value={newMovie.Rated}
+                            <textarea
+                              className="form-control custom-input"
+                              placeholder="Nhập mô tả chi tiết về cốt truyện, diễn viên, đạo diễn..."
+                              value={newMovie.Description}
                               onChange={(e) =>
                                 setNewMovie({
                                   ...newMovie,
-                                  Rated: e.target.value,
+                                  Description: e.target.value,
                                 })
                               }
+                              rows="4"
                               required
-                            >
-                              <option value="">-- Chọn giới hạn độ tuổi --</option>
-                              <option value="P">P - Phổ biến (Mọi lứa tuổi)</option>
-                              <option value="C13">C13 - Trên 13 tuổi</option>
-                              <option value="C16">C16 - Trên 16 tuổi</option>
-                              <option value="C18">C18 - Trên 18 tuổi</option>
-                            </select>
+                            />
                           </div>
 
+                          {/* Ngôn ngữ phụ đề */}
+                          <div className="col-12">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-language me-2 text-success"></i>
+                              Ngôn ngữ phụ đề
+                            </label>
+                            <div className="d-flex gap-3">
+                              {["Vietsub", "Lồng tiếng", "Phụ đề Anh"].map(
+                                (lang) => (
+                                  <div key={lang} className="form-check">
+                                    <input
+                                      type="checkbox"
+                                      className="form-check-input"
+                                      id={lang}
+                                      checked={newMovie.Language.includes(lang)}
+                                      onChange={() =>
+                                        handleLanguageChange(lang)
+                                      }
+                                    />
+                                    <label
+                                      className="form-check-label"
+                                      htmlFor={lang}                                    
+                                    >
+                                      {lang}
+                                    </label>
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Poster Upload */}
+                          <div className="col-12">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-image me-2 text-warning"></i>
+                              Ảnh poster
+                            </label>
+                            <input
+                              type="file"
+                              className="form-control custom-input"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files[0];
+                                if (file) {
+                                  setSelectedPoster(file);
+                                  setNewMovie({
+                                    ...newMovie,
+                                    PosterUrl: URL.createObjectURL(file),
+                                  });
+                                }
+                              }}
+                              required
+                            />
+                            {newMovie.PosterUrl && (
+                              <div className="mt-3">
+                                <img
+                                  src={newMovie.PosterUrl}
+                                  alt="preview"
+                                  style={{
+                                    maxWidth: "200px",
+                                    borderRadius: "8px",
+                                  }}
+                                />
+                              </div>
+                            )}
+                          </div>
                         </div>
 
-                        {/* Action Buttons */}
-                        <div className="cinema-form-actions">
-                          <button type="submit" className="cinema-btn cinema-btn-primary">
-                            <i className="fas fa-save"></i>
-                            Lưu phim
-                          </button>
-                          <button
+                        {/* Nút hành động */}
+                        <div className="col-12 text-end mt-4">
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            type="submit"
+                            className="btn btn-gradient-success me-2 rounded-pill px-4"
+                          >
+                            <i className="fas fa-save me-1"></i> Lưu
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                             type="button"
-                            className="cinema-btn cinema-btn-secondary"
+                            className="btn btn-gradient-secondary rounded-pill px-4"
                             onClick={() => setShowForm(false)}
                           >
-                            <i className="fas fa-times"></i>
-                            Hủy bỏ
-                          </button>
+                            <i className="fas fa-times me-1"></i> Hủy
+                          </motion.button>
                         </div>
                       </form>
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
-
               {/* Card chứa bảng */}
               <div className="card border-0 shadow-sm rounded-4 animate__animated animate__fadeIn">
                 <div className="card-body p-4">

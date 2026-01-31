@@ -17,8 +17,10 @@ import {
   Star,
   Eye,
   EyeOff,
+  Sparkles,
+  Activity,
 } from "lucide-react";
-import "../../styles/wishlist/Show.css";
+import "../../styles/Role/Show.css";
 
 export default function ReviewShow() {
   const { ReviewId } = useParams();
@@ -63,45 +65,27 @@ export default function ReviewShow() {
       <MainLayout>
         <div className="main-container">
           <div className="pd-ltr-20">
-            <div className="wishlist-show-loading-container">
-              <div
-                className="spinner-border text-primary wishlist-show-spinner"
-                role="status"
-              ></div>
-              <h5 className="text-primary">
-                Đang tải dữ liệu đánh giá...
-              </h5>
-              <p className="text-muted mt-2">Vui lòng chờ trong giây lát</p>
+            <div className="loading-container">
+              <div className="spinner-border text-primary mb-3" role="status">
+                <span className="sr-only">Loading...</span>
+              </div>
+              <h5 className="loading-title">Đang tải dữ liệu đánh giá...</h5>
+              <p className="loading-subtitle">Vui lòng chờ trong giây lát</p>
 
-              {/* Skeleton */}
-              <div className="card shadow-sm border-0 wishlist-show-skeleton-card">
-                <div className="card-body">
+              {/* Skeleton giả lập khi đang tải */}
+              <div className="skeleton-card">
+                <div className="skeleton-body">
                   <div className="row">
                     <div className="col-md-4 text-center">
-                      <div className="wishlist-show-skeleton-avatar"></div>
-                      <div className="wishlist-show-skeleton-text"></div>
+                      <div className="skeleton-avatar"></div>
+                      <div className="skeleton-text-short"></div>
                     </div>
                     <div className="col-md-8">
-                      <div
-                        className="wishlist-show-skeleton-line"
-                        style={{ width: "60%" }}
-                      ></div>
-                      <div
-                        className="wishlist-show-skeleton-line"
-                        style={{ width: "100%" }}
-                      ></div>
-                      <div
-                        className="wishlist-show-skeleton-line"
-                        style={{ width: "90%" }}
-                      ></div>
-                      <div
-                        className="wishlist-show-skeleton-line"
-                        style={{ width: "80%" }}
-                      ></div>
-                      <div
-                        className="wishlist-show-skeleton-line"
-                        style={{ width: "70%" }}
-                      ></div>
+                      <div className="skeleton-text-60"></div>
+                      <div className="skeleton-text-100"></div>
+                      <div className="skeleton-text-90"></div>
+                      <div className="skeleton-text-80"></div>
+                      <div className="skeleton-text-70"></div>
                     </div>
                   </div>
                 </div>
@@ -119,17 +103,14 @@ export default function ReviewShow() {
       <MainLayout>
         <div className="main-container">
           <div className="pd-ltr-20">
-            <div className="wishlist-show-error-container">
-              <div className="wishlist-show-error-content">
-                <div className="wishlist-show-error-card">
-                  <div className="wishlist-show-error-icon-wrapper">
+            <div className="error-container">
+              <div className="error-content">
+                <div className="error-card">
+                  <div className="error-icon">
                     <XCircle size={40} color="#ef4444" />
                   </div>
-                  <h3 className="wishlist-show-error-title">{error}</h3>
-                  <button
-                    onClick={() => window.location.reload()}
-                    className="wishlist-show-error-button"
-                  >
+                  <h3 className="error-title">{error}</h3>
+                  <button onClick={() => window.location.reload()} className="error-button">
                     Thử lại
                   </button>
                 </div>
@@ -147,12 +128,10 @@ export default function ReviewShow() {
       <MainLayout>
         <div className="main-container">
           <div className="pd-ltr-20">
-            <div className="wishlist-show-no-data-container">
-              <div className="wishlist-show-no-data-content">
-                <MessageSquare size={64} className="wishlist-show-no-data-icon" />
-                <p className="wishlist-show-no-data-text">
-                  Không có dữ liệu đánh giá.
-                </p>
+            <div className="no-data-container">
+              <div className="no-data-content">
+                <MessageSquare size={64} className="no-data-icon" />
+                <p className="no-data-text">Không có dữ liệu đánh giá.</p>
               </div>
             </div>
           </div>
@@ -167,33 +146,28 @@ export default function ReviewShow() {
     <MainLayout>
       <div className="main-container">
         <div className="pd-ltr-20">
-          <div className="wishlist-show-main-container">
+          <div className="role-show-container">
             {/* Background Effects */}
-            <div className="wishlist-show-bg-effect"></div>
+            <div className="background-effect"></div>
 
-            <div className="wishlist-show-content-wrapper">
+            <div className="role-show-content">
               {/* Header */}
-              <div className="wishlist-show-header">
+              <div className="header-section">
                 <div>
-                  <button
-                    onClick={() => navigate("/review")}
-                    className="wishlist-show-back-button"
-                  >
+                  <button onClick={() => navigate("/review")} className="back-button">
                     <ArrowLeft size={16} />
                     Quay lại danh sách
                   </button>
-                  <h1 className="wishlist-show-title">
-                    Chi Tiết Đánh Giá
-                  </h1>
-                  <p className="wishlist-show-subtitle">
+                  <h1 className="page-title">Chi Tiết Đánh Giá</h1>
+                  <p className="page-subtitle">
                     Xem thông tin chi tiết và quản lý đánh giá
                   </p>
                 </div>
 
-                <div className="wishlist-show-actions">
+                <div className="header-actions">
                   <button
                     onClick={() => navigate(`/review/edit/${ReviewId}`)}
-                    className="wishlist-show-edit-button"
+                    className="edit-button"
                   >
                     <Edit3 size={18} />
                     Chỉnh sửa
@@ -202,208 +176,159 @@ export default function ReviewShow() {
               </div>
 
               {/* Main Content */}
-              <div className="wishlist-show-grid">
+              <div className="main-grid">
                 {/* Left Column - Review Summary */}
-                <div className="wishlist-show-summary-card">
+                <div className="role-summary-card">
                   {/* Icon */}
-                  <div
-                    className={`wishlist-show-icon-wrapper ${
-                      isVisible ? "active" : "inactive"
-                    }`}
-                  >
+                  <div className={`role-icon ${isVisible ? 'active' : 'inactive'}`}>
                     <MessageSquare size={56} color="white" strokeWidth={2} />
                   </div>
 
                   {/* User Name */}
-                  <h2 className="wishlist-show-user-name">
-                    {getUserName(review.UserId)}
-                  </h2>
+                  <h2 className="role-name">{getUserName(review.UserId)}</h2>
 
                   {/* Rating */}
-                  <div style={{ fontSize: "24px", margin: "10px 0" }}>
+                  <div style={{ 
+                    fontSize: "32px", 
+                    margin: "12px 0",
+                    letterSpacing: "4px"
+                  }}>
                     {"⭐".repeat(review.Rating)}
                   </div>
 
-                  {/* Movie Title */}
-                  <p className="wishlist-show-movie-title">
-                    {getMovieTitle(review.MovieId)}
-                  </p>
-
                   {/* Status Badge */}
-                  <div
-                    className={`wishlist-show-status-badge ${
-                      isVisible ? "active" : "inactive"
-                    }`}
-                  >
-                    {isVisible ? (
-                      <Eye size={16} />
-                    ) : (
-                      <EyeOff size={16} />
-                    )}
+                  <div className={`status-badge ${isVisible ? 'active' : 'inactive'}`}>
+                    {isVisible ? <Eye size={16} /> : <EyeOff size={16} />}
                     {isVisible ? "Hiển thị" : "Ẩn"}
                   </div>
 
+                  {/* Movie Title */}
+                  <div className="description-box">
+                    <div className="description-header">
+                      <Film size={18} color="#6b7280" />
+                      <span className="description-label">Phim</span>
+                    </div>
+                    <p className="description-text">
+                      {getMovieTitle(review.MovieId)}
+                    </p>
+                  </div>
+
+                  {/* Comment */}
+                  <div className="description-box">
+                    <div className="description-header">
+                      <MessageSquare size={18} color="#6b7280" />
+                      <span className="description-label">Bình luận</span>
+                    </div>
+                    <p className="description-text">
+                      {review.Comment || "Không có bình luận"}
+                    </p>
+                  </div>
+
                   {/* Review ID */}
-                  <div className="wishlist-show-id-box">
-                    <div className="wishlist-show-id-label">
-                      ID Đánh Giá
-                    </div>
-                    <div className="wishlist-show-id-value">
-                      {review.ReviewId}
-                    </div>
+                  <div className="role-id-box">
+                    <div className="role-id-label">ID Đánh Giá</div>
+                    <div className="role-id-value">{review.ReviewId}</div>
                   </div>
                 </div>
 
                 {/* Right Column - Details */}
-                <div className="wishlist-show-details-column">
-                  {/* User Info */}
-                  <div className="wishlist-show-info-card">
-                    <div className="wishlist-show-info-header">
-                      <div className="wishlist-show-info-icon user">
-                        <User size={24} color="white" />
+                <div className="details-column">
+                  {/* User & Movie Info */}
+                  <div className="info-card">
+                    <div className="info-header">
+                      <div className="info-icon">
+                        <Sparkles size={24} color="white" />
                       </div>
                       <div>
-                        <h3 className="wishlist-show-info-title">
-                          Thông Tin Người Dùng
-                        </h3>
-                        <p className="wishlist-show-info-subtitle">
-                          Chi tiết về người đánh giá
-                        </p>
+                        <h3 className="info-title">Thông Tin Đánh Giá</h3>
+                        <p className="info-subtitle">Chi tiết về người dùng và phim</p>
                       </div>
                     </div>
 
-                    <div className="wishlist-show-info-list">
-                      <div className="wishlist-show-info-item">
-                        <User size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Tên người dùng
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {getUserName(review.UserId)}
-                          </div>
+                    <div className="info-items">
+                      <div className="info-item">
+                        <User size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Người đánh giá</div>
+                          <div className="info-item-value">{getUserName(review.UserId)}</div>
+                        </div>
+                      </div>
+
+                      <div className="info-item">
+                        <Film size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Tên phim</div>
+                          <div className="info-item-value">{getMovieTitle(review.MovieId)}</div>
+                        </div>
+                      </div>
+
+                      <div className="info-item">
+                        <Star size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Số sao</div>
+                          <div className="info-item-value">{review.Rating} ⭐</div>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Movie & Rating Info */}
-                  <div className="wishlist-show-info-card">
-                    <div className="wishlist-show-info-header">
-                      <div className="wishlist-show-info-icon movie">
-                        <Film size={24} color="white" />
+                  {/* Created Info */}
+                  <div className="info-card">
+                    <div className="info-header">
+                      <div className="info-icon">
+                        <Activity size={24} color="white" />
                       </div>
                       <div>
-                        <h3 className="wishlist-show-info-title">
-                          Thông Tin Phim & Đánh Giá
-                        </h3>
-                        <p className="wishlist-show-info-subtitle">
-                          Chi tiết về phim và xếp hạng
-                        </p>
+                        <h3 className="info-title">Thông Tin Tạo</h3>
+                        <p className="info-subtitle">Chi tiết về người tạo đánh giá</p>
                       </div>
                     </div>
 
-                    <div className="wishlist-show-info-list">
-                      <div className="wishlist-show-info-item">
-                        <Film size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Tên phim
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {getMovieTitle(review.MovieId)}
-                          </div>
+                    <div className="info-items">
+                      <div className="info-item">
+                        <User size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Người tạo</div>
+                          <div className="info-item-value">{review.CreatedBy || "N/A"}</div>
                         </div>
                       </div>
 
-                      <div className="wishlist-show-info-item">
-                        <Star size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Số sao
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {review.Rating} ⭐
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="wishlist-show-info-item">
-                        <MessageSquare size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Bình luận
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {review.Comment || "Không có bình luận"}
-                          </div>
+                      <div className="info-item">
+                        <Calendar size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Ngày tạo</div>
+                          <div className="info-item-value">{review.CreatedAt || "N/A"}</div>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Time Info */}
-                  <div className="wishlist-show-info-card">
-                    <div className="wishlist-show-info-header">
-                      <div className="wishlist-show-info-icon time">
+                  {/* Updated Info */}
+                  <div className="info-card">
+                    <div className="info-header">
+                      <div className="info-icon">
                         <Clock size={24} color="white" />
                       </div>
                       <div>
-                        <h3 className="wishlist-show-info-title">
-                          Thông Tin Thời Gian
-                        </h3>
-                        <p className="wishlist-show-info-subtitle">
-                          Lịch sử hoạt động
-                        </p>
+                        <h3 className="info-title">Cập Nhật Gần Nhất</h3>
+                        <p className="info-subtitle">Lịch sử thay đổi đánh giá</p>
                       </div>
                     </div>
 
-                    <div className="wishlist-show-info-list">
-                      <div className="wishlist-show-info-item">
-                        <Calendar size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Ngày tạo
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {review.CreatedAt || "N/A"}
-                          </div>
+                    <div className="info-items">
+                      <div className="info-item">
+                        <User size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Người cập nhật</div>
+                          <div className="info-item-value">{review.UpdatedBy || "N/A"}</div>
                         </div>
                       </div>
 
-                      <div className="wishlist-show-info-item">
-                        <Clock size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Cập nhật lần cuối
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {review.UpdatedAt || "N/A"}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="wishlist-show-info-item">
-                        <User size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Người tạo
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {review.CreatedBy || "N/A"}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="wishlist-show-info-item">
-                        <User size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Người cập nhật
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {review.UpdatedBy || "N/A"}
-                          </div>
+                      <div className="info-item">
+                        <Clock size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Ngày cập nhật</div>
+                          <div className="info-item-value">{review.UpdatedAt || "N/A"}</div>
                         </div>
                       </div>
                     </div>

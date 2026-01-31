@@ -210,45 +210,32 @@ export default function Schedule() {
                 </div>
               </div>
 
-              {/* Form thêm */}
-              {/* Form thêm lịch chiếu định kỳ - CINEMA STYLE */}
+              {/* Form thêm lịch chiếu định kỳ */}
               <AnimatePresence>
                 {showForm && (
                   <motion.div
-                    initial={{ opacity: 0, y: -30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -30 }}
-                    transition={{ duration: 0.4 }}
-                    className="cinema-add-form"
+                    initial={{ y: -100, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -100, opacity: 0 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    className="card border-0 shadow-lg rounded-4 mb-4 form-add-user"
                   >
-                    {/* Form Header */}
-                    <div className="cinema-form-header">
-                      <div className="cinema-form-title">
-                        <div className="cinema-form-icon">
-                          <i className="fas fa-calendar-alt"></i>
-                        </div>
-                        <div className="cinema-form-title-text">
-                          <h4>Thêm lịch chiếu định kỳ</h4>
-                          <p className="cinema-form-subtitle">
-                            Tạo lịch chiếu phim tự động theo tuần
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                    <div className="card-body p-4">
+                      <h4 className="fw-bold mb-4 text-primary d-flex align-items-center">
+                        <i className="fas fa-calendar-alt me-2"></i> Thêm lịch
+                        chiếu định kỳ
+                      </h4>
 
-                    {/* Form Body */}
-                    <div className="cinema-form-body">
                       <form onSubmit={handleAddSchedule}>
-                        <div className="cinema-form-grid">
+                        <div className="row g-4">
                           {/* Phim */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-film"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-film me-2 text-primary"></i>
                               Phim
-                              <span className="required">*</span>
                             </label>
                             <select
-                              className="cinema-select"
+                              className="form-select custom-input"
                               value={newSchedule.MovieId}
                               onChange={(e) =>
                                 setNewSchedule({
@@ -268,14 +255,13 @@ export default function Schedule() {
                           </div>
 
                           {/* Phòng chiếu */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-door-open"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-door-open me-2 text-danger"></i>
                               Phòng chiếu
-                              <span className="required">*</span>
                             </label>
                             <select
-                              className="cinema-select"
+                              className="form-select custom-input"
                               value={newSchedule.RoomId}
                               onChange={(e) =>
                                 setNewSchedule({
@@ -295,15 +281,14 @@ export default function Schedule() {
                           </div>
 
                           {/* Ngày bắt đầu */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-calendar-plus"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-calendar-plus me-2 text-success"></i>
                               Ngày bắt đầu
-                              <span className="required">*</span>
                             </label>
                             <input
                               type="date"
-                              className="cinema-input"
+                              className="form-control custom-input"
                               value={newSchedule.StartDate}
                               onChange={(e) =>
                                 setNewSchedule({
@@ -316,15 +301,14 @@ export default function Schedule() {
                           </div>
 
                           {/* Ngày kết thúc */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-calendar-minus"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-calendar-minus me-2 text-info"></i>
                               Ngày kết thúc
-                              <span className="required">*</span>
                             </label>
                             <input
                               type="date"
-                              className="cinema-input"
+                              className="form-control custom-input"
                               value={newSchedule.EndDate}
                               onChange={(e) =>
                                 setNewSchedule({
@@ -336,47 +320,15 @@ export default function Schedule() {
                             />
                           </div>
 
-                          {/* Các ngày trong tuần - Full width */}
-                          <div className="cinema-form-group cinema-form-grid-full">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-calendar-week"></i>
-                              Các ngày trong tuần
-                            </label>
-                            <div className="cinema-checkbox-group">
-                              {days.map((d) => (
-                                <div
-                                  key={d.en}
-                                  className="cinema-checkbox-item"
-                                >
-                                  <input
-                                    type="checkbox"
-                                    id={d.en}
-                                    checked={newSchedule.DaysOfWeek.includes(
-                                      d.en
-                                    )}
-                                    onChange={() => handleDaysChange(d.en)}
-                                  />
-                                  <label
-                                    className="cinema-checkbox-label"
-                                    htmlFor={d.en}
-                                  >
-                                    {d.vi}
-                                  </label>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-
                           {/* Giờ bắt đầu */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-clock"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-clock me-2 text-warning"></i>
                               Giờ bắt đầu
-                              <span className="required">*</span>
                             </label>
                             <input
                               type="time"
-                              className="cinema-input"
+                              className="form-control custom-input"
                               value={newSchedule.StartTime}
                               onChange={(e) =>
                                 setNewSchedule({
@@ -389,15 +341,14 @@ export default function Schedule() {
                           </div>
 
                           {/* Giờ kết thúc */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-hourglass-end"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-hourglass-end me-2 text-secondary"></i>
                               Giờ kết thúc
-                              <span className="required">*</span>
                             </label>
                             <input
                               type="time"
-                              className="cinema-input"
+                              className="form-control custom-input"
                               value={newSchedule.EndTime}
                               onChange={(e) =>
                                 setNewSchedule({
@@ -410,15 +361,14 @@ export default function Schedule() {
                           </div>
 
                           {/* Giá vé */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-money-bill-wave"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-money-bill-wave me-2 text-success"></i>
                               Giá vé
-                              <span className="required">*</span>
                             </label>
                             <input
                               type="number"
-                              className="cinema-input"
+                              className="form-control custom-input"
                               placeholder="VD: 75000"
                               min="0"
                               step="1000"
@@ -432,8 +382,8 @@ export default function Schedule() {
                               required
                             />
                             {newSchedule.Price && (
-                              <div className="cinema-helper-text">
-                                <i className="fas fa-info-circle"></i>
+                              <small className="text-muted">
+                                <i className="fas fa-info-circle me-1"></i>
                                 Giá:{" "}
                                 <strong>
                                   {parseInt(newSchedule.Price).toLocaleString(
@@ -441,19 +391,18 @@ export default function Schedule() {
                                   )}{" "}
                                   VNĐ
                                 </strong>
-                              </div>
+                              </small>
                             )}
                           </div>
 
                           {/* Trạng thái */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-toggle-on"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-toggle-on me-2 text-primary"></i>
                               Trạng thái
-                              <span className="required">*</span>
                             </label>
                             <select
-                              className="cinema-select"
+                              className="form-select custom-input"
                               value={newSchedule.Status}
                               onChange={(e) =>
                                 setNewSchedule({
@@ -468,25 +417,56 @@ export default function Schedule() {
                               <option value="Inactive">⏸️ Tạm khóa</option>
                             </select>
                           </div>
+
+                          {/* Các ngày trong tuần */}
+                          <div className="col-12">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-calendar-week me-2 text-info"></i>
+                              Các ngày trong tuần
+                            </label>
+                            <div className="d-flex flex-wrap gap-3">
+                              {days.map((d) => (
+                                <div key={d.en} className="form-check">
+                                  <input
+                                    type="checkbox"
+                                    className="form-check-input"
+                                    id={d.en}
+                                    checked={newSchedule.DaysOfWeek.includes(
+                                      d.en
+                                    )}
+                                    onChange={() => handleDaysChange(d.en)}
+                                  />
+                                  <label
+                                    className="form-check-label"
+                                    htmlFor={d.en}
+                                  >
+                                    {d.vi}
+                                  </label>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
                         </div>
 
-                        {/* Action Buttons */}
-                        <div className="cinema-form-actions">
-                          <button
+                        {/* Nút hành động */}
+                        <div className="col-12 text-end mt-3">
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                             type="submit"
-                            className="cinema-btn cinema-btn-primary"
+                            className="btn btn-gradient-success me-2 rounded-pill px-4"
                           >
-                            <i className="fas fa-save"></i>
-                            Lưu lịch chiếu
-                          </button>
-                          <button
+                            <i className="fas fa-save me-1"></i> Lưu
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                             type="button"
-                            className="cinema-btn cinema-btn-secondary"
+                            className="btn btn-gradient-secondary rounded-pill px-4"
                             onClick={() => setShowForm(false)}
                           >
-                            <i className="fas fa-times"></i>
-                            Hủy bỏ
-                          </button>
+                            <i className="fas fa-times me-1"></i> Hủy
+                          </motion.button>
                         </div>
                       </form>
                     </div>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import bannergau2 from "../vendors/images/bannergau21.png";
 import gau1 from "../vendors/images/gau1.jpg";
-
+import "../styles/Menu.css";
 import { logout } from "../utils/auth";
 
 const Header = () => {
@@ -16,9 +16,9 @@ const Header = () => {
   // State cho Right Sidebar
   const [showRightSidebar, setShowRightSidebar] = useState(false);
 
-  // State cho theme
+  // State cho theme - ĐÃ SỬA: Đặt mặc định là white cho cả header và sidebar
   const [headerTheme, setHeaderTheme] = useState("header-white");
-  const [sidebarTheme, setSidebarTheme] = useState("sidebar-dark");
+  const [sidebarTheme, setSidebarTheme] = useState("sidebar-light");
   const [dropdownIcon, setDropdownIcon] = useState("icon-style-1");
   const [listIcon, setListIcon] = useState("icon-list-style-4");
 
@@ -26,10 +26,12 @@ const Header = () => {
     setActiveMenu(activeMenu === menu ? null : menu);
   };
   const fullName = localStorage.getItem("fullname");
+  
   // Function to handle logout
   const handleLogout = () => {
     logout();
   };
+  
   return (
     <header className={`${headerTheme} ${sidebarTheme}`}>
       {/* Header */}
@@ -397,14 +399,14 @@ const Header = () => {
               ))}
             </div>
 
-            {/* Reset Button */}
+            {/* Reset Button - ĐÃ SỬA: Reset về white theme */}
             <div className="reset-options pt-30 text-center">
               <button
                 className="btn btn-danger"
                 id="reset-settings"
                 onClick={() => {
                   setHeaderTheme("header-white");
-                  setSidebarTheme("sidebar-dark");
+                  setSidebarTheme("sidebar-light");
                   setDropdownIcon("icon-style-1");
                   setListIcon("icon-list-style-4");
                 }}
@@ -526,19 +528,10 @@ const Header = () => {
                     <Link to="/datatable">Menu</Link>
                   </li>
                   <li>
-                    <Link to="/datatable">Phim đang chiếu</Link>
+                    <Link to="/Promotion">Khuyến mãi & Sự kiện (Promotions)</Link>
                   </li>
                   <li>
-                    <Link to="/datatable">Phim sắp chiếu</Link>
-                  </li>
-                  <li>
-                    <Link to="/datatable">Phim mới</Link>
-                  </li>
-                  <li>
-                    <Link to="/datatable">Khuyến mãi & Sự kiện</Link>
-                  </li>
-                  <li>
-                    <Link to="/datatable">Tin Tức</Link>
+                    <Link to="/news">Tin Tức</Link>
                   </li>
                 </ul>
               </li>
@@ -576,10 +569,7 @@ const Header = () => {
                   </li>
                   <li>
                     <Link to="/distributor">Nhà phát hành (Distributors)</Link>
-                  </li>
-                  <li>
-                    <Link to="/Promotion">Khuyến mãi (Promotions)</Link>
-                  </li>
+                  </li>                
                   <li>
                     <Link to="/Review">Đánh giá phim (Reviews)</Link>
                   </li>
@@ -660,7 +650,7 @@ const Header = () => {
                     <a href="highchart.html">Thanh toán</a>
                   </li>
                   <li>
-                    <a href="knob-chart.html">Bắp nước / Combo</a>
+                    <Link to="/foodanddrink">Bắp nước / Combo</Link>
                   </li>
                 </ul>
               </li>
@@ -727,7 +717,7 @@ const Header = () => {
                     <Link to="/rooms">Phòng chiếu (Rooms)</Link>
                   </li>
                   <li>
-                    <a href="blog.html">Ghế ngồi</a>
+                  <Link to="/seats">Ghế ngồi</Link>
                   </li>
                   <li>
                     <Link to="/staffs">Nhân viên rạp (Staff)</Link>
@@ -756,7 +746,7 @@ const Header = () => {
                   }}
                 >
                   <li>
-                    <a href="#">Danh sách đơn đặt vé</a>
+                    <Link to="/bookings">Danh sách đơn đặt vé</Link>
                   </li>
                   <li>
                     <a href="#">Quản lý vé</a>

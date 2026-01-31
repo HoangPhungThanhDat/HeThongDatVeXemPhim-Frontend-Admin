@@ -133,70 +133,54 @@ export default function Distributor() {
                   </button>
                 </div>
               </div>
-
-              {/* Form thêm nhà phát hành - CINEMA STYLE */}
+              {/* Form thêm nhà phát hành */}
               <AnimatePresence>
                 {showForm && (
                   <motion.div
-                    initial={{ opacity: 0, y: -30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -30 }}
-                    transition={{ duration: 0.4 }}
-                    className="cinema-add-form"
+                    initial={{ y: -100, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -100, opacity: 0 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    className="card border-0 shadow-lg rounded-4 mb-4 form-add-user"
                   >
-                    {/* Form Header */}
-                    <div className="cinema-form-header">
-                      <div className="cinema-form-title">
-                        <div className="cinema-form-icon">
-                          <i className="fas fa-building"></i>
-                        </div>
-                        <div className="cinema-form-title-text">
-                          <h4>Thêm nhà phát hành</h4>
-                          <p className="cinema-form-subtitle">
-                            Thêm thông tin công ty phát hành phim
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                    <div className="card-body p-4">
+                      <h4 className="fw-bold mb-4 text-primary d-flex align-items-center">
+                        <i className="fas fa-building me-2"></i> Thêm nhà phát
+                        hành
+                      </h4>
 
-                    {/* Form Body */}
-                    <div className="cinema-form-body">
                       <form onSubmit={handleAddDistributor}>
-                        <div className="cinema-form-grid">
+                        <div className="row g-4">
                           {/* Tên nhà phát hành */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-briefcase"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-briefcase me-2 text-primary"></i>
                               Tên nhà phát hành
-                              <span className="required">*</span>
-                            </label>
-                            <div className="cinema-input-wrapper">
-                              <input
-                                type="text"
-                                className="cinema-input"
-                                placeholder="VD: Warner Bros, Universal Pictures..."
-                                value={newDistributor.Name}
-                                onChange={(e) =>
-                                  setNewDistributor({
-                                    ...newDistributor,
-                                    Name: e.target.value,
-                                  })
-                                }
-                                required
-                              />
-                            </div>
-                          </div>
-
-                          {/* Quốc gia */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-globe"></i>
-                              Quốc gia
-                              <span className="required">*</span>
                             </label>
                             <input
                               type="text"
-                              className="cinema-input"
+                              className="form-control custom-input"
+                              placeholder="VD: Warner Bros, Universal Pictures..."
+                              value={newDistributor.Name}
+                              onChange={(e) =>
+                                setNewDistributor({
+                                  ...newDistributor,
+                                  Name: e.target.value,
+                                })
+                              }
+                              required
+                            />
+                          </div>
+
+                          {/* Quốc gia */}
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-globe me-2 text-danger"></i>
+                              Quốc gia
+                            </label>
+                            <input
+                              type="text"
+                              className="form-control custom-input"
                               placeholder="VD: United States, Vietnam..."
                               value={newDistributor.Country}
                               onChange={(e) =>
@@ -210,15 +194,14 @@ export default function Distributor() {
                           </div>
 
                           {/* Email */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-envelope"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-envelope me-2 text-success"></i>
                               Email
-                              <span className="required">*</span>
                             </label>
                             <input
                               type="email"
-                              className="cinema-input"
+                              className="form-control custom-input"
                               placeholder="VD: contact@company.com"
                               value={newDistributor.Email}
                               onChange={(e) =>
@@ -232,15 +215,14 @@ export default function Distributor() {
                           </div>
 
                           {/* Phone */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-phone"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-phone me-2 text-info"></i>
                               Số điện thoại
-                              <span className="required">*</span>
                             </label>
                             <input
                               type="tel"
-                              className="cinema-input"
+                              className="form-control custom-input"
                               placeholder="VD: +84 123 456 789"
                               value={newDistributor.Phone}
                               onChange={(e) =>
@@ -254,14 +236,14 @@ export default function Distributor() {
                           </div>
 
                           {/* Website */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-link"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-link me-2 text-warning"></i>
                               Website
                             </label>
                             <input
                               type="url"
-                              className="cinema-input"
+                              className="form-control custom-input"
                               placeholder="VD: https://company.com"
                               value={newDistributor.Website}
                               onChange={(e) =>
@@ -272,21 +254,21 @@ export default function Distributor() {
                               }
                             />
                             {newDistributor.Website && (
-                              <div className="cinema-helper-text">
-                                <i className="fas fa-check-circle"></i>
+                              <small className="text-muted">
+                                <i className="fas fa-check-circle me-1"></i>
                                 Website hợp lệ
-                              </div>
+                              </small>
                             )}
                           </div>
 
                           {/* Chọn phim */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-film"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-film me-2 text-primary"></i>
                               Phim phát hành
                             </label>
                             <select
-                              className="cinema-select"
+                              className="form-select custom-input"
                               value={newDistributor.MovieId || ""}
                               onChange={(e) =>
                                 setNewDistributor({
@@ -309,14 +291,13 @@ export default function Distributor() {
                           </div>
 
                           {/* Trạng thái */}
-                          <div className="cinema-form-group cinema-form-grid-full">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-toggle-on"></i>
+                          <div className="col-12">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-toggle-on me-2 text-success"></i>
                               Trạng thái
-                              <span className="required">*</span>
                             </label>
                             <select
-                              className="cinema-select"
+                              className="form-select custom-input"
                               value={newDistributor.Status}
                               onChange={(e) =>
                                 setNewDistributor({
@@ -333,23 +314,25 @@ export default function Distributor() {
                           </div>
                         </div>
 
-                        {/* Action Buttons */}
-                        <div className="cinema-form-actions">
-                          <button
+                        {/* Nút hành động */}
+                        <div className="col-12 text-end mt-3">
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                             type="submit"
-                            className="cinema-btn cinema-btn-primary"
+                            className="btn btn-gradient-success me-2 rounded-pill px-4"
                           >
-                            <i className="fas fa-save"></i>
-                            Lưu nhà phát hành
-                          </button>
-                          <button
+                            <i className="fas fa-save me-1"></i> Lưu
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                             type="button"
-                            className="cinema-btn cinema-btn-secondary"
+                            className="btn btn-gradient-secondary rounded-pill px-4"
                             onClick={() => setShowForm(false)}
                           >
-                            <i className="fas fa-times"></i>
-                            Hủy bỏ
-                          </button>
+                            <i className="fas fa-times me-1"></i> Hủy
+                          </motion.button>
                         </div>
                       </form>
                     </div>
@@ -365,9 +348,8 @@ export default function Distributor() {
                       <thead className="bg-light text-dark border-bottom">
                         <tr>
                           <th className="px-4">Id</th>
-                          <th>Tên nhà phát hành</th>
+                          <th>Tên</th>
                           <th>Quốc gia</th>
-                          <th>Email</th>
                           <th>Điện thoại</th>
                           <th>Website</th>
                           <th>Trạng thái</th>
@@ -381,7 +363,6 @@ export default function Distributor() {
                               <td className="fw-bold px-4">{index + 1}</td>
                               <td>{distributor.Name}</td>
                               <td>{distributor.Country}</td>
-                              <td>{distributor.Email}</td>
                               <td>{distributor.Phone}</td>
                               <td>{distributor.Website}</td>
                               <td>

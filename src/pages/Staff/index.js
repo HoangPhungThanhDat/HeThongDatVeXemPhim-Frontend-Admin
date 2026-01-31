@@ -152,40 +152,28 @@ export default function Staff() {
               <AnimatePresence>
                 {showForm && (
                   <motion.div
-                    initial={{ opacity: 0, y: -30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -30 }}
-                    transition={{ duration: 0.4 }}
-                    className="cinema-add-form"
+                    initial={{ y: -100, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -100, opacity: 0 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    className="card border-0 shadow-lg rounded-4 mb-4 form-add-user"
                   >
-                    {/* Form Header */}
-                    <div className="cinema-form-header">
-                      <div className="cinema-form-title">
-                        <div className="cinema-form-icon">
-                          <i className="fas fa-user-plus"></i>
-                        </div>
-                        <div className="cinema-form-title-text">
-                          <h4>Thêm nhân viên mới</h4>
-                          <p className="cinema-form-subtitle">
-                            Tạo hồ sơ nhân viên làm việc tại rạp
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                    <div className="card-body p-4">
+                      <h4 className="fw-bold mb-4 text-primary d-flex align-items-center">
+                        <i className="fas fa-user-plus me-2"></i> Thêm nhân viên
+                        mới
+                      </h4>
 
-                    {/* Form Body */}
-                    <div className="cinema-form-body">
                       <form onSubmit={handleAddStaff}>
-                        <div className="cinema-form-grid">
+                        <div className="row g-4">
                           {/* Rạp chiếu */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-film"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-film me-2 text-primary"></i>
                               Rạp chiếu
-                              <span className="required">*</span>
                             </label>
                             <select
-                              className="cinema-select"
+                              className="form-select custom-input"
                               value={newStaff.CinemaId}
                               onChange={(e) =>
                                 setNewStaff({
@@ -205,15 +193,14 @@ export default function Staff() {
                           </div>
 
                           {/* Họ tên */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-user"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-user me-2 text-danger"></i>
                               Họ và tên
-                              <span className="required">*</span>
                             </label>
                             <input
                               type="text"
-                              className="cinema-input"
+                              className="form-control custom-input"
                               placeholder="VD: Nguyễn Văn A"
                               value={newStaff.FullName}
                               onChange={(e) =>
@@ -227,15 +214,14 @@ export default function Staff() {
                           </div>
 
                           {/* Email */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-envelope"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-envelope me-2 text-success"></i>
                               Email
-                              <span className="required">*</span>
                             </label>
                             <input
                               type="email"
-                              className="cinema-input"
+                              className="form-control custom-input"
                               placeholder="VD: nhanvien@cinema.vn"
                               value={newStaff.Email}
                               onChange={(e) =>
@@ -249,14 +235,14 @@ export default function Staff() {
                           </div>
 
                           {/* Số điện thoại */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-phone"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-phone me-2 text-info"></i>
                               Số điện thoại
                             </label>
                             <input
                               type="tel"
-                              className="cinema-input"
+                              className="form-control custom-input"
                               placeholder="VD: 0901234567"
                               value={newStaff.Phone}
                               onChange={(e) =>
@@ -269,14 +255,13 @@ export default function Staff() {
                           </div>
 
                           {/* Chức vụ */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-briefcase"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-briefcase me-2 text-warning"></i>
                               Chức vụ
-                              <span className="required">*</span>
                             </label>
                             <select
-                              className="cinema-select"
+                              className="form-select custom-input"
                               value={newStaff.Position}
                               onChange={(e) =>
                                 setNewStaff({
@@ -299,14 +284,13 @@ export default function Staff() {
                           </div>
 
                           {/* Trạng thái */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-toggle-on"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-toggle-on me-2 text-success"></i>
                               Trạng thái
-                              <span className="required">*</span>
                             </label>
                             <select
-                              className="cinema-select"
+                              className="form-select custom-input"
                               value={newStaff.Status}
                               onChange={(e) =>
                                 setNewStaff({
@@ -326,71 +310,27 @@ export default function Staff() {
                             newStaff.FullName &&
                             newStaff.Email &&
                             newStaff.Position && (
-                              <div className="cinema-form-group cinema-form-grid-full">
+                              <div className="col-12">
                                 <div
-                                  style={{
-                                    padding: "20px",
-                                    background: "rgba(247, 147, 30, 0.08)",
-                                    border: "2px solid rgba(247, 147, 30, 0.3)",
-                                    borderRadius: "12px",
-                                    marginTop: "8px",
-                                  }}
+                                  className="alert alert-warning"
+                                  role="alert"
                                 >
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: "12px",
-                                      marginBottom: "12px",
-                                    }}
-                                  >
-                                    <i
-                                      className="fas fa-id-card"
-                                      style={{
-                                        color: "#f7931e",
-                                        fontSize: "24px",
-                                      }}
-                                    ></i>
-                                    <h5
-                                      style={{
-                                        margin: 0,
-                                        color: "white",
-                                        fontWeight: 700,
-                                      }}
-                                    >
+                                  <div className="d-flex align-items-center mb-3">
+                                    <i className="fas fa-id-card me-2 fs-4"></i>
+                                    <h5 className="mb-0 fw-bold">
                                       Thông tin nhân viên
                                     </h5>
                                   </div>
-                                  <div
-                                    style={{
-                                      color: "#94a3b8",
-                                      fontSize: "14px",
-                                      lineHeight: 1.8,
-                                    }}
-                                  >
-                                    <p style={{ margin: "8px 0" }}>
-                                      <i
-                                        className="fas fa-user"
-                                        style={{
-                                          color: "#f7931e",
-                                          marginRight: "8px",
-                                        }}
-                                      ></i>
+                                  <div className="ms-4">
+                                    <p className="mb-2">
+                                      <i className="fas fa-user me-2 text-danger"></i>
                                       Họ tên:{" "}
-                                      <strong style={{ color: "white" }}>
-                                        {newStaff.FullName}
-                                      </strong>
+                                      <strong>{newStaff.FullName}</strong>
                                     </p>
-                                    <p style={{ margin: "8px 0" }}>
-                                      <i
-                                        className="fas fa-film"
-                                        style={{
-                                          color: "#f7931e",
-                                          marginRight: "8px",
-                                        }}
-                                      ></i>
+                                    <p className="mb-2">
+                                      <i className="fas fa-film me-2 text-primary"></i>
                                       Rạp:{" "}
-                                      <strong style={{ color: "white" }}>
+                                      <strong>
                                         {
                                           cinemas.find(
                                             (c) =>
@@ -399,16 +339,10 @@ export default function Staff() {
                                         }
                                       </strong>
                                     </p>
-                                    <p style={{ margin: "8px 0" }}>
-                                      <i
-                                        className="fas fa-briefcase"
-                                        style={{
-                                          color: "#f7931e",
-                                          marginRight: "8px",
-                                        }}
-                                      ></i>
+                                    <p className="mb-2">
+                                      <i className="fas fa-briefcase me-2 text-warning"></i>
                                       Chức vụ:{" "}
-                                      <strong style={{ color: "#3b82f6" }}>
+                                      <strong className="text-primary">
                                         {newStaff.Position === "Quản lý"
                                           ? "👔 Quản lý"
                                           : newStaff.Position === "Soát vé"
@@ -423,50 +357,29 @@ export default function Staff() {
                                           : "🛡️ Bảo vệ"}
                                       </strong>
                                     </p>
-                                    <p style={{ margin: "8px 0" }}>
-                                      <i
-                                        className="fas fa-envelope"
-                                        style={{
-                                          color: "#f7931e",
-                                          marginRight: "8px",
-                                        }}
-                                      ></i>
+                                    <p className="mb-2">
+                                      <i className="fas fa-envelope me-2 text-success"></i>
                                       Email:{" "}
-                                      <strong style={{ color: "#22c55e" }}>
+                                      <strong className="text-success">
                                         {newStaff.Email}
                                       </strong>
                                     </p>
                                     {newStaff.Phone && (
-                                      <p style={{ margin: "8px 0" }}>
-                                        <i
-                                          className="fas fa-phone"
-                                          style={{
-                                            color: "#f7931e",
-                                            marginRight: "8px",
-                                          }}
-                                        ></i>
+                                      <p className="mb-2">
+                                        <i className="fas fa-phone me-2 text-info"></i>
                                         Điện thoại:{" "}
-                                        <strong style={{ color: "white" }}>
-                                          {newStaff.Phone}
-                                        </strong>
+                                        <strong>{newStaff.Phone}</strong>
                                       </p>
                                     )}
-                                    <p style={{ margin: "8px 0" }}>
-                                      <i
-                                        className="fas fa-tag"
-                                        style={{
-                                          color: "#f7931e",
-                                          marginRight: "8px",
-                                        }}
-                                      ></i>
+                                    <p className="mb-0">
+                                      <i className="fas fa-tag me-2 text-warning"></i>
                                       Trạng thái:{" "}
                                       <strong
-                                        style={{
-                                          color:
-                                            newStaff.Status === "Active"
-                                              ? "#22c55e"
-                                              : "#ef4444",
-                                        }}
+                                        className={
+                                          newStaff.Status === "Active"
+                                            ? "text-success"
+                                            : "text-danger"
+                                        }
                                       >
                                         {newStaff.Status === "Active"
                                           ? "✅ Đang làm việc"
@@ -479,23 +392,25 @@ export default function Staff() {
                             )}
                         </div>
 
-                        {/* Action Buttons */}
-                        <div className="cinema-form-actions">
-                          <button
+                        {/* Nút hành động */}
+                        <div className="col-12 text-end mt-3">
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                             type="submit"
-                            className="cinema-btn cinema-btn-primary"
+                            className="btn btn-gradient-success me-2 rounded-pill px-4"
                           >
-                            <i className="fas fa-save"></i>
-                            Lưu nhân viên
-                          </button>
-                          <button
+                            <i className="fas fa-save me-1"></i> Lưu
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                             type="button"
-                            className="cinema-btn cinema-btn-secondary"
+                            className="btn btn-gradient-secondary rounded-pill px-4"
                             onClick={() => setShowForm(false)}
                           >
-                            <i className="fas fa-times"></i>
-                            Hủy bỏ
-                          </button>
+                            <i className="fas fa-times me-1"></i> Hủy
+                          </motion.button>
                         </div>
                       </form>
                     </div>

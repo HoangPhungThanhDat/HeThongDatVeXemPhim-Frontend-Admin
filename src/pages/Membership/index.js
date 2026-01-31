@@ -136,7 +136,7 @@ export default function Membership() {
                     animate={{ y: 0, opacity: 1 }}
                     exit={{ y: -100, opacity: 0 }}
                     transition={{ duration: 0.6, ease: "easeOut" }}
-                    className="card border-0 shadow-lg rounded-4 mb-4 form-add-membership"
+                    className="card border-0 shadow-lg rounded-4 mb-4 form-add-user"
                   >
                     <div className="card-body p-4">
                       <h4 className="fw-bold mb-4 text-primary d-flex align-items-center">
@@ -148,7 +148,7 @@ export default function Membership() {
                           {/* Người dùng */}
                           <div className="col-md-6">
                             <label className="form-label fw-bold">
-                              <i className="fas fa-user me-2 text-primary"></i>{" "}
+                              <i className="fas fa-user me-2 text-primary"></i>
                               Người dùng
                             </label>
                             <select
@@ -174,7 +174,7 @@ export default function Membership() {
                           {/* Cấp bậc */}
                           <div className="col-md-6">
                             <label className="form-label fw-bold">
-                              <i className="fas fa-layer-group me-2 text-info"></i>{" "}
+                              <i className="fas fa-layer-group me-2 text-info"></i>
                               Cấp bậc
                             </label>
                             <input
@@ -195,7 +195,7 @@ export default function Membership() {
                           {/* Điểm tích lũy */}
                           <div className="col-md-6">
                             <label className="form-label fw-bold">
-                              <i className="fas fa-star me-2 text-warning"></i>{" "}
+                              <i className="fas fa-star me-2 text-warning"></i>
                               Điểm tích lũy
                             </label>
                             <input
@@ -214,10 +214,34 @@ export default function Membership() {
                             />
                           </div>
 
+                          {/* Trạng thái */}
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-toggle-on me-2 text-success"></i>
+                              Trạng thái
+                            </label>
+                            <select
+                              className="form-select custom-input"
+                              value={newMembership.Status}
+                              onChange={(e) =>
+                                setNewMembership({
+                                  ...newMembership,
+                                  Status: e.target.value,
+                                })
+                              }
+                              required
+                            >
+                              <option value="">-- Chọn trạng thái --</option>
+                              <option value="Active">Hoạt động</option>
+                              <option value="Inactive">Khóa</option>
+                              <option value="Banned">Cấm</option>
+                            </select>
+                          </div>
+
                           {/* Ngày bắt đầu */}
                           <div className="col-md-6">
                             <label className="form-label fw-bold">
-                              <i className="fas fa-calendar-plus me-2 text-success"></i>{" "}
+                              <i className="fas fa-calendar-plus me-2 text-success"></i>
                               Ngày bắt đầu
                             </label>
                             <input
@@ -237,7 +261,7 @@ export default function Membership() {
                           {/* Ngày kết thúc */}
                           <div className="col-md-6">
                             <label className="form-label fw-bold">
-                              <i className="fas fa-calendar-times me-2 text-danger"></i>{" "}
+                              <i className="fas fa-calendar-times me-2 text-danger"></i>
                               Ngày kết thúc
                             </label>
                             <input
@@ -253,10 +277,10 @@ export default function Membership() {
                             />
                           </div>
 
-                          {/* Quyền lợi */}
-                          <div className="col-md-6">
+                          {/* Quyền lợi - Full width */}
+                          <div className="col-12">
                             <label className="form-label fw-bold">
-                              <i className="fas fa-gift me-2 text-primary"></i>{" "}
+                              <i className="fas fa-gift me-2 text-primary"></i>
                               Quyền lợi
                             </label>
                             <input
@@ -271,30 +295,6 @@ export default function Membership() {
                                 })
                               }
                             />
-                          </div>
-
-                          {/* Trạng thái */}
-                          <div className="col-md-6">
-                            <label className="form-label fw-bold">
-                              <i className="fas fa-toggle-on me-2 text-success"></i>{" "}
-                              Trạng thái
-                            </label>
-                            <select
-                              className="form-select custom-input"
-                              value={newMembership.Status}
-                              onChange={(e) =>
-                                setNewMembership({
-                                  ...newMembership,
-                                  Status: e.target.value,
-                                })
-                              }
-                              required
-                            >
-                              <option value="">-- Chọn trạng thái --</option>
-                              <option value="Active">Hoạt động</option>
-                              <option value="Inactive">Khóa</option>
-                              <option value="Banned">Cấm</option>
-                            </select>
                           </div>
 
                           {/* Buttons */}

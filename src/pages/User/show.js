@@ -1,17 +1,34 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import "@fortawesome/fontawesome-free/css/all.min.css";
+import { useParams, useNavigate } from "react-router-dom";
 import MainLayout from "../../layouts/MainLayout";
-import "../../styles/Show.css"; // Import CSS mới
 import UserApi from "../../api/UserApi";
-import { useNavigate } from "react-router-dom";
+import {
+  User,
+  Edit3,
+  ArrowLeft,
+  CheckCircle,
+  XCircle,
+  Mail,
+  Phone,
+  Calendar,
+  Clock,
+  Sparkles,
+  Activity,
+  Shield,
+  IdCard,
+  Cake,
+  UserCheck,
+} from "lucide-react";
+import "../../styles/Role/Show.css";
+
 
 export default function UserShow() {
   const { UserId } = useParams();
+  const navigate = useNavigate();
+
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -33,70 +50,33 @@ export default function UserShow() {
     if (UserId) fetchUser();
   }, [UserId]);
 
-   // ⏳ Loading đẹp hơn (có skeleton + spinner)
-   if (loading) {
+  // Loading State
+  if (loading) {
     return (
       <MainLayout>
         <div className="main-container">
-        <div className="pd-ltr-20">
-            <div className="d-flex flex-column align-items-center justify-content-center p-5">
-              <div
-                className="spinner-border text-orange mb-3"
-                role="status"
-                style={{ 
-                  width: "4rem", 
-                  height: "4rem",
-                  borderColor: "#f7931e",
-                  borderRightColor: "transparent"
-                }}
-              ></div>
-              <h5 style={{ color: "#f7931e" }}>Đang tải dữ liệu người dùng...</h5>
-              <p className="text-muted mt-2">Vui lòng chờ trong giây lát</p>
+          <div className="pd-ltr-20">
+            <div className="loading-container">
+              <div className="spinner-border text-primary mb-3" role="status">
+                <span className="sr-only">Loading...</span>
+              </div>
+              <h5 className="loading-title">Đang tải dữ liệu người dùng...</h5>
+              <p className="loading-subtitle">Vui lòng chờ trong giây lát</p>
 
               {/* Skeleton giả lập khi đang tải */}
-              <div className="card shadow-sm border-0 mt-4 w-75" style={{ 
-                background: "rgba(30, 41, 59, 0.6)",
-                backdropFilter: "blur(20px)",
-                border: "1px solid rgba(247, 147, 30, 0.2)"
-              }}>
-                <div className="card-body">
+              <div className="skeleton-card">
+                <div className="skeleton-body">
                   <div className="row">
                     <div className="col-md-4 text-center">
-                      <div
-                        className="rounded-circle mx-auto"
-                        style={{ 
-                          width: "120px", 
-                          height: "120px",
-                          background: "linear-gradient(90deg, rgba(247, 147, 30, 0.1) 25%, rgba(247, 147, 30, 0.2) 50%, rgba(247, 147, 30, 0.1) 75%)",
-                          backgroundSize: "200% 100%",
-                          animation: "shimmer 1.5s infinite"
-                        }}
-                      ></div>
-                      <div
-                        className="mt-3 rounded mx-auto"
-                        style={{
-                          width: "80%",
-                          height: "20px",
-                          background: "linear-gradient(90deg, rgba(247, 147, 30, 0.1) 25%, rgba(247, 147, 30, 0.2) 50%, rgba(247, 147, 30, 0.1) 75%)",
-                          backgroundSize: "200% 100%",
-                          animation: "shimmer 1.5s infinite"
-                        }}
-                      ></div>
+                      <div className="skeleton-avatar"></div>
+                      <div className="skeleton-text-short"></div>
                     </div>
                     <div className="col-md-8">
-                      {[60, 100, 90, 80, 70].map((width, idx) => (
-                        <div
-                          key={idx}
-                          className="rounded mb-2"
-                          style={{ 
-                            width: `${width}%`, 
-                            height: idx === 0 ? "20px" : "15px",
-                            background: "linear-gradient(90deg, rgba(247, 147, 30, 0.1) 25%, rgba(247, 147, 30, 0.2) 50%, rgba(247, 147, 30, 0.1) 75%)",
-                            backgroundSize: "200% 100%",
-                            animation: "shimmer 1.5s infinite"
-                          }}
-                        ></div>
-                      ))}
+                      <div className="skeleton-text-60"></div>
+                      <div className="skeleton-text-100"></div>
+                      <div className="skeleton-text-90"></div>
+                      <div className="skeleton-text-80"></div>
+                      <div className="skeleton-text-70"></div>
                     </div>
                   </div>
                 </div>
@@ -104,44 +84,28 @@ export default function UserShow() {
             </div>
           </div>
         </div>
-
-        <style jsx>{`
-          @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-          }
-        `}</style>
       </MainLayout>
     );
   }
 
-  // ❌ Nếu lỗi
+  // Error State
   if (error) {
     return (
       <MainLayout>
-         <div className="main-container">
-         <div className="pd-ltr-20">
-            <div className="text-center p-5">
-              <i className="fa fa-exclamation-circle fa-3x mb-3" style={{ color: "#ef4444" }}></i>
-              <h5 style={{ color: "#fff" }}>{error}</h5>
-              <button
-                className="btn mt-3"
-                onClick={() => window.location.reload()}
-                style={{
-                  background: "linear-gradient(135deg, #f7931e 0%, #e67e22 100%)",
-                  color: "white",
-                  border: "none",
-                  padding: "12px 32px",
-                  borderRadius: "12px",
-                  fontWeight: "600",
-                  boxShadow: "0 8px 24px rgba(247, 147, 30, 0.3)",
-                  transition: "all 0.3s ease"
-                }}
-                onMouseOver={(e) => e.target.style.transform = "translateY(-2px)"}
-                onMouseOut={(e) => e.target.style.transform = "translateY(0)"}
-              >
-                <i className="fa fa-sync-alt me-2"></i> Thử lại
-              </button>
+        <div className="main-container">
+          <div className="pd-ltr-20">
+            <div className="error-container">
+              <div className="error-content">
+                <div className="error-card">
+                  <div className="error-icon">
+                    <XCircle size={40} color="#ef4444" />
+                  </div>
+                  <h3 className="error-title">{error}</h3>
+                  <button onClick={() => window.location.reload()} className="error-button">
+                    Thử lại
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -149,15 +113,17 @@ export default function UserShow() {
     );
   }
 
-  // 📌 Không có dữ liệu
+  // No Data State
   if (!user) {
     return (
       <MainLayout>
-       <div className="main-container">
-       <div className="pd-ltr-20">
-            <div className="text-center p-5 text-muted">
-              <i className="fa fa-user-slash fa-2x mb-2" style={{ color: "#64748b" }}></i>
-              <p style={{ color: "#94a3b8" }}>Không có dữ liệu người dùng.</p>
+        <div className="main-container">
+          <div className="pd-ltr-20">
+            <div className="no-data-container">
+              <div className="no-data-content">
+                <User size={64} className="no-data-icon" />
+                <p className="no-data-text">Không có dữ liệu người dùng.</p>
+              </div>
             </div>
           </div>
         </div>
@@ -165,193 +131,203 @@ export default function UserShow() {
     );
   }
 
-  // ✅ Main Content
+  const isActive = user.Status === "Active";
+
   return (
     <MainLayout>
       <div className="main-container">
-      <div className="pd-ltr-20">
-      <div className="cinema-user-detail">
-        {/* Hero Section với Background Gradient */}
-        <div className="user-hero-section">
-          <div className="hero-overlay"></div>
-          <div className="hero-content">
-            <div className="user-avatar-wrapper">
-              <div className="avatar-glow"></div>
-              <img
-                src={user.Avatar || "https://via.placeholder.com/200"}
-                alt={user.FullName}
-                className="user-avatar-hero"
-              />
-              <div
-                className={`status-badge status-${user.Status?.toLowerCase()}`}
-              >
-                <span className="status-dot"></span>
-                {user.Status === "Active"
-                  ? "Hoạt động"
-                  : user.Status === "Inactive"
-                  ? "Tạm khóa"
-                  : "Đã cấm"}
+        <div className="pd-ltr-20">
+          <div className="role-show-container">
+            {/* Background Effects */}
+            <div className="background-effect"></div>
+
+            <div className="role-show-content">
+              {/* Header */}
+              <div className="header-section">
+                <div>
+                  <button onClick={() => navigate("/user")} className="back-button">
+                    <ArrowLeft size={16} />
+                    Quay lại danh sách
+                  </button>
+                  <h1 className="page-title">Chi Tiết Người Dùng</h1>
+                  <p className="page-subtitle">
+                    Xem thông tin chi tiết và quản lý người dùng hệ thống
+                  </p>
+                </div>
+
+                <div className="header-actions">
+                  <button
+                    onClick={() => navigate(`/user/edit/${UserId}`)}
+                    className="edit-button"
+                  >
+                    <Edit3 size={18} />
+                    Chỉnh sửa
+                  </button>
+                </div>
               </div>
-            </div>
-            <h1 className="user-name-hero">{user.FullName}</h1>
-            <div className="user-role-badge">
-              <i className="fas fa-crown me-2"></i>
-              {user.role?.RoleName || "Member"}
+
+              {/* Main Content */}
+              <div className="main-grid">
+                {/* Left Column - User Summary */}
+                <div className="role-summary-card">
+                  {/* Avatar */}
+                  <div className={`role-icon ${isActive ? 'active' : 'inactive'}`}>
+                    {user.Avatar ? (
+                      <img
+                        src={user.Avatar}
+                        alt={user.FullName}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                          borderRadius: "24px",
+                        }}
+                      />
+                    ) : (
+                      <User size={56} color="white" strokeWidth={2} />
+                    )}
+                  </div>
+
+                  {/* User Name */}
+                  <h2 className="role-name">{user.FullName}</h2>
+
+                  {/* Status Badge */}
+                  <div className={`status-badge ${isActive ? 'active' : 'inactive'}`}>
+                    {isActive ? <CheckCircle size={16} /> : <XCircle size={16} />}
+                    {user.Status === "Active"
+                      ? "Hoạt động"
+                      : user.Status === "Inactive"
+                      ? "Tạm khóa"
+                      : "Đã cấm"}
+                  </div>
+
+                  {/* Email */}
+                  <div className="description-box">
+                    <div className="description-header">
+                      <Mail size={18} color="#6b7280" />
+                      <span className="description-label">Email</span>
+                    </div>
+                    <p className="description-text">{user.Email}</p>
+                  </div>
+
+                  {/* User ID */}
+                  <div className="role-id-box">
+                    <div className="role-id-label">ID Người Dùng</div>
+                    <div className="role-id-value">{user.UserId}</div>
+                  </div>
+                </div>
+
+                {/* Right Column - Details */}
+                <div className="details-column">
+                  {/* Personal Info */}
+                  <div className="info-card">
+                    <div className="info-header">
+                      <div className="info-icon">
+                        <Sparkles size={24} color="white" />
+                      </div>
+                      <div>
+                        <h3 className="info-title">Thông Tin Cá Nhân</h3>
+                        <p className="info-subtitle">Chi tiết thông tin người dùng</p>
+                      </div>
+                    </div>
+
+                    <div className="info-items">
+                      <div className="info-item">
+                        <Phone size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Số điện thoại</div>
+                          <div className="info-item-value">
+                            {user.PhoneNumber || "Chưa cập nhật"}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="info-item">
+                        <UserCheck size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Giới tính</div>
+                          <div className="info-item-value">
+                            {user.Gender || "Chưa cập nhật"}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="info-item">
+                        <Cake size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Ngày sinh</div>
+                          <div className="info-item-value">
+                            {user.DateOfBirth || "Chưa cập nhật"}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="info-item">
+                        <Shield size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Vai trò</div>
+                          <div className="info-item-value">
+                            {user.role?.RoleName || "User"}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Account Info */}
+                  <div className="info-card">
+                    <div className="info-header">
+                      <div className="info-icon">
+                        <Activity size={24} color="white" />
+                      </div>
+                      <div>
+                        <h3 className="info-title">Thông Tin Tài Khoản</h3>
+                        <p className="info-subtitle">Lịch sử hoạt động</p>
+                      </div>
+                    </div>
+
+                    <div className="info-items">
+                      <div className="info-item">
+                        <User size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Người tạo</div>
+                          <div className="info-item-value">
+                            {user.CreatedBy || "System"}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="info-item">
+                        <Calendar size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Ngày tạo</div>
+                          <div className="info-item-value">{user.CreatedAt}</div>
+                        </div>
+                      </div>
+
+                      <div className="info-item">
+                        <User size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Người cập nhật</div>
+                          <div className="info-item-value">{user.UpdatedBy || "N/A"}</div>
+                        </div>
+                      </div>
+
+                      <div className="info-item">
+                        <Clock size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Cập nhật lần cuối</div>
+                          <div className="info-item-value">{user.UpdatedAt}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-
-        {/* Main Content Wrapper */}
-        <div className="user-content-wrapper">
-          <div className="container">
-            {/* Info Cards Grid */}
-            <div className="info-grid">
-              {/* Card 1: Thông Tin Cá Nhân */}
-              <div className="info-card">
-                <div className="card-header">
-                  <i className="fas fa-user-circle"></i>
-                  <h3>Thông Tin Cá Nhân</h3>
-                </div>
-                <div className="card-body">
-                  <div className="info-row">
-                    <div className="info-label">
-                      <i className="fas fa-id-card"></i>
-                      <span>ID Người dùng</span>
-                    </div>
-                    <div className="info-value">{user.UserId}</div>
-                  </div>
-                  <div className="info-row">
-                    <div className="info-label">
-                      <i className="fas fa-envelope"></i>
-                      <span>Email</span>
-                    </div>
-                    <div className="info-value">{user.Email}</div>
-                  </div>
-                  <div className="info-row">
-                    <div className="info-label">
-                      <i className="fas fa-phone"></i>
-                      <span>Số điện thoại</span>
-                    </div>
-                    <div className="info-value">
-                      {user.PhoneNumber || "Chưa cập nhật"}
-                    </div>
-                  </div>
-                  <div className="info-row">
-                    <div className="info-label">
-                      <i className="fas fa-venus-mars"></i>
-                      <span>Giới tính</span>
-                    </div>
-                    <div className="info-value">
-                      {user.Gender || "Chưa cập nhật"}
-                    </div>
-                  </div>
-                  <div className="info-row">
-                    <div className="info-label">
-                      <i className="fas fa-birthday-cake"></i>
-                      <span>Ngày sinh</span>
-                    </div>
-                    <div className="info-value">
-                      {user.DateOfBirth || "Chưa cập nhật"}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 2: Thông Tin Tài Khoản */}
-              <div className="info-card">
-                <div className="card-header">
-                  <i className="fas fa-shield-alt"></i>
-                  <h3>Thông Tin Tài Khoản</h3>
-                </div>
-                <div className="card-body">
-                  <div className="info-row">
-                    <div className="info-label">
-                      <i className="fas fa-user-tag"></i>
-                      <span>Vai trò</span>
-                    </div>
-                    <div className="info-value">
-                      <span
-                        className={`role-pill role-${
-                          user.role?.RoleName?.toLowerCase() || "user"
-                        }`}
-                      >
-                        {user.role?.RoleName || "User"}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="info-row">
-                    <div className="info-label">
-                      <i className="fas fa-toggle-on"></i>
-                      <span>Trạng thái</span>
-                    </div>
-                    <div className="info-value">
-                      <span
-                        className={`status-pill status-${user.Status?.toLowerCase()}`}
-                      >
-                        {user.Status === "Active"
-                          ? "Hoạt động"
-                          : user.Status === "Inactive"
-                          ? "Tạm khóa"
-                          : "Đã cấm"}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="info-row">
-                    <div className="info-label">
-                      <i className="fas fa-calendar-plus"></i>
-                      <span>Ngày tạo</span>
-                    </div>
-                    <div className="info-value">{user.CreatedAt}</div>
-                  </div>
-                  <div className="info-row">
-                    <div className="info-label">
-                      <i className="fas fa-calendar-check"></i>
-                      <span>Cập nhật lần cuối</span>
-                    </div>
-                    <div className="info-value">{user.UpdatedAt}</div>
-                  </div>
-                  <div className="info-row">
-                    <div className="info-label">
-                      <i className="fas fa-user-plus"></i>
-                      <span>Người tạo</span>
-                    </div>
-                    <div className="info-value">{user.CreatedBy || "System"}</div>
-                  </div>
-                  <div className="info-row">
-                    <div className="info-label">
-                      <i className="fas fa-user-edit"></i>
-                      <span>Người cập nhật</span>
-                    </div>
-                    <div className="info-value">{user.UpdatedBy || "N/A"}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="action-buttons">
-              <button
-                className="btn-cinema btn-primary"
-                onClick={() => navigate(`/User/edit/${user.UserId}`)}
-              >
-                <i className="fas fa-edit"></i>
-                <span>Chỉnh sửa</span>
-              </button>
-              <button
-                className="btn-cinema btn-secondary"
-                onClick={() => window.history.back()}
-              >
-                <i className="fas fa-arrow-left"></i>
-                <span>Quay lại</span>
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
-      </div>
-      </div>
-
-      
     </MainLayout>
   );
 }

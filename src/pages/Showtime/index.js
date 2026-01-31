@@ -138,7 +138,7 @@ export default function Showtime() {
                     animate={{ y: 0, opacity: 1 }}
                     exit={{ y: -100, opacity: 0 }}
                     transition={{ duration: 0.6, ease: "easeOut" }}
-                    className="card border-0 shadow-lg rounded-4 mb-4"
+                    className="card border-0 shadow-lg rounded-4 mb-4 form-add-user"
                   >
                     <div className="card-body p-4">
                       <h4 className="fw-bold mb-4 text-primary d-flex align-items-center">
@@ -150,167 +150,137 @@ export default function Showtime() {
                         <div className="row g-4">
                           {/* Phim */}
                           <div className="col-md-6">
-                            <label className="form-label fw-semibold">
-                              <i className="fas fa-film me-1 text-primary"></i>{" "}
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-film me-2 text-primary"></i>
                               Phim được chiếu
                             </label>
-                            <div className="input-group">
-                              <span className="input-group-text bg-light">
-                                <i className="fas fa-film"></i>
-                              </span>
-                              <select
-                                className="form-select"
-                                value={newShowtime.MovieId}
-                                onChange={(e) =>
-                                  setNewShowtime({
-                                    ...newShowtime,
-                                    MovieId: e.target.value,
-                                  })
-                                }
-                                required
-                              >
-                                <option value="">-- Chọn phim --</option>
-                                {movies.map((m) => (
-                                  <option key={m.MovieId} value={m.MovieId}>
-                                    {m.Title}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
+                            <select
+                              className="form-select custom-input"
+                              value={newShowtime.MovieId}
+                              onChange={(e) =>
+                                setNewShowtime({
+                                  ...newShowtime,
+                                  MovieId: e.target.value,
+                                })
+                              }
+                              required
+                            >
+                              <option value="">-- Chọn phim --</option>
+                              {movies.map((m) => (
+                                <option key={m.MovieId} value={m.MovieId}>
+                                  {m.Title}
+                                </option>
+                              ))}
+                            </select>
                           </div>
 
                           {/* Phòng chiếu */}
                           <div className="col-md-6">
-                            <label className="form-label fw-semibold">
-                              <i className="fas fa-door-open me-1 text-primary"></i>{" "}
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-door-open me-2 text-danger"></i>
                               Phòng chiếu
                             </label>
-                            <div className="input-group">
-                              <span className="input-group-text bg-light">
-                                <i className="fas fa-door-open"></i>
-                              </span>
-                              <select
-                                className="form-select"
-                                value={newShowtime.RoomId}
-                                onChange={(e) =>
-                                  setNewShowtime({
-                                    ...newShowtime,
-                                    RoomId: e.target.value,
-                                  })
-                                }
-                                required
-                              >
-                                <option value="">-- Chọn phòng --</option>
-                                {rooms.map((r) => (
-                                  <option key={r.RoomId} value={r.RoomId}>
-                                    {r.Name}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
+                            <select
+                              className="form-select custom-input"
+                              value={newShowtime.RoomId}
+                              onChange={(e) =>
+                                setNewShowtime({
+                                  ...newShowtime,
+                                  RoomId: e.target.value,
+                                })
+                              }
+                              required
+                            >
+                              <option value="">-- Chọn phòng --</option>
+                              {rooms.map((r) => (
+                                <option key={r.RoomId} value={r.RoomId}>
+                                  {r.Name}
+                                </option>
+                              ))}
+                            </select>
                           </div>
 
                           {/* Giờ bắt đầu */}
                           <div className="col-md-6">
-                            <label className="form-label fw-semibold">
-                              <i className="fas fa-clock me-1 text-primary"></i>{" "}
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-clock me-2 text-success"></i>
                               Giờ bắt đầu
                             </label>
-                            <div className="input-group">
-                              <span className="input-group-text bg-light">
-                                <i className="fas fa-clock"></i>
-                              </span>
-                              <input
-                                type="datetime-local"
-                                className="form-control"
-                                value={newShowtime.StartTime}
-                                onChange={(e) =>
-                                  setNewShowtime({
-                                    ...newShowtime,
-                                    StartTime: e.target.value,
-                                  })
-                                }
-                                required
-                              />
-                            </div>
+                            <input
+                              type="datetime-local"
+                              className="form-control custom-input"
+                              value={newShowtime.StartTime}
+                              onChange={(e) =>
+                                setNewShowtime({
+                                  ...newShowtime,
+                                  StartTime: e.target.value,
+                                })
+                              }
+                              required
+                            />
                           </div>
 
                           {/* Giờ kết thúc */}
                           <div className="col-md-6">
-                            <label className="form-label fw-semibold">
-                              <i className="fas fa-clock me-1 text-primary"></i>{" "}
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-clock me-2 text-info"></i>
                               Giờ kết thúc
                             </label>
-                            <div className="input-group">
-                              <span className="input-group-text bg-light">
-                                <i className="fas fa-clock"></i>
-                              </span>
-                              <input
-                                type="datetime-local"
-                                className="form-control"
-                                value={newShowtime.EndTime}
-                                onChange={(e) =>
-                                  setNewShowtime({
-                                    ...newShowtime,
-                                    EndTime: e.target.value,
-                                  })
-                                }
-                                required
-                              />
-                            </div>
+                            <input
+                              type="datetime-local"
+                              className="form-control custom-input"
+                              value={newShowtime.EndTime}
+                              onChange={(e) =>
+                                setNewShowtime({
+                                  ...newShowtime,
+                                  EndTime: e.target.value,
+                                })
+                              }
+                              required
+                            />
                           </div>
 
                           {/* Giá vé */}
                           <div className="col-md-6">
-                            <label className="form-label fw-semibold">
-                              <i className="fas fa-dollar-sign me-1 text-success"></i>{" "}
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-dollar-sign me-2 text-warning"></i>
                               Giá vé cơ bản
                             </label>
-                            <div className="input-group">
-                              <span className="input-group-text bg-light">
-                                <i className="fas fa-dollar-sign"></i>
-                              </span>
-                              <input
-                                type="number"
-                                className="form-control"
-                                placeholder="Nhập giá vé"
-                                value={newShowtime.Price}
-                                onChange={(e) =>
-                                  setNewShowtime({
-                                    ...newShowtime,
-                                    Price: e.target.value,
-                                  })
-                                }
-                                required
-                              />
-                            </div>
+                            <input
+                              type="number"
+                              className="form-control custom-input"
+                              placeholder="Nhập giá vé"
+                              value={newShowtime.Price}
+                              onChange={(e) =>
+                                setNewShowtime({
+                                  ...newShowtime,
+                                  Price: e.target.value,
+                                })
+                              }
+                              required
+                            />
                           </div>
 
                           {/* Trạng thái */}
                           <div className="col-md-6">
-                            <label className="form-label fw-semibold">
-                              <i className="fas fa-toggle-on me-1 text-info"></i>{" "}
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-toggle-on me-2 text-success"></i>
                               Trạng thái suất chiếu
                             </label>
-                            <div className="input-group">
-                              <span className="input-group-text bg-light">
-                                <i className="fas fa-toggle-on"></i>
-                              </span>
-                              <select
-                                className="form-select"
-                                value={newShowtime.Status}
-                                onChange={(e) =>
-                                  setNewShowtime({
-                                    ...newShowtime,
-                                    Status: e.target.value,
-                                  })
-                                }
-                              >
-                                <option value="Scheduled">Đã lên lịch</option>
-                                <option value="Cancelled">Đã hủy</option>
-                                <option value="Finished">Đã kết thúc</option>
-                              </select>
-                            </div>
+                            <select
+                              className="form-select custom-input"
+                              value={newShowtime.Status}
+                              onChange={(e) =>
+                                setNewShowtime({
+                                  ...newShowtime,
+                                  Status: e.target.value,
+                                })
+                              }
+                            >
+                              <option value="Scheduled">Đã lên lịch</option>
+                              <option value="Cancelled">Đã hủy</option>
+                              <option value="Finished">Đã kết thúc</option>
+                            </select>
                           </div>
 
                           {/* Nút hành động */}
@@ -339,7 +309,6 @@ export default function Showtime() {
                   </motion.div>
                 )}
               </AnimatePresence>
-
               {/* Card chứa bảng */}
               <div className="card border-0 shadow-sm rounded-4 animate__animated animate__fadeIn">
                 <div className="card-body p-4">
@@ -347,15 +316,14 @@ export default function Showtime() {
                     <table className="table align-middle table-hover table-striped">
                       <thead className="bg-light text-dark">
                         <tr>
-                          <th style={{ width: "80px" }}>ID</th>
-                          <th style={{ minWidth: "150px" }}>Phim chiếu</th>
-                          <th style={{ minWidth: "150px" }}>Phòng chiếu</th>
-                          <th style={{ width: "150px" }}>Giờ bắt đầu</th>
-                          <th style={{ width: "150px" }}>Giờ kết thúc</th>
-                          <th style={{ width: "120px" }}>Giá vé cơ bản</th>
-                          <th style={{ width: "130px" }}>Trạng thái</th>
+                          <th >ID</th>
+                          <th >Phim chiếu</th>
+                          <th >Phòng chiếu</th>
+                          <th >Giờ bắt đầu</th>
+                          <th >Giờ kết thúc</th>
+                          <th >Trạng thái</th>
                           <th
-                            style={{ width: "150px" }}
+                           
                             className="text-center"
                           >
                             Hành động
@@ -382,7 +350,6 @@ export default function Showtime() {
                                 <td className="text-muted">
                                   {showtime.EndTime}
                                 </td>
-                                <td className="text-muted">{showtime.Price}</td>
                                 <td>
                                   <label className="switch">
                                     <input

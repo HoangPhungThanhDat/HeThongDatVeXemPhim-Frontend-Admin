@@ -142,44 +142,31 @@ export default function OrderDetail() {
               </div>
 
               {/* Form thêm */}
-
               <AnimatePresence>
                 {showForm && (
                   <motion.div
-                    initial={{ opacity: 0, y: -30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -30 }}
-                    transition={{ duration: 0.4 }}
-                    className="cinema-add-form"
+                    initial={{ y: -100, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -100, opacity: 0 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    className="card border-0 shadow-lg rounded-4 mb-4 form-add-user"
                   >
-                    {/* Form Header */}
-                    <div className="cinema-form-header">
-                      <div className="cinema-form-title">
-                        <div className="cinema-form-icon">
-                          <i className="fas fa-plus-circle"></i>
-                        </div>
-                        <div className="cinema-form-title-text">
-                          <h4>Thêm chi tiết đơn hàng</h4>
-                          <p className="cinema-form-subtitle">
-                            Thêm vé hoặc sản phẩm vào đơn hàng
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                    <div className="card-body p-4">
+                      <h4 className="fw-bold mb-4 text-primary d-flex align-items-center">
+                        <i className="fas fa-plus-circle me-2"></i> Thêm chi
+                        tiết đơn hàng
+                      </h4>
 
-                    {/* Form Body */}
-                    <div className="cinema-form-body">
                       <form onSubmit={handleAddOrderDetail}>
-                        <div className="cinema-form-grid">
+                        <div className="row g-4">
                           {/* Đơn hàng */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-shopping-cart"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-shopping-cart me-2 text-primary"></i>
                               Đơn hàng
-                              <span className="required">*</span>
                             </label>
                             <select
-                              className="cinema-select"
+                              className="form-select custom-input"
                               value={newOrderDetail.OrderId}
                               onChange={(e) =>
                                 setNewOrderDetail({
@@ -199,13 +186,13 @@ export default function OrderDetail() {
                           </div>
 
                           {/* Mã vé đặt */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-ticket-alt"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-ticket-alt me-2 text-danger"></i>
                               Mã vé đặt
                             </label>
                             <select
-                              className="cinema-select"
+                              className="form-select custom-input"
                               value={newOrderDetail.TicketId}
                               onChange={(e) =>
                                 setNewOrderDetail({
@@ -224,13 +211,13 @@ export default function OrderDetail() {
                           </div>
 
                           {/* Sản phẩm */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-popcorn"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-popcorn me-2 text-success"></i>
                               Sản phẩm (Bắp, nước)
                             </label>
                             <select
-                              className="cinema-select"
+                              className="form-select custom-input"
                               value={newOrderDetail.ItemId}
                               onChange={(e) =>
                                 setNewOrderDetail({
@@ -249,15 +236,14 @@ export default function OrderDetail() {
                           </div>
 
                           {/* Số lượng */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-sort-numeric-up"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-sort-numeric-up me-2 text-info"></i>
                               Số lượng
-                              <span className="required">*</span>
                             </label>
                             <input
                               type="number"
-                              className="cinema-input"
+                              className="form-control custom-input"
                               placeholder="VD: 2"
                               min="1"
                               value={newOrderDetail.Quantity}
@@ -272,15 +258,14 @@ export default function OrderDetail() {
                           </div>
 
                           {/* Giá từng món */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-money-bill-wave"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-money-bill-wave me-2 text-warning"></i>
                               Giá từng món
-                              <span className="required">*</span>
                             </label>
                             <input
                               type="number"
-                              className="cinema-input"
+                              className="form-control custom-input"
                               placeholder="VD: 50000"
                               min="0"
                               step="1000"
@@ -295,8 +280,8 @@ export default function OrderDetail() {
                             />
                             {newOrderDetail.Price &&
                               newOrderDetail.Quantity && (
-                                <div className="cinema-helper-text">
-                                  <i className="fas fa-info-circle"></i>
+                                <small className="text-muted">
+                                  <i className="fas fa-info-circle me-1"></i>
                                   Thành tiền:{" "}
                                   <strong>
                                     {(
@@ -305,19 +290,18 @@ export default function OrderDetail() {
                                     ).toLocaleString("vi-VN")}{" "}
                                     VNĐ
                                   </strong>
-                                </div>
+                                </small>
                               )}
                           </div>
 
                           {/* Trạng thái */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-toggle-on"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-toggle-on me-2 text-success"></i>
                               Trạng thái
-                              <span className="required">*</span>
                             </label>
                             <select
-                              className="cinema-select"
+                              className="form-select custom-input"
                               value={newOrderDetail.Status}
                               onChange={(e) =>
                                 setNewOrderDetail({
@@ -338,87 +322,37 @@ export default function OrderDetail() {
                               newOrderDetail.ItemId) &&
                             newOrderDetail.Quantity &&
                             newOrderDetail.Price && (
-                              <div className="cinema-form-group cinema-form-grid-full">
+                              <div className="col-12">
                                 <div
-                                  style={{
-                                    padding: "20px",
-                                    background: "rgba(247, 147, 30, 0.08)",
-                                    border: "2px solid rgba(247, 147, 30, 0.3)",
-                                    borderRadius: "12px",
-                                    marginTop: "8px",
-                                  }}
+                                  className="alert alert-warning"
+                                  role="alert"
                                 >
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: "12px",
-                                      marginBottom: "12px",
-                                    }}
-                                  >
-                                    <i
-                                      className="fas fa-receipt"
-                                      style={{
-                                        color: "#f7931e",
-                                        fontSize: "24px",
-                                      }}
-                                    ></i>
-                                    <h5
-                                      style={{
-                                        margin: 0,
-                                        color: "white",
-                                        fontWeight: 700,
-                                      }}
-                                    >
+                                  <div className="d-flex align-items-center mb-3">
+                                    <i className="fas fa-receipt me-2 fs-4"></i>
+                                    <h5 className="mb-0 fw-bold">
                                       Thông tin chi tiết
                                     </h5>
                                   </div>
-                                  <div
-                                    style={{
-                                      color: "#94a3b8",
-                                      fontSize: "14px",
-                                      lineHeight: 1.8,
-                                    }}
-                                  >
-                                    <p style={{ margin: "8px 0" }}>
-                                      <i
-                                        className="fas fa-shopping-cart"
-                                        style={{
-                                          color: "#f7931e",
-                                          marginRight: "8px",
-                                        }}
-                                      ></i>
+                                  <div className="ms-4">
+                                    <p className="mb-2">
+                                      <i className="fas fa-shopping-cart me-2 text-primary"></i>
                                       Đơn hàng:{" "}
-                                      <strong style={{ color: "white" }}>
-                                        {newOrderDetail.OrderId}
-                                      </strong>
+                                      <strong>{newOrderDetail.OrderId}</strong>
                                     </p>
                                     {newOrderDetail.TicketId && (
-                                      <p style={{ margin: "8px 0" }}>
-                                        <i
-                                          className="fas fa-ticket-alt"
-                                          style={{
-                                            color: "#f7931e",
-                                            marginRight: "8px",
-                                          }}
-                                        ></i>
+                                      <p className="mb-2">
+                                        <i className="fas fa-ticket-alt me-2 text-danger"></i>
                                         Vé:{" "}
-                                        <strong style={{ color: "#22c55e" }}>
+                                        <strong className="text-success">
                                           {newOrderDetail.TicketId}
                                         </strong>
                                       </p>
                                     )}
                                     {newOrderDetail.ItemId && (
-                                      <p style={{ margin: "8px 0" }}>
-                                        <i
-                                          className="fas fa-popcorn"
-                                          style={{
-                                            color: "#f7931e",
-                                            marginRight: "8px",
-                                          }}
-                                        ></i>
+                                      <p className="mb-2">
+                                        <i className="fas fa-popcorn me-2 text-success"></i>
                                         Sản phẩm:{" "}
-                                        <strong style={{ color: "#22c55e" }}>
+                                        <strong className="text-success">
                                           {
                                             foodanddrinks.find(
                                               (f) =>
@@ -429,50 +363,25 @@ export default function OrderDetail() {
                                         </strong>
                                       </p>
                                     )}
-                                    <p style={{ margin: "8px 0" }}>
-                                      <i
-                                        className="fas fa-sort-numeric-up"
-                                        style={{
-                                          color: "#f7931e",
-                                          marginRight: "8px",
-                                        }}
-                                      ></i>
+                                    <p className="mb-2">
+                                      <i className="fas fa-sort-numeric-up me-2 text-info"></i>
                                       Số lượng:{" "}
-                                      <strong style={{ color: "white" }}>
-                                        {newOrderDetail.Quantity}
-                                      </strong>
+                                      <strong>{newOrderDetail.Quantity}</strong>
                                     </p>
-                                    <p style={{ margin: "8px 0" }}>
-                                      <i
-                                        className="fas fa-money-bill-wave"
-                                        style={{
-                                          color: "#f7931e",
-                                          marginRight: "8px",
-                                        }}
-                                      ></i>
+                                    <p className="mb-2">
+                                      <i className="fas fa-money-bill-wave me-2 text-warning"></i>
                                       Đơn giá:{" "}
-                                      <strong style={{ color: "white" }}>
+                                      <strong>
                                         {parseInt(
                                           newOrderDetail.Price
                                         ).toLocaleString("vi-VN")}{" "}
                                         VNĐ
                                       </strong>
                                     </p>
-                                    <p style={{ margin: "8px 0" }}>
-                                      <i
-                                        className="fas fa-coins"
-                                        style={{
-                                          color: "#f7931e",
-                                          marginRight: "8px",
-                                        }}
-                                      ></i>
+                                    <p className="mb-2">
+                                      <i className="fas fa-coins me-2 text-warning"></i>
                                       Tổng tiền:{" "}
-                                      <strong
-                                        style={{
-                                          color: "#f7931e",
-                                          fontSize: "16px",
-                                        }}
-                                      >
+                                      <strong className="text-warning fs-5">
                                         {(
                                           parseInt(newOrderDetail.Price) *
                                           parseInt(newOrderDetail.Quantity)
@@ -480,22 +389,15 @@ export default function OrderDetail() {
                                         VNĐ
                                       </strong>
                                     </p>
-                                    <p style={{ margin: "8px 0" }}>
-                                      <i
-                                        className="fas fa-tag"
-                                        style={{
-                                          color: "#f7931e",
-                                          marginRight: "8px",
-                                        }}
-                                      ></i>
+                                    <p className="mb-0">
+                                      <i className="fas fa-tag me-2 text-info"></i>
                                       Trạng thái:{" "}
                                       <strong
-                                        style={{
-                                          color:
-                                            newOrderDetail.Status === "Active"
-                                              ? "#22c55e"
-                                              : "#ef4444",
-                                        }}
+                                        className={
+                                          newOrderDetail.Status === "Active"
+                                            ? "text-success"
+                                            : "text-danger"
+                                        }
                                       >
                                         {newOrderDetail.Status === "Active"
                                           ? "✅ Hoạt động"
@@ -508,23 +410,25 @@ export default function OrderDetail() {
                             )}
                         </div>
 
-                        {/* Action Buttons */}
-                        <div className="cinema-form-actions">
-                          <button
+                        {/* Nút hành động */}
+                        <div className="col-12 text-end mt-3">
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                             type="submit"
-                            className="cinema-btn cinema-btn-primary"
+                            className="btn btn-gradient-success me-2 rounded-pill px-4"
                           >
-                            <i className="fas fa-save"></i>
-                            Lưu chi tiết
-                          </button>
-                          <button
+                            <i className="fas fa-save me-1"></i> Lưu
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                             type="button"
-                            className="cinema-btn cinema-btn-secondary"
+                            className="btn btn-gradient-secondary rounded-pill px-4"
                             onClick={() => setShowForm(false)}
                           >
-                            <i className="fas fa-times"></i>
-                            Hủy bỏ
-                          </button>
+                            <i className="fas fa-times me-1"></i> Hủy
+                          </motion.button>
                         </div>
                       </form>
                     </div>

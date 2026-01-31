@@ -135,44 +135,31 @@ export default function Ticket() {
                 </div>
               </div>
 
-              {/* Form thêm vé mới - CINEMA STYLE */}
+              {/* Form thêm vé mới */}
               <AnimatePresence>
                 {showForm && (
                   <motion.div
-                    initial={{ opacity: 0, y: -30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -30 }}
-                    transition={{ duration: 0.4 }}
-                    className="cinema-add-form"
+                    initial={{ y: -100, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -100, opacity: 0 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    className="card border-0 shadow-lg rounded-4 mb-4 form-add-user"
                   >
-                    {/* Form Header */}
-                    <div className="cinema-form-header">
-                      <div className="cinema-form-title">
-                        <div className="cinema-form-icon">
-                          <i className="fas fa-ticket-alt"></i>
-                        </div>
-                        <div className="cinema-form-title-text">
-                          <h4>Thêm vé mới</h4>
-                          <p className="cinema-form-subtitle">
-                            Đặt vé xem phim cho khách hàng
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                    <div className="card-body p-4">
+                      <h4 className="fw-bold mb-4 text-primary d-flex align-items-center">
+                        <i className="fas fa-ticket-alt me-2"></i> Thêm vé mới
+                      </h4>
 
-                    {/* Form Body */}
-                    <div className="cinema-form-body">
                       <form onSubmit={handleAddTicket}>
-                        <div className="cinema-form-grid">
+                        <div className="row g-4">
                           {/* Người đặt */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-user"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-user me-2 text-primary"></i>
                               Người đặt vé
-                              <span className="required">*</span>
                             </label>
                             <select
-                              className="cinema-select"
+                              className="form-select custom-input"
                               value={newTicket.UserId}
                               onChange={(e) =>
                                 setNewTicket({
@@ -192,14 +179,13 @@ export default function Ticket() {
                           </div>
 
                           {/* Suất chiếu */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-clock"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-clock me-2 text-danger"></i>
                               Suất chiếu
-                              <span className="required">*</span>
                             </label>
                             <select
-                              className="cinema-select"
+                              className="form-select custom-input"
                               value={newTicket.ShowtimeId}
                               onChange={(e) =>
                                 setNewTicket({
@@ -229,14 +215,13 @@ export default function Ticket() {
                           </div>
 
                           {/* Ghế ngồi */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-couch"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-couch me-2 text-success"></i>
                               Ghế ngồi
-                              <span className="required">*</span>
                             </label>
                             <select
-                              className="cinema-select"
+                              className="form-select custom-input"
                               value={newTicket.SeatId}
                               onChange={(e) =>
                                 setNewTicket({
@@ -257,15 +242,14 @@ export default function Ticket() {
                           </div>
 
                           {/* Thời gian đặt */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-calendar-check"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-calendar-check me-2 text-info"></i>
                               Thời điểm đặt vé
-                              <span className="required">*</span>
                             </label>
                             <input
                               type="datetime-local"
-                              className="cinema-input"
+                              className="form-control custom-input"
                               value={newTicket.BookingTime}
                               onChange={(e) =>
                                 setNewTicket({
@@ -278,14 +262,13 @@ export default function Ticket() {
                           </div>
 
                           {/* Trạng thái vé */}
-                          <div className="cinema-form-group cinema-form-grid-full">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-info-circle"></i>
+                          <div className="col-12">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-info-circle me-2 text-warning"></i>
                               Trạng thái vé
-                              <span className="required">*</span>
                             </label>
                             <select
-                              className="cinema-select"
+                              className="form-select custom-input"
                               value={newTicket.Status}
                               onChange={(e) =>
                                 setNewTicket({
@@ -305,58 +288,22 @@ export default function Ticket() {
                           {newTicket.UserId &&
                             newTicket.ShowtimeId &&
                             newTicket.SeatId && (
-                              <div className="cinema-form-group cinema-form-grid-full">
+                              <div className="col-12">
                                 <div
-                                  style={{
-                                    padding: "20px",
-                                    background: "rgba(247, 147, 30, 0.08)",
-                                    border: "2px solid rgba(247, 147, 30, 0.3)",
-                                    borderRadius: "12px",
-                                    marginTop: "8px",
-                                  }}
+                                  className="alert alert-warning"
+                                  role="alert"
                                 >
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: "12px",
-                                      marginBottom: "12px",
-                                    }}
-                                  >
-                                    <i
-                                      className="fas fa-check-circle"
-                                      style={{
-                                        color: "#f7931e",
-                                        fontSize: "24px",
-                                      }}
-                                    ></i>
-                                    <h5
-                                      style={{
-                                        margin: 0,
-                                        color: "white",
-                                        fontWeight: 700,
-                                      }}
-                                    >
+                                  <div className="d-flex align-items-center mb-3">
+                                    <i className="fas fa-check-circle me-2 fs-4"></i>
+                                    <h5 className="mb-0 fw-bold">
                                       Xác nhận thông tin đặt vé
                                     </h5>
                                   </div>
-                                  <div
-                                    style={{
-                                      color: "#94a3b8",
-                                      fontSize: "14px",
-                                      lineHeight: 1.8,
-                                    }}
-                                  >
-                                    <p style={{ margin: "8px 0" }}>
-                                      <i
-                                        className="fas fa-user"
-                                        style={{
-                                          color: "#f7931e",
-                                          marginRight: "8px",
-                                        }}
-                                      ></i>
+                                  <div className="ms-4">
+                                    <p className="mb-2">
+                                      <i className="fas fa-user me-2 text-primary"></i>
                                       Khách hàng:{" "}
-                                      <strong style={{ color: "white" }}>
+                                      <strong>
                                         {
                                           users.find(
                                             (u) => u.UserId === newTicket.UserId
@@ -364,16 +311,10 @@ export default function Ticket() {
                                         }
                                       </strong>
                                     </p>
-                                    <p style={{ margin: "8px 0" }}>
-                                      <i
-                                        className="fas fa-film"
-                                        style={{
-                                          color: "#f7931e",
-                                          marginRight: "8px",
-                                        }}
-                                      ></i>
+                                    <p className="mb-2">
+                                      <i className="fas fa-film me-2 text-danger"></i>
                                       Suất chiếu:{" "}
-                                      <strong style={{ color: "white" }}>
+                                      <strong>
                                         {
                                           showtimes.find(
                                             (s) =>
@@ -383,16 +324,10 @@ export default function Ticket() {
                                         }
                                       </strong>
                                     </p>
-                                    <p style={{ margin: "8px 0" }}>
-                                      <i
-                                        className="fas fa-chair"
-                                        style={{
-                                          color: "#f7931e",
-                                          marginRight: "8px",
-                                        }}
-                                      ></i>
+                                    <p className="mb-0">
+                                      <i className="fas fa-chair me-2 text-success"></i>
                                       Ghế:{" "}
-                                      <strong style={{ color: "white" }}>
+                                      <strong>
                                         {
                                           seats.find(
                                             (s) => s.SeatId === newTicket.SeatId
@@ -411,23 +346,25 @@ export default function Ticket() {
                             )}
                         </div>
 
-                        {/* Action Buttons */}
-                        <div className="cinema-form-actions">
-                          <button
+                        {/* Nút hành động */}
+                        <div className="col-12 text-end mt-3">
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                             type="submit"
-                            className="cinema-btn cinema-btn-primary"
+                            className="btn btn-gradient-success me-2 rounded-pill px-4"
                           >
-                            <i className="fas fa-ticket-alt"></i>
-                            Đặt vé ngay
-                          </button>
-                          <button
+                            <i className="fas fa-save me-1"></i> Lưu
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                             type="button"
-                            className="cinema-btn cinema-btn-secondary"
+                            className="btn btn-gradient-secondary rounded-pill px-4"
                             onClick={() => setShowForm(false)}
                           >
-                            <i className="fas fa-times"></i>
-                            Hủy bỏ
-                          </button>
+                            <i className="fas fa-times me-1"></i> Hủy
+                          </motion.button>
                         </div>
                       </form>
                     </div>

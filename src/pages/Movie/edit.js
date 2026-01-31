@@ -98,7 +98,7 @@ export default function MovieEdit() {
       formData.append("_method", "PUT");
       formData.append("UserId", movie.UserId);
       formData.append("Title", movie.Title);
-      formData.append("Trailer", movie.Trailer);
+      formData.append("TrailerUrl", movie.Trailer);
       formData.append("GenreId", movie.GenreId);
       formData.append("Duration", movie.Duration);
       formData.append("Language", Array.isArray(movie.Language) ? movie.Language.join(",") : movie.Language);
@@ -424,7 +424,7 @@ export default function MovieEdit() {
                           alignItems: 'center', 
                           gap: '8px',
                           cursor: 'pointer',
-                          color: '#e2e8f0'
+                         
                         }}>
                           <input
                             type="checkbox"
@@ -535,7 +535,7 @@ export default function MovieEdit() {
             </div>
 
             {/* Info Section */}
-            <div className="info-section">
+            <div className="info-section" > 
               {/* Highlight Card */}
               <div className="info-card highlight-card">
                 <div className="info-icon-wrapper">

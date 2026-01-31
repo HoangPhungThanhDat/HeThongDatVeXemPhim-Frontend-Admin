@@ -1,9 +1,8 @@
-// src/pages/Notification/NotificationEdit.js
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import MainLayout from "../../layouts/MainLayout";
-import "../../styles/Edit.css";
+import "../../styles/Role/Edit.css";
 import NotificationApi from "../../api/NotificationApi";
 import UserApi from "../../api/UserApi";
 import Swal from "sweetalert2";
@@ -70,7 +69,6 @@ export default function NotificationEdit() {
     e.preventDefault();
     NotificationApi.update(NotificationId, notification)
       .then(() => {
-        // ✅ Thông báo thành công trước
         Swal.fire({
           toast: true,
           position: "top-end",
@@ -89,14 +87,11 @@ export default function NotificationEdit() {
             popup: "animate__animated animate__slideOutRight",
           },
         }).then(() => {
-          // 👉 Sau khi toast biến mất mới điều hướng
-          navigate("/notification");
+          navigate("/notifications");
         });
       })
       .catch((err) => {
         console.error("❌ Lỗi khi cập nhật thông báo:", err);
-
-        // ❌ Thông báo lỗi
         Swal.fire({
           toast: true,
           position: "top-end",
@@ -123,7 +118,7 @@ export default function NotificationEdit() {
     return (
       <MainLayout>
         <div className="main-container">
-          <div className="container role-show-container">
+          <div className="pd-ltr-20">
             <div className="d-flex flex-column align-items-center justify-content-center p-5">
               <div
                 className="spinner-border text-primary mb-3"
@@ -133,7 +128,6 @@ export default function NotificationEdit() {
               <h5 className="text-primary">Đang tải dữ liệu thông báo...</h5>
               <p className="text-muted mt-2">Vui lòng chờ trong giây lát</p>
 
-              {/* Skeleton giả lập khi đang tải */}
               <div className="card shadow-sm border-0 mt-4 w-75">
                 <div className="card-body">
                   <div className="row">
@@ -187,15 +181,19 @@ export default function NotificationEdit() {
   if (error) {
     return (
       <MainLayout>
-        <div className="text-center p-5 text-danger">
-          <i className="fa fa-exclamation-circle fa-3x mb-3"></i>
-          <h5>{error}</h5>
-          <button
-            className="btn btn-outline-primary mt-3"
-            onClick={() => window.location.reload()}
-          >
-            <i className="fa fa-sync-alt me-2"></i> Thử lại
-          </button>
+        <div className="main-container">
+          <div className="pd-ltr-20">
+            <div className="text-center p-5 text-danger">
+              <i className="fa fa-exclamation-circle fa-3x mb-3"></i>
+              <h5>{error}</h5>
+              <button
+                className="btn btn-outline-primary mt-3"
+                onClick={() => window.location.reload()}
+              >
+                <i className="fa fa-sync-alt me-2"></i> Thử lại
+              </button>
+            </div>
+          </div>
         </div>
       </MainLayout>
     );
@@ -205,9 +203,13 @@ export default function NotificationEdit() {
   if (!notification) {
     return (
       <MainLayout>
-        <div className="text-center p-5 text-muted">
-          <i className="fa fa-bell-slash fa-2x mb-2"></i>
-          <p>Không có dữ liệu thông báo.</p>
+        <div className="main-container">
+          <div className="pd-ltr-20">
+            <div className="text-center p-5 text-muted">
+              <i className="fa fa-bell-slash fa-2x mb-2"></i>
+              <p>Không có dữ liệu thông báo.</p>
+            </div>
+          </div>
         </div>
       </MainLayout>
     );
@@ -215,26 +217,75 @@ export default function NotificationEdit() {
 
   return (
     <MainLayout>
-      <div className="main-container fade-in">
-        <div className="container role-edit-container py-5">
-          <div className="card edit-card shadow-lg border-0 rounded-4 animate-card">
-            {/* Header */}
-            <div className="card-header bg-gradient text-white text-center py-4 rounded-top-4 header-glow">
-              <h3 className="mb-0 fw-bold">
-                <i className="fas fa-bell me-2"></i>Cập nhật thông báo
-              </h3>
-            </div>
+      <div className="modern-cinema-page">
+        <div className="cinema-container">
+          {/* Breadcrumb */}
+          <div className="breadcrumb-nav">
+            <span className="breadcrumb-item" onClick={() => navigate("/")}>
+              <i className="fas fa-home"></i> Trang chủ
+            </span>
+            <span className="breadcrumb-separator">/</span>
+            <span className="breadcrumb-item" onClick={() => navigate("/notifications")}>
+              Thông báo
+            </span>
+            <span className="breadcrumb-separator">/</span>
+            <span className="breadcrumb-item active">Chỉnh sửa</span>
+          </div>
 
-            {/* Body */}
-            <div className="card-body p-5">
-              <form onSubmit={handleSubmit} className="row g-4">
-                {/* Người nhận */}
-                <div className="col-md-6">
-                  <label className="form-label fw-bold mb-2">
-                    <i className="fas fa-user me-2 text-primary"></i>Người nhận
+          {/* Main Content */}
+          <div className="content-wrapper">
+            {/* Left Column - Form */}
+            <div className="form-section">
+              <div className="section-header">
+                <div className="header-icon">
+                  <i className="fas fa-bell"></i>
+                </div>
+                <div className="header-text">
+                  <h2 className="section-title">Chỉnh Sửa Thông Báo</h2>
+                  <p className="section-subtitle">Cập nhật thông tin thông báo hệ thống</p>
+                </div>
+              </div>
+
+              <div className="form-card">
+                <div className="form-group">
+                  <label className="field-label">
+                    <i className="fas fa-heading label-icon"></i>
+                    Tiêu đề
+                  </label>
+                  <input
+                    type="text"
+                    className="modern-input"
+                    name="Title"
+                    value={notification.Title}
+                    onChange={handleChange}
+                    placeholder="Nhập tiêu đề thông báo"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="field-label">
+                    <i className="fas fa-align-left label-icon"></i>
+                    Nội dung
+                  </label>
+                  <textarea
+                    className="modern-input modern-textarea"
+                    name="Message"
+                    value={notification.Message}
+                    onChange={handleChange}
+                    placeholder="Nhập nội dung thông báo"
+                    rows="5"
+                    required
+                  ></textarea>
+                </div>
+
+                <div className="form-group">
+                  <label className="field-label">
+                    <i className="fas fa-user label-icon"></i>
+                    Người nhận
                   </label>
                   <select
-                    className="form-control form-select-lg"
+                    className="modern-input"
                     name="UserId"
                     value={notification.UserId}
                     onChange={handleChange}
@@ -249,13 +300,13 @@ export default function NotificationEdit() {
                   </select>
                 </div>
 
-                {/* Loại thông báo */}
-                <div className="col-md-6">
-                  <label className="form-label fw-bold mb-2">
-                    <i className="fas fa-tag me-2 text-warning"></i>Loại thông báo
+                <div className="form-group">
+                  <label className="field-label">
+                    <i className="fas fa-tag label-icon"></i>
+                    Loại thông báo
                   </label>
                   <select
-                    className="form-control form-select-lg"
+                    className="modern-input"
                     name="Type"
                     value={notification.Type}
                     onChange={handleChange}
@@ -268,92 +319,155 @@ export default function NotificationEdit() {
                   </select>
                 </div>
 
-                {/* Tiêu đề */}
-                <div className="col-md-12">
-                  <label className="form-label fw-bold mb-2">
-                    <i className="fas fa-heading me-2 text-info"></i>Tiêu đề
+                <div className="form-group">
+                  <label className="field-label">
+                    <i className="fas fa-check-circle label-icon"></i>
+                    Trạng thái đọc
                   </label>
-                  <input
-                    type="text"
-                    className="form-control form-control-lg"
-                    name="Title"
-                    value={notification.Title}
-                    onChange={handleChange}
-                    placeholder="Nhập tiêu đề thông báo"
-                    required
-                  />
-                </div>
-
-                {/* Nội dung */}
-                <div className="col-md-12">
-                  <label className="form-label fw-bold mb-2">
-                    <i className="fas fa-align-left me-2 text-secondary"></i>Nội dung
-                  </label>
-                  <textarea
-                    className="form-control form-control-lg"
-                    name="Message"
-                    value={notification.Message}
-                    onChange={handleChange}
-                    placeholder="Nhập nội dung thông báo"
-                    rows="5"
-                    required
-                  ></textarea>
-                </div>
-
-                {/* Trạng thái đọc */}
-                <div className="col-md-6">
-                  <label className="form-label fw-bold mb-2">
-                    <i className="fas fa-check-circle me-2 text-success"></i>Trạng thái đọc
-                  </label>
-                  <div className="form-check form-switch">
-                    <input
-                      className="form-check-input"
-                      type="checkbox"
-                      name="IsRead"
-                      id="isReadSwitch"
-                      checked={notification.IsRead}
-                      onChange={handleChange}
-                      style={{ width: "1.25rem", height: "1.5rem" }}
-                    />
-                    <label className="form-check-label ms-2" htmlFor="isReadSwitch">
-                      {notification.IsRead ? "Đã đọc" : "Chưa đọc"}
-                    </label>
+                  <div className="status-selector">
+                    <div
+                      className={`status-option ${notification.IsRead ? 'active' : ''}`}
+                      onClick={() => setNotification({...notification, IsRead: true})}
+                    >
+                      <div className="status-radio">
+                        {notification.IsRead && <div className="status-dot"></div>}
+                      </div>
+                      <div className="status-content">
+                        <div className="status-badge active-badge">
+                          <i className="fas fa-check-circle"></i>
+                        </div>
+                        <span className="status-label">Đã đọc</span>
+                      </div>
+                    </div>
+                    <div
+                      className={`status-option ${!notification.IsRead ? 'active' : ''}`}
+                      onClick={() => setNotification({...notification, IsRead: false})}
+                    >
+                      <div className="status-radio">
+                        {!notification.IsRead && <div className="status-dot"></div>}
+                      </div>
+                      <div className="status-content">
+                        <div className="status-badge inactive-badge">
+                          <i className="fas fa-times-circle"></i>
+                        </div>
+                        <span className="status-label">Chưa đọc</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                {/* Trạng thái */}
-                <div className="col-md-6">
-                  <label className="form-label fw-bold mb-2">
-                    <i className="fas fa-toggle-on me-2 text-success"></i>Trạng thái
+                <div className="form-group">
+                  <label className="field-label">
+                    <i className="fas fa-power-off label-icon"></i>
+                    Trạng thái
                   </label>
-                  <select
-                    className="form-control form-select-lg"
-                    name="Status"
-                    value={notification.Status}
-                    onChange={handleChange}
-                  >
-                    <option value="Active">Hoạt động</option>
-                    <option value="Inactive">Khóa</option>
-                  </select>
+                  <div className="status-selector">
+                    <div
+                      className={`status-option ${notification.Status === 'Active' ? 'active' : ''}`}
+                      onClick={() => setNotification({...notification, Status: 'Active'})}
+                    >
+                      <div className="status-radio">
+                        {notification.Status === 'Active' && <div className="status-dot"></div>}
+                      </div>
+                      <div className="status-content">
+                        <div className="status-badge active-badge">
+                          <i className="fas fa-check-circle"></i>
+                        </div>
+                        <span className="status-label">Hoạt động</span>
+                      </div>
+                    </div>
+                    <div
+                      className={`status-option ${notification.Status === 'Inactive' ? 'active' : ''}`}
+                      onClick={() => setNotification({...notification, Status: 'Inactive'})}
+                    >
+                      <div className="status-radio">
+                        {notification.Status === 'Inactive' && <div className="status-dot"></div>}
+                      </div>
+                      <div className="status-content">
+                        <div className="status-badge inactive-badge">
+                          <i className="fas fa-times-circle"></i>
+                        </div>
+                        <span className="status-label">Không hoạt động</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Nút hành động */}
-                <div className="col-12 text-center mt-5">
-                  <button
-                    type="submit"
-                    className="btn btn-gradient btn-xl px-5 me-4 shadow-lg action-btn"
-                  >
-                    <i className="fas fa-save me-2"></i>Lưu
-                  </button>
-                  <button
-                    type="button"
+                <div className="form-actions">
+                  <button 
+                    type="button" 
+                    className="btn-cinema btn-cancel"
                     onClick={() => navigate("/notifications")}
-                    className="btn btn-secondary btn-xl px-5 shadow-lg action-btn cancel-btn"
                   >
-                    <i className="fas fa-undo me-2"></i>Hủy
+                    <i className="fas fa-times"></i>
+                    Hủy bỏ
+                  </button>
+                  <button 
+                    type="button" 
+                    className="btn-cinema btn-save"
+                    onClick={handleSubmit}
+                  >
+                    <i className="fas fa-check"></i>
+                    Lưu thay đổi
                   </button>
                 </div>
-              </form>
+              </div>
+            </div>
+
+            {/* Right Column - Info */}
+            <div className="info-section">
+              <div className="info-card highlight-card">
+                <div className="info-icon-wrapper">
+                  <i className="fas fa-lightbulb"></i>
+                </div>
+                <h4 className="info-title">Lưu ý quan trọng</h4>
+                <p className="info-text">
+                  Việc thay đổi thông báo sẽ ảnh hưởng trực tiếp đến thông tin người dùng nhận được. 
+                  Vui lòng kiểm tra kỹ nội dung trước khi lưu.
+                </p>
+              </div>
+
+              <div className="info-card">
+                <div className="info-header">
+                  <i className="fas fa-info-circle"></i>
+                  <span>Thông tin thông báo</span>
+                </div>
+                <div className="info-list">
+                  <div className="info-item">
+                    <span className="info-key">Tiêu đề hiện tại:</span>
+                    <span className="info-value">{notification.Title || "Chưa có"}</span>
+                  </div>
+                  <div className="info-item">
+                    <span className="info-key">Loại:</span>
+                    <span className="info-value">
+                      {notification.Type === 'System' ? 'Hệ thống' : 
+                       notification.Type === 'Promotion' ? 'Khuyến mãi' : 
+                       notification.Type === 'Order' ? 'Đơn hàng' : notification.Type}
+                    </span>
+                  </div>
+                  <div className="info-item">
+                    <span className="info-key">Trạng thái:</span>
+                    <span className={`status-pill ${notification.Status === 'Active' ? 'pill-active' : 'pill-inactive'}`}>
+                      {notification.Status === 'Active' ? 'Hoạt động' : 'Không hoạt động'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="info-card tips-card">
+                <div className="tip-item">
+                  <i className="fas fa-check-circle tip-icon"></i>
+                  <p>Tiêu đề nên ngắn gọn và thu hút</p>
+                </div>
+                <div className="tip-item">
+                  <i className="fas fa-check-circle tip-icon"></i>
+                  <p>Nội dung rõ ràng, dễ hiểu</p>
+                </div>
+                <div className="tip-item">
+                  <i className="fas fa-check-circle tip-icon"></i>
+                  <p>Chọn đúng loại thông báo phù hợp</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

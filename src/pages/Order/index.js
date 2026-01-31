@@ -138,44 +138,32 @@ export default function Schedule() {
 
               {/* Form thêm */}
 
-              {/* Form thêm đơn hàng - CINEMA STYLE */}
+              {/* Form thêm đơn hàng */}
               <AnimatePresence>
                 {showForm && (
                   <motion.div
-                    initial={{ opacity: 0, y: -30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -30 }}
-                    transition={{ duration: 0.4 }}
-                    className="cinema-add-form"
+                    initial={{ y: -100, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -100, opacity: 0 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    className="card border-0 shadow-lg rounded-4 mb-4 form-add-user"
                   >
-                    {/* Form Header */}
-                    <div className="cinema-form-header">
-                      <div className="cinema-form-title">
-                        <div className="cinema-form-icon">
-                          <i className="fas fa-shopping-cart"></i>
-                        </div>
-                        <div className="cinema-form-title-text">
-                          <h4>Thêm đơn hàng</h4>
-                          <p className="cinema-form-subtitle">
-                            Tạo đơn đặt hàng cho khách hàng
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                    <div className="card-body p-4">
+                      <h4 className="fw-bold mb-4 text-primary d-flex align-items-center">
+                        <i className="fas fa-shopping-cart me-2"></i> Thêm đơn
+                        hàng
+                      </h4>
 
-                    {/* Form Body */}
-                    <div className="cinema-form-body">
                       <form onSubmit={handleAddOrder}>
-                        <div className="cinema-form-grid">
+                        <div className="row g-4">
                           {/* Người đặt */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-user-circle"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-user-circle me-2 text-primary"></i>
                               Người đặt
-                              <span className="required">*</span>
                             </label>
                             <select
-                              className="cinema-select"
+                              className="form-select custom-input"
                               value={newOrder.UserId}
                               onChange={(e) =>
                                 setNewOrder({
@@ -195,13 +183,13 @@ export default function Schedule() {
                           </div>
 
                           {/* Mã khuyến mãi */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-gift"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-gift me-2 text-danger"></i>
                               Khuyến mãi
                             </label>
                             <select
-                              className="cinema-select"
+                              className="form-select custom-input"
                               value={newOrder.PromotionId || ""}
                               onChange={(e) =>
                                 setNewOrder({
@@ -223,15 +211,14 @@ export default function Schedule() {
                           </div>
 
                           {/* Ngày đặt */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-calendar-alt"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-calendar-alt me-2 text-success"></i>
                               Ngày đặt
-                              <span className="required">*</span>
                             </label>
                             <input
                               type="date"
-                              className="cinema-input"
+                              className="form-control custom-input"
                               value={newOrder.OrderDate}
                               onChange={(e) =>
                                 setNewOrder({
@@ -244,15 +231,14 @@ export default function Schedule() {
                           </div>
 
                           {/* Tổng tiền */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-money-bill-wave"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-money-bill-wave me-2 text-warning"></i>
                               Tổng tiền
-                              <span className="required">*</span>
                             </label>
                             <input
                               type="number"
-                              className="cinema-input"
+                              className="form-control custom-input"
                               placeholder="VD: 150000"
                               min="0"
                               step="1000"
@@ -266,8 +252,8 @@ export default function Schedule() {
                               required
                             />
                             {newOrder.TotalAmount && (
-                              <div className="cinema-helper-text">
-                                <i className="fas fa-info-circle"></i>
+                              <small className="text-muted">
+                                <i className="fas fa-info-circle me-1"></i>
                                 Tổng thanh toán:{" "}
                                 <strong>
                                   {parseInt(
@@ -275,19 +261,18 @@ export default function Schedule() {
                                   ).toLocaleString("vi-VN")}{" "}
                                   VNĐ
                                 </strong>
-                              </div>
+                              </small>
                             )}
                           </div>
 
                           {/* Trạng thái */}
-                          <div className="cinema-form-group cinema-form-grid-full">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-info-circle"></i>
+                          <div className="col-12">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-info-circle me-2 text-info"></i>
                               Trạng thái đơn hàng
-                              <span className="required">*</span>
                             </label>
                             <select
-                              className="cinema-select"
+                              className="form-select custom-input"
                               value={newOrder.Status}
                               onChange={(e) =>
                                 setNewOrder({
@@ -306,58 +291,19 @@ export default function Schedule() {
 
                           {/* Summary Box - Hiển thị khi có đủ thông tin */}
                           {newOrder.UserId && newOrder.TotalAmount && (
-                            <div className="cinema-form-group cinema-form-grid-full">
-                              <div
-                                style={{
-                                  padding: "20px",
-                                  background: "rgba(247, 147, 30, 0.08)",
-                                  border: "2px solid rgba(247, 147, 30, 0.3)",
-                                  borderRadius: "12px",
-                                  marginTop: "8px",
-                                }}
-                              >
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "12px",
-                                    marginBottom: "12px",
-                                  }}
-                                >
-                                  <i
-                                    className="fas fa-receipt"
-                                    style={{
-                                      color: "#f7931e",
-                                      fontSize: "24px",
-                                    }}
-                                  ></i>
-                                  <h5
-                                    style={{
-                                      margin: 0,
-                                      color: "white",
-                                      fontWeight: 700,
-                                    }}
-                                  >
+                            <div className="col-12">
+                              <div className="alert alert-warning" role="alert">
+                                <div className="d-flex align-items-center mb-3">
+                                  <i className="fas fa-receipt me-2 fs-4"></i>
+                                  <h5 className="mb-0 fw-bold">
                                     Thông tin đơn hàng
                                   </h5>
                                 </div>
-                                <div
-                                  style={{
-                                    color: "#94a3b8",
-                                    fontSize: "14px",
-                                    lineHeight: 1.8,
-                                  }}
-                                >
-                                  <p style={{ margin: "8px 0" }}>
-                                    <i
-                                      className="fas fa-user"
-                                      style={{
-                                        color: "#f7931e",
-                                        marginRight: "8px",
-                                      }}
-                                    ></i>
+                                <div className="ms-4">
+                                  <p className="mb-2">
+                                    <i className="fas fa-user me-2 text-primary"></i>
                                     Khách hàng:{" "}
-                                    <strong style={{ color: "white" }}>
+                                    <strong>
                                       {
                                         users.find(
                                           (u) => u.UserId === newOrder.UserId
@@ -365,16 +311,10 @@ export default function Schedule() {
                                       }
                                     </strong>
                                   </p>
-                                  <p style={{ margin: "8px 0" }}>
-                                    <i
-                                      className="fas fa-calendar"
-                                      style={{
-                                        color: "#f7931e",
-                                        marginRight: "8px",
-                                      }}
-                                    ></i>
+                                  <p className="mb-2">
+                                    <i className="fas fa-calendar me-2 text-success"></i>
                                     Ngày đặt:{" "}
-                                    <strong style={{ color: "white" }}>
+                                    <strong>
                                       {newOrder.OrderDate
                                         ? new Date(
                                             newOrder.OrderDate
@@ -382,21 +322,10 @@ export default function Schedule() {
                                         : "Chưa chọn"}
                                     </strong>
                                   </p>
-                                  <p style={{ margin: "8px 0" }}>
-                                    <i
-                                      className="fas fa-coins"
-                                      style={{
-                                        color: "#f7931e",
-                                        marginRight: "8px",
-                                      }}
-                                    ></i>
+                                  <p className="mb-2">
+                                    <i className="fas fa-coins me-2 text-warning"></i>
                                     Tổng tiền:{" "}
-                                    <strong
-                                      style={{
-                                        color: "#f7931e",
-                                        fontSize: "16px",
-                                      }}
-                                    >
+                                    <strong className="text-warning">
                                       {parseInt(
                                         newOrder.TotalAmount
                                       ).toLocaleString("vi-VN")}{" "}
@@ -404,16 +333,10 @@ export default function Schedule() {
                                     </strong>
                                   </p>
                                   {newOrder.PromotionId && (
-                                    <p style={{ margin: "8px 0" }}>
-                                      <i
-                                        className="fas fa-gift"
-                                        style={{
-                                          color: "#f7931e",
-                                          marginRight: "8px",
-                                        }}
-                                      ></i>
+                                    <p className="mb-2">
+                                      <i className="fas fa-gift me-2 text-danger"></i>
                                       Khuyến mãi:{" "}
-                                      <strong style={{ color: "#22c55e" }}>
+                                      <strong className="text-success">
                                         {
                                           promotions.find(
                                             (p) =>
@@ -424,26 +347,19 @@ export default function Schedule() {
                                       </strong>
                                     </p>
                                   )}
-                                  <p style={{ margin: "8px 0" }}>
-                                    <i
-                                      className="fas fa-tag"
-                                      style={{
-                                        color: "#f7931e",
-                                        marginRight: "8px",
-                                      }}
-                                    ></i>
+                                  <p className="mb-0">
+                                    <i className="fas fa-tag me-2 text-info"></i>
                                     Trạng thái:{" "}
                                     <strong
-                                      style={{
-                                        color:
-                                          newOrder.Status === "Paid"
-                                            ? "#22c55e"
-                                            : newOrder.Status === "Cancelled"
-                                            ? "#ef4444"
-                                            : newOrder.Status === "Completed"
-                                            ? "#3b82f6"
-                                            : "#fbbf24",
-                                      }}
+                                      className={
+                                        newOrder.Status === "Paid"
+                                          ? "text-success"
+                                          : newOrder.Status === "Cancelled"
+                                          ? "text-danger"
+                                          : newOrder.Status === "Completed"
+                                          ? "text-primary"
+                                          : "text-warning"
+                                      }
                                     >
                                       {newOrder.Status === "Pending"
                                         ? "⏳ Chờ xử lý"
@@ -460,23 +376,25 @@ export default function Schedule() {
                           )}
                         </div>
 
-                        {/* Action Buttons */}
-                        <div className="cinema-form-actions">
-                          <button
+                        {/* Nút hành động */}
+                        <div className="col-12 text-end mt-3">
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                             type="submit"
-                            className="cinema-btn cinema-btn-primary"
+                            className="btn btn-gradient-success me-2 rounded-pill px-4"
                           >
-                            <i className="fas fa-check-circle"></i>
-                            Tạo đơn hàng
-                          </button>
-                          <button
+                            <i className="fas fa-save me-1"></i> Lưu
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                             type="button"
-                            className="cinema-btn cinema-btn-secondary"
+                            className="btn btn-gradient-secondary rounded-pill px-4"
                             onClick={() => setShowForm(false)}
                           >
-                            <i className="fas fa-times"></i>
-                            Hủy bỏ
-                          </button>
+                            <i className="fas fa-times me-1"></i> Hủy
+                          </motion.button>
                         </div>
                       </form>
                     </div>

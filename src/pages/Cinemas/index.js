@@ -149,41 +149,28 @@ export default function Cinemas() {
               <AnimatePresence>
                 {showForm && (
                   <motion.div
-                    initial={{ opacity: 0, y: -30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -30 }}
-                    transition={{ duration: 0.4 }}
-                    className="cinema-add-form"
+                    initial={{ y: -100, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -100, opacity: 0 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    className="card border-0 shadow-lg rounded-4 mb-4 form-add-user"
                   >
-                    {/* Form Header */}
-                    <div className="cinema-form-header">
-                      <div className="cinema-form-title">
-                        <div className="cinema-form-icon">
-                          <i className="fas fa-film"></i>
-                        </div>
-                        <div className="cinema-form-title-text">
-                          <h4>Thêm rạp mới</h4>
-                          <p className="cinema-form-subtitle">
-                            Tạo rạp chiếu phim mới trong hệ thống
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                    <div className="card-body p-4">
+                      <h4 className="fw-bold mb-4 text-primary d-flex align-items-center">
+                        <i className="fas fa-film me-2"></i> Thêm rạp mới
+                      </h4>
 
-                    {/* Form Body */}
-                    <div className="cinema-form-body">
                       <form onSubmit={handleAddCinema}>
-                        <div className="cinema-form-grid">
+                        <div className="row g-4">
                           {/* Tên rạp */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-building"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-building me-2 text-primary"></i>
                               Tên rạp
-                              <span className="required">*</span>
                             </label>
                             <input
                               type="text"
-                              className="cinema-input"
+                              className="form-control custom-input"
                               placeholder="VD: CGV Vincom Center"
                               value={newCinema.Name}
                               onChange={(e) =>
@@ -197,15 +184,14 @@ export default function Cinemas() {
                           </div>
 
                           {/* Địa chỉ */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-map-marker-alt"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-map-marker-alt me-2 text-danger"></i>
                               Địa chỉ
-                              <span className="required">*</span>
                             </label>
                             <input
                               type="text"
-                              className="cinema-input"
+                              className="form-control custom-input"
                               placeholder="VD: 72 Lê Thánh Tôn, Quận 1"
                               value={newCinema.Address}
                               onChange={(e) =>
@@ -219,15 +205,14 @@ export default function Cinemas() {
                           </div>
 
                           {/* Thành phố */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-city"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-city me-2 text-success"></i>
                               Thành phố
-                              <span className="required">*</span>
                             </label>
                             <input
                               type="text"
-                              className="cinema-input"
+                              className="form-control custom-input"
                               placeholder="VD: Hồ Chí Minh"
                               value={newCinema.City}
                               onChange={(e) =>
@@ -241,15 +226,14 @@ export default function Cinemas() {
                           </div>
 
                           {/* Số điện thoại */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-phone"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-phone me-2 text-info"></i>
                               Số điện thoại
-                              <span className="required">*</span>
                             </label>
                             <input
                               type="text"
-                              className="cinema-input"
+                              className="form-control custom-input"
                               placeholder="VD: 0901234567"
                               value={newCinema.Phone}
                               onChange={(e) =>
@@ -263,14 +247,14 @@ export default function Cinemas() {
                           </div>
 
                           {/* Email */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-envelope"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-envelope me-2 text-warning"></i>
                               Email liên hệ
                             </label>
                             <input
                               type="email"
-                              className="cinema-input"
+                              className="form-control custom-input"
                               placeholder="VD: contact@cinema.vn"
                               value={newCinema.Email}
                               onChange={(e) =>
@@ -283,14 +267,13 @@ export default function Cinemas() {
                           </div>
 
                           {/* Trạng thái */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-toggle-on"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-toggle-on me-2 text-success"></i>
                               Trạng thái
-                              <span className="required">*</span>
                             </label>
                             <select
-                              className="cinema-select"
+                              className="form-select custom-input"
                               value={newCinema.Status}
                               onChange={(e) =>
                                 setNewCinema({
@@ -306,16 +289,15 @@ export default function Cinemas() {
                             </select>
                           </div>
 
-                          {/* Hình ảnh - Full width */}
-                          <div className="cinema-form-group cinema-form-grid-full">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-image"></i>
+                          {/* Hình ảnh */}
+                          <div className="col-12">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-image me-2 text-primary"></i>
                               Hình ảnh rạp
-                              <span className="required">*</span>
                             </label>
                             <input
                               type="file"
-                              className="cinema-input"
+                              className="form-control custom-input"
                               accept="image/*"
                               onChange={(e) => {
                                 const file = e.target.files[0];
@@ -330,16 +312,7 @@ export default function Cinemas() {
                               required
                             />
                             {newCinema.ImageUrl && (
-                              <div
-                                style={{
-                                  marginTop: "16px",
-                                  textAlign: "center",
-                                  padding: "20px",
-                                  background: "rgba(247, 147, 30, 0.08)",
-                                  border: "2px solid rgba(247, 147, 30, 0.3)",
-                                  borderRadius: "12px",
-                                }}
-                              >
+                              <div className="mt-3 text-center">
                                 <img
                                   src={newCinema.ImageUrl}
                                   alt="preview"
@@ -348,24 +321,10 @@ export default function Cinemas() {
                                     maxHeight: "200px",
                                     borderRadius: "12px",
                                     objectFit: "cover",
-                                    border: "3px solid rgba(247, 147, 30, 0.5)",
                                   }}
                                 />
-                                <p
-                                  style={{
-                                    color: "#94a3b8",
-                                    marginTop: "12px",
-                                    fontSize: "14px",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    gap: "8px",
-                                  }}
-                                >
-                                  <i
-                                    className="fas fa-check-circle"
-                                    style={{ color: "#22c55e" }}
-                                  ></i>
+                                <p className="text-muted mt-2">
+                                  <i className="fas fa-check-circle me-1 text-success"></i>
                                   Ảnh xem trước
                                 </p>
                               </div>
@@ -377,131 +336,55 @@ export default function Cinemas() {
                             newCinema.Address &&
                             newCinema.City &&
                             newCinema.Phone && (
-                              <div className="cinema-form-group cinema-form-grid-full">
+                              <div className="col-12">
                                 <div
-                                  style={{
-                                    padding: "20px",
-                                    background: "rgba(247, 147, 30, 0.08)",
-                                    border: "2px solid rgba(247, 147, 30, 0.3)",
-                                    borderRadius: "12px",
-                                    marginTop: "8px",
-                                  }}
+                                  className="alert alert-warning"
+                                  role="alert"
                                 >
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: "12px",
-                                      marginBottom: "12px",
-                                    }}
-                                  >
-                                    <i
-                                      className="fas fa-info-circle"
-                                      style={{
-                                        color: "#f7931e",
-                                        fontSize: "24px",
-                                      }}
-                                    ></i>
-                                    <h5
-                                      style={{
-                                        margin: 0,
-                                        color: "white",
-                                        fontWeight: 700,
-                                      }}
-                                    >
+                                  <div className="d-flex align-items-center mb-3">
+                                    <i className="fas fa-info-circle me-2 fs-4"></i>
+                                    <h5 className="mb-0 fw-bold">
                                       Thông tin rạp chiếu
                                     </h5>
                                   </div>
-                                  <div
-                                    style={{
-                                      color: "#94a3b8",
-                                      fontSize: "14px",
-                                      lineHeight: 1.8,
-                                    }}
-                                  >
-                                    <p style={{ margin: "8px 0" }}>
-                                      <i
-                                        className="fas fa-building"
-                                        style={{
-                                          color: "#f7931e",
-                                          marginRight: "8px",
-                                        }}
-                                      ></i>
-                                      Tên rạp:{" "}
-                                      <strong style={{ color: "white" }}>
-                                        {newCinema.Name}
-                                      </strong>
+                                  <div className="ms-4">
+                                    <p className="mb-2">
+                                      <i className="fas fa-building me-2 text-primary"></i>
+                                      Tên rạp: <strong>{newCinema.Name}</strong>
                                     </p>
-                                    <p style={{ margin: "8px 0" }}>
-                                      <i
-                                        className="fas fa-map-marker-alt"
-                                        style={{
-                                          color: "#f7931e",
-                                          marginRight: "8px",
-                                        }}
-                                      ></i>
+                                    <p className="mb-2">
+                                      <i className="fas fa-map-marker-alt me-2 text-danger"></i>
                                       Địa chỉ:{" "}
-                                      <strong style={{ color: "white" }}>
-                                        {newCinema.Address}
-                                      </strong>
+                                      <strong>{newCinema.Address}</strong>
                                     </p>
-                                    <p style={{ margin: "8px 0" }}>
-                                      <i
-                                        className="fas fa-city"
-                                        style={{
-                                          color: "#f7931e",
-                                          marginRight: "8px",
-                                        }}
-                                      ></i>
+                                    <p className="mb-2">
+                                      <i className="fas fa-city me-2 text-success"></i>
                                       Thành phố:{" "}
-                                      <strong style={{ color: "white" }}>
-                                        {newCinema.City}
-                                      </strong>
+                                      <strong>{newCinema.City}</strong>
                                     </p>
-                                    <p style={{ margin: "8px 0" }}>
-                                      <i
-                                        className="fas fa-phone"
-                                        style={{
-                                          color: "#f7931e",
-                                          marginRight: "8px",
-                                        }}
-                                      ></i>
+                                    <p className="mb-2">
+                                      <i className="fas fa-phone me-2 text-info"></i>
                                       Hotline:{" "}
-                                      <strong style={{ color: "white" }}>
-                                        {newCinema.Phone}
-                                      </strong>
+                                      <strong>{newCinema.Phone}</strong>
                                     </p>
                                     {newCinema.Email && (
-                                      <p style={{ margin: "8px 0" }}>
-                                        <i
-                                          className="fas fa-envelope"
-                                          style={{
-                                            color: "#f7931e",
-                                            marginRight: "8px",
-                                          }}
-                                        ></i>
+                                      <p className="mb-2">
+                                        <i className="fas fa-envelope me-2 text-warning"></i>
                                         Email:{" "}
-                                        <strong style={{ color: "#22c55e" }}>
+                                        <strong className="text-success">
                                           {newCinema.Email}
                                         </strong>
                                       </p>
                                     )}
-                                    <p style={{ margin: "8px 0" }}>
-                                      <i
-                                        className="fas fa-tag"
-                                        style={{
-                                          color: "#f7931e",
-                                          marginRight: "8px",
-                                        }}
-                                      ></i>
+                                    <p className="mb-0">
+                                      <i className="fas fa-tag me-2 text-info"></i>
                                       Trạng thái:{" "}
                                       <strong
-                                        style={{
-                                          color:
-                                            newCinema.Status === "Active"
-                                              ? "#22c55e"
-                                              : "#ef4444",
-                                        }}
+                                        className={
+                                          newCinema.Status === "Active"
+                                            ? "text-success"
+                                            : "text-danger"
+                                        }
                                       >
                                         {newCinema.Status === "Active"
                                           ? "✅ Hoạt động"
@@ -514,23 +397,25 @@ export default function Cinemas() {
                             )}
                         </div>
 
-                        {/* Action Buttons */}
-                        <div className="cinema-form-actions">
-                          <button
+                        {/* Nút hành động */}
+                        <div className="col-12 text-end mt-3">
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                             type="submit"
-                            className="cinema-btn cinema-btn-primary"
+                            className="btn btn-gradient-success me-2 rounded-pill px-4"
                           >
-                            <i className="fas fa-save"></i>
-                            Lưu rạp chiếu
-                          </button>
-                          <button
+                            <i className="fas fa-save me-1"></i> Lưu
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                             type="button"
-                            className="cinema-btn cinema-btn-secondary"
+                            className="btn btn-gradient-secondary rounded-pill px-4"
                             onClick={() => setShowForm(false)}
                           >
-                            <i className="fas fa-times"></i>
-                            Hủy bỏ
-                          </button>
+                            <i className="fas fa-times me-1"></i> Hủy
+                          </motion.button>
                         </div>
                       </form>
                     </div>

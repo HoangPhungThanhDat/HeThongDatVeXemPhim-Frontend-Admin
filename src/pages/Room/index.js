@@ -21,9 +21,8 @@ export default function Room() {
   const [newRoom, setNewRoom] = useState({
     CinemaId: "",
     Name: "",
-    SeatCount: "",
     RoomType: "",
-    Status: "",
+    Status: "Active",
   });
 
   useEffect(() => {
@@ -42,20 +41,24 @@ export default function Room() {
   const handleAddRoom = async (e) => {
     e.preventDefault();
     try {
-      const res = await RoomApi.create(newRoom);
+      const roomData = {
+        ...newRoom,
+        TotalSeats: 0,
+      };
+
+      const res = await RoomApi.create(roomData);
       const createdRoom = res.data.data || res.data;
 
       setRooms([...rooms, createdRoom]);
       setNewRoom({
         CinemaId: "",
         Name: "",
-        SeatCount: "",
         RoomType: "",
-        Status: "",
+        Status: "Active",
       });
       setShowForm(false);
 
-      showToast("success", "🎉 Thêm phòng chiếu thành công!");
+      showToast("success", "🎉 Thêm phòng chiếu thành công! Hãy tạo ghế cho phòng này.");
     } catch (error) {
       console.error("Lỗi khi thêm phòng:", error);
       showToast("error", "❌ Thêm thất bại!");
@@ -112,7 +115,7 @@ export default function Room() {
               {/* Header */}
               <div className="d-flex justify-content-between align-items-center mb-4 p-3 shadow-sm bg-gradient rounded-4 header-box">
                 <h3 className="m-0 text-white fw-bold d-flex align-items-center">
-                  <i className="fas fa-heart me-2"></i> Quản lý phòng chiếu
+                  <i className="fas fa-door-open me-2"></i> Quản lý phòng chiếu
                 </h3>
                 <div>
                   <button
@@ -131,40 +134,27 @@ export default function Room() {
               <AnimatePresence>
                 {showForm && (
                   <motion.div
-                    initial={{ opacity: 0, y: -30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -30 }}
-                    transition={{ duration: 0.4 }}
-                    className="cinema-add-form"
+                    initial={{ y: -100, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -100, opacity: 0 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    className="card border-0 shadow-lg rounded-4 mb-4 form-add-user"
                   >
-                    {/* Form Header */}
-                    <div className="cinema-form-header">
-                      <div className="cinema-form-title">
-                        <div className="cinema-form-icon">
-                          <i className="fas fa-door-open"></i>
-                        </div>
-                        <div className="cinema-form-title-text">
-                          <h4>Thêm phòng chiếu mới</h4>
-                          <p className="cinema-form-subtitle">
-                            Tạo phòng chiếu phim mới cho rạp
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                    <div className="card-body p-4">
+                      <h4 className="fw-bold mb-4 text-primary d-flex align-items-center">
+                        <i className="fas fa-door-open me-2"></i> Thêm phòng chiếu mới
+                      </h4>
 
-                    {/* Form Body */}
-                    <div className="cinema-form-body">
                       <form onSubmit={handleAddRoom}>
-                        <div className="cinema-form-grid">
+                        <div className="row g-4">
                           {/* Chọn rạp */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-building"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-building me-2 text-primary"></i>
                               Chọn rạp
-                              <span className="required">*</span>
                             </label>
                             <select
-                              className="cinema-select"
+                              className="form-select custom-input"
                               value={newRoom.CinemaId}
                               onChange={(e) =>
                                 setNewRoom({
@@ -177,22 +167,21 @@ export default function Room() {
                               <option value="">-- Chọn rạp chiếu --</option>
                               {cinemas.map((c) => (
                                 <option key={c.CinemaId} value={c.CinemaId}>
-                                  🎬 {c.Name}
+                                  {c.Name}
                                 </option>
                               ))}
                             </select>
                           </div>
 
                           {/* Tên phòng */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-door-closed"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-door-closed me-2 text-success"></i>
                               Tên phòng chiếu
-                              <span className="required">*</span>
                             </label>
                             <input
                               type="text"
-                              className="cinema-input"
+                              className="form-control custom-input"
                               placeholder="VD: Phòng 1, Phòng VIP"
                               value={newRoom.Name}
                               onChange={(e) =>
@@ -202,45 +191,14 @@ export default function Room() {
                             />
                           </div>
 
-                          {/* Tổng số ghế */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-chair"></i>
-                              Tổng số ghế
-                              <span className="required">*</span>
-                            </label>
-                            <input
-                              type="number"
-                              className="cinema-input"
-                              placeholder="VD: 120"
-                              min="0"
-                              value={newRoom.SeatCount}
-                              onChange={(e) =>
-                                setNewRoom({
-                                  ...newRoom,
-                                  SeatCount: e.target.value,
-                                })
-                              }
-                              required
-                            />
-                            {newRoom.SeatCount && (
-                              <div className="cinema-helper-text">
-                                <i className="fas fa-info-circle"></i>
-                                Sức chứa:{" "}
-                                <strong>{newRoom.SeatCount} ghế</strong>
-                              </div>
-                            )}
-                          </div>
-
                           {/* Loại phòng */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-film"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-film me-2 text-danger"></i>
                               Loại phòng
-                              <span className="required">*</span>
                             </label>
                             <select
-                              className="cinema-select"
+                              className="form-select custom-input"
                               value={newRoom.RoomType}
                               onChange={(e) =>
                                 setNewRoom({
@@ -251,22 +209,21 @@ export default function Room() {
                               required
                             >
                               <option value="">-- Chọn loại phòng --</option>
-                              <option value="2D">📽️ 2D Standard</option>
-                              <option value="3D">🕶️ 3D</option>
-                              <option value="4DX">🎢 4DX</option>
-                              <option value="IMAX">🎭 IMAX</option>
+                              <option value="2D">2D Standard</option>
+                              <option value="3D">3D</option>
+                              <option value="4DX">4DX</option>
+                              <option value="IMAX">IMAX</option>
                             </select>
                           </div>
 
                           {/* Trạng thái */}
-                          <div className="cinema-form-group">
-                            <label className="cinema-form-label">
-                              <i className="fas fa-toggle-on"></i>
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-toggle-on me-2 text-warning"></i>
                               Trạng thái
-                              <span className="required">*</span>
                             </label>
                             <select
-                              className="cinema-select"
+                              className="form-select custom-input"
                               value={newRoom.Status}
                               onChange={(e) =>
                                 setNewRoom({
@@ -276,174 +233,123 @@ export default function Room() {
                               }
                               required
                             >
-                              <option value="">-- Chọn trạng thái --</option>
-                              <option value="Active">✅ Hoạt động</option>
-                              <option value="Inactive">
-                                ❌ Không hoạt động
-                              </option>
-                              <option value="Maintenance">🔧 Bảo trì</option>
+                              <option value="Active">Hoạt động</option>
+                              <option value="Inactive">Không hoạt động</option>
+                              <option value="Maintenance">Bảo trì</option>
                             </select>
                           </div>
 
-                          {/* Summary Box - Hiển thị khi có đủ thông tin */}
-                          {newRoom.CinemaId &&
-                            newRoom.Name &&
-                            newRoom.SeatCount &&
-                            newRoom.RoomType && (
-                              <div className="cinema-form-group cinema-form-grid-full">
-                                <div
-                                  style={{
-                                    padding: "20px",
-                                    background: "rgba(247, 147, 30, 0.08)",
-                                    border: "2px solid rgba(247, 147, 30, 0.3)",
-                                    borderRadius: "12px",
-                                    marginTop: "8px",
-                                  }}
-                                >
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: "12px",
-                                      marginBottom: "12px",
-                                    }}
-                                  >
-                                    <i
-                                      className="fas fa-info-circle"
-                                      style={{
-                                        color: "#f7931e",
-                                        fontSize: "24px",
-                                      }}
-                                    ></i>
-                                    <h5
-                                      style={{
-                                        margin: 0,
-                                        color: "white",
-                                        fontWeight: 700,
-                                      }}
-                                    >
-                                      Thông tin phòng chiếu
-                                    </h5>
-                                  </div>
-                                  <div
-                                    style={{
-                                      color: "#94a3b8",
-                                      fontSize: "14px",
-                                      lineHeight: 1.8,
-                                    }}
-                                  >
-                                    <p style={{ margin: "8px 0" }}>
-                                      <i
-                                        className="fas fa-building"
-                                        style={{
-                                          color: "#f7931e",
-                                          marginRight: "8px",
-                                        }}
-                                      ></i>
-                                      Rạp:{" "}
-                                      <strong style={{ color: "white" }}>
-                                        {
-                                          cinemas.find(
-                                            (c) =>
-                                              c.CinemaId === newRoom.CinemaId
-                                          )?.Name
-                                        }
-                                      </strong>
-                                    </p>
-                                    <p style={{ margin: "8px 0" }}>
-                                      <i
-                                        className="fas fa-door-closed"
-                                        style={{
-                                          color: "#f7931e",
-                                          marginRight: "8px",
-                                        }}
-                                      ></i>
-                                      Tên phòng:{" "}
-                                      <strong style={{ color: "white" }}>
-                                        {newRoom.Name}
-                                      </strong>
-                                    </p>
-                                    <p style={{ margin: "8px 0" }}>
-                                      <i
-                                        className="fas fa-chair"
-                                        style={{
-                                          color: "#f7931e",
-                                          marginRight: "8px",
-                                        }}
-                                      ></i>
-                                      Số ghế:{" "}
-                                      <strong style={{ color: "#22c55e" }}>
-                                        {newRoom.SeatCount} ghế
-                                      </strong>
-                                    </p>
-                                    <p style={{ margin: "8px 0" }}>
-                                      <i
-                                        className="fas fa-film"
-                                        style={{
-                                          color: "#f7931e",
-                                          marginRight: "8px",
-                                        }}
-                                      ></i>
-                                      Loại phòng:{" "}
-                                      <strong style={{ color: "#3b82f6" }}>
-                                        {newRoom.RoomType === "2D"
-                                          ? "📽️ 2D Standard"
-                                          : newRoom.RoomType === "3D"
-                                          ? "🕶️ 3D"
-                                          : newRoom.RoomType === "4DX"
-                                          ? "🎢 4DX"
-                                          : "🎭 IMAX"}
-                                      </strong>
-                                    </p>
-                                    <p style={{ margin: "8px 0" }}>
-                                      <i
-                                        className="fas fa-tag"
-                                        style={{
-                                          color: "#f7931e",
-                                          marginRight: "8px",
-                                        }}
-                                      ></i>
-                                      Trạng thái:{" "}
-                                      <strong
-                                        style={{
-                                          color:
-                                            newRoom.Status === "Active"
-                                              ? "#22c55e"
-                                              : newRoom.Status === "Inactive"
-                                              ? "#ef4444"
-                                              : "#fbbf24",
-                                        }}
-                                      >
-                                        {newRoom.Status === "Active"
-                                          ? "✅ Hoạt động"
-                                          : newRoom.Status === "Inactive"
-                                          ? "❌ Không hoạt động"
-                                          : "🔧 Bảo trì"}
-                                      </strong>
-                                    </p>
-                                  </div>
+                          {/* Thông báo */}
+                          <div className="col-12">
+                            <div
+                              style={{
+                                padding: "16px",
+                                background: "rgba(59, 130, 246, 0.1)",
+                                border: "2px solid rgba(59, 130, 246, 0.3)",
+                                borderRadius: "12px",
+                              }}
+                            >
+                              <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
+                                <i
+                                  className="fas fa-info-circle"
+                                  style={{ color: "#3b82f6", fontSize: "20px", marginTop: "2px" }}
+                                ></i>
+                                <div style={{ fontSize: "14px", color: "#64748b" }}>
+                                  <strong style={{ color: "#1e293b", display: "block", marginBottom: "4px" }}>
+                                    💡 Lưu ý về số ghế
+                                  </strong>
+                                  Số ghế sẽ được tính tự động sau khi bạn tạo ghế cho phòng này. 
+                                  Sau khi tạo phòng, hãy vào phần "Quản lý ghế" để tạo ghế hàng loạt.
                                 </div>
                               </div>
-                            )}
+                            </div>
+                          </div>
+
+                          {/* Summary Box */}
+                          {newRoom.CinemaId && newRoom.Name && newRoom.RoomType && (
+                            <div className="col-12">
+                              <div
+                                style={{
+                                  padding: "20px",
+                                  background: "rgba(247, 147, 30, 0.08)",
+                                  border: "2px solid rgba(247, 147, 30, 0.3)",
+                                  borderRadius: "12px",
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "12px",
+                                    marginBottom: "12px",
+                                  }}
+                                >
+                                  <i
+                                    className="fas fa-clipboard-check"
+                                    style={{ color: "#f7931e", fontSize: "20px" }}
+                                  ></i>
+                                  <h5 style={{ margin: 0, color: "#1e293b", fontWeight: 700, fontSize: "16px" }}>
+                                    Thông tin phòng chiếu
+                                  </h5>
+                                </div>
+                                <div style={{ fontSize: "14px", lineHeight: 1.8, color: "#64748b" }}>
+                                  <p style={{ margin: "8px 0" }}>
+                                    <i className="fas fa-building" style={{ color: "#f7931e", marginRight: "8px", width: "20px" }}></i>
+                                    Rạp:{" "}
+                                    <strong style={{ color: "#1e293b" }}>
+                                      {cinemas.find((c) => c.CinemaId === newRoom.CinemaId)?.Name}
+                                    </strong>
+                                  </p>
+                                  <p style={{ margin: "8px 0" }}>
+                                    <i className="fas fa-door-closed" style={{ color: "#f7931e", marginRight: "8px", width: "20px" }}></i>
+                                    Tên phòng:{" "}
+                                    <strong style={{ color: "#1e293b" }}>{newRoom.Name}</strong>
+                                  </p>
+                                  <p style={{ margin: "8px 0" }}>
+                                    <i className="fas fa-film" style={{ color: "#f7931e", marginRight: "8px", width: "20px" }}></i>
+                                    Loại phòng:{" "}
+                                    <strong style={{ color: "#3b82f6" }}>
+                                      {newRoom.RoomType === "2D"
+                                        ? "2D Standard"
+                                        : newRoom.RoomType === "3D"
+                                        ? "3D"
+                                        : newRoom.RoomType === "4DX"
+                                        ? "4DX"
+                                        : "IMAX"}
+                                    </strong>
+                                  </p>
+                                  <p style={{ margin: "8px 0" }}>
+                                    <i className="fas fa-chair" style={{ color: "#f7931e", marginRight: "8px", width: "20px" }}></i>
+                                    Số ghế:{" "}
+                                    <strong style={{ color: "#fbbf24" }}>
+                                      Chưa có (sẽ tính tự động)
+                                    </strong>
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
 
-                        {/* Action Buttons */}
-                        <div className="cinema-form-actions">
-                          <button
+                        {/* Nút hành động */}
+                        <div className="col-12 text-end mt-4">
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                             type="submit"
-                            className="cinema-btn cinema-btn-primary"
+                            className="btn btn-gradient-success me-2 rounded-pill px-4"
                           >
-                            <i className="fas fa-save"></i>
-                            Lưu phòng chiếu
-                          </button>
-                          <button
+                            <i className="fas fa-save me-1"></i> Lưu
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                             type="button"
-                            className="cinema-btn cinema-btn-secondary"
+                            className="btn btn-gradient-secondary rounded-pill px-4"
                             onClick={() => setShowForm(false)}
                           >
-                            <i className="fas fa-times"></i>
-                            Hủy bỏ
-                          </button>
+                            <i className="fas fa-times me-1"></i> Hủy
+                          </motion.button>
                         </div>
                       </form>
                     </div>
@@ -458,7 +364,7 @@ export default function Room() {
                     <table className="table align-middle table-hover table-striped">
                       <thead className="bg-light text-dark border-bottom">
                         <tr>
-                          <th className="px-4">id</th>
+                          <th className="px-4">ID</th>
                           <th>Tên rạp</th>
                           <th>Tên phòng</th>
                           <th>Số ghế</th>
@@ -473,21 +379,22 @@ export default function Room() {
                               <tr key={room.RoomId} className="table-row-hover">
                                 <td className="fw-bold px-4">{index + 1}</td>
                                 <td className="fw-semibold">
-                                  {cinemas.find(
-                                    (c) => c.CinemaId === room.CinemaId
-                                  )?.Name || room.CinemaId}
+                                  {cinemas.find((c) => c.CinemaId === room.CinemaId)?.Name ||
+                                    room.CinemaId}
                                 </td>
                                 <td>{room.Name}</td>
-                                <td>{room.SeatCount}</td>
+                                <td>
+                                  <span className={`badge ${room.TotalSeats > 0 ? 'bg-success' : 'bg-warning'}`}>
+                                    {room.TotalSeats || 0} ghế
+                                  </span>
+                                </td>
                                 <td>{room.RoomType}</td>
                                 <td>
                                   <label className="switch">
                                     <input
                                       type="checkbox"
                                       checked={room.Status === "Active"}
-                                      onChange={() =>
-                                        toggleStatus(room.RoomId, room.Status)
-                                      }
+                                      onChange={() => toggleStatus(room.RoomId, room.Status)}
                                     />
                                     <span className="slider"></span>
                                   </label>
@@ -511,25 +418,19 @@ export default function Room() {
                                   <button
                                     className="action-btn text-info"
                                     title="Chi tiết"
-                                    onClick={() =>
-                                      navigate(`/rooms/show/${room.RoomId}`)
-                                    }
+                                    onClick={() => navigate(`/rooms/show/${room.RoomId}`)}
                                   >
                                     <i className="fas fa-eye"></i>
                                   </button>
                                   <button
                                     className="action-btn text-primary"
                                     title="Sửa"
-                                    onClick={() =>
-                                      navigate(`/rooms/edit/${room.RoomId}`)
-                                    }
+                                    onClick={() => navigate(`/rooms/edit/${room.RoomId}`)}
                                   >
                                     <i className="fas fa-edit"></i>
                                   </button>
                                   <button
-                                    onClick={() =>
-                                      deleteRoom(room.RoomId, setRooms)
-                                    }
+                                    onClick={() => deleteRoom(room.RoomId, setRooms)}
                                     className="action-btn text-danger"
                                     title="Xóa"
                                   >

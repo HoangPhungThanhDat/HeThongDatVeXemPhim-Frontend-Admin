@@ -8,7 +8,7 @@ import GenreApi from "../../api/GenreApi";
 import { motion, AnimatePresence } from "framer-motion";
 import Swal from "sweetalert2";
 import "animate.css";
-import {deleteGenre} from "./delete";
+import { deleteGenre } from "./delete";
 
 export default function Genre() {
   const navigate = useNavigate();
@@ -125,140 +125,125 @@ export default function Genre() {
                 </div>
               </div>
 
-              {/* Form thêm genre */}
               {/* Form thêm thể loại phim */}
-          {/* Form thêm thể loại phim - CINEMA STYLE */}
-<AnimatePresence>
-  {showForm && (
-    <motion.div
-      initial={{ opacity: 0, y: -30 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -30 }}
-      transition={{ duration: 0.4 }}
-      className="cinema-add-form"
-    >
-      {/* Form Header */}
-      <div className="cinema-form-header">
-        <div className="cinema-form-title">
-          <div className="cinema-form-icon">
-            <i className="fas fa-film"></i>
-          </div>
-          <div className="cinema-form-title-text">
-            <h4>Thêm thể loại phim</h4>
-            <p className="cinema-form-subtitle">
-              Tạo thể loại mới cho hệ thống
-            </p>
-          </div>
-        </div>
-      </div>
+              <AnimatePresence>
+                {showForm && (
+                  <motion.div
+                    initial={{ y: -100, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -100, opacity: 0 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    className="card border-0 shadow-lg rounded-4 mb-4 form-add-user"
+                  >
+                    <div className="card-body p-4">
+                      <h4 className="fw-bold mb-4 text-primary d-flex align-items-center">
+                        <i className="fas fa-film me-2"></i> Thêm thể loại phim
+                      </h4>
 
-      {/* Form Body */}
-      <div className="cinema-form-body">
-        <form onSubmit={handleAddGenre}>
-          <div className="cinema-form-grid">
-            
-            {/* Tên thể loại */}
-            <div className="cinema-form-group">
-              <label className="cinema-form-label">
-                <i className="fas fa-tag"></i>
-                Tên thể loại
-                <span className="required">*</span>
-              </label>
-              <div className="cinema-input-wrapper">
-                <input
-                  type="text"
-                  className="cinema-input"
-                  placeholder="VD: Hành động, Kinh dị, Tình cảm..."
-                  value={newGenre.Name}
-                  onChange={(e) =>
-                    setNewGenre({
-                      ...newGenre,
-                      Name: e.target.value,
-                    })
-                  }
-                  minLength={3}
-                  maxLength={50}
-                  required
-                />
-              </div>
-              {newGenre.Name && (
-                <div className="cinema-helper-text">
-                  <i className="fas fa-info-circle"></i>
-                  Độ dài: <strong>{newGenre.Name.length}/50 ký tự</strong>
-                </div>
-              )}
-            </div>
+                      <form onSubmit={handleAddGenre}>
+                        <div className="row g-4">
+                          {/* Tên thể loại */}
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-tag me-2 text-primary"></i>
+                              Tên thể loại
+                            </label>
+                            <input
+                              type="text"
+                              className="form-control custom-input"
+                              placeholder="VD: Hành động, Kinh dị, Tình cảm..."
+                              value={newGenre.Name}
+                              onChange={(e) =>
+                                setNewGenre({
+                                  ...newGenre,
+                                  Name: e.target.value,
+                                })
+                              }
+                              minLength={3}
+                              maxLength={50}
+                              required
+                            />
+                            {newGenre.Name && (
+                              <small className="text-muted">
+                                <i className="fas fa-info-circle me-1"></i>
+                                Độ dài:{" "}
+                                <strong>{newGenre.Name.length}/50 ký tự</strong>
+                              </small>
+                            )}
+                          </div>
 
-            {/* Trạng thái */}
-            <div className="cinema-form-group">
-              <label className="cinema-form-label">
-                <i className="fas fa-toggle-on"></i>
-                Trạng thái
-                <span className="required">*</span>
-              </label>
-              <select
-                className="cinema-select"
-                value={newGenre.Status}
-                onChange={(e) =>
-                  setNewGenre({
-                    ...newGenre,
-                    Status: e.target.value,
-                  })
-                }
-                required
-              >
-                <option value="">-- Chọn trạng thái --</option>
-                <option value="Active">✅ Hoạt động</option>
-                <option value="Inactive">⏸️ Tạm khóa</option>
-                <option value="Banned">🚫 Cấm sử dụng</option>
-              </select>
-            </div>
+                          {/* Trạng thái */}
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-toggle-on me-2 text-success"></i>
+                              Trạng thái
+                            </label>
+                            <select
+                              className="form-select custom-input"
+                              value={newGenre.Status}
+                              onChange={(e) =>
+                                setNewGenre({
+                                  ...newGenre,
+                                  Status: e.target.value,
+                                })
+                              }
+                              required
+                            >
+                              <option value="">-- Chọn trạng thái --</option>
+                              <option value="Active">✅ Hoạt động</option>
+                              <option value="Inactive">⏸️ Tạm khóa</option>
+                              <option value="Banned">🚫 Cấm sử dụng</option>
+                            </select>
+                          </div>
 
-            {/* Mô tả thể loại - Full width */}
-            <div className="cinema-form-group cinema-form-grid-full">
-              <label className="cinema-form-label">
-                <i className="fas fa-align-left"></i>
-                Mô tả thể loại
-                <span className="required">*</span>
-              </label>
-              <textarea
-                className="cinema-textarea"
-                placeholder="Mô tả chi tiết về thể loại phim này..."
-                value={newGenre.Description}
-                onChange={(e) =>
-                  setNewGenre({
-                    ...newGenre,
-                    Description: e.target.value,
-                  })
-                }
-                rows={4}
-                required
-                style={{ minHeight: '100px' }}
-              />
-            </div>
+                          {/* Mô tả thể loại */}
+                          <div className="col-12">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-align-left me-2 text-info"></i>
+                              Mô tả thể loại
+                            </label>
+                            <textarea
+                              className="form-control custom-input"
+                              placeholder="Mô tả chi tiết về thể loại phim này..."
+                              value={newGenre.Description}
+                              onChange={(e) =>
+                                setNewGenre({
+                                  ...newGenre,
+                                  Description: e.target.value,
+                                })
+                              }
+                              rows={4}
+                              required
+                              style={{ minHeight: "100px" }}
+                            />
+                          </div>
+                        </div>
 
-          </div>
-
-          {/* Action Buttons */}
-          <div className="cinema-form-actions">
-            <button type="submit" className="cinema-btn cinema-btn-primary">
-              <i className="fas fa-save"></i>
-              Lưu thể loại
-            </button>
-            <button
-              type="button"
-              className="cinema-btn cinema-btn-secondary"
-              onClick={() => setShowForm(false)}
-            >
-              <i className="fas fa-times"></i>
-              Hủy bỏ
-            </button>
-          </div>
-        </form>
-      </div>
-    </motion.div>
-  )}
-</AnimatePresence>
+                        {/* Nút hành động */}
+                        <div className="col-12 text-end mt-3">
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            type="submit"
+                            className="btn btn-gradient-success me-2 rounded-pill px-4"
+                          >
+                            <i className="fas fa-save me-1"></i> Lưu
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            type="button"
+                            className="btn btn-gradient-secondary rounded-pill px-4"
+                            onClick={() => setShowForm(false)}
+                          >
+                            <i className="fas fa-times me-1"></i> Hủy
+                          </motion.button>
+                        </div>
+                      </form>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Card chứa bảng */}
               <div className="card border-0 shadow-sm rounded-4 animate__animated animate__fadeIn">

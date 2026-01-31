@@ -13,7 +13,6 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      // Gửi login request
       const response = await AuthApi.Login({
         Email: email,
         Password: password,
@@ -21,16 +20,12 @@ const Login = () => {
       console.log("Login response:", response.data);
 
       const { token, user } = response.data;
-
-      // Giải mã token
       const decodedToken = jwtDecode(token);
       console.log("Decoded Token:", decodedToken);
 
-      // Lấy role
       const roleName = decodedToken.role || decodedToken.RoleName;
       console.log("RoleName:", roleName);
 
-      // Lấy fullname từ token
       const fullName = decodedToken.FullName || decodedToken.fullname;
 
       if (roleName !== "Admin") {
@@ -39,12 +34,10 @@ const Login = () => {
         return;
       }
 
-      // Lưu vào localStorage
       localStorage.setItem("token", token);
       localStorage.setItem("role", roleName);
       localStorage.setItem("fullname", user.FullName);
       localStorage.setItem("UserId", user.UserId);
-      // Chuyển hướng
       window.location.href = "http://localhost:3000/";
     } catch (error) {
       console.error("Login failed:", error.response?.data || error.message);
@@ -98,8 +91,8 @@ const Login = () => {
         width: '100%',
         maxWidth: '1400px',
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-        gap: '60px',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))',
+        gap: 'clamp(30px, 5vw, 60px)',
         alignItems: 'center',
         position: 'relative',
         zIndex: 10
@@ -108,15 +101,15 @@ const Login = () => {
         <div style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '40px',
+          gap: 'clamp(20px, 3vw, 32px)',
           padding: '0 20px'
         }}>
           {/* Logo */}
           <div style={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '16px',
-            padding: '16px 24px',
+            gap: '12px',
+            padding: 'clamp(12px, 2vw, 16px) clamp(16px, 3vw, 24px)',
             background: 'linear-gradient(135deg, rgba(220, 38, 38, 0.1) 0%, rgba(251, 146, 60, 0.1) 100%)',
             backdropFilter: 'blur(20px)',
             borderRadius: '16px',
@@ -124,8 +117,8 @@ const Login = () => {
             maxWidth: 'fit-content'
           }}>
             <div style={{
-              width: '56px',
-              height: '56px',
+              width: 'clamp(40px, 6vw, 56px)',
+              height: 'clamp(40px, 6vw, 56px)',
               background: 'linear-gradient(135deg, #dc2626 0%, #fb923c 100%)',
               borderRadius: '12px',
               display: 'flex',
@@ -133,11 +126,11 @@ const Login = () => {
               justifyContent: 'center',
               boxShadow: '0 10px 40px rgba(220, 38, 38, 0.3)'
             }}>
-              <Film size={32} color="white" strokeWidth={2.5} />
+              <Film size={window.innerWidth < 768 ? 24 : 32} color="white" strokeWidth={2.5} />
             </div>
             <div>
               <h1 style={{
-                fontSize: '32px',
+                fontSize: 'clamp(20px, 3.5vw, 32px)',
                 fontWeight: 900,
                 color: 'white',
                 margin: 0,
@@ -146,7 +139,7 @@ const Login = () => {
                 Gấu<span style={{ color: '#dc2626' }}>Phim</span>
               </h1>
               <p style={{
-                fontSize: '12px',
+                fontSize: 'clamp(10px, 1.5vw, 12px)',
                 color: '#9ca3af',
                 margin: 0,
                 fontWeight: 600,
@@ -158,11 +151,11 @@ const Login = () => {
           {/* Hero Text */}
           <div>
             <h2 style={{
-              fontSize: 'clamp(32px, 5vw, 56px)',
+              fontSize: 'clamp(24px, 4vw, 48px)',
               fontWeight: 900,
               color: 'white',
-              margin: '0 0 20px 0',
-              lineHeight: 1.1,
+              margin: '0 0 12px 0',
+              lineHeight: 1.2,
               letterSpacing: '-1px'
             }}>
               Quản Lý<br />
@@ -179,7 +172,7 @@ const Login = () => {
               Chuyên Nghiệp
             </h2>
             <p style={{
-              fontSize: '18px',
+              fontSize: 'clamp(14px, 2vw, 18px)',
               color: '#9ca3af',
               lineHeight: 1.6,
               margin: 0
@@ -188,18 +181,22 @@ const Login = () => {
             </p>
           </div>
 
-          {/* Features */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Features - Hidden on mobile */}
+          <div style={{ 
+            display: window.innerWidth < 768 ? 'none' : 'flex', 
+            flexDirection: 'column', 
+            gap: '12px' 
+          }}>
             {[
-              { icon: Sparkles, title: 'Quản Lý Thông Minh', desc: 'AI-powered analytics & insights', color: '#dc2626' },
-              { icon: Shield, title: 'Bảo Mật Tối Đa', desc: 'Enterprise-grade security', color: '#fb923c' },
-              { icon: Zap, title: 'Hiệu Suất Cao', desc: 'Lightning-fast performance', color: '#dc2626' }
+              { icon: Sparkles, title: 'Quản Lý Thông Minh', desc: 'AI-powered analytics', color: '#dc2626' },
+              { icon: Shield, title: 'Bảo Mật Tối Đa', desc: 'Enterprise security', color: '#fb923c' },
+              { icon: Zap, title: 'Hiệu Suất Cao', desc: 'Lightning-fast', color: '#dc2626' }
             ].map((item, idx) => (
               <div key={idx} style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '16px',
-                padding: '20px',
+                gap: '12px',
+                padding: 'clamp(12px, 2vw, 16px)',
                 background: 'rgba(255, 255, 255, 0.03)',
                 backdropFilter: 'blur(20px)',
                 border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -216,8 +213,8 @@ const Login = () => {
                 e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
               }}>
                 <div style={{
-                  width: '48px',
-                  height: '48px',
+                  width: 'clamp(36px, 5vw, 44px)',
+                  height: 'clamp(36px, 5vw, 44px)',
                   background: `linear-gradient(135deg, ${item.color}dd, ${item.color}bb)`,
                   borderRadius: '10px',
                   display: 'flex',
@@ -226,17 +223,17 @@ const Login = () => {
                   flexShrink: 0,
                   boxShadow: `0 8px 24px ${item.color}33`
                 }}>
-                  <item.icon size={24} color="white" />
+                  <item.icon size={20} color="white" />
                 </div>
                 <div style={{ flex: 1 }}>
                   <h3 style={{
-                    fontSize: '16px',
+                    fontSize: 'clamp(13px, 1.8vw, 15px)',
                     fontWeight: 700,
                     color: 'white',
-                    margin: '0 0 4px 0'
+                    margin: '0 0 2px 0'
                   }}>{item.title}</h3>
                   <p style={{
-                    fontSize: '13px',
+                    fontSize: 'clamp(11px, 1.5vw, 13px)',
                     color: '#9ca3af',
                     margin: 0
                   }}>{item.desc}</p>
@@ -245,11 +242,11 @@ const Login = () => {
             ))}
           </div>
 
-          {/* Stats */}
+          {/* Stats - Hidden on small laptops */}
           <div style={{
-            display: 'grid',
+            display: window.innerWidth < 1024 ? 'none' : 'grid',
             gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '16px'
+            gap: '12px'
           }}>
             {[
               { value: '99.9%', label: 'Uptime' },
@@ -257,7 +254,7 @@ const Login = () => {
               { value: '1M+', label: 'Tickets' }
             ].map((stat, idx) => (
               <div key={idx} style={{
-                padding: '20px',
+                padding: 'clamp(12px, 2vw, 16px)',
                 background: 'rgba(255, 255, 255, 0.03)',
                 backdropFilter: 'blur(20px)',
                 borderRadius: '12px',
@@ -265,13 +262,13 @@ const Login = () => {
                 textAlign: 'center'
               }}>
                 <div style={{
-                  fontSize: '28px',
+                  fontSize: 'clamp(20px, 3vw, 24px)',
                   fontWeight: 900,
                   color: 'white',
                   marginBottom: '4px'
                 }}>{stat.value}</div>
                 <div style={{
-                  fontSize: '11px',
+                  fontSize: '10px',
                   color: '#9ca3af',
                   textTransform: 'uppercase',
                   letterSpacing: '1px',
@@ -307,32 +304,32 @@ const Login = () => {
               backdropFilter: 'blur(40px)',
               borderRadius: '20px',
               border: '1px solid rgba(255, 255, 255, 0.1)',
-              padding: '48px 40px',
+              padding: 'clamp(24px, 5vw, 40px)',
               boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)'
             }}>
               {/* Header */}
-              <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+              <div style={{ textAlign: 'center', marginBottom: 'clamp(24px, 4vw, 32px)' }}>
                 <div style={{
-                  width: '64px',
-                  height: '64px',
+                  width: 'clamp(48px, 8vw, 64px)',
+                  height: 'clamp(48px, 8vw, 64px)',
                   background: 'linear-gradient(135deg, #dc2626, #fb923c)',
                   borderRadius: '16px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  margin: '0 auto 20px',
+                  margin: '0 auto 16px',
                   boxShadow: '0 12px 40px rgba(220, 38, 38, 0.4)'
                 }}>
-                  <Lock size={32} color="white" strokeWidth={2.5} />
+                  <Lock size={window.innerWidth < 768 ? 24 : 32} color="white" strokeWidth={2.5} />
                 </div>
                 <h2 style={{
-                  fontSize: '32px',
+                  fontSize: 'clamp(24px, 4vw, 32px)',
                   fontWeight: 900,
                   color: 'white',
                   margin: '0 0 8px 0'
                 }}>Đăng Nhập</h2>
                 <p style={{
-                  fontSize: '14px',
+                  fontSize: 'clamp(12px, 2vw, 14px)',
                   color: '#9ca3af',
                   margin: 0
                 }}>Chào mừng bạn trở lại hệ thống</p>
@@ -341,20 +338,20 @@ const Login = () => {
               {/* Form */}
               <div>
                 {/* Email */}
-                <div style={{ marginBottom: '24px' }}>
+                <div style={{ marginBottom: '20px' }}>
                   <label style={{
                     display: 'block',
-                    fontSize: '12px',
+                    fontSize: 'clamp(11px, 1.5vw, 12px)',
                     fontWeight: 700,
                     color: '#d1d5db',
-                    marginBottom: '12px',
+                    marginBottom: '10px',
                     textTransform: 'uppercase',
                     letterSpacing: '1px'
                   }}>Email / Username</label>
                   <div style={{ position: 'relative' }}>
-                    <Mail size={20} color="#6b7280" style={{
+                    <Mail size={18} color="#6b7280" style={{
                       position: 'absolute',
-                      left: '16px',
+                      left: '14px',
                       top: '50%',
                       transform: 'translateY(-50%)',
                       pointerEvents: 'none'
@@ -367,12 +364,12 @@ const Login = () => {
                       required
                       style={{
                         width: '100%',
-                        padding: '16px 16px 16px 48px',
+                        padding: 'clamp(12px, 2vw, 14px) clamp(12px, 2vw, 14px) clamp(12px, 2vw, 14px) clamp(40px, 6vw, 44px)',
                         background: 'rgba(0, 0, 0, 0.4)',
                         border: '2px solid rgba(255, 255, 255, 0.1)',
                         borderRadius: '12px',
                         color: 'white',
-                        fontSize: '15px',
+                        fontSize: 'clamp(13px, 2vw, 15px)',
                         outline: 'none',
                         transition: 'all 0.3s ease',
                         boxSizing: 'border-box'
@@ -390,20 +387,20 @@ const Login = () => {
                 </div>
 
                 {/* Password */}
-                <div style={{ marginBottom: '24px' }}>
+                <div style={{ marginBottom: '20px' }}>
                   <label style={{
                     display: 'block',
-                    fontSize: '12px',
+                    fontSize: 'clamp(11px, 1.5vw, 12px)',
                     fontWeight: 700,
                     color: '#d1d5db',
-                    marginBottom: '12px',
+                    marginBottom: '10px',
                     textTransform: 'uppercase',
                     letterSpacing: '1px'
                   }}>Password</label>
                   <div style={{ position: 'relative' }}>
-                    <Lock size={20} color="#6b7280" style={{
+                    <Lock size={18} color="#6b7280" style={{
                       position: 'absolute',
-                      left: '16px',
+                      left: '14px',
                       top: '50%',
                       transform: 'translateY(-50%)',
                       pointerEvents: 'none'
@@ -416,12 +413,12 @@ const Login = () => {
                       required
                       style={{
                         width: '100%',
-                        padding: '16px 48px 16px 48px',
+                        padding: 'clamp(12px, 2vw, 14px) clamp(40px, 6vw, 44px)',
                         background: 'rgba(0, 0, 0, 0.4)',
                         border: '2px solid rgba(255, 255, 255, 0.1)',
                         borderRadius: '12px',
                         color: 'white',
-                        fontSize: '15px',
+                        fontSize: 'clamp(13px, 2vw, 15px)',
                         outline: 'none',
                         transition: 'all 0.3s ease',
                         boxSizing: 'border-box'
@@ -440,7 +437,7 @@ const Login = () => {
                       onClick={() => setShowPassword(!showPassword)}
                       style={{
                         position: 'absolute',
-                        right: '16px',
+                        right: '14px',
                         top: '50%',
                         transform: 'translateY(-50%)',
                         background: 'none',
@@ -450,7 +447,7 @@ const Login = () => {
                         padding: 0
                       }}
                     >
-                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
                 </div>
@@ -460,17 +457,19 @@ const Login = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  marginBottom: '32px'
+                  marginBottom: '24px',
+                  flexWrap: 'wrap',
+                  gap: '8px'
                 }}>
                   <label style={{
                     display: 'flex',
                     alignItems: 'center',
                     cursor: 'pointer',
-                    fontSize: '14px',
+                    fontSize: 'clamp(12px, 1.8vw, 14px)',
                     color: '#9ca3af'
                   }}>
                     <input type="checkbox" style={{ marginRight: '8px' }} />
-                    Ghi nhớ đăng nhập
+                    Ghi nhớ
                   </label>
                   <button
                     type="button"
@@ -478,7 +477,7 @@ const Login = () => {
                       background: 'none',
                       border: 'none',
                       color: '#dc2626',
-                      fontSize: '14px',
+                      fontSize: 'clamp(12px, 1.8vw, 14px)',
                       fontWeight: 600,
                       cursor: 'pointer'
                     }}
@@ -494,12 +493,12 @@ const Login = () => {
                   disabled={loading}
                   style={{
                     width: '100%',
-                    padding: '18px',
+                    padding: 'clamp(14px, 2.5vw, 16px)',
                     background: 'linear-gradient(135deg, #dc2626, #fb923c)',
                     border: 'none',
                     borderRadius: '12px',
                     color: 'white',
-                    fontSize: '16px',
+                    fontSize: 'clamp(14px, 2vw, 16px)',
                     fontWeight: 900,
                     textTransform: 'uppercase',
                     letterSpacing: '1px',
@@ -525,8 +524,8 @@ const Login = () => {
                   {loading ? (
                     <>
                       <div style={{
-                        width: '20px',
-                        height: '20px',
+                        width: '18px',
+                        height: '18px',
                         border: '3px solid rgba(255,255,255,0.3)',
                         borderTop: '3px solid white',
                         borderRadius: '50%',
@@ -537,7 +536,7 @@ const Login = () => {
                   ) : (
                     <>
                       Đăng Nhập
-                      <ChevronRight size={20} />
+                      <ChevronRight size={18} />
                     </>
                   )}
                 </button>
@@ -545,27 +544,27 @@ const Login = () => {
 
               {/* Footer */}
               <div style={{
-                marginTop: '32px',
-                paddingTop: '24px',
+                marginTop: 'clamp(20px, 3vw, 28px)',
+                paddingTop: 'clamp(16px, 3vw, 20px)',
                 borderTop: '1px solid rgba(255, 255, 255, 0.1)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
-                fontSize: '13px',
+                fontSize: 'clamp(11px, 1.5vw, 13px)',
                 color: '#6b7280'
               }}>
-                <Shield size={16} />
-                Kết nối bảo mật với mã hóa AES-256
+                <Shield size={14} />
+                Kết nối bảo mật AES-256
               </div>
             </div>
           </div>
 
           {/* Support */}
           <div style={{
-            marginTop: '24px',
+            marginTop: '20px',
             textAlign: 'center',
-            fontSize: '14px',
+            fontSize: 'clamp(12px, 1.8vw, 14px)',
             color: '#6b7280'
           }}>
             Cần hỗ trợ?{' '}
@@ -574,9 +573,10 @@ const Login = () => {
               border: 'none',
               color: '#dc2626',
               fontWeight: 600,
-              cursor: 'pointer'
+              cursor: 'pointer',
+              fontSize: 'inherit'
             }}>
-              Liên hệ IT Support →
+              Liên hệ IT →
             </button>
           </div>
         </div>
@@ -597,6 +597,12 @@ const Login = () => {
         }
         @keyframes spin {
           to { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+          body {
+            font-size: 14px;
+          }
         }
       `}</style>
     </div>

@@ -48,6 +48,9 @@ const Loader = () => {
               style={{
                 width: `${progress}%`,
                 transition: "width 0.1s linear",
+                backgroundColor: "#000",
+                height: "100%",
+                borderRadius: "10px",
               }}
             ></div>
           </div>

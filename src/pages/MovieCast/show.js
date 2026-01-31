@@ -17,6 +17,7 @@ import {
   Activity,
   Film,
 } from "lucide-react";
+import "../../styles/Role/Show.css";
 
 export default function MovieCastShow() {
   const { CastId } = useParams();
@@ -57,54 +58,27 @@ export default function MovieCastShow() {
       <MainLayout>
         <div className="main-container">
           <div className="pd-ltr-20">
-            <div className="d-flex flex-column align-items-center justify-content-center p-5">
-              <div
-                className="spinner-border text-primary mb-3"
-                role="status"
-                style={{ width: "4rem", height: "4rem", borderColor: "#f7931e", borderRightColor: "transparent" }}
-              ></div>
-              <h5 style={{ color: "#f7931e" }}>Đang tải dữ liệu diễn viên...</h5>
-              <p className="text-muted mt-2">Vui lòng chờ trong giây lát</p>
+            <div className="loading-container">
+              <div className="spinner-border text-primary mb-3" role="status">
+                <span className="sr-only">Loading...</span>
+              </div>
+              <h5 className="loading-title">Đang tải dữ liệu diễn viên...</h5>
+              <p className="loading-subtitle">Vui lòng chờ trong giây lát</p>
 
               {/* Skeleton giả lập khi đang tải */}
-              <div className="card shadow-sm border-0 mt-4 w-75">
-                <div className="card-body">
+              <div className="skeleton-card">
+                <div className="skeleton-body">
                   <div className="row">
                     <div className="col-md-4 text-center">
-                      <div
-                        className="bg-light rounded-circle mx-auto"
-                        style={{ width: "120px", height: "120px" }}
-                      ></div>
-                      <div
-                        className="bg-light mt-3 rounded"
-                        style={{
-                          width: "80%",
-                          height: "20px",
-                          margin: "0 auto",
-                        }}
-                      ></div>
+                      <div className="skeleton-avatar"></div>
+                      <div className="skeleton-text-short"></div>
                     </div>
                     <div className="col-md-8">
-                      <div
-                        className="bg-light rounded mb-3"
-                        style={{ width: "60%", height: "20px" }}
-                      ></div>
-                      <div
-                        className="bg-light rounded mb-2"
-                        style={{ width: "100%", height: "15px" }}
-                      ></div>
-                      <div
-                        className="bg-light rounded mb-2"
-                        style={{ width: "90%", height: "15px" }}
-                      ></div>
-                      <div
-                        className="bg-light rounded mb-2"
-                        style={{ width: "80%", height: "15px" }}
-                      ></div>
-                      <div
-                        className="bg-light rounded mb-2"
-                        style={{ width: "70%", height: "15px" }}
-                      ></div>
+                      <div className="skeleton-text-60"></div>
+                      <div className="skeleton-text-100"></div>
+                      <div className="skeleton-text-90"></div>
+                      <div className="skeleton-text-80"></div>
+                      <div className="skeleton-text-70"></div>
                     </div>
                   </div>
                 </div>
@@ -122,77 +96,14 @@ export default function MovieCastShow() {
       <MainLayout>
         <div className="main-container">
           <div className="pd-ltr-20">
-            <div
-              style={{
-                minHeight: "100vh",
-                background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
-                padding: "40px 20px",
-              }}
-            >
-              <div
-                style={{
-                  maxWidth: "600px",
-                  margin: "0 auto",
-                  textAlign: "center",
-                }}
-              >
-                <div
-                  style={{
-                    background: "rgba(247, 147, 30, 0.1)",
-                    backdropFilter: "blur(20px)",
-                    borderRadius: "24px",
-                    border: "1px solid rgba(247, 147, 30, 0.3)",
-                    padding: "60px 40px",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: "80px",
-                      height: "80px",
-                      background: "rgba(247, 147, 30, 0.2)",
-                      borderRadius: "50%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      margin: "0 auto 24px",
-                    }}
-                  >
-                    <XCircle size={40} color="#f7931e" />
+            <div className="error-container">
+              <div className="error-content">
+                <div className="error-card">
+                  <div className="error-icon">
+                    <XCircle size={40} color="#ef4444" />
                   </div>
-                  <h3
-                    style={{
-                      fontSize: "24px",
-                      fontWeight: 700,
-                      color: "white",
-                      marginBottom: "12px",
-                    }}
-                  >
-                    {error}
-                  </h3>
-                  <button
-                    onClick={() => window.location.reload()}
-                    style={{
-                      marginTop: "24px",
-                      padding: "12px 32px",
-                      background: "linear-gradient(135deg, #f7931e, #e67e22)",
-                      border: "none",
-                      borderRadius: "12px",
-                      color: "white",
-                      fontSize: "16px",
-                      fontWeight: 600,
-                      cursor: "pointer",
-                      transition: "all 0.3s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = "translateY(-2px)";
-                      e.currentTarget.style.boxShadow =
-                        "0 8px 24px rgba(247, 147, 30, 0.4)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = "translateY(0)";
-                      e.currentTarget.style.boxShadow = "none";
-                    }}
-                  >
+                  <h3 className="error-title">{error}</h3>
+                  <button onClick={() => window.location.reload()} className="error-button">
                     Thử lại
                   </button>
                 </div>
@@ -210,27 +121,10 @@ export default function MovieCastShow() {
       <MainLayout>
         <div className="main-container">
           <div className="pd-ltr-20">
-            <div
-              style={{
-                minHeight: "100vh",
-                background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
-                padding: "40px 20px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <div
-                style={{
-                  textAlign: "center",
-                  color: "#94a3b8",
-                }}
-              >
-                <UserCircle
-                  size={64}
-                  style={{ marginBottom: "16px", opacity: 0.5 }}
-                />
-                <p style={{ fontSize: "18px" }}>Không có dữ liệu diễn viên.</p>
+            <div className="no-data-container">
+              <div className="no-data-content">
+                <UserCircle size={64} className="no-data-icon" />
+                <p className="no-data-text">Không có dữ liệu diễn viên.</p>
               </div>
             </div>
           </div>
@@ -245,130 +139,28 @@ export default function MovieCastShow() {
     <MainLayout>
       <div className="main-container">
         <div className="pd-ltr-20">
-          <div
-            style={{
-              minHeight: "100vh",
-              background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
-              padding: "40px 20px",
-              position: "relative",
-              overflow: "hidden",
-            }}
-          >
+          <div className="role-show-container">
             {/* Background Effects */}
-            <div
-              style={{
-                position: "absolute",
-                top: "-10%",
-                right: "-5%",
-                width: "500px",
-                height: "500px",
-                background:
-                  "radial-gradient(circle, rgba(247, 147, 30, 0.15) 0%, transparent 70%)",
-                borderRadius: "50%",
-                filter: "blur(80px)",
-                pointerEvents: "none",
-              }}
-            ></div>
+            <div className="background-effect"></div>
 
-            <div
-              style={{
-                maxWidth: "1200px",
-                margin: "0 auto",
-                position: "relative",
-                zIndex: 10,
-              }}
-            >
+            <div className="role-show-content">
               {/* Header */}
-              <div
-                style={{
-                  marginBottom: "32px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  flexWrap: "wrap",
-                  gap: "16px",
-                }}
-              >
+              <div className="header-section">
                 <div>
-                  <button
-                    onClick={() => navigate("/moviecast")}
-                    style={{
-                      padding: "8px 16px",
-                      background: "rgba(255, 255, 255, 0.05)",
-                      border: "1px solid rgba(255, 255, 255, 0.1)",
-                      borderRadius: "8px",
-                      color: "#94a3b8",
-                      fontSize: "14px",
-                      fontWeight: 500,
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      marginBottom: "16px",
-                      transition: "all 0.3s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background =
-                        "rgba(255, 255, 255, 0.1)";
-                      e.currentTarget.style.color = "white";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background =
-                        "rgba(255, 255, 255, 0.05)";
-                      e.currentTarget.style.color = "#94a3b8";
-                    }}
-                  >
+                  <button onClick={() => navigate("/moviecast")} className="back-button">
                     <ArrowLeft size={16} />
                     Quay lại danh sách
                   </button>
-                  <h1
-                    style={{
-                      fontSize: "36px",
-                      fontWeight: 900,
-                      color: "white",
-                      margin: "0 0 8px 0",
-                      letterSpacing: "-0.5px",
-                    }}
-                  >
-                    Chi Tiết Diễn Viên
-                  </h1>
-                  <p
-                    style={{
-                      fontSize: "16px",
-                      color: "#94a3b8",
-                      margin: 0,
-                    }}
-                  >
+                  <h1 className="page-title">Chi Tiết Diễn Viên</h1>
+                  <p className="page-subtitle">
                     Xem thông tin chi tiết về diễn viên và vai trò
                   </p>
                 </div>
 
-                <div style={{ display: "flex", gap: "12px" }}>
+                <div className="header-actions">
                   <button
                     onClick={() => navigate(`/moviecast/edit/${CastId}`)}
-                    style={{
-                      padding: "12px 24px",
-                      background: "linear-gradient(135deg, #f7931e, #e67e22)",
-                      border: "none",
-                      borderRadius: "12px",
-                      color: "white",
-                      fontSize: "15px",
-                      fontWeight: 600,
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      transition: "all 0.3s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = "translateY(-2px)";
-                      e.currentTarget.style.boxShadow =
-                        "0 8px 24px rgba(247, 147, 30, 0.4)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = "translateY(0)";
-                      e.currentTarget.style.boxShadow = "none";
-                    }}
+                    className="edit-button"
                   >
                     <Edit3 size={18} />
                     Chỉnh sửa
@@ -377,128 +169,30 @@ export default function MovieCastShow() {
               </div>
 
               {/* Main Content */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                  gap: "24px",
-                }}
-              >
+              <div className="main-grid">
                 {/* Left Column - Cast Summary */}
-                <div
-                  style={{
-                    background: "rgba(255, 255, 255, 0.05)",
-                    backdropFilter: "blur(20px)",
-                    borderRadius: "20px",
-                    border: "1px solid rgba(255, 255, 255, 0.1)",
-                    padding: "40px",
-                    textAlign: "center",
-                  }}
-                >
+                <div className="role-summary-card">
                   {/* Icon */}
-                  <div
-                    style={{
-                      width: "120px",
-                      height: "120px",
-                      background: `linear-gradient(135deg, ${
-                        isActive ? "#f7931e" : "#6b7280"
-                      }, ${isActive ? "#e67e22" : "#4b5563"})`,
-                      borderRadius: "24px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      margin: "0 auto 24px",
-                      boxShadow: `0 12px 40px ${
-                        isActive
-                          ? "rgba(247, 147, 30, 0.4)"
-                          : "rgba(107, 114, 128, 0.4)"
-                      }`,
-                    }}
-                  >
+                  <div className={`role-icon ${isActive ? 'active' : 'inactive'}`}>
                     <UserCircle size={56} color="white" strokeWidth={2} />
                   </div>
 
                   {/* Cast Name */}
-                  <h2
-                    style={{
-                      fontSize: "28px",
-                      fontWeight: 800,
-                      color: "white",
-                      margin: "0 0 12px 0",
-                    }}
-                  >
-                    {cast.Name}
-                  </h2>
+                  <h2 className="role-name">{cast.Name}</h2>
 
                   {/* Status Badge */}
-                  <div
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      padding: "8px 20px",
-                      background: isActive
-                        ? "rgba(34, 197, 94, 0.15)"
-                        : "rgba(239, 68, 68, 0.15)",
-                      border: `1px solid ${
-                        isActive
-                          ? "rgba(34, 197, 94, 0.3)"
-                          : "rgba(239, 68, 68, 0.3)"
-                      }`,
-                      borderRadius: "20px",
-                      fontSize: "14px",
-                      fontWeight: 600,
-                      color: isActive ? "#22c55e" : "#ef4444",
-                      marginBottom: "24px",
-                    }}
-                  >
-                    {isActive ? (
-                      <CheckCircle size={16} />
-                    ) : (
-                      <XCircle size={16} />
-                    )}
+                  <div className={`status-badge ${isActive ? 'active' : 'inactive'}`}>
+                    {isActive ? <CheckCircle size={16} /> : <XCircle size={16} />}
                     {isActive ? "Hoạt động" : "Không hoạt động"}
                   </div>
 
                   {/* Role */}
-                  <div
-                    style={{
-                      padding: "20px",
-                      background: "rgba(0, 0, 0, 0.2)",
-                      borderRadius: "12px",
-                      marginBottom: "24px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        marginBottom: "8px",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <FileText size={18} color="#94a3b8" />
-                      <span
-                        style={{
-                          fontSize: "12px",
-                          fontWeight: 600,
-                          color: "#94a3b8",
-                          textTransform: "uppercase",
-                          letterSpacing: "1px",
-                        }}
-                      >
-                        Vai trò
-                      </span>
+                  <div className="description-box">
+                    <div className="description-header">
+                      <FileText size={18} color="#6b7280" />
+                      <span className="description-label">Vai trò</span>
                     </div>
-                    <p
-                      style={{
-                        fontSize: "15px",
-                        color: "#cbd5e1",
-                        margin: 0,
-                        lineHeight: 1.6,
-                      }}
-                    >
+                    <p className="description-text">
                       {cast.Role === "Actor"
                         ? "Diễn viên"
                         : cast.Role === "Director"
@@ -512,344 +206,82 @@ export default function MovieCastShow() {
                   </div>
 
                   {/* Movie */}
-                  <div
-                    style={{
-                      padding: "20px",
-                      background: "rgba(0, 0, 0, 0.2)",
-                      borderRadius: "12px",
-                      marginBottom: "24px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        marginBottom: "8px",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <Film size={18} color="#94a3b8" />
-                      <span
-                        style={{
-                          fontSize: "12px",
-                          fontWeight: 600,
-                          color: "#94a3b8",
-                          textTransform: "uppercase",
-                          letterSpacing: "1px",
-                        }}
-                      >
-                        Phim
-                      </span>
+                  <div className="description-box">
+                    <div className="description-header">
+                      <Film size={18} color="#6b7280" />
+                      <span className="description-label">Phim</span>
                     </div>
-                    <p
-                      style={{
-                        fontSize: "15px",
-                        color: "#cbd5e1",
-                        margin: 0,
-                        lineHeight: 1.6,
-                      }}
-                    >
+                    <p className="description-text">
                       {getMovieTitle(cast.MovieId)}
                     </p>
                   </div>
 
                   {/* Cast ID */}
-                  <div
-                    style={{
-                      padding: "16px",
-                      background: "rgba(0, 0, 0, 0.2)",
-                      borderRadius: "12px",
-                      border: "1px solid rgba(255, 255, 255, 0.05)",
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: "12px",
-                        color: "#64748b",
-                        marginBottom: "4px",
-                        textTransform: "uppercase",
-                        letterSpacing: "1px",
-                      }}
-                    >
-                      ID Diễn Viên
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "16px",
-                        fontWeight: 700,
-                        color: "#f7931e",
-                        fontFamily: "monospace",
-                      }}
-                    >
-                      {cast.CastId}
-                    </div>
+                  <div className="role-id-box">
+                    <div className="role-id-label">ID Diễn Viên</div>
+                    <div className="role-id-value">{cast.CastId}</div>
                   </div>
                 </div>
 
                 {/* Right Column - Details */}
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "24px",
-                  }}
-                >
+                <div className="details-column">
                   {/* Created Info */}
-                  <div
-                    style={{
-                      background: "rgba(255, 255, 255, 0.05)",
-                      backdropFilter: "blur(20px)",
-                      borderRadius: "20px",
-                      border: "1px solid rgba(255, 255, 255, 0.1)",
-                      padding: "32px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "12px",
-                        marginBottom: "24px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: "48px",
-                          height: "48px",
-                          background:
-                            "linear-gradient(135deg, #f7931e, #e67e22)",
-                          borderRadius: "12px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
+                  <div className="info-card">
+                    <div className="info-header">
+                      <div className="info-icon">
                         <Sparkles size={24} color="white" />
                       </div>
                       <div>
-                        <h3
-                          style={{
-                            fontSize: "20px",
-                            fontWeight: 700,
-                            color: "white",
-                            margin: 0,
-                          }}
-                        >
-                          Thông Tin Tạo
-                        </h3>
-                        <p
-                          style={{
-                            fontSize: "14px",
-                            color: "#94a3b8",
-                            margin: 0,
-                          }}
-                        >
-                          Chi tiết về người tạo diễn viên
-                        </p>
+                        <h3 className="info-title">Thông Tin Tạo</h3>
+                        <p className="info-subtitle">Chi tiết về người tạo diễn viên</p>
                       </div>
                     </div>
 
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "16px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "12px",
-                          padding: "16px",
-                          background: "rgba(0, 0, 0, 0.2)",
-                          borderRadius: "12px",
-                        }}
-                      >
-                        <User size={20} color="#94a3b8" />
-                        <div style={{ flex: 1 }}>
-                          <div
-                            style={{
-                              fontSize: "12px",
-                              color: "#64748b",
-                              marginBottom: "4px",
-                            }}
-                          >
-                            Người tạo
-                          </div>
-                          <div
-                            style={{
-                              fontSize: "15px",
-                              fontWeight: 600,
-                              color: "white",
-                            }}
-                          >
-                            {cast.CreatedBy || "N/A"}
-                          </div>
+                    <div className="info-items">
+                      <div className="info-item">
+                        <User size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Người tạo</div>
+                          <div className="info-item-value">{cast.CreatedBy || "N/A"}</div>
                         </div>
                       </div>
 
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "12px",
-                          padding: "16px",
-                          background: "rgba(0, 0, 0, 0.2)",
-                          borderRadius: "12px",
-                        }}
-                      >
-                        <Calendar size={20} color="#94a3b8" />
-                        <div style={{ flex: 1 }}>
-                          <div
-                            style={{
-                              fontSize: "12px",
-                              color: "#64748b",
-                              marginBottom: "4px",
-                            }}
-                          >
-                            Ngày tạo
-                          </div>
-                          <div
-                            style={{
-                              fontSize: "15px",
-                              fontWeight: 600,
-                              color: "white",
-                            }}
-                          >
-                            {cast.CreatedAt || "N/A"}
-                          </div>
+                      <div className="info-item">
+                        <Calendar size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Ngày tạo</div>
+                          <div className="info-item-value">{cast.CreatedAt || "N/A"}</div>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   {/* Updated Info */}
-                  <div
-                    style={{
-                      background: "rgba(255, 255, 255, 0.05)",
-                      backdropFilter: "blur(20px)",
-                      borderRadius: "20px",
-                      border: "1px solid rgba(255, 255, 255, 0.1)",
-                      padding: "32px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "12px",
-                        marginBottom: "24px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: "48px",
-                          height: "48px",
-                          background:
-                            "linear-gradient(135deg, #f7931e, #e67e22)",
-                          borderRadius: "12px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
+                  <div className="info-card">
+                    <div className="info-header">
+                      <div className="info-icon">
                         <Activity size={24} color="white" />
                       </div>
                       <div>
-                        <h3
-                          style={{
-                            fontSize: "20px",
-                            fontWeight: 700,
-                            color: "white",
-                            margin: 0,
-                          }}
-                        >
-                          Cập Nhật Gần Nhất
-                        </h3>
-                        <p
-                          style={{
-                            fontSize: "14px",
-                            color: "#94a3b8",
-                            margin: 0,
-                          }}
-                        >
-                          Lịch sử thay đổi diễn viên
-                        </p>
+                        <h3 className="info-title">Cập Nhật Gần Nhất</h3>
+                        <p className="info-subtitle">Lịch sử thay đổi diễn viên</p>
                       </div>
                     </div>
 
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "16px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "12px",
-                          padding: "16px",
-                          background: "rgba(0, 0, 0, 0.2)",
-                          borderRadius: "12px",
-                        }}
-                      >
-                        <User size={20} color="#94a3b8" />
-                        <div style={{ flex: 1 }}>
-                          <div
-                            style={{
-                              fontSize: "12px",
-                              color: "#64748b",
-                              marginBottom: "4px",
-                            }}
-                          >
-                            Người cập nhật
-                          </div>
-                          <div
-                            style={{
-                              fontSize: "15px",
-                              fontWeight: 600,
-                              color: "white",
-                            }}
-                          >
-                            {cast.UpdatedBy || "N/A"}
-                          </div>
+                    <div className="info-items">
+                      <div className="info-item">
+                        <User size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Người cập nhật</div>
+                          <div className="info-item-value">{cast.UpdatedBy || "N/A"}</div>
                         </div>
                       </div>
 
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "12px",
-                          padding: "16px",
-                          background: "rgba(0, 0, 0, 0.2)",
-                          borderRadius: "12px",
-                        }}
-                      >
-                        <Clock size={20} color="#94a3b8" />
-                        <div style={{ flex: 1 }}>
-                          <div
-                            style={{
-                              fontSize: "12px",
-                              color: "#64748b",
-                              marginBottom: "4px",
-                            }}
-                          >
-                            Ngày cập nhật
-                          </div>
-                          <div
-                            style={{
-                              fontSize: "15px",
-                              fontWeight: 600,
-                              color: "white",
-                            }}
-                          >
-                            {cast.UpdatedAt || "N/A"}
-                          </div>
+                      <div className="info-item">
+                        <Clock size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Ngày cập nhật</div>
+                          <div className="info-item-value">{cast.UpdatedAt || "N/A"}</div>
                         </div>
                       </div>
                     </div>
@@ -857,12 +289,6 @@ export default function MovieCastShow() {
                 </div>
               </div>
             </div>
-
-            <style>{`
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-        `}</style>
           </div>
         </div>
       </div>

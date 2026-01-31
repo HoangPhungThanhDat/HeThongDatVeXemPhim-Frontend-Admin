@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import "../../styles/Edit.css";
+import "../../styles/Role/Edit.css";
 import MainLayout from "../../layouts/MainLayout";
 import UserApi from "../../api/UserApi";
 import Swal from "sweetalert2";
@@ -15,12 +15,29 @@ export default function UserEdit() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Hàm chuyển đổi format ngày từ d-m-Y sang yyyy-MM-dd (cho input type="date")
+  const formatDateForInput = (dateString) => {
+    if (!dateString) return "";
+    // Input: "08-12-2004" (d-m-Y)
+    // Output: "2004-12-08" (yyyy-MM-dd)
+    const parts = dateString.split("-");
+    if (parts.length === 3) {
+      return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+    return dateString;
+  };
+
   // Lấy user theo UserId
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const res = await UserApi.getById(UserId);
-        setUser(res.data.data);
+        const userData = res.data.data;
+        // Chuyển đổi format ngày khi nhận từ API
+        if (userData.DateOfBirth) {
+          userData.DateOfBirth = formatDateForInput(userData.DateOfBirth);
+        }
+        setUser(userData);
       } catch (err) {
         console.error("❌ Lỗi khi lấy user:", err);
         setError(
@@ -42,71 +59,65 @@ export default function UserEdit() {
     }));
   };
 
-  // Thông báo toast
-  const showToast = (icon, message, onClose) => {
-    Swal.fire({
-      toast: true,
-      position: "top-end",
-      icon,
-      title: message,
-      showConfirmButton: false,
-      timer: 2500,
-      timerProgressBar: true,
-      customClass: {
-        popup: "my-toast animated-toast",
-      },
-      showClass: {
-        popup: "animate__animated animate__slideInRight",
-      },
-      hideClass: {
-        popup: "animate__animated animate__slideOutRight",
-      },
-      willClose: onClose,
-    });
-  };
-
   // Submit cập nhật
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
 
-    // Hiển thị loading
-    Swal.fire({
-      title: "Đang xử lý...",
-      html: "Vui lòng chờ trong giây lát",
-      allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
-      },
-    });
-
     try {
       const payload = { ...user };
       if (!payload.PasswordHash) delete payload.PasswordHash;
+      
+      // ✅ KHÔNG CẦN CHUYỂN ĐỔI DateOfBirth
+      // Vì input type="date" đã trả về format yyyy-MM-dd (ví dụ: 2004-12-08)
+      // Laravel sẽ tự động chấp nhận format Y-m-d này
+
+      console.log("📤 Payload gửi lên server:", payload);
 
       await UserApi.update(UserId, payload);
 
-      Swal.close();
-      showToast("success", "🎉 Cập nhật thành công!", () => {
+      Swal.fire({
+        toast: true,
+        position: "top-end",
+        icon: "success",
+        title: "🎉 Cập nhật người dùng thành công!",
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+        customClass: {
+          popup: "my-toast animated-toast",
+        },
+        showClass: {
+          popup: "animate__animated animate__slideInRight",
+        },
+        hideClass: {
+          popup: "animate__animated animate__slideOutRight",
+        },
+      }).then(() => {
         navigate("/user");
       });
     } catch (err) {
       console.error("❌ Lỗi khi cập nhật:", err);
-      Swal.close();
-
-      if (err.response) {
-        setError(err.response.data.message || "Cập nhật thất bại!");
-        showToast(
-          "error",
-          err.response.data.message || "❌ Cập nhật thất bại!"
-        );
-      } else if (err.request) {
-        setError("Không nhận được phản hồi từ server!");
-        showToast("error", "❌ Không kết nối được server!");
-      } else {
-        setError("Cập nhật thất bại!");
-        showToast("error", "❌ Có lỗi xảy ra!");
-      }
+      console.error("📛 Response data:", err.response?.data);
+      
+      Swal.fire({
+        toast: true,
+        position: "top-end",
+        icon: "error",
+        title: "❌ Cập nhật người dùng thất bại!",
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        customClass: {
+          popup: "my-toast animated-toast",
+        },
+        showClass: {
+          popup: "animate__animated animate__slideInRight",
+        },
+        hideClass: {
+          popup: "animate__animated animate__slideOutRight",
+        },
+      });
     }
   };
 
@@ -212,184 +223,315 @@ export default function UserEdit() {
       </MainLayout>
     );
   }
-  // ✅ Main Form
+
   return (
     <MainLayout>
-      <div className="main-container">
-        <div className="pd-ltr-20">
-          <div className="cinema-user-edit">
-            <div className="user-edit-container">
-              <div className="edit-card">
-                {/* Header */}
-                <div className="edit-card-header">
-                  <h3>
-                    <i className="fas fa-user-edit"></i>
-                    <span>Chỉnh Sửa Người Dùng</span>
-                  </h3>
+      <div className="modern-cinema-page">
+        <div className="cinema-container">
+          {/* Breadcrumb */}
+          <div className="breadcrumb-nav">
+            <span className="breadcrumb-item" onClick={() => navigate("/")}>
+              <i className="fas fa-home"></i> Trang chủ
+            </span>
+            <span className="breadcrumb-separator">/</span>
+            <span className="breadcrumb-item" onClick={() => navigate("/user")}>
+              Người dùng
+            </span>
+            <span className="breadcrumb-separator">/</span>
+            <span className="breadcrumb-item active">Chỉnh sửa</span>
+          </div>
+
+          {/* Main Content */}
+          <div className="content-wrapper">
+            {/* Left Column - Form */}
+            <div className="form-section">
+              <div className="section-header">
+                <div className="header-icon">
+                  <i className="fas fa-user-edit"></i>
+                </div>
+                <div className="header-text">
+                  <h2 className="section-title">Chỉnh Sửa Người Dùng</h2>
+                  <p className="section-subtitle">Cập nhật thông tin người dùng hệ thống</p>
+                </div>
+              </div>
+
+              <div className="form-card">
+                <div className="form-group">
+                  <label className="field-label">
+                    <i className="fas fa-user label-icon"></i>
+                    Họ và tên
+                  </label>
+                  <input
+                    type="text"
+                    className="modern-input"
+                    name="FullName"
+                    value={user.FullName || ""}
+                    onChange={handleChange}
+                    placeholder="Nhập họ và tên đầy đủ"
+                    required
+                  />
                 </div>
 
-                {/* Body */}
-                <div className="edit-card-body">
-                  <form onSubmit={handleSubmit}>
-                    {/* Row 1: Họ tên & Email */}
-                    <div className="edit-form-row">
-                      <div className="edit-form-group">
-                        <label className="edit-form-label">
-                          <i className="fas fa-user text-primary"></i>
-                          <span>Họ và Tên</span>
-                        </label>
-                        <input
-                          type="text"
-                          className="edit-input"
-                          name="FullName"
-                          value={user.FullName || ""}
-                          onChange={handleChange}
-                          placeholder="Nhập họ và tên đầy đủ"
-                          required
-                        />
-                      </div>
+                <div className="form-group">
+                  <label className="field-label">
+                    <i className="fas fa-envelope label-icon"></i>
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    className="modern-input"
+                    name="Email"
+                    value={user.Email || ""}
+                    onChange={handleChange}
+                    placeholder="example@cinema.com"
+                    required
+                  />
+                </div>
 
-                      <div className="edit-form-group">
-                        <label className="edit-form-label">
-                          <i className="fas fa-envelope text-danger"></i>
-                          <span>Email</span>
-                        </label>
-                        <input
-                          type="email"
-                          className="edit-input"
-                          name="Email"
-                          value={user.Email || ""}
-                          onChange={handleChange}
-                          placeholder="example@cinema.com"
-                          required
-                        />
-                      </div>
-                    </div>
+                <div className="form-group">
+                  <label className="field-label">
+                    <i className="fas fa-phone label-icon"></i>
+                    Số điện thoại
+                  </label>
+                  <input
+                    type="text"
+                    className="modern-input"
+                    name="PhoneNumber"
+                    value={user.PhoneNumber || ""}
+                    onChange={handleChange}
+                    placeholder="0987 654 321"
+                  />
+                </div>
 
-                    {/* Row 2: Số điện thoại & Ngày sinh */}
-                    <div className="edit-form-row">
-                      <div className="edit-form-group">
-                        <label className="edit-form-label">
-                          <i className="fas fa-phone text-success"></i>
-                          <span>Số Điện Thoại</span>
-                        </label>
-                        <input
-                          type="text"
-                          className="edit-input"
-                          name="PhoneNumber"
-                          value={user.PhoneNumber || ""}
-                          onChange={handleChange}
-                          placeholder="0987 654 321"
-                        />
-                      </div>
+                <div className="form-group">
+                  <label className="field-label">
+                    <i className="fas fa-calendar-alt label-icon"></i>
+                    Ngày sinh
+                  </label>
+                  <input
+                    type="date"
+                    className="modern-input"
+                    name="DateOfBirth"
+                    value={user.DateOfBirth || ""}
+                    onChange={handleChange}
+                  />
+                </div>
 
-                      <div className="edit-form-group">
-                        <label className="edit-form-label">
-                          <i className="fas fa-calendar-alt text-warning"></i>
-                          <span>Ngày Sinh</span>
-                        </label>
-                        <input
-                          type="date"
-                          className="edit-input"
-                          name="DateOfBirth"
-                          value={user.DateOfBirth || ""}
-                          onChange={handleChange}
-                        />
-                      </div>
-                    </div>
+                <div className="form-group">
+                  <label className="field-label">
+                    <i className="fas fa-lock label-icon"></i>
+                    Mật khẩu mới
+                  </label>
+                  <input
+                    type="password"
+                    className="modern-input"
+                    name="PasswordHash"
+                    value={user.PasswordHash || ""}
+                    onChange={handleChange}
+                    placeholder="••••••••"
+                    maxLength="8"
+                  />
+                  <small style={{fontSize: '12px', color: '#6c757d', marginTop: '5px', display: 'block'}}>
+                    💡 Để trống nếu không muốn thay đổi mật khẩu (Tối đa 8 ký tự)
+                  </small>
+                </div>
 
-                    {/* Row 3: Mật khẩu & Vai trò */}
-                    <div className="edit-form-row">
-                      <div className="edit-form-group">
-                        <label className="edit-form-label">
-                          <i className="fas fa-lock text-dark"></i>
-                          <span>Mật Khẩu Mới</span>
-                        </label>
-                        <input
-                          type="password"
-                          className="edit-input"
-                          name="PasswordHash"
-                          value={user.PasswordHash || ""}
-                          onChange={handleChange}
-                          placeholder="••••••••"
-                          maxLength="8"
-                        />
-                        <small className="edit-helper-text">
-                          💡 Để trống nếu không muốn thay đổi mật khẩu (Tối đa 8
-                          ký tự)
-                        </small>
-                      </div>
+                <div className="form-group">
+                  <label className="field-label">
+                    <i className="fas fa-user-shield label-icon"></i>
+                    Vai trò
+                  </label>
+                  <select
+                    className="modern-input"
+                    name="RoleId"
+                    value={user.RoleId || 2}
+                    onChange={handleChange}
+                  >
+                    <option value={2}>👤 User - Người dùng</option>
+                    <option value={1}>👑 Admin - Quản trị viên</option>
+                  </select>
+                </div>
 
-                      <div className="edit-form-group">
-                        <label className="edit-form-label">
-                          <i className="fas fa-user-shield text-dark"></i>
-                          <span>Vai Trò</span>
-                        </label>
-                        <select
-                          className="edit-select"
-                          name="RoleId"
-                          value={user.RoleId || 2}
-                          onChange={handleChange}
-                        >
-                          <option value={2}>👤 User - Người dùng</option>
-                          <option value={1}>👑 Admin - Quản trị viên</option>
-                        </select>
+                <div className="form-group">
+                  <label className="field-label">
+                    <i className="fas fa-venus-mars label-icon"></i>
+                    Giới tính
+                  </label>
+                  <div className="status-selector">
+                    <div
+                      className={`status-option ${user.Gender === 'Male' ? 'active' : ''}`}
+                      onClick={() => setUser({...user, Gender: 'Male'})}
+                    >
+                      <div className="status-radio">
+                        {user.Gender === 'Male' && <div className="status-dot"></div>}
+                      </div>
+                      <div className="status-content">
+                        <div className="status-badge active-badge">
+                          <i className="fas fa-mars"></i>
+                        </div>
+                        <span className="status-label">Nam</span>
                       </div>
                     </div>
-
-                    {/* Row 4: Giới tính & Trạng thái */}
-                    <div className="edit-form-row">
-                      <div className="edit-form-group">
-                        <label className="edit-form-label">
-                          <i className="fas fa-venus-mars text-info"></i>
-                          <span>Giới Tính</span>
-                        </label>
-                        <select
-                          className="edit-select"
-                          name="Gender"
-                          value={user.Gender || "Male"}
-                          onChange={handleChange}
-                        >
-                          <option value="Male">👨 Nam</option>
-                          <option value="Female">👩 Nữ</option>
-                          <option value="Other">🌈 Khác</option>
-                        </select>
+                    <div
+                      className={`status-option ${user.Gender === 'Female' ? 'active' : ''}`}
+                      onClick={() => setUser({...user, Gender: 'Female'})}
+                    >
+                      <div className="status-radio">
+                        {user.Gender === 'Female' && <div className="status-dot"></div>}
                       </div>
-
-                      <div className="edit-form-group">
-                        <label className="edit-form-label">
-                          <i className="fas fa-toggle-on text-success"></i>
-                          <span>Trạng Thái</span>
-                        </label>
-                        <select
-                          className="edit-select"
-                          name="Status"
-                          value={user.Status || "Active"}
-                          onChange={handleChange}
-                        >
-                          <option value="Active">✅ Hoạt động</option>
-                          <option value="Inactive">⏸️ Tạm khóa</option>
-                          <option value="Banned">🚫 Đã cấm</option>
-                        </select>
+                      <div className="status-content">
+                        <div className="status-badge inactive-badge">
+                          <i className="fas fa-venus"></i>
+                        </div>
+                        <span className="status-label">Nữ</span>
                       </div>
                     </div>
-
-                    {/* Action Buttons */}
-                    <div className="edit-actions">
-                      <button type="submit" className="edit-btn edit-btn-save">
-                        <i className="fas fa-save"></i>
-                        <span>Lưu Thay Đổi</span>
-                      </button>
-                      <button
-                        type="button"
-                        className="edit-btn edit-btn-cancel"
-                        onClick={() => navigate("/user")}
-                      >
-                        <i className="fas fa-times-circle"></i>
-                        <span>Hủy Bỏ</span>
-                      </button>
+                    <div
+                      className={`status-option ${user.Gender === 'Other' ? 'active' : ''}`}
+                      onClick={() => setUser({...user, Gender: 'Other'})}
+                    >
+                      <div className="status-radio">
+                        {user.Gender === 'Other' && <div className="status-dot"></div>}
+                      </div>
+                      <div className="status-content">
+                        <div className="status-badge" style={{background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}}>
+                          <i className="fas fa-genderless"></i>
+                        </div>
+                        <span className="status-label">Khác</span>
+                      </div>
                     </div>
-                  </form>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="field-label">
+                    <i className="fas fa-power-off label-icon"></i>
+                    Trạng thái
+                  </label>
+                  <div className="status-selector">
+                    <div
+                      className={`status-option ${user.Status === 'Active' ? 'active' : ''}`}
+                      onClick={() => setUser({...user, Status: 'Active'})}
+                    >
+                      <div className="status-radio">
+                        {user.Status === 'Active' && <div className="status-dot"></div>}
+                      </div>
+                      <div className="status-content">
+                        <div className="status-badge active-badge">
+                          <i className="fas fa-check-circle"></i>
+                        </div>
+                        <span className="status-label">Hoạt động</span>
+                      </div>
+                    </div>
+                    <div
+                      className={`status-option ${user.Status === 'Inactive' ? 'active' : ''}`}
+                      onClick={() => setUser({...user, Status: 'Inactive'})}
+                    >
+                      <div className="status-radio">
+                        {user.Status === 'Inactive' && <div className="status-dot"></div>}
+                      </div>
+                      <div className="status-content">
+                        <div className="status-badge inactive-badge">
+                          <i className="fas fa-pause-circle"></i>
+                        </div>
+                        <span className="status-label">Tạm khóa</span>
+                      </div>
+                    </div>
+                    <div
+                      className={`status-option ${user.Status === 'Banned' ? 'active' : ''}`}
+                      onClick={() => setUser({...user, Status: 'Banned'})}
+                    >
+                      <div className="status-radio">
+                        {user.Status === 'Banned' && <div className="status-dot"></div>}
+                      </div>
+                      <div className="status-content">
+                        <div className="status-badge" style={{background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'}}>
+                          <i className="fas fa-ban"></i>
+                        </div>
+                        <span className="status-label">Đã cấm</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-actions">
+                  <button 
+                    type="button" 
+                    className="btn-cinema btn-cancel"
+                    onClick={() => navigate("/user")}
+                  >
+                    <i className="fas fa-times"></i>
+                    Hủy bỏ
+                  </button>
+                  <button 
+                    type="button" 
+                    className="btn-cinema btn-save"
+                    onClick={handleSubmit}
+                  >
+                    <i className="fas fa-check"></i>
+                    Lưu thay đổi
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column - Info */}
+            <div className="info-section">
+              <div className="info-card highlight-card">
+                <div className="info-icon-wrapper">
+                  <i className="fas fa-lightbulb"></i>
+                </div>
+                <h4 className="info-title">Lưu ý quan trọng</h4>
+                <p className="info-text">
+                  Việc thay đổi thông tin người dùng sẽ ảnh hưởng trực tiếp đến quyền truy cập và dữ liệu cá nhân trong hệ thống. 
+                  Vui lòng kiểm tra kỹ trước khi lưu.
+                </p>
+              </div>
+
+              <div className="info-card">
+                <div className="info-header">
+                  <i className="fas fa-info-circle"></i>
+                  <span>Thông tin người dùng</span>
+                </div>
+                <div className="info-list">
+                  <div className="info-item">
+                    <span className="info-key">Tên hiện tại:</span>
+                    <span className="info-value">{user.FullName || "Chưa có"}</span>
+                  </div>
+                  <div className="info-item">
+                    <span className="info-key">Email:</span>
+                    <span className="info-value">{user.Email || "Chưa có"}</span>
+                  </div>
+                  <div className="info-item">
+                    <span className="info-key">Vai trò:</span>
+                    <span className="info-value">{user.RoleId === 1 ? 'Admin' : 'User'}</span>
+                  </div>
+                  <div className="info-item">
+                    <span className="info-key">Trạng thái:</span>
+                    <span className={`status-pill ${
+                      user.Status === 'Active' ? 'pill-active' : 
+                      user.Status === 'Inactive' ? 'pill-inactive' : 
+                      'pill-inactive'
+                    }`}>
+                      {user.Status === 'Active' ? 'Hoạt động' : 
+                       user.Status === 'Inactive' ? 'Tạm khóa' : 'Đã cấm'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="info-card tips-card">
+                <div className="tip-item">
+                  <i className="fas fa-check-circle tip-icon"></i>
+                  <p>Kiểm tra email và số điện thoại trước khi lưu</p>
+                </div>
+                <div className="tip-item">
+                  <i className="fas fa-check-circle tip-icon"></i>
+                  <p>Mật khẩu để trống nếu không muốn thay đổi</p>
+                </div>
+                <div className="tip-item">
+                  <i className="fas fa-check-circle tip-icon"></i>
+                  <p>Cân nhắc kỹ khi thay đổi vai trò và trạng thái</p>
                 </div>
               </div>
             </div>

@@ -91,6 +91,21 @@ import NotificationEdit from "../pages/Notifications/edit";
 import Staff from "../pages/Staff/index";
 import StaffShow from "../pages/Staff/show";
 import StaffEdit from "../pages/Staff/edit";
+
+import FoodAndDrink from "../pages/FoodAndDrink/index";
+import FoodAndDrinkShow from "../pages/FoodAndDrink/show";
+import FoodAndDrinkEdit from "../pages/FoodAndDrink/edit";
+
+import Booking from "../pages/Booking/index";
+import BookingShow from "../pages/Booking/show";
+
+import New from "../pages/New/index";
+import NewShow from "../pages/New/show";
+import NewEdit from "../pages/New/edit";
+
+import Seat from "../pages/Seat/index";
+import SeatShow from "../pages/Seat/show";
+import SeatEdit from "../pages/Seat/edit";
 export default function AdminRoutes() {
   return (
     <Routes>
@@ -630,7 +645,7 @@ export default function AdminRoutes() {
         path="/notifications"
         element={
           <PrivateRoute>
-            <Notification/>
+            <Notification />
           </PrivateRoute>
         }
       />
@@ -638,7 +653,7 @@ export default function AdminRoutes() {
         path="/notifications/show/:NotificationId"
         element={
           <PrivateRoute>
-            <NotificationShow/>
+            <NotificationShow />
           </PrivateRoute>
         }
       />
@@ -651,11 +666,11 @@ export default function AdminRoutes() {
         }
       />
 
-        <Route
+      <Route
         path="/staffs"
         element={
           <PrivateRoute>
-            <Staff/>
+            <Staff />
           </PrivateRoute>
         }
       />
@@ -663,7 +678,7 @@ export default function AdminRoutes() {
         path="/staffs/show/:StaffId"
         element={
           <PrivateRoute>
-            <StaffShow/>
+            <StaffShow />
           </PrivateRoute>
         }
       />
@@ -672,6 +687,98 @@ export default function AdminRoutes() {
         element={
           <PrivateRoute>
             <StaffEdit />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/foodanddrink"
+        element={
+          <PrivateRoute>
+            <FoodAndDrink />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/foodanddrink/show/:ItemId"
+        element={
+          <PrivateRoute>
+            <FoodAndDrinkShow />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/foodanddrink/edit/:ItemId"
+        element={
+          <PrivateRoute>
+            <FoodAndDrinkEdit />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/bookings"
+        element={
+          <PrivateRoute>
+            <Booking />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/bookings/show/:OrderId"
+        element={
+          <PrivateRoute>
+            <BookingShow />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/news"
+        element={
+          <PrivateRoute>
+            <New />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/news/show/:NewsId"
+        element={
+          <PrivateRoute>
+            <NewShow />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/news/edit/:NewsId"
+        element={
+          <PrivateRoute>
+            <NewEdit />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/seats"
+        element={
+          <PrivateRoute>
+            <Seat />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/seats/show/:SeatId"
+        element={
+          <PrivateRoute>
+            <SeatShow />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/seats/edit/:roomId"
+        element={
+          <PrivateRoute>
+            <SeatEdit />
           </PrivateRoute>
         }
       />

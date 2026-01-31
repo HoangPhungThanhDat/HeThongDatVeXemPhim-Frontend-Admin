@@ -198,7 +198,7 @@ export default function Notification() {
                     animate={{ y: 0, opacity: 1 }}
                     exit={{ y: -100, opacity: 0 }}
                     transition={{ duration: 0.6, ease: "easeOut" }}
-                    className="card border-0 shadow-lg rounded-4 mb-4"
+                    className="card border-0 shadow-lg rounded-4 mb-4 form-add-user"
                   >
                     <div className="card-body p-4">
                       <h4 className="fw-bold mb-4 text-primary d-flex align-items-center">
@@ -210,103 +210,126 @@ export default function Notification() {
                         <div className="row g-4">
                           {/* Người nhận */}
                           <div className="col-md-6">
-                            <div className="input-group">
-                              <span className="input-group-text bg-light">
-                                <i className="fas fa-user"></i>
-                              </span>
-                              <select
-                                className="form-control"
-                                value={newNotification.UserId}
-                                onChange={(e) =>
-                                  setNewNotification({
-                                    ...newNotification,
-                                    UserId: e.target.value,
-                                  })
-                                }
-                                required
-                              >
-                                <option value="">-- Chọn người nhận --</option>
-                                {users.map((u) => (
-                                  <option key={u.UserId} value={u.UserId}>
-                                    {u.FullName}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-user me-2 text-primary"></i>
+                              Người nhận
+                            </label>
+                            <select
+                              className="form-select custom-input"
+                              value={newNotification.UserId}
+                              onChange={(e) =>
+                                setNewNotification({
+                                  ...newNotification,
+                                  UserId: e.target.value,
+                                })
+                              }
+                              required
+                            >
+                              <option value="">-- Chọn người nhận --</option>
+                              {users.map((u) => (
+                                <option key={u.UserId} value={u.UserId}>
+                                  {u.FullName}
+                                </option>
+                              ))}
+                            </select>
                           </div>
 
                           {/* Loại thông báo */}
                           <div className="col-md-6">
-                            <div className="input-group">
-                              <span className="input-group-text bg-light">
-                                <i className="fas fa-tag"></i>
-                              </span>
-                              <select
-                                className="form-control"
-                                value={newNotification.Type}
-                                onChange={(e) =>
-                                  setNewNotification({
-                                    ...newNotification,
-                                    Type: e.target.value,
-                                  })
-                                }
-                                required
-                              >
-                                <option value="">-- Loại thông báo --</option>
-                                <option value="System">Hệ thống</option>
-                                <option value="Promotion">Khuyến mãi</option>
-                                <option value="Order">Đơn hàng</option>
-                              </select>
-                            </div>
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-tag me-2 text-danger"></i>
+                              Loại thông báo
+                            </label>
+                            <select
+                              className="form-select custom-input"
+                              value={newNotification.Type}
+                              onChange={(e) =>
+                                setNewNotification({
+                                  ...newNotification,
+                                  Type: e.target.value,
+                                })
+                              }
+                              required
+                            >
+                              <option value="">-- Loại thông báo --</option>
+                              <option value="System">Hệ thống</option>
+                              <option value="Promotion">Khuyến mãi</option>
+                              <option value="Order">Đơn hàng</option>
+                            </select>
                           </div>
 
                           {/* Tiêu đề */}
                           <div className="col-md-12">
-                            <div className="input-group">
-                              <span className="input-group-text bg-light">
-                                <i className="fas fa-heading"></i>
-                              </span>
-                              <input
-                                type="text"
-                                className="form-control"
-                                placeholder="Nhập tiêu đề thông báo"
-                                value={newNotification.Title}
-                                onChange={(e) =>
-                                  setNewNotification({
-                                    ...newNotification,
-                                    Title: e.target.value,
-                                  })
-                                }
-                                required
-                              />
-                            </div>
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-heading me-2 text-success"></i>
+                              Tiêu đề
+                            </label>
+                            <input
+                              type="text"
+                              className="form-control custom-input"
+                              placeholder="Nhập tiêu đề thông báo"
+                              value={newNotification.Title}
+                              onChange={(e) =>
+                                setNewNotification({
+                                  ...newNotification,
+                                  Title: e.target.value,
+                                })
+                              }
+                              required
+                            />
                           </div>
 
                           {/* Nội dung */}
                           <div className="col-md-12">
-                            <div className="input-group">
-                              <span className="input-group-text bg-light">
-                                <i className="fas fa-align-left"></i>
-                              </span>
-                              <textarea
-                                className="form-control"
-                                placeholder="Nhập nội dung thông báo"
-                                rows="4"
-                                value={newNotification.Message}
-                                onChange={(e) =>
-                                  setNewNotification({
-                                    ...newNotification,
-                                    Message: e.target.value,
-                                  })
-                                }
-                                required
-                              ></textarea>
-                            </div>
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-align-left me-2 text-info"></i>
+                              Nội dung
+                            </label>
+                            <textarea
+                              className="form-control custom-input"
+                              placeholder="Nhập nội dung thông báo"
+                              rows="4"
+                              value={newNotification.Message}
+                              onChange={(e) =>
+                                setNewNotification({
+                                  ...newNotification,
+                                  Message: e.target.value,
+                                })
+                              }
+                              required
+                            ></textarea>
+                          </div>
+
+                          {/* Trạng thái */}
+                          <div className="col-md-6">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-toggle-on me-2 text-warning"></i>
+                              Trạng thái
+                            </label>
+                            <select
+                              className="form-select custom-input"
+                              value={newNotification.Status}
+                              onChange={(e) =>
+                                setNewNotification({
+                                  ...newNotification,
+                                  Status: e.target.value,
+                                })
+                              }
+                              required
+                            >
+                              <option value="">-- Trạng thái --</option>
+                              <option value="Active">Hoạt động</option>
+                              <option value="Inactive">Khóa</option>
+                            </select>
                           </div>
 
                           {/* Trạng thái đọc */}
                           <div className="col-md-6">
-                            <div className="form-check">
+                            <label className="form-label fw-bold">
+                              <i className="fas fa-check-circle me-2 text-success"></i>
+                              Trạng thái đọc
+                            </label>
+                            <div className="form-check mt-2">
                               <input
                                 className="form-check-input"
                                 type="checkbox"
@@ -321,35 +344,10 @@ export default function Notification() {
                               />
                               <label
                                 className="form-check-label"
-                                htmlFor="isReadCheck"
+                                htmlFor="isReadCheck"                              
                               >
-                                <i className="fas fa-check-circle me-1"></i> Đã
-                                đọc
+                                Đã đọc
                               </label>
-                            </div>
-                          </div>
-
-                          {/* Trạng thái */}
-                          <div className="col-md-6">
-                            <div className="input-group">
-                              <span className="input-group-text bg-light">
-                                <i className="fas fa-toggle-on"></i>
-                              </span>
-                              <select
-                                className="form-control"
-                                value={newNotification.Status}
-                                onChange={(e) =>
-                                  setNewNotification({
-                                    ...newNotification,
-                                    Status: e.target.value,
-                                  })
-                                }
-                                required
-                              >
-                                <option value="">-- Trạng thái --</option>
-                                <option value="Active">Hoạt động</option>
-                                <option value="Inactive">Khóa</option>
-                              </select>
                             </div>
                           </div>
 
@@ -405,14 +403,12 @@ export default function Notification() {
                               >
                                 <td className="fw-bold px-4">{index + 1}</td>
                                 <td className="fw-semibold">
-                                 
                                   {users.find(
                                     (u) => u.UserId === notification.UserId
                                   )?.FullName || notification.UserId}
                                 </td>
                                 <td>
                                   <div className="d-flex align-items-center">
-          
                                     <span className="fw-semibold">
                                       {notification.Title}
                                     </span>

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import MainLayout from "../../layouts/MainLayout";
-import "../../styles/wishlist/Show.css";
 import MovieApi from "../../api/MovieApi";
 import GenreApi from "../../api/GenreApi";
 import {
@@ -16,7 +15,11 @@ import {
   Star,
   Video,
   Image as ImageIcon,
+  Sparkles,
+  Activity,
+  FileText,
 } from "lucide-react";
+import "../../styles/Role/Show.css";
 
 export default function MovieShow() {
   const { MovieId } = useParams();
@@ -56,43 +59,27 @@ export default function MovieShow() {
       <MainLayout>
         <div className="main-container">
           <div className="pd-ltr-20">
-            <div className="wishlist-show-loading-container">
-              <div
-                className="spinner-border text-primary wishlist-show-spinner"
-                role="status"
-              ></div>
-              <h5 className="text-primary">Đang tải dữ liệu phim...</h5>
-              <p className="text-muted mt-2">Vui lòng chờ trong giây lát</p>
+            <div className="loading-container">
+              <div className="spinner-border text-primary mb-3" role="status">
+                <span className="sr-only">Loading...</span>
+              </div>
+              <h5 className="loading-title">Đang tải dữ liệu phim...</h5>
+              <p className="loading-subtitle">Vui lòng chờ trong giây lát</p>
 
-              {/* Skeleton */}
-              <div className="card shadow-sm border-0 wishlist-show-skeleton-card">
-                <div className="card-body">
+              {/* Skeleton giả lập khi đang tải */}
+              <div className="skeleton-card">
+                <div className="skeleton-body">
                   <div className="row">
                     <div className="col-md-4 text-center">
-                      <div className="wishlist-show-skeleton-avatar"></div>
-                      <div className="wishlist-show-skeleton-text"></div>
+                      <div className="skeleton-avatar"></div>
+                      <div className="skeleton-text-short"></div>
                     </div>
                     <div className="col-md-8">
-                      <div
-                        className="wishlist-show-skeleton-line"
-                        style={{ width: "60%" }}
-                      ></div>
-                      <div
-                        className="wishlist-show-skeleton-line"
-                        style={{ width: "100%" }}
-                      ></div>
-                      <div
-                        className="wishlist-show-skeleton-line"
-                        style={{ width: "90%" }}
-                      ></div>
-                      <div
-                        className="wishlist-show-skeleton-line"
-                        style={{ width: "80%" }}
-                      ></div>
-                      <div
-                        className="wishlist-show-skeleton-line"
-                        style={{ width: "70%" }}
-                      ></div>
+                      <div className="skeleton-text-60"></div>
+                      <div className="skeleton-text-100"></div>
+                      <div className="skeleton-text-90"></div>
+                      <div className="skeleton-text-80"></div>
+                      <div className="skeleton-text-70"></div>
                     </div>
                   </div>
                 </div>
@@ -110,17 +97,14 @@ export default function MovieShow() {
       <MainLayout>
         <div className="main-container">
           <div className="pd-ltr-20">
-            <div className="wishlist-show-error-container">
-              <div className="wishlist-show-error-content">
-                <div className="wishlist-show-error-card">
-                  <div className="wishlist-show-error-icon-wrapper">
-                    <XCircle size={40} />
+            <div className="error-container">
+              <div className="error-content">
+                <div className="error-card">
+                  <div className="error-icon">
+                    <XCircle size={40} color="#ef4444" />
                   </div>
-                  <h3 className="wishlist-show-error-title">{error}</h3>
-                  <button
-                    onClick={() => window.location.reload()}
-                    className="wishlist-show-error-button"
-                  >
+                  <h3 className="error-title">{error}</h3>
+                  <button onClick={() => window.location.reload()} className="error-button">
                     Thử lại
                   </button>
                 </div>
@@ -138,12 +122,10 @@ export default function MovieShow() {
       <MainLayout>
         <div className="main-container">
           <div className="pd-ltr-20">
-            <div className="wishlist-show-no-data-container">
-              <div className="wishlist-show-no-data-content">
-                <Film size={64} className="wishlist-show-no-data-icon" />
-                <p className="wishlist-show-no-data-text">
-                  Không có dữ liệu phim.
-                </p>
+            <div className="no-data-container">
+              <div className="no-data-content">
+                <Film size={64} className="no-data-icon" />
+                <p className="no-data-text">Không có dữ liệu phim.</p>
               </div>
             </div>
           </div>
@@ -151,6 +133,19 @@ export default function MovieShow() {
       </MainLayout>
     );
   }
+
+  // Hàm xử lý TrailerUrl để tạo link YouTube đúng
+  const getTrailerUrl = (trailerUrl) => {
+    if (!trailerUrl) return null;
+    
+    // Nếu đã là URL đầy đủ thì return luôn
+    if (trailerUrl.startsWith('http://') || trailerUrl.startsWith('https://')) {
+      return trailerUrl;
+    }
+    
+    // Nếu chỉ là video ID thì tạo URL YouTube
+    return `https://www.youtube.com/watch?v=${trailerUrl}`;
+  };
 
   const isActive = movie.Status === "NowShowing";
   const statusText =
@@ -164,31 +159,28 @@ export default function MovieShow() {
     <MainLayout>
       <div className="main-container">
         <div className="pd-ltr-20">
-          <div className="wishlist-show-main-container">
+          <div className="role-show-container">
             {/* Background Effects */}
-            <div className="wishlist-show-bg-effect"></div>
+            <div className="background-effect"></div>
 
-            <div className="wishlist-show-content-wrapper">
+            <div className="role-show-content">
               {/* Header */}
-              <div className="wishlist-show-header">
+              <div className="header-section">
                 <div>
-                  <button
-                    onClick={() => navigate("/movie")}
-                    className="wishlist-show-back-button"
-                  >
+                  <button onClick={() => navigate("/movie")} className="back-button">
                     <ArrowLeft size={16} />
                     Quay lại danh sách
                   </button>
-                  <h1 className="wishlist-show-title">Chi Tiết Phim</h1>
-                  <p className="wishlist-show-subtitle">
+                  <h1 className="page-title">Chi Tiết Phim</h1>
+                  <p className="page-subtitle">
                     Xem thông tin chi tiết và quản lý phim
                   </p>
                 </div>
 
-                <div className="wishlist-show-actions">
+                <div className="header-actions">
                   <button
                     onClick={() => navigate(`/movie/edit/${movie.MovieId}`)}
-                    className="wishlist-show-edit-button"
+                    className="edit-button"
                   >
                     <Edit3 size={18} />
                     Chỉnh sửa
@@ -197,9 +189,9 @@ export default function MovieShow() {
               </div>
 
               {/* Main Content */}
-              <div className="wishlist-show-grid">
+              <div className="main-grid">
                 {/* Left Column - Movie Summary */}
-                <div className="wishlist-show-summary-card">
+                <div className="role-summary-card">
                   {/* Poster or Icon */}
                   {movie.PosterUrl ? (
                     <img
@@ -213,166 +205,121 @@ export default function MovieShow() {
                       }}
                     />
                   ) : (
-                    <div
-                      className={`wishlist-show-icon-wrapper ${
-                        isActive ? "active" : "inactive"
-                      }`}
-                    >
+                    <div className={`role-icon ${isActive ? 'active' : 'inactive'}`}>
                       <Film size={56} color="white" strokeWidth={2} />
                     </div>
                   )}
 
                   {/* Movie Title */}
-                  <h2 className="wishlist-show-user-name">{movie.Title}</h2>
+                  <h2 className="role-name">{movie.Title}</h2>
 
                   {/* Genre */}
-                  <p className="wishlist-show-movie-title">
+                  <p className="role-name" style={{ fontSize: '1rem', marginTop: '0.5rem', opacity: 0.8 }}>
                     {getGenreName(movie.GenreId)}
                   </p>
 
                   {/* Status Badge */}
-                  <div
-                    className={`wishlist-show-status-badge ${
-                      isActive ? "active" : "inactive"
-                    }`}
-                  >
-                    {isActive ? (
-                      <CheckCircle size={16} />
-                    ) : (
-                      <XCircle size={16} />
-                    )}
+                  <div className={`status-badge ${isActive ? 'active' : 'inactive'}`}>
+                    {isActive ? <CheckCircle size={16} /> : <XCircle size={16} />}
                     {statusText}
                   </div>
 
-                  {/* Movie ID */}
-                  <div className="wishlist-show-id-box">
-                    <div className="wishlist-show-id-label">Mã Phim</div>
-                    <div className="wishlist-show-id-value">
-                      {movie.MovieId}
+                  {/* Description */}
+                  <div className="description-box">
+                    <div className="description-header">
+                      <FileText size={18} color="#6b7280" />
+                      <span className="description-label">Mô tả</span>
                     </div>
+                    <p className="description-text">
+                      {movie.Description || "Không có mô tả"}
+                    </p>
+                  </div>
+
+                  {/* Movie ID */}
+                  <div className="role-id-box">
+                    <div className="role-id-label">Mã Phim</div>
+                    <div className="role-id-value">{movie.MovieId}</div>
                   </div>
                 </div>
 
                 {/* Right Column - Details */}
-                <div className="wishlist-show-details-column">
+                <div className="details-column">
                   {/* Basic Info */}
-                  <div className="wishlist-show-info-card">
-                    <div className="wishlist-show-info-header">
-                      <div className="wishlist-show-info-icon user">
+                  <div className="info-card">
+                    <div className="info-header">
+                      <div className="info-icon">
                         <Film size={24} color="white" />
                       </div>
                       <div>
-                        <h3 className="wishlist-show-info-title">
-                          Thông Tin Cơ Bản
-                        </h3>
-                        <p className="wishlist-show-info-subtitle">
-                          Chi tiết về phim
-                        </p>
+                        <h3 className="info-title">Thông Tin Cơ Bản</h3>
+                        <p className="info-subtitle">Chi tiết về phim</p>
                       </div>
                     </div>
 
-                    <div className="wishlist-show-info-list">
-                      <div className="wishlist-show-info-item">
-                        <Film size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Slug
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {movie.Slug}
-                          </div>
+                    <div className="info-items">
+                      <div className="info-item">
+                        <Film size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Slug</div>
+                          <div className="info-item-value">{movie.Slug}</div>
                         </div>
                       </div>
 
-                      <div className="wishlist-show-info-item">
-                        <Clock size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Thời lượng
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {movie.Duration} phút
-                          </div>
+                      <div className="info-item">
+                        <Clock size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Thời lượng</div>
+                          <div className="info-item-value">{movie.Duration} phút</div>
                         </div>
                       </div>
 
-                      <div className="wishlist-show-info-item">
-                        <Calendar size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Ngày phát hành
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {movie.ReleaseDate}
-                          </div>
+                      <div className="info-item">
+                        <Calendar size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Ngày phát hành</div>
+                          <div className="info-item-value">{movie.ReleaseDate}</div>
                         </div>
                       </div>
 
-                      <div className="wishlist-show-info-item">
-                        <Globe size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Ngôn ngữ
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {movie.Language}
-                          </div>
+                      <div className="info-item">
+                        <Globe size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Ngôn ngữ</div>
+                          <div className="info-item-value">{movie.Language}</div>
                         </div>
                       </div>
 
-                      <div className="wishlist-show-info-item">
-                        <Star size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Độ tuổi
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {movie.Rated}
-                          </div>
+                      <div className="info-item">
+                        <Star size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Độ tuổi</div>
+                          <div className="info-item-value">{movie.Rated}</div>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Description & Media */}
-                  <div className="wishlist-show-info-card">
-                    <div className="wishlist-show-info-header">
-                      <div className="wishlist-show-info-icon movie">
-                        <Video size={24} color="white" />
+                  {/* Media Info */}
+                  <div className="info-card">
+                    <div className="info-header">
+                      <div className="info-icon">
+                        <Sparkles size={24} color="white" />
                       </div>
                       <div>
-                        <h3 className="wishlist-show-info-title">
-                          Mô Tả & Media
-                        </h3>
-                        <p className="wishlist-show-info-subtitle">
-                          Nội dung và liên kết
-                        </p>
+                        <h3 className="info-title">Thông Tin Media</h3>
+                        <p className="info-subtitle">Nội dung và liên kết</p>
                       </div>
                     </div>
 
-                    <div className="wishlist-show-info-list">
-                      <div className="wishlist-show-info-item">
-                        <Film size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Mô tả
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {movie.Description}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="wishlist-show-info-item">
-                        <Video size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Trailer URL
-                          </div>
-                          <div className="wishlist-show-info-item-value">
+                    <div className="info-items">
+                      <div className="info-item">
+                        <Video size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Trailer URL</div>
+                          <div className="info-item-value">
                             {movie.TrailerUrl ? (
                               <a
-                                href={movie.TrailerUrl}
+                                href={ getTrailerUrl(movie.TrailerUrl)}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 style={{ color: "#f7931e" }}
@@ -387,13 +334,11 @@ export default function MovieShow() {
                       </div>
 
                       {movie.PosterUrl && (
-                        <div className="wishlist-show-info-item">
-                          <ImageIcon size={20} color="#94a3b8" />
-                          <div className="wishlist-show-info-item-content">
-                            <div className="wishlist-show-info-item-label">
-                              Poster URL
-                            </div>
-                            <div className="wishlist-show-info-item-value">
+                        <div className="info-item">
+                          <ImageIcon size={20} color="#6b7280" />
+                          <div className="info-item-content">
+                            <div className="info-item-label">Poster URL</div>
+                            <div className="info-item-value">
                               <a
                                 href={movie.PosterUrl}
                                 target="_blank"
@@ -410,43 +355,31 @@ export default function MovieShow() {
                   </div>
 
                   {/* System Info */}
-                  <div className="wishlist-show-info-card">
-                    <div className="wishlist-show-info-header">
-                      <div className="wishlist-show-info-icon time">
-                        <Clock size={24} color="white" />
+                  <div className="info-card">
+                    <div className="info-header">
+                      <div className="info-icon">
+                        <Activity size={24} color="white" />
                       </div>
                       <div>
-                        <h3 className="wishlist-show-info-title">
-                          Thông Tin Hệ Thống
-                        </h3>
-                        <p className="wishlist-show-info-subtitle">
-                          Lịch sử tạo và cập nhật
-                        </p>
+                        <h3 className="info-title">Thông Tin Hệ Thống</h3>
+                        <p className="info-subtitle">Lịch sử tạo và cập nhật</p>
                       </div>
                     </div>
 
-                    <div className="wishlist-show-info-list">
-                      <div className="wishlist-show-info-item">
-                        <Calendar size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Ngày tạo
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {movie.CreatedAt || "N/A"}
-                          </div>
+                    <div className="info-items">
+                      <div className="info-item">
+                        <Calendar size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Ngày tạo</div>
+                          <div className="info-item-value">{movie.CreatedAt || "N/A"}</div>
                         </div>
                       </div>
 
-                      <div className="wishlist-show-info-item">
-                        <Clock size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Cập nhật lần cuối
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {movie.UpdatedAt || "N/A"}
-                          </div>
+                      <div className="info-item">
+                        <Clock size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Cập nhật lần cuối</div>
+                          <div className="info-item-value">{movie.UpdatedAt || "N/A"}</div>
                         </div>
                       </div>
                     </div>

@@ -432,7 +432,6 @@ export default function Promotion() {
                           <th className="px-4">ID</th>
                           <th>Tên chương trình</th>
                           <th>Mã khuyến mãi</th>
-                          <th>Mô tả</th>
                           <th>Hình ảnh</th>
                           <th>Trạng thái</th>
                           <th className="text-center">Hành động</th>
@@ -447,10 +446,7 @@ export default function Promotion() {
                             >
                               <td className="fw-bold px-4">{index + 1}</td>
                               <td className="fw-semibold">{promotion.Title}</td>
-                              <td className="text-muted">{promotion.Code}</td>
-                              <td className="text-muted">
-                                {promotion.Description}
-                              </td>
+                              <td className="text-muted">{promotion.Code}</td>                            
                               <td>
                                 {promotion.ImageUrl && (
                                   <img

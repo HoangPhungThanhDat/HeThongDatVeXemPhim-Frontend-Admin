@@ -1,24 +1,39 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import "@fortawesome/fontawesome-free/css/all.min.css";
 import MainLayout from "../../layouts/MainLayout";
-import "../../styles/Show.css";
 import NotificationApi from "../../api/NotificationApi";
 import UserApi from "../../api/UserApi";
+import {
+  Bell,
+  Edit3,
+  ArrowLeft,
+  CheckCircle,
+  XCircle,
+  User,
+  Calendar,
+  Clock,
+  FileText,
+  Sparkles,
+  Activity,
+  AlertCircle,
+  Megaphone,
+  ShoppingCart,
+} from "lucide-react";
+import "../../styles/Role/Show.css";
 
 export default function NotificationShow() {
   const { NotificationId } = useParams();
+  const navigate = useNavigate();
+
   const [notification, setNotification] = useState(null);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // gọi song song
         const [notificationRes, userRes] = await Promise.all([
           NotificationApi.getById(NotificationId),
           UserApi.getAll(),
@@ -56,82 +71,43 @@ export default function NotificationShow() {
   const getTypeIcon = (type) => {
     switch (type) {
       case "System":
-        return "fa-cog";
+        return <AlertCircle size={20} color="#6b7280" />;
       case "Promotion":
-        return "fa-bullhorn";
+        return <Megaphone size={20} color="#6b7280" />;
       case "Order":
-        return "fa-shopping-cart";
+        return <ShoppingCart size={20} color="#6b7280" />;
       default:
-        return "fa-bell";
+        return <Bell size={20} color="#6b7280" />;
     }
   };
 
-  const getTypeBadgeClass = (type) => {
-    switch (type) {
-      case "System":
-        return "bg-primary";
-      case "Promotion":
-        return "bg-warning";
-      case "Order":
-        return "bg-success";
-      default:
-        return "bg-secondary";
-    }
-  };
-
-  // ⏳ Loading đẹp hơn (có skeleton + spinner)
+  // Loading State
   if (loading) {
     return (
       <MainLayout>
         <div className="main-container">
-          <div className="container user-show-container">
-            <div className="d-flex flex-column align-items-center justify-content-center p-5">
-              <div
-                className="spinner-border text-primary mb-3"
-                role="status"
-                style={{ width: "4rem", height: "4rem" }}
-              ></div>
-              <h5 className="text-primary">Đang tải dữ liệu thông báo...</h5>
-              <p className="text-muted mt-2">Vui lòng chờ trong giây lát</p>
+          <div className="pd-ltr-20">
+            <div className="loading-container">
+              <div className="spinner-border text-primary mb-3" role="status">
+                <span className="sr-only">Loading...</span>
+              </div>
+              <h5 className="loading-title">Đang tải dữ liệu thông báo...</h5>
+              <p className="loading-subtitle">Vui lòng chờ trong giây lát</p>
+
               {/* Skeleton giả lập khi đang tải */}
-              <div className="card shadow-sm border-0 mt-4 w-75">
-                <div className="card-body">
+              <div className="skeleton-card">
+                <div className="skeleton-body">
                   <div className="row">
                     <div className="col-md-4 text-center">
-                      <div
-                        className="bg-light rounded-circle mx-auto"
-                        style={{ width: "120px", height: "120px" }}
-                      ></div>
-                      <div
-                        className="bg-light mt-3 rounded"
-                        style={{
-                          width: "80%",
-                          height: "20px",
-                          margin: "0 auto",
-                        }}
-                      ></div>
+                      <div className="skeleton-avatar"></div>
+                      <div className="skeleton-text-short"></div>
                     </div>
                     <div className="col-md-8">
-                      <div
-                        className="bg-light rounded mb-3"
-                        style={{ width: "60%", height: "20px" }}
-                      ></div>
-                      <div
-                        className="bg-light rounded mb-2"
-                        style={{ width: "100%", height: "15px" }}
-                      ></div>
-                      <div
-                        className="bg-light rounded mb-2"
-                        style={{ width: "90%", height: "15px" }}
-                      ></div>
-                      <div
-                        className="bg-light rounded mb-2"
-                        style={{ width: "80%", height: "15px" }}
-                      ></div>
-                      <div
-                        className="bg-light rounded mb-2"
-                        style={{ width: "70%", height: "15px" }}
-                      ></div>
+                      <div className="skeleton-text-60"></div>
+                      <div className="skeleton-text-100"></div>
+                      <div className="skeleton-text-90"></div>
+                      <div className="skeleton-text-80"></div>
+                      <div className="skeleton-text-70"></div>
                     </div>
                   </div>
                 </div>
@@ -143,157 +119,234 @@ export default function NotificationShow() {
     );
   }
 
-  // Error
+  // Error State
   if (error) {
     return (
       <MainLayout>
-        <div className="text-center p-5 text-danger">
-          <i className="fa fa-exclamation-circle fa-3x mb-3"></i>
-          <h5>{error}</h5>
-          <button
-            className="btn btn-outline-primary mt-3"
-            onClick={() => window.location.reload()}
-          >
-            <i className="fa fa-sync-alt me-2"></i> Thử lại
-          </button>
-        </div>
-      </MainLayout>
-    );
-  }
-
-  // Không có dữ liệu
-  if (!notification) {
-    return (
-      <MainLayout>
-        <div className="text-center p-5 text-muted">
-          <i className="fa fa-bell-slash fa-2x mb-2"></i>
-          <p>Không có dữ liệu thông báo.</p>
-        </div>
-      </MainLayout>
-    );
-  }
-
-  return (
-    <MainLayout>
-      <main>
         <div className="main-container">
-          <div className="container user-show-container">
-            <div className="card shadow-lg border-0 rounded-3">
-              <div className="card-body p-5">
-                <h5 className="user-info-title mb-4">Chi tiết thông báo</h5>
-
-                <table className="table table-bordered">
-                  <tbody>
-                    <tr>
-                      <th style={{ width: "30%" }}>Mã thông báo</th>
-                      <td>{notification.NotificationId}</td>
-                    </tr>
-                    <tr>
-                      <th>Người nhận</th>
-                      <td className="fw-semibold">
-                        {getUserName(notification.UserId)}
-                      </td>
-                    </tr>
-                    <tr>
-                      <th>Tiêu đề</th>
-                      <td className="fw-bold text-primary">
-                        {notification.Title}
-                      </td>
-                    </tr>
-                    <tr>
-                      <th>Nội dung</th>
-                      <td>
-                        <div
-                          className="p-3 bg-light rounded"
-                          style={{ whiteSpace: "pre-wrap" }}
-                        >
-                          {notification.Message}
-                        </div>
-                      </td>
-                    </tr>
-                    <tr>
-                      <th>Loại thông báo</th>
-                      <td>
-                        <span
-                          className={`badge ${getTypeBadgeClass(
-                            notification.Type
-                          )} px-3 py-2`}
-                        >
-                          {getTypeLabel(notification.Type)}
-                        </span>
-                      </td>
-                    </tr>
-                    <tr>
-                      <th>Trạng thái đọc</th>
-                      <td>
-                        <span
-                          className={`fw-semibold px-3 py-1 rounded-pill text-white ${
-                            notification.IsRead ? "bg-success" : "bg-warning"
-                          }`}
-                        >
-                          {notification.IsRead ? "Đã đọc" : "Chưa đọc"}
-                        </span>
-                      </td>
-                    </tr>
-                    <tr>
-                      <th>Trạng thái</th>
-                      <td>
-                        <span
-                          className={`fw-semibold px-3 py-1 rounded-pill text-white ${
-                            notification.Status === "Active"
-                              ? "bg-success"
-                              : "bg-danger"
-                          }`}
-                        >
-                          {notification.Status === "Active"
-                            ? "Hoạt động"
-                            : "Khóa"}
-                        </span>
-                      </td>
-                    </tr>
-                    <tr>
-                      <th>Ngày tạo</th>
-                      <td>{notification.CreatedAt}</td>
-                    </tr>
-                    <tr>
-                      <th>Ngày cập nhật</th>
-                      <td>{notification.UpdatedAt}</td>
-                    </tr>
-                     <tr>
-                      <th>Người tạo</th>
-                      <td>{notification.CreatedBy}</td>
-                    </tr>
-                     <tr>
-                      <th>Người cập nhật</th>
-                      <td>{notification.UpdatedBy}</td>
-                    </tr>
-                  </tbody>
-                </table>
-
-                {/* Nút hành động */}
-                <div className="mt-4 action-btns d-flex">
-                  <button
-                    className="btn btn-edit me-3"
-                    onClick={() =>
-                      navigate(
-                        `/notifications/edit/${notification.NotificationId}`
-                      )
-                    }
-                  >
-                    <i className="fa fa-edit me-2"></i> Chỉnh sửa
-                  </button>
-                  <button
-                    className="btn btn-back"
-                    onClick={() => navigate("/notifications")}
-                  >
-                    <i className="fa fa-arrow-left me-2"></i> Quay lại
+          <div className="pd-ltr-20">
+            <div className="error-container">
+              <div className="error-content">
+                <div className="error-card">
+                  <div className="error-icon">
+                    <XCircle size={40} color="#ef4444" />
+                  </div>
+                  <h3 className="error-title">{error}</h3>
+                  <button onClick={() => window.location.reload()} className="error-button">
+                    Thử lại
                   </button>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </main>
+      </MainLayout>
+    );
+  }
+
+  // No Data State
+  if (!notification) {
+    return (
+      <MainLayout>
+        <div className="main-container">
+          <div className="pd-ltr-20">
+            <div className="no-data-container">
+              <div className="no-data-content">
+                <Bell size={64} className="no-data-icon" />
+                <p className="no-data-text">Không có dữ liệu thông báo.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  const isActive = notification.Status === "Active";
+  const isRead = notification.IsRead;
+
+  return (
+    <MainLayout>
+      <div className="main-container">
+        <div className="pd-ltr-20">
+          <div className="role-show-container">
+            {/* Background Effects */}
+            <div className="background-effect"></div>
+
+            <div className="role-show-content">
+              {/* Header */}
+              <div className="header-section">
+                <div>
+                  <button onClick={() => navigate("/notifications")} className="back-button">
+                    <ArrowLeft size={16} />
+                    Quay lại danh sách
+                  </button>
+                  <h1 className="page-title">Chi Tiết Thông Báo</h1>
+                  <p className="page-subtitle">
+                    Xem thông tin chi tiết và quản lý thông báo hệ thống
+                  </p>
+                </div>
+
+                <div className="header-actions">
+                  <button
+                    onClick={() => navigate(`/notifications/edit/${NotificationId}`)}
+                    className="edit-button"
+                  >
+                    <Edit3 size={18} />
+                    Chỉnh sửa
+                  </button>
+                </div>
+              </div>
+
+              {/* Main Content */}
+              <div className="main-grid">
+                {/* Left Column - Notification Summary */}
+                <div className="role-summary-card">
+                  {/* Icon */}
+                  <div className={`role-icon ${isActive ? 'active' : 'inactive'}`}>
+                    <Bell size={56} color="white" strokeWidth={2} />
+                  </div>
+
+                  {/* Notification Title */}
+                  <h2 className="role-name">{notification.Title}</h2>
+
+                  {/* Status Badges */}
+                  <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginBottom: '20px' }}>
+                    <div className={`status-badge ${isActive ? 'active' : 'inactive'}`}>
+                      {isActive ? <CheckCircle size={16} /> : <XCircle size={16} />}
+                      {isActive ? "Hoạt động" : "Không hoạt động"}
+                    </div>
+                    <div className={`status-badge ${isRead ? 'active' : 'inactive'}`} style={{
+                      background: isRead ? '#10b981' : '#f59e0b'
+                    }}>
+                      {isRead ? <CheckCircle size={16} /> : <XCircle size={16} />}
+                      {isRead ? "Đã đọc" : "Chưa đọc"}
+                    </div>
+                  </div>
+
+                  {/* Message */}
+                  <div className="description-box">
+                    <div className="description-header">
+                      <FileText size={18} color="#6b7280" />
+                      <span className="description-label">Nội dung</span>
+                    </div>
+                    <p className="description-text" style={{ whiteSpace: 'pre-wrap' }}>
+                      {notification.Message || "Không có nội dung"}
+                    </p>
+                  </div>
+
+                  {/* Type */}
+                  <div className="description-box">
+                    <div className="description-header">
+                      {getTypeIcon(notification.Type)}
+                      <span className="description-label">Loại thông báo</span>
+                    </div>
+                    <p className="description-text">
+                      {getTypeLabel(notification.Type)}
+                    </p>
+                  </div>
+
+                  {/* Notification ID */}
+                  <div className="role-id-box">
+                    <div className="role-id-label">ID Thông Báo</div>
+                    <div className="role-id-value">{notification.NotificationId}</div>
+                  </div>
+                </div>
+
+                {/* Right Column - Details */}
+                <div className="details-column">
+                  {/* Recipient Info */}
+                  <div className="info-card">
+                    <div className="info-header">
+                      <div className="info-icon">
+                        <User size={24} color="white" />
+                      </div>
+                      <div>
+                        <h3 className="info-title">Thông Tin Người Nhận</h3>
+                        <p className="info-subtitle">Chi tiết về người nhận thông báo</p>
+                      </div>
+                    </div>
+
+                    <div className="info-items">
+                      <div className="info-item">
+                        <User size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Người nhận</div>
+                          <div className="info-item-value">
+                            {getUserName(notification.UserId)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Created Info */}
+                  <div className="info-card">
+                    <div className="info-header">
+                      <div className="info-icon">
+                        <Sparkles size={24} color="white" />
+                      </div>
+                      <div>
+                        <h3 className="info-title">Thông Tin Tạo</h3>
+                        <p className="info-subtitle">Chi tiết về người tạo thông báo</p>
+                      </div>
+                    </div>
+
+                    <div className="info-items">
+                      <div className="info-item">
+                        <User size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Người tạo</div>
+                          <div className="info-item-value">{notification.CreatedBy || "N/A"}</div>
+                        </div>
+                      </div>
+
+                      <div className="info-item">
+                        <Calendar size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Ngày tạo</div>
+                          <div className="info-item-value">{notification.CreatedAt || "N/A"}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Updated Info */}
+                  <div className="info-card">
+                    <div className="info-header">
+                      <div className="info-icon">
+                        <Activity size={24} color="white" />
+                      </div>
+                      <div>
+                        <h3 className="info-title">Cập Nhật Gần Nhất</h3>
+                        <p className="info-subtitle">Lịch sử thay đổi thông báo</p>
+                      </div>
+                    </div>
+
+                    <div className="info-items">
+                      <div className="info-item">
+                        <User size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Người cập nhật</div>
+                          <div className="info-item-value">{notification.UpdatedBy || "N/A"}</div>
+                        </div>
+                      </div>
+
+                      <div className="info-item">
+                        <Clock size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Ngày cập nhật</div>
+                          <div className="info-item-value">{notification.UpdatedAt || "N/A"}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </MainLayout>
   );
 }

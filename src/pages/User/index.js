@@ -377,8 +377,7 @@ export default function User() {
                       <thead className="bg-light text-dark border-bottom">
                         <tr>
                           <th className="px-4">ID</th>
-                          <th>Họ tên</th>
-                          <th>Email</th>
+                          <th>Họ tên</th>                         
                           <th>Số điện thoại</th>
                           <th>Vai trò</th>
                           <th>Trạng thái</th>
@@ -390,8 +389,7 @@ export default function User() {
                           users.map((user, index) => (
                             <tr key={user.UserId} className="table-row-hover">
                               <td className="fw-bold px-4">{index + 1}</td>
-                              <td className="fw-semibold">{user.FullName}</td>
-                              <td className="text-muted">{user.Email}</td>
+                              <td className="fw-semibold">{user.FullName}</td>                            
                               <td className="text-muted">{user.PhoneNumber}</td>
                               <td>
                                 <span

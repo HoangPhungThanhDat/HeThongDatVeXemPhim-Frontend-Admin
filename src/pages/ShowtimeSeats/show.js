@@ -16,8 +16,12 @@ import {
   Calendar,
   Film,
   AlertTriangle,
+  User,
+  Sparkles,
+  Activity,
+  FileText,
 } from "lucide-react";
-import "../../styles/wishlist/Show.css";
+import "../../styles/Role/Show.css";
 
 export default function ShowtimeSeatShow() {
   const { ShowtimeSeatId } = useParams();
@@ -79,45 +83,27 @@ export default function ShowtimeSeatShow() {
       <MainLayout>
         <div className="main-container">
           <div className="pd-ltr-20">
-            <div className="wishlist-show-loading-container">
-              <div
-                className="spinner-border text-primary wishlist-show-spinner"
-                role="status"
-              ></div>
-              <h5 className="text-primary">
-                Đang tải dữ liệu trạng thái ghế...
-              </h5>
-              <p className="text-muted mt-2">Vui lòng chờ trong giây lát</p>
+            <div className="loading-container">
+              <div className="spinner-border text-primary mb-3" role="status">
+                <span className="sr-only">Loading...</span>
+              </div>
+              <h5 className="loading-title">Đang tải dữ liệu trạng thái ghế...</h5>
+              <p className="loading-subtitle">Vui lòng chờ trong giây lát</p>
 
-              {/* Skeleton */}
-              <div className="card shadow-sm border-0 wishlist-show-skeleton-card">
-                <div className="card-body">
+              {/* Skeleton giả lập khi đang tải */}
+              <div className="skeleton-card">
+                <div className="skeleton-body">
                   <div className="row">
                     <div className="col-md-4 text-center">
-                      <div className="wishlist-show-skeleton-avatar"></div>
-                      <div className="wishlist-show-skeleton-text"></div>
+                      <div className="skeleton-avatar"></div>
+                      <div className="skeleton-text-short"></div>
                     </div>
                     <div className="col-md-8">
-                      <div
-                        className="wishlist-show-skeleton-line"
-                        style={{ width: "60%" }}
-                      ></div>
-                      <div
-                        className="wishlist-show-skeleton-line"
-                        style={{ width: "100%" }}
-                      ></div>
-                      <div
-                        className="wishlist-show-skeleton-line"
-                        style={{ width: "90%" }}
-                      ></div>
-                      <div
-                        className="wishlist-show-skeleton-line"
-                        style={{ width: "80%" }}
-                      ></div>
-                      <div
-                        className="wishlist-show-skeleton-line"
-                        style={{ width: "70%" }}
-                      ></div>
+                      <div className="skeleton-text-60"></div>
+                      <div className="skeleton-text-100"></div>
+                      <div className="skeleton-text-90"></div>
+                      <div className="skeleton-text-80"></div>
+                      <div className="skeleton-text-70"></div>
                     </div>
                   </div>
                 </div>
@@ -135,17 +121,14 @@ export default function ShowtimeSeatShow() {
       <MainLayout>
         <div className="main-container">
           <div className="pd-ltr-20">
-            <div className="wishlist-show-error-container">
-              <div className="wishlist-show-error-content">
-                <div className="wishlist-show-error-card">
-                  <div className="wishlist-show-error-icon-wrapper">
+            <div className="error-container">
+              <div className="error-content">
+                <div className="error-card">
+                  <div className="error-icon">
                     <XCircle size={40} color="#ef4444" />
                   </div>
-                  <h3 className="wishlist-show-error-title">{error}</h3>
-                  <button
-                    onClick={() => window.location.reload()}
-                    className="wishlist-show-error-button"
-                  >
+                  <h3 className="error-title">{error}</h3>
+                  <button onClick={() => window.location.reload()} className="error-button">
                     Thử lại
                   </button>
                 </div>
@@ -163,12 +146,10 @@ export default function ShowtimeSeatShow() {
       <MainLayout>
         <div className="main-container">
           <div className="pd-ltr-20">
-            <div className="wishlist-show-no-data-container">
-              <div className="wishlist-show-no-data-content">
-                <Armchair size={64} className="wishlist-show-no-data-icon" />
-                <p className="wishlist-show-no-data-text">
-                  Không có dữ liệu trạng thái ghế.
-                </p>
+            <div className="no-data-container">
+              <div className="no-data-content">
+                <Armchair size={64} className="no-data-icon" />
+                <p className="no-data-text">Không có dữ liệu trạng thái ghế.</p>
               </div>
             </div>
           </div>
@@ -184,33 +165,28 @@ export default function ShowtimeSeatShow() {
     <MainLayout>
       <div className="main-container">
         <div className="pd-ltr-20">
-          <div className="wishlist-show-main-container">
+          <div className="role-show-container">
             {/* Background Effects */}
-            <div className="wishlist-show-bg-effect"></div>
+            <div className="background-effect"></div>
 
-            <div className="wishlist-show-content-wrapper">
+            <div className="role-show-content">
               {/* Header */}
-              <div className="wishlist-show-header">
+              <div className="header-section">
                 <div>
-                  <button
-                    onClick={() => navigate("/showtimeseats")}
-                    className="wishlist-show-back-button"
-                  >
+                  <button onClick={() => navigate("/showtimeseats")} className="back-button">
                     <ArrowLeft size={16} />
                     Quay lại danh sách
                   </button>
-                  <h1 className="wishlist-show-title">
-                    Chi Tiết Trạng Thái Ghế
-                  </h1>
-                  <p className="wishlist-show-subtitle">
+                  <h1 className="page-title">Chi Tiết Trạng Thái Ghế</h1>
+                  <p className="page-subtitle">
                     Xem thông tin chi tiết và quản lý trạng thái ghế theo suất chiếu
                   </p>
                 </div>
 
-                <div className="wishlist-show-actions">
+                <div className="header-actions">
                   <button
                     onClick={() => navigate(`/showtimeseats/edit/${ShowtimeSeatId}`)}
-                    className="wishlist-show-edit-button"
+                    className="edit-button"
                   >
                     <Edit3 size={18} />
                     Chỉnh sửa
@@ -219,35 +195,29 @@ export default function ShowtimeSeatShow() {
               </div>
 
               {/* Main Content */}
-              <div className="wishlist-show-grid">
+              <div className="main-grid">
                 {/* Left Column - Seat Summary */}
-                <div className="wishlist-show-summary-card">
+                <div className="role-summary-card">
                   {/* Icon */}
-                  <div
-                    className={`wishlist-show-icon-wrapper ${
-                      isAvailable ? "active" : "inactive"
-                    }`}
-                  >
+                  <div className={`role-icon ${isAvailable ? 'active' : 'inactive'}`}>
                     <Armchair size={56} color="white" strokeWidth={2} />
                   </div>
 
                   {/* Seat Info */}
-                  <h2 className="wishlist-show-user-name">
+                  <h2 className="role-name">
                     {seatDetail ? `Hàng ${seatDetail.Row} - Ghế ${seatDetail.Number}` : "N/A"}
                   </h2>
 
                   {/* Seat Type */}
-                  <p className="wishlist-show-movie-title">
+                  <p style={{ color: '#6b7280', fontSize: '15px', marginBottom: '16px' }}>
                     {seatDetail?.SeatType || "N/A"}
                   </p>
 
                   {/* Status Badge */}
                   <div
-                    className={`wishlist-show-status-badge ${
+                    className={`status-badge ${
                       showtimeSeat.Status === "Available"
                         ? "active"
-                        : showtimeSeat.Status === "Reserved"
-                        ? "inactive"
                         : "inactive"
                     }`}
                   >
@@ -267,74 +237,44 @@ export default function ShowtimeSeatShow() {
                       : showtimeSeat.Status}
                   </div>
 
+                  {/* Showtime Info */}
+                  <div className="description-box">
+                    <div className="description-header">
+                      <Film size={18} color="#6b7280" />
+                      <span className="description-label">Suất chiếu</span>
+                    </div>
+                    <p className="description-text">
+                      {getShowtimeInfo(showtimeSeat.ShowtimeId)}
+                    </p>
+                  </div>
+
                   {/* ShowtimeSeat ID */}
-                  <div className="wishlist-show-id-box">
-                    <div className="wishlist-show-id-label">
-                      ID Trạng Thái Ghế
-                    </div>
-                    <div className="wishlist-show-id-value">
-                      {showtimeSeat.ShowtimeSeatId}
-                    </div>
+                  <div className="role-id-box">
+                    <div className="role-id-label">ID Trạng Thái Ghế</div>
+                    <div className="role-id-value">{showtimeSeat.ShowtimeSeatId}</div>
                   </div>
                 </div>
 
                 {/* Right Column - Details */}
-                <div className="wishlist-show-details-column">
-                  {/* Showtime Info */}
-                  <div className="wishlist-show-info-card">
-                    <div className="wishlist-show-info-header">
-                      <div className="wishlist-show-info-icon user">
-                        <Film size={24} color="white" />
-                      </div>
-                      <div>
-                        <h3 className="wishlist-show-info-title">
-                          Thông Tin Suất Chiếu
-                        </h3>
-                        <p className="wishlist-show-info-subtitle">
-                          Chi tiết về suất chiếu
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="wishlist-show-info-list">
-                      <div className="wishlist-show-info-item">
-                        <Clock size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Suất chiếu
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {getShowtimeInfo(showtimeSeat.ShowtimeId)}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
+                <div className="details-column">
                   {/* Seat Details */}
-                  <div className="wishlist-show-info-card">
-                    <div className="wishlist-show-info-header">
-                      <div className="wishlist-show-info-icon movie">
-                        <Armchair size={24} color="white" />
+                  <div className="info-card">
+                    <div className="info-header">
+                      <div className="info-icon">
+                        <Sparkles size={24} color="white" />
                       </div>
                       <div>
-                        <h3 className="wishlist-show-info-title">
-                          Thông Tin Ghế Ngồi
-                        </h3>
-                        <p className="wishlist-show-info-subtitle">
-                          Chi tiết về vị trí ghế
-                        </p>
+                        <h3 className="info-title">Thông Tin Ghế Ngồi</h3>
+                        <p className="info-subtitle">Chi tiết về vị trí và loại ghế</p>
                       </div>
                     </div>
 
-                    <div className="wishlist-show-info-list">
-                      <div className="wishlist-show-info-item">
-                        <MapPin size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Vị trí ghế
-                          </div>
-                          <div className="wishlist-show-info-item-value">
+                    <div className="info-items">
+                      <div className="info-item">
+                        <MapPin size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Vị trí ghế</div>
+                          <div className="info-item-value">
                             {getSeatInfo(showtimeSeat.SeatId)}
                           </div>
                         </div>
@@ -342,39 +282,27 @@ export default function ShowtimeSeatShow() {
 
                       {seatDetail && (
                         <>
-                          <div className="wishlist-show-info-item">
-                            <Armchair size={20} color="#94a3b8" />
-                            <div className="wishlist-show-info-item-content">
-                              <div className="wishlist-show-info-item-label">
-                                Hàng
-                              </div>
-                              <div className="wishlist-show-info-item-value">
-                                {seatDetail.Row}
-                              </div>
+                          <div className="info-item">
+                            <Armchair size={20} color="#6b7280" />
+                            <div className="info-item-content">
+                              <div className="info-item-label">Hàng</div>
+                              <div className="info-item-value">{seatDetail.Row}</div>
                             </div>
                           </div>
 
-                          <div className="wishlist-show-info-item">
-                            <Armchair size={20} color="#94a3b8" />
-                            <div className="wishlist-show-info-item-content">
-                              <div className="wishlist-show-info-item-label">
-                                Số ghế
-                              </div>
-                              <div className="wishlist-show-info-item-value">
-                                {seatDetail.Number}
-                              </div>
+                          <div className="info-item">
+                            <Armchair size={20} color="#6b7280" />
+                            <div className="info-item-content">
+                              <div className="info-item-label">Số ghế</div>
+                              <div className="info-item-value">{seatDetail.Number}</div>
                             </div>
                           </div>
 
-                          <div className="wishlist-show-info-item">
-                            <Armchair size={20} color="#94a3b8" />
-                            <div className="wishlist-show-info-item-content">
-                              <div className="wishlist-show-info-item-label">
-                                Loại ghế
-                              </div>
-                              <div className="wishlist-show-info-item-value">
-                                {seatDetail.SeatType}
-                              </div>
+                          <div className="info-item">
+                            <FileText size={20} color="#6b7280" />
+                            <div className="info-item-content">
+                              <div className="info-item-label">Loại ghế</div>
+                              <div className="info-item-value">{seatDetail.SeatType}</div>
                             </div>
                           </div>
                         </>
@@ -382,44 +310,95 @@ export default function ShowtimeSeatShow() {
                     </div>
                   </div>
 
-                  {/* System Info */}
-                  <div className="wishlist-show-info-card">
-                    <div className="wishlist-show-info-header">
-                      <div className="wishlist-show-info-icon time">
-                        <Calendar size={24} color="white" />
+                  {/* Booking Status */}
+                  <div className="info-card">
+                    <div className="info-header">
+                      <div className="info-icon">
+                        <Activity size={24} color="white" />
                       </div>
                       <div>
-                        <h3 className="wishlist-show-info-title">
-                          Thông Tin Hệ Thống
-                        </h3>
-                        <p className="wishlist-show-info-subtitle">
-                          Lịch sử hoạt động
-                        </p>
+                        <h3 className="info-title">Trạng Thái Đặt Chỗ</h3>
+                        <p className="info-subtitle">Thông tin về tình trạng ghế</p>
                       </div>
                     </div>
 
-                    <div className="wishlist-show-info-list">
-                      <div className="wishlist-show-info-item">
-                        <Calendar size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Ngày tạo
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {showtimeSeat.CreatedAt || "N/A"}
+                    <div className="info-items">
+                      <div className="info-item">
+                        <CheckCircle size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Trạng thái</div>
+                          <div className="info-item-value">
+                            {showtimeSeat.Status === "Available"
+                              ? "Còn trống"
+                              : showtimeSeat.Status === "Reserved"
+                              ? "Đã đặt"
+                              : showtimeSeat.Status === "Broken"
+                              ? "Hỏng"
+                              : showtimeSeat.Status}
                           </div>
                         </div>
                       </div>
 
-                      <div className="wishlist-show-info-item">
-                        <Clock size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Cập nhật lần cuối
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {showtimeSeat.UpdatedAt || "N/A"}
-                          </div>
+                      <div className="info-item">
+                        <Clock size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">ID Suất chiếu</div>
+                          <div className="info-item-value">{showtimeSeat.ShowtimeId}</div>
+                        </div>
+                      </div>
+
+                      <div className="info-item">
+                        <Armchair size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">ID Ghế</div>
+                          <div className="info-item-value">{showtimeSeat.SeatId}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* System Info */}
+                  <div className="info-card">
+                    <div className="info-header">
+                      <div className="info-icon">
+                        <Calendar size={24} color="white" />
+                      </div>
+                      <div>
+                        <h3 className="info-title">Thông Tin Hệ Thống</h3>
+                        <p className="info-subtitle">Lịch sử hoạt động</p>
+                      </div>
+                    </div>
+
+                    <div className="info-items">
+                      <div className="info-item">
+                        <Calendar size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Ngày tạo</div>
+                          <div className="info-item-value">{showtimeSeat.CreatedAt || "N/A"}</div>
+                        </div>
+                      </div>
+
+                      <div className="info-item">
+                        <Clock size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Cập nhật lần cuối</div>
+                          <div className="info-item-value">{showtimeSeat.UpdatedAt || "N/A"}</div>
+                        </div>
+                      </div>
+
+                      <div className="info-item">
+                        <User size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Người tạo</div>
+                          <div className="info-item-value">{showtimeSeat.CreatedBy || "N/A"}</div>
+                        </div>
+                      </div>
+
+                      <div className="info-item">
+                        <User size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Người cập nhật</div>
+                          <div className="info-item-value">{showtimeSeat.UpdatedBy || "N/A"}</div>
                         </div>
                       </div>
                     </div>

@@ -18,8 +18,10 @@ import {
   Play,
   StopCircle,
   User,
+  Sparkles,
+  Activity,
 } from "lucide-react";
-import "../../styles/wishlist/Show.css";
+import "../../styles/Role/Show.css";
 
 export default function ScheduleShow() {
   const { ScheduleId } = useParams();
@@ -88,45 +90,27 @@ export default function ScheduleShow() {
       <MainLayout>
         <div className="main-container">
           <div className="pd-ltr-20">
-            <div className="wishlist-show-loading-container">
-              <div
-                className="spinner-border text-primary wishlist-show-spinner"
-                role="status"
-              ></div>
-              <h5 className="text-primary">
-                Đang tải dữ liệu lịch chiếu định kỳ...
-              </h5>
-              <p className="text-muted mt-2">Vui lòng chờ trong giây lát</p>
+            <div className="loading-container">
+              <div className="spinner-border text-primary mb-3" role="status">
+                <span className="sr-only">Loading...</span>
+              </div>
+              <h5 className="loading-title">Đang tải dữ liệu lịch chiếu...</h5>
+              <p className="loading-subtitle">Vui lòng chờ trong giây lát</p>
 
-              {/* Skeleton */}
-              <div className="card shadow-sm border-0 wishlist-show-skeleton-card">
-                <div className="card-body">
+              {/* Skeleton giả lập khi đang tải */}
+              <div className="skeleton-card">
+                <div className="skeleton-body">
                   <div className="row">
                     <div className="col-md-4 text-center">
-                      <div className="wishlist-show-skeleton-avatar"></div>
-                      <div className="wishlist-show-skeleton-text"></div>
+                      <div className="skeleton-avatar"></div>
+                      <div className="skeleton-text-short"></div>
                     </div>
                     <div className="col-md-8">
-                      <div
-                        className="wishlist-show-skeleton-line"
-                        style={{ width: "60%" }}
-                      ></div>
-                      <div
-                        className="wishlist-show-skeleton-line"
-                        style={{ width: "100%" }}
-                      ></div>
-                      <div
-                        className="wishlist-show-skeleton-line"
-                        style={{ width: "90%" }}
-                      ></div>
-                      <div
-                        className="wishlist-show-skeleton-line"
-                        style={{ width: "80%" }}
-                      ></div>
-                      <div
-                        className="wishlist-show-skeleton-line"
-                        style={{ width: "70%" }}
-                      ></div>
+                      <div className="skeleton-text-60"></div>
+                      <div className="skeleton-text-100"></div>
+                      <div className="skeleton-text-90"></div>
+                      <div className="skeleton-text-80"></div>
+                      <div className="skeleton-text-70"></div>
                     </div>
                   </div>
                 </div>
@@ -144,17 +128,14 @@ export default function ScheduleShow() {
       <MainLayout>
         <div className="main-container">
           <div className="pd-ltr-20">
-            <div className="wishlist-show-error-container">
-              <div className="wishlist-show-error-content">
-                <div className="wishlist-show-error-card">
-                  <div className="wishlist-show-error-icon-wrapper">
+            <div className="error-container">
+              <div className="error-content">
+                <div className="error-card">
+                  <div className="error-icon">
                     <XCircle size={40} color="#ef4444" />
                   </div>
-                  <h3 className="wishlist-show-error-title">{error}</h3>
-                  <button
-                    onClick={() => window.location.reload()}
-                    className="wishlist-show-error-button"
-                  >
+                  <h3 className="error-title">{error}</h3>
+                  <button onClick={() => window.location.reload()} className="error-button">
                     Thử lại
                   </button>
                 </div>
@@ -172,12 +153,10 @@ export default function ScheduleShow() {
       <MainLayout>
         <div className="main-container">
           <div className="pd-ltr-20">
-            <div className="wishlist-show-no-data-container">
-              <div className="wishlist-show-no-data-content">
-                <CalendarDays size={64} className="wishlist-show-no-data-icon" />
-                <p className="wishlist-show-no-data-text">
-                  Không có dữ liệu lịch chiếu định kỳ.
-                </p>
+            <div className="no-data-container">
+              <div className="no-data-content">
+                <CalendarDays size={64} className="no-data-icon" />
+                <p className="no-data-text">Không có dữ liệu lịch chiếu định kỳ.</p>
               </div>
             </div>
           </div>
@@ -192,33 +171,28 @@ export default function ScheduleShow() {
     <MainLayout>
       <div className="main-container">
         <div className="pd-ltr-20">
-          <div className="wishlist-show-main-container">
+          <div className="role-show-container">
             {/* Background Effects */}
-            <div className="wishlist-show-bg-effect"></div>
+            <div className="background-effect"></div>
 
-            <div className="wishlist-show-content-wrapper">
+            <div className="role-show-content">
               {/* Header */}
-              <div className="wishlist-show-header">
+              <div className="header-section">
                 <div>
-                  <button
-                    onClick={() => navigate("/schedules")}
-                    className="wishlist-show-back-button"
-                  >
+                  <button onClick={() => navigate("/schedules")} className="back-button">
                     <ArrowLeft size={16} />
                     Quay lại danh sách
                   </button>
-                  <h1 className="wishlist-show-title">
-                    Chi Tiết Lịch Chiếu Định Kỳ
-                  </h1>
-                  <p className="wishlist-show-subtitle">
-                    Xem thông tin chi tiết và quản lý lịch chiếu
+                  <h1 className="page-title">Chi Tiết Lịch Chiếu Định Kỳ</h1>
+                  <p className="page-subtitle">
+                    Xem thông tin chi tiết và quản lý lịch chiếu định kỳ
                   </p>
                 </div>
 
-                <div className="wishlist-show-actions">
+                <div className="header-actions">
                   <button
                     onClick={() => navigate(`/schedules/edit/${ScheduleId}`)}
-                    className="wishlist-show-edit-button"
+                    className="edit-button"
                   >
                     <Edit3 size={18} />
                     Chỉnh sửa
@@ -227,183 +201,130 @@ export default function ScheduleShow() {
               </div>
 
               {/* Main Content */}
-              <div className="wishlist-show-grid">
+              <div className="main-grid">
                 {/* Left Column - Schedule Summary */}
-                <div className="wishlist-show-summary-card">
+                <div className="role-summary-card">
                   {/* Icon */}
-                  <div
-                    className={`wishlist-show-icon-wrapper ${
-                      isActive ? "active" : "inactive"
-                    }`}
-                  >
+                  <div className={`role-icon ${isActive ? 'active' : 'inactive'}`}>
                     <CalendarDays size={56} color="white" strokeWidth={2} />
                   </div>
 
                   {/* Movie Title */}
-                  <h2 className="wishlist-show-user-name">
-                    {getMovieTitle(schedule.MovieId)}
-                  </h2>
+                  <h2 className="role-name">{getMovieTitle(schedule.MovieId)}</h2>
 
                   {/* Room Name */}
-                  <p className="wishlist-show-movie-title">
+                  <p style={{ color: '#6b7280', fontSize: '15px', marginBottom: '16px' }}>
                     {getRoomName(schedule.RoomId)}
                   </p>
 
                   {/* Status Badge */}
-                  <div
-                    className={`wishlist-show-status-badge ${
-                      isActive ? "active" : "inactive"
-                    }`}
-                  >
-                    {isActive ? (
-                      <CheckCircle size={16} />
-                    ) : (
-                      <XCircle size={16} />
-                    )}
+                  <div className={`status-badge ${isActive ? 'active' : 'inactive'}`}>
+                    {isActive ? <CheckCircle size={16} /> : <XCircle size={16} />}
                     {isActive ? "Hoạt động" : "Không hoạt động"}
                   </div>
 
+                  {/* Days of Week */}
+                  <div className="description-box">
+                    <div className="description-header">
+                      <CalendarDays size={18} color="#6b7280" />
+                      <span className="description-label">Các ngày trong tuần</span>
+                    </div>
+                    <p className="description-text">
+                      {getDaysInVietnamese(schedule.DaysOfWeek)}
+                    </p>
+                  </div>
+
                   {/* Schedule ID */}
-                  <div className="wishlist-show-id-box">
-                    <div className="wishlist-show-id-label">
-                      ID Lịch Chiếu
-                    </div>
-                    <div className="wishlist-show-id-value">
-                      {schedule.ScheduleId}
-                    </div>
+                  <div className="role-id-box">
+                    <div className="role-id-label">ID Lịch Chiếu</div>
+                    <div className="role-id-value">{schedule.ScheduleId}</div>
                   </div>
                 </div>
 
                 {/* Right Column - Details */}
-                <div className="wishlist-show-details-column">
+                <div className="details-column">
                   {/* Movie & Room Info */}
-                  <div className="wishlist-show-info-card">
-                    <div className="wishlist-show-info-header">
-                      <div className="wishlist-show-info-icon user">
+                  <div className="info-card">
+                    <div className="info-header">
+                      <div className="info-icon">
                         <Film size={24} color="white" />
                       </div>
                       <div>
-                        <h3 className="wishlist-show-info-title">
-                          Thông Tin Phim & Phòng
-                        </h3>
-                        <p className="wishlist-show-info-subtitle">
-                          Chi tiết về phim và phòng chiếu
-                        </p>
+                        <h3 className="info-title">Thông Tin Phim & Phòng</h3>
+                        <p className="info-subtitle">Chi tiết về phim và phòng chiếu</p>
                       </div>
                     </div>
 
-                    <div className="wishlist-show-info-list">
-                      <div className="wishlist-show-info-item">
-                        <Film size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Tên phim
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {getMovieTitle(schedule.MovieId)}
-                          </div>
+                    <div className="info-items">
+                      <div className="info-item">
+                        <Film size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Tên phim</div>
+                          <div className="info-item-value">{getMovieTitle(schedule.MovieId)}</div>
                         </div>
                       </div>
 
-                      <div className="wishlist-show-info-item">
-                        <DoorOpen size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Phòng chiếu
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {getRoomName(schedule.RoomId)}
-                          </div>
+                      <div className="info-item">
+                        <DoorOpen size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Phòng chiếu</div>
+                          <div className="info-item-value">{getRoomName(schedule.RoomId)}</div>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   {/* Schedule Details */}
-                  <div className="wishlist-show-info-card">
-                    <div className="wishlist-show-info-header">
-                      <div className="wishlist-show-info-icon movie">
-                        <CalendarDays size={24} color="white" />
+                  <div className="info-card">
+                    <div className="info-header">
+                      <div className="info-icon">
+                        <Sparkles size={24} color="white" />
                       </div>
                       <div>
-                        <h3 className="wishlist-show-info-title">
-                          Thông Tin Lịch Chiếu
-                        </h3>
-                        <p className="wishlist-show-info-subtitle">
-                          Chi tiết về thời gian và giá vé
-                        </p>
+                        <h3 className="info-title">Thông Tin Lịch Chiếu</h3>
+                        <p className="info-subtitle">Chi tiết về thời gian và giá vé</p>
                       </div>
                     </div>
 
-                    <div className="wishlist-show-info-list">
-                      <div className="wishlist-show-info-item">
-                        <Calendar size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Ngày bắt đầu
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {schedule.StartDate || "N/A"}
-                          </div>
+                    <div className="info-items">
+                      <div className="info-item">
+                        <Calendar size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Ngày bắt đầu</div>
+                          <div className="info-item-value">{schedule.StartDate || "N/A"}</div>
                         </div>
                       </div>
 
-                      <div className="wishlist-show-info-item">
-                        <Calendar size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Ngày kết thúc
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {schedule.EndDate || "N/A"}
-                          </div>
+                      <div className="info-item">
+                        <Calendar size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Ngày kết thúc</div>
+                          <div className="info-item-value">{schedule.EndDate || "N/A"}</div>
                         </div>
                       </div>
 
-                      <div className="wishlist-show-info-item">
-                        <CalendarDays size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Các ngày trong tuần
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {getDaysInVietnamese(schedule.DaysOfWeek)}
-                          </div>
+                      <div className="info-item">
+                        <Play size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Giờ chiếu</div>
+                          <div className="info-item-value">{schedule.StartTime || "N/A"}</div>
                         </div>
                       </div>
 
-                      <div className="wishlist-show-info-item">
-                        <Play size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Giờ chiếu
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {schedule.StartTime || "N/A"}
-                          </div>
+                      <div className="info-item">
+                        <StopCircle size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Giờ kết thúc</div>
+                          <div className="info-item-value">{schedule.EndTime || "N/A"}</div>
                         </div>
                       </div>
 
-                      <div className="wishlist-show-info-item">
-                        <StopCircle size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Giờ kết thúc
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {schedule.EndTime || "N/A"}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="wishlist-show-info-item">
-                        <DollarSign size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Giá vé
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {schedule.Price ? `${schedule.Price} đ` : "N/A"}
+                      <div className="info-item">
+                        <DollarSign size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Giá vé</div>
+                          <div className="info-item-value">
+                            {schedule.Price ? `${schedule.Price.toLocaleString('vi-VN')} đ` : "N/A"}
                           </div>
                         </div>
                       </div>
@@ -411,67 +332,47 @@ export default function ScheduleShow() {
                   </div>
 
                   {/* System Info */}
-                  <div className="wishlist-show-info-card">
-                    <div className="wishlist-show-info-header">
-                      <div className="wishlist-show-info-icon time">
-                        <Clock size={24} color="white" />
+                  <div className="info-card">
+                    <div className="info-header">
+                      <div className="info-icon">
+                        <Activity size={24} color="white" />
                       </div>
                       <div>
-                        <h3 className="wishlist-show-info-title">
-                          Thông Tin Hệ Thống
-                        </h3>
-                        <p className="wishlist-show-info-subtitle">
-                          Lịch sử hoạt động
-                        </p>
+                        <h3 className="info-title">Thông Tin Hệ Thống</h3>
+                        <p className="info-subtitle">Lịch sử hoạt động</p>
                       </div>
                     </div>
 
-                    <div className="wishlist-show-info-list">
-                      <div className="wishlist-show-info-item">
-                        <Calendar size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Ngày tạo
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {schedule.CreatedAt || "N/A"}
-                          </div>
+                    <div className="info-items">
+                      <div className="info-item">
+                        <User size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Người tạo</div>
+                          <div className="info-item-value">{schedule.CreatedBy || "N/A"}</div>
                         </div>
                       </div>
 
-                      <div className="wishlist-show-info-item">
-                        <Clock size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Cập nhật lần cuối
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {schedule.UpdatedAt || "N/A"}
-                          </div>
+                      <div className="info-item">
+                        <Calendar size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Ngày tạo</div>
+                          <div className="info-item-value">{schedule.CreatedAt || "N/A"}</div>
                         </div>
                       </div>
 
-                      <div className="wishlist-show-info-item">
-                        <User size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Người tạo
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {schedule.CreatedBy || "N/A"}
-                          </div>
+                      <div className="info-item">
+                        <User size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Người cập nhật</div>
+                          <div className="info-item-value">{schedule.UpdatedBy || "N/A"}</div>
                         </div>
                       </div>
 
-                      <div className="wishlist-show-info-item">
-                        <User size={20} color="#94a3b8" />
-                        <div className="wishlist-show-info-item-content">
-                          <div className="wishlist-show-info-item-label">
-                            Người cập nhật
-                          </div>
-                          <div className="wishlist-show-info-item-value">
-                            {schedule.UpdatedBy || "N/A"}
-                          </div>
+                      <div className="info-item">
+                        <Clock size={20} color="#6b7280" />
+                        <div className="info-item-content">
+                          <div className="info-item-label">Cập nhật lần cuối</div>
+                          <div className="info-item-value">{schedule.UpdatedAt || "N/A"}</div>
                         </div>
                       </div>
                     </div>
