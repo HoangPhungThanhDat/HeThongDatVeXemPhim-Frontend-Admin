@@ -1,7 +1,7 @@
 <div align="center">
 
-# 🎬 Cinema Booking System
-### Admin Panel - Quản Trị Rạp Chiếu Phim
+# Hệ thống đặt vé rạp chiếu phim
+### Gấu Phim Admin - Quản Trị Rạp Chiếu Phim
 
 <img src="https://img.shields.io/badge/React-18.2.0-61DAFB?style=for-the-badge&logo=react&logoColor=white" alt="React"/>
 <img src="https://img.shields.io/badge/Redux_Toolkit-1.9.5-764ABC?style=for-the-badge&logo=redux&logoColor=white" alt="Redux"/>
@@ -35,7 +35,7 @@
 
 ## 🌟 Giới Thiệu
 
-**Cinema Admin Panel** là giao diện quản trị hiện đại cho hệ thống đặt vé xem phim trực tuyến. Được thiết kế với trải nghiệm người dùng tối ưu, hệ thống cung cấp đầy đủ công cụ quản lý nghiệp vụ rạp chiếu phim một cách chuyên nghiệp và hiệu quả.
+**Gấu Phim Admin** là giao diện quản trị hiện đại cho hệ thống đặt vé xem phim trực tuyến. Được thiết kế với trải nghiệm người dùng tối ưu, hệ thống cung cấp đầy đủ công cụ quản lý nghiệp vụ rạp chiếu phim một cách chuyên nghiệp và hiệu quả.
 
 ### 🎯 Điểm Nổi Bật
 
@@ -1468,18 +1468,12 @@ Xin cảm ơn các thư viện và công cụ mã nguồn mở tuyệt vời:
 
 <div align="center">
 
-### ⭐ Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=your-username/cinema-admin-panel&type=Date)](https://star-history.com/#your-username/cinema-admin-panel&Date)
-
----
-
 **Nếu dự án này hữu ích, đừng quên cho một ⭐ nhé!**
 
 Made with ❤️ by **Gấu Phim Team**
 
 <img src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png" width="100%"/>
 
-*© 2024 Cinema Booking System. All rights reserved.*
+*© 2025 Cinema Booking System. All rights reserved.*
 
 </div>

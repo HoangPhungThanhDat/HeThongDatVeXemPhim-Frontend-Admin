@@ -655,40 +655,7 @@ const Header = () => {
                 </ul>
               </li>
 
-              {/* Hệ thống & báo cáo */}
-              <li
-                className={`dropdown ${
-                  activeMenu === "system" ? "active" : ""
-                }`}
-              >
-                <a
-                  href="#"
-                  className="dropdown-toggle"
-                  onClick={() => toggleMenu("system")}
-                >
-                  <span className="micon dw dw-browser2"></span>
-                  <span className="mtext">Hệ thống & Báo cáo</span>
-                </a>
-                <ul
-                  className="submenu"
-                  style={{
-                    display: activeMenu === "system" ? "block" : "none",
-                  }}
-                >
-                  <li>
-                    <a href="403.html">Nhật ký hệ thống</a>
-                  </li>
-                  <li>
-                    <a href="404.html">Trang lỗi</a>
-                  </li>
-                  <li>
-                    <a href="500.html">500</a>
-                  </li>
-                  <li>
-                    <a href="503.html">503</a>
-                  </li>
-                </ul>
-              </li>
+              
 
               {/* Quản lý rạp chiếu */}
               <li
@@ -761,7 +728,13 @@ const Header = () => {
                   <span className="mtext">Chat</span>
                 </a>
               </li>
+              <li>
+                <a href="invoice.html" className="dropdown-toggle no-arrow">
+                <span className="micon dw dw-phone-call"></span>
 
+                  <span className="mtext">Liên Hệ</span>
+                </a>
+              </li>
               {/* Voucher */}
               <li>
                 <a href="invoice.html" className="dropdown-toggle no-arrow">
@@ -804,7 +777,40 @@ const Header = () => {
                   </li>
                 </ul>
               </li>
-
+{/* Hệ thống & báo cáo */}
+<li
+                className={`dropdown ${
+                  activeMenu === "system" ? "active" : ""
+                }`}
+              >
+                <a
+                  href="#"
+                  className="dropdown-toggle"
+                  onClick={() => toggleMenu("system")}
+                >
+                  <span className="micon dw dw-browser2"></span>
+                  <span className="mtext">Hệ thống & Báo cáo</span>
+                </a>
+                <ul
+                  className="submenu"
+                  style={{
+                    display: activeMenu === "system" ? "block" : "none",
+                  }}
+                >
+                  <li>
+                    <a href="403.html">Nhật ký hệ thống</a>
+                  </li>
+                  <li>
+                    <a href="404.html">Trang lỗi</a>
+                  </li>
+                  <li>
+                    <a href="500.html">500</a>
+                  </li>
+                  <li>
+                    <a href="503.html">503</a>
+                  </li>
+                </ul>
+              </li>
               {/* External link */}
               <li>
                 <a

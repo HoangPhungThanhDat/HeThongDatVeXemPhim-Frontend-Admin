@@ -77,7 +77,7 @@ export default function SeatShow() {
   return (
     <div>
       <MainLayout>
-        <main>
+      <main className="seat-management-page">
           <div className="main-container">
             <div className="pd-ltr-20">
               {/* Header với nút quay lại */}
