@@ -106,6 +106,8 @@ import NewEdit from "../pages/New/edit";
 import Seat from "../pages/Seat/index";
 import SeatShow from "../pages/Seat/show";
 import SeatEdit from "../pages/Seat/edit";
+
+import Contact from "../pages/Contact/index";
 export default function AdminRoutes() {
   return (
     <Routes>
@@ -779,6 +781,15 @@ export default function AdminRoutes() {
         element={
           <PrivateRoute>
             <SeatEdit />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/contacts"
+        element={
+          <PrivateRoute>
+            <Contact />
           </PrivateRoute>
         }
       />
