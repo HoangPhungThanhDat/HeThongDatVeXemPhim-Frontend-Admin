@@ -33,18 +33,15 @@ export default function Schedule() {
   });
 
   useEffect(() => {
-    // Lấy tất cả lịch chiếu
     ScheduleApi.getAll()
       .then((res) => setSchedules(res.data.data))
       .catch((err) => console.error("Lỗi load schedules:", err))
       .finally(() => setLoading(false));
 
-    // Lấy danh sách phim
     MovieApi.getAll()
       .then((res) => setMovies(res.data.data))
       .catch((err) => console.error("Lỗi load movies:", err));
 
-    // Lấy danh sách phòng
     RoomApi.getAll()
       .then((res) => setRooms(res.data.data))
       .catch((err) => console.error("Lỗi load rooms:", err));
@@ -64,20 +61,24 @@ export default function Schedule() {
     });
   };
 
+  // ✅ handleAddSchedule mới: đọc meta từ backend để hiển thị số suất chiếu + ghế đã tạo
   const handleAddSchedule = async (e) => {
     e.preventDefault();
     try {
       const payload = {
         ...newSchedule,
-        MovieId: newSchedule.MovieId ? Number(newSchedule.MovieId) : null,
-        RoomId: newSchedule.RoomId ? Number(newSchedule.RoomId) : null,
-        DaysOfWeek: newSchedule.DaysOfWeek, // giữ nguyên là mảng
-
-        Price: parseFloat(newSchedule.Price),
+        MovieId:    newSchedule.MovieId ? Number(newSchedule.MovieId) : null,
+        RoomId:     newSchedule.RoomId  ? Number(newSchedule.RoomId)  : null,
+        DaysOfWeek: newSchedule.DaysOfWeek, // gửi dạng array ['Mon','Tue',...]
+        Price:      parseFloat(newSchedule.Price),
       };
+
       const res = await ScheduleApi.create(payload);
-      const createdSchedule = res.data.data || res.data;
+      const { data: createdSchedule, meta } = res.data;
+
       setSchedules([...schedules, createdSchedule]);
+
+      // Reset form
       setNewSchedule({
         MovieId: "",
         RoomId: "",
@@ -90,10 +91,16 @@ export default function Schedule() {
         Status: "",
       });
       setShowForm(false);
-      showToast("success", "🎉 Thêm lịch chiếu thành công!");
+
+      // Toast hiển thị số suất chiếu + ghế đã tạo tự động
+      const detail = meta
+        ? ` (${meta.showtimes_created} suất chiếu, ${meta.seats_created} ghế)`
+        : "";
+      showToast("success", `🎉 Tạo lịch chiếu thành công!${detail}`);
     } catch (error) {
       console.error("Lỗi khi thêm schedule:", error);
-      showToast("error", "❌ Thêm thất bại!");
+      const errMsg = error.response?.data?.message || "Thêm thất bại!";
+      showToast("error", `❌ ${errMsg}`);
     }
   };
 
@@ -107,7 +114,6 @@ export default function Schedule() {
         return;
       }
 
-      // ✅ Đảm bảo DaysOfWeek là mảng
       let days = scheduleItem.DaysOfWeek;
       if (typeof days === "string") {
         days = days.split(",").map((d) => d.trim());
@@ -121,11 +127,12 @@ export default function Schedule() {
         scheduleItem.EndDate?.split("T")[0] || scheduleItem.EndDate;
       const startTime =
         scheduleItem.StartTime?.slice(0, 5) || scheduleItem.StartTime;
-      const endTime = scheduleItem.EndTime?.slice(0, 5) || scheduleItem.EndTime;
+      const endTime =
+        scheduleItem.EndTime?.slice(0, 5) || scheduleItem.EndTime;
 
       let priceValue = scheduleItem.Price;
       if (typeof priceValue === "string") {
-        priceValue = priceValue.replace(/[^\d]/g, ""); // xoá ký tự ₫, dấu phẩy, chữ
+        priceValue = priceValue.replace(/[^\d]/g, "");
       }
       priceValue = Number(priceValue);
 
@@ -136,15 +143,15 @@ export default function Schedule() {
       }
 
       const payload = {
-        MovieId: Number(scheduleItem.MovieId),
-        RoomId: Number(scheduleItem.RoomId),
-        StartDate: startDate,
-        EndDate: endDate,
+        MovieId:    Number(scheduleItem.MovieId),
+        RoomId:     Number(scheduleItem.RoomId),
+        StartDate:  startDate,
+        EndDate:    endDate,
         DaysOfWeek: days,
-        StartTime: startTime,
-        EndTime: endTime,
-        Price: priceValue,
-        Status: newStatus,
+        StartTime:  startTime,
+        EndTime:    endTime,
+        Price:      priceValue,
+        Status:     newStatus,
       };
 
       await ScheduleApi.update(ScheduleId, payload);
@@ -156,8 +163,6 @@ export default function Schedule() {
       );
     } catch (error) {
       console.error("❌ Lỗi khi cập nhật trạng thái:", error);
-      if (error.response?.data?.errors) {
-      }
       showToast("error", "❌ Không thể cập nhật trạng thái!");
     }
   };
@@ -175,6 +180,7 @@ export default function Schedule() {
   };
 
   if (loading) return <Loader />;
+
   const days = [
     { vi: "Thứ 2", en: "Mon" },
     { vi: "Thứ 3", en: "Tue" },
@@ -191,11 +197,11 @@ export default function Schedule() {
         <main>
           <div className="main-container">
             <div className="pd-ltr-20">
+
               {/* Header */}
               <div className="d-flex justify-content-between align-items-center mb-4 p-3 shadow-sm bg-gradient rounded-4 header-box">
                 <h3 className="m-0 text-white fw-bold d-flex align-items-center">
-                  <i className="fas fa-heart me-2"></i> Quản lý lịch chiếu định
-                  kỳ
+                  <i className="fas fa-heart me-2"></i> Quản lý lịch chiếu định kỳ
                 </h3>
                 <div>
                   <button
@@ -222,26 +228,22 @@ export default function Schedule() {
                   >
                     <div className="card-body p-4">
                       <h4 className="fw-bold mb-4 text-primary d-flex align-items-center">
-                        <i className="fas fa-calendar-alt me-2"></i> Thêm lịch
-                        chiếu định kỳ
+                        <i className="fas fa-calendar-alt me-2"></i> Thêm lịch chiếu định kỳ
                       </h4>
 
                       <form onSubmit={handleAddSchedule}>
                         <div className="row g-4">
+
                           {/* Phim */}
                           <div className="col-md-6">
                             <label className="form-label fw-bold">
-                              <i className="fas fa-film me-2 text-primary"></i>
-                              Phim
+                              <i className="fas fa-film me-2 text-primary"></i>Phim
                             </label>
                             <select
                               className="form-select custom-input"
                               value={newSchedule.MovieId}
                               onChange={(e) =>
-                                setNewSchedule({
-                                  ...newSchedule,
-                                  MovieId: e.target.value,
-                                })
+                                setNewSchedule({ ...newSchedule, MovieId: e.target.value })
                               }
                               required
                             >
@@ -257,17 +259,13 @@ export default function Schedule() {
                           {/* Phòng chiếu */}
                           <div className="col-md-6">
                             <label className="form-label fw-bold">
-                              <i className="fas fa-door-open me-2 text-danger"></i>
-                              Phòng chiếu
+                              <i className="fas fa-door-open me-2 text-danger"></i>Phòng chiếu
                             </label>
                             <select
                               className="form-select custom-input"
                               value={newSchedule.RoomId}
                               onChange={(e) =>
-                                setNewSchedule({
-                                  ...newSchedule,
-                                  RoomId: e.target.value,
-                                })
+                                setNewSchedule({ ...newSchedule, RoomId: e.target.value })
                               }
                               required
                             >
@@ -283,18 +281,14 @@ export default function Schedule() {
                           {/* Ngày bắt đầu */}
                           <div className="col-md-6">
                             <label className="form-label fw-bold">
-                              <i className="fas fa-calendar-plus me-2 text-success"></i>
-                              Ngày bắt đầu
+                              <i className="fas fa-calendar-plus me-2 text-success"></i>Ngày bắt đầu
                             </label>
                             <input
                               type="date"
                               className="form-control custom-input"
                               value={newSchedule.StartDate}
                               onChange={(e) =>
-                                setNewSchedule({
-                                  ...newSchedule,
-                                  StartDate: e.target.value,
-                                })
+                                setNewSchedule({ ...newSchedule, StartDate: e.target.value })
                               }
                               required
                             />
@@ -303,18 +297,14 @@ export default function Schedule() {
                           {/* Ngày kết thúc */}
                           <div className="col-md-6">
                             <label className="form-label fw-bold">
-                              <i className="fas fa-calendar-minus me-2 text-info"></i>
-                              Ngày kết thúc
+                              <i className="fas fa-calendar-minus me-2 text-info"></i>Ngày kết thúc
                             </label>
                             <input
                               type="date"
                               className="form-control custom-input"
                               value={newSchedule.EndDate}
                               onChange={(e) =>
-                                setNewSchedule({
-                                  ...newSchedule,
-                                  EndDate: e.target.value,
-                                })
+                                setNewSchedule({ ...newSchedule, EndDate: e.target.value })
                               }
                               required
                             />
@@ -323,18 +313,14 @@ export default function Schedule() {
                           {/* Giờ bắt đầu */}
                           <div className="col-md-6">
                             <label className="form-label fw-bold">
-                              <i className="fas fa-clock me-2 text-warning"></i>
-                              Giờ bắt đầu
+                              <i className="fas fa-clock me-2 text-warning"></i>Giờ bắt đầu
                             </label>
                             <input
                               type="time"
                               className="form-control custom-input"
                               value={newSchedule.StartTime}
                               onChange={(e) =>
-                                setNewSchedule({
-                                  ...newSchedule,
-                                  StartTime: e.target.value,
-                                })
+                                setNewSchedule({ ...newSchedule, StartTime: e.target.value })
                               }
                               required
                             />
@@ -343,18 +329,14 @@ export default function Schedule() {
                           {/* Giờ kết thúc */}
                           <div className="col-md-6">
                             <label className="form-label fw-bold">
-                              <i className="fas fa-hourglass-end me-2 text-secondary"></i>
-                              Giờ kết thúc
+                              <i className="fas fa-hourglass-end me-2 text-secondary"></i>Giờ kết thúc
                             </label>
                             <input
                               type="time"
                               className="form-control custom-input"
                               value={newSchedule.EndTime}
                               onChange={(e) =>
-                                setNewSchedule({
-                                  ...newSchedule,
-                                  EndTime: e.target.value,
-                                })
+                                setNewSchedule({ ...newSchedule, EndTime: e.target.value })
                               }
                               required
                             />
@@ -363,8 +345,7 @@ export default function Schedule() {
                           {/* Giá vé */}
                           <div className="col-md-6">
                             <label className="form-label fw-bold">
-                              <i className="fas fa-money-bill-wave me-2 text-success"></i>
-                              Giá vé
+                              <i className="fas fa-money-bill-wave me-2 text-success"></i>Giá vé
                             </label>
                             <input
                               type="number"
@@ -374,10 +355,7 @@ export default function Schedule() {
                               step="1000"
                               value={newSchedule.Price}
                               onChange={(e) =>
-                                setNewSchedule({
-                                  ...newSchedule,
-                                  Price: e.target.value,
-                                })
+                                setNewSchedule({ ...newSchedule, Price: e.target.value })
                               }
                               required
                             />
@@ -386,10 +364,7 @@ export default function Schedule() {
                                 <i className="fas fa-info-circle me-1"></i>
                                 Giá:{" "}
                                 <strong>
-                                  {parseInt(newSchedule.Price).toLocaleString(
-                                    "vi-VN"
-                                  )}{" "}
-                                  VNĐ
+                                  {parseInt(newSchedule.Price).toLocaleString("vi-VN")} VNĐ
                                 </strong>
                               </small>
                             )}
@@ -398,17 +373,13 @@ export default function Schedule() {
                           {/* Trạng thái */}
                           <div className="col-md-6">
                             <label className="form-label fw-bold">
-                              <i className="fas fa-toggle-on me-2 text-primary"></i>
-                              Trạng thái
+                              <i className="fas fa-toggle-on me-2 text-primary"></i>Trạng thái
                             </label>
                             <select
                               className="form-select custom-input"
                               value={newSchedule.Status}
                               onChange={(e) =>
-                                setNewSchedule({
-                                  ...newSchedule,
-                                  Status: e.target.value,
-                                })
+                                setNewSchedule({ ...newSchedule, Status: e.target.value })
                               }
                               required
                             >
@@ -421,8 +392,7 @@ export default function Schedule() {
                           {/* Các ngày trong tuần */}
                           <div className="col-12">
                             <label className="form-label fw-bold">
-                              <i className="fas fa-calendar-week me-2 text-info"></i>
-                              Các ngày trong tuần
+                              <i className="fas fa-calendar-week me-2 text-info"></i>Các ngày trong tuần
                             </label>
                             <div className="d-flex flex-wrap gap-3">
                               {days.map((d) => (
@@ -431,15 +401,10 @@ export default function Schedule() {
                                     type="checkbox"
                                     className="form-check-input"
                                     id={d.en}
-                                    checked={newSchedule.DaysOfWeek.includes(
-                                      d.en
-                                    )}
+                                    checked={newSchedule.DaysOfWeek.includes(d.en)}
                                     onChange={() => handleDaysChange(d.en)}
                                   />
-                                  <label
-                                    className="form-check-label"
-                                    htmlFor={d.en}
-                                  >
+                                  <label className="form-check-label" htmlFor={d.en}>
                                     {d.vi}
                                   </label>
                                 </div>
@@ -486,7 +451,6 @@ export default function Schedule() {
                           <th>Phòng</th>
                           <th>Ngày bắt đầu</th>
                           <th>Ngày kết thúc</th>
-
                           <th>Trạng thái</th>
                           <th className="text-center">Hành động</th>
                         </tr>
@@ -497,32 +461,25 @@ export default function Schedule() {
                             <tr key={s.ScheduleId}>
                               <td className="fw-bold px-4">{index + 1}</td>
                               <td>
-                                {movies.find((m) => m.MovieId === s.MovieId)
-                                  ?.Title || s.MovieId}
+                                {movies.find((m) => m.MovieId === s.MovieId)?.Title || s.MovieId}
                               </td>
                               <td>
-                                {rooms.find((u) => u.RoomId === s.RoomId)
-                                  ?.Name || s.RoomId}
+                                {rooms.find((u) => u.RoomId === s.RoomId)?.Name || s.RoomId}
                               </td>
                               <td>{s.StartDate}</td>
                               <td>{s.EndDate}</td>
-
                               <td>
                                 <label className="switch">
                                   <input
                                     type="checkbox"
                                     checked={s.Status === "Active"}
-                                    onChange={() =>
-                                      toggleStatus(s.ScheduleId, s.Status)
-                                    }
+                                    onChange={() => toggleStatus(s.ScheduleId, s.Status)}
                                   />
                                   <span className="slider"></span>
                                 </label>
                                 <span
                                   className={`ms-2 fw-semibold ${
-                                    s.Status === "Active"
-                                      ? "text-success"
-                                      : "text-danger"
+                                    s.Status === "Active" ? "text-success" : "text-danger"
                                   }`}
                                 >
                                   {s.Status === "Active" ? "Hoạt động" : "Khóa"}
@@ -532,25 +489,19 @@ export default function Schedule() {
                                 <button
                                   className="action-btn text-info"
                                   title="Chi tiết"
-                                  onClick={() =>
-                                    navigate(`/schedules/show/${s.ScheduleId}`)
-                                  }
+                                  onClick={() => navigate(`/schedules/show/${s.ScheduleId}`)}
                                 >
                                   <i className="fas fa-eye"></i>
                                 </button>
                                 <button
                                   className="action-btn text-primary"
                                   title="Sửa"
-                                  onClick={() =>
-                                    navigate(`/schedules/edit/${s.ScheduleId}`)
-                                  }
+                                  onClick={() => navigate(`/schedules/edit/${s.ScheduleId}`)}
                                 >
                                   <i className="fas fa-edit"></i>
                                 </button>
                                 <button
-                                  onClick={() =>
-                                    deleteSchedule(s.ScheduleId, setSchedules)
-                                  }
+                                  onClick={() => deleteSchedule(s.ScheduleId, setSchedules)}
                                   className="action-btn text-danger"
                                   title="Xóa"
                                 >
@@ -561,7 +512,7 @@ export default function Schedule() {
                           ))
                         ) : (
                           <tr>
-                            <td colSpan="8" className="text-center py-3">
+                            <td colSpan="7" className="text-center py-3">
                               Chưa có dữ liệu
                             </td>
                           </tr>
@@ -571,6 +522,7 @@ export default function Schedule() {
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
         </main>

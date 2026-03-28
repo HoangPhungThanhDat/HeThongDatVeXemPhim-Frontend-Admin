@@ -7,9 +7,16 @@ const ShowtimeSeatApi = {
   update: (Id, data) => axios.put(`/showtimeseats/${Id}`, data),
   delete: (Id) => axios.delete(`/showtimeseats/${Id}`),
 
-  // ✅ THÊM: Tạo ghế tự động theo showtime
   generateByShowtime: (showtimeId) =>
     axios.post(`/showtimes/${showtimeId}/generate-seats`),
+
+  // ✅ Server-side pagination
+  getPaged: ({ page = 1, limit = 20, showtimeId = "", status = "", signal } = {}) => {
+    const params = new URLSearchParams({ page, limit });
+    if (showtimeId) params.append("showtime_id", showtimeId);
+    if (status)     params.append("status", status);
+    return axios.get(`/showtimeseats/paged?${params}`, { signal });
+  },
 };
 
 export default ShowtimeSeatApi;

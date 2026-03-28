@@ -1,8 +1,8 @@
 import axiosAdmin from "./AxiosAdmin";
 
 const PromotionApi = {
-  getAll: () => axiosAdmin.get("/promotions"), 
-  getById: (PromotionId) => axiosAdmin.get(`/promotions/${PromotionId}`), 
+  getAll: () => axiosAdmin.get("/promotions"),
+  getById: (PromotionId) => axiosAdmin.get(`/promotions/${PromotionId}`),
 
   create: (data, config = {}) => {
     return axiosAdmin.post("/promotions", data, {
@@ -23,6 +23,14 @@ const PromotionApi = {
   },
 
   delete: (PromotionId) => axiosAdmin.delete(`/promotions/${PromotionId}`),
+
+  // ✅ Server-side pagination
+  getPaged: ({ page = 1, limit = 10, search = "", status = "", signal } = {}) => {
+    const params = new URLSearchParams({ page, limit });
+    if (search) params.append("search", search);
+    if (status) params.append("status", status);
+    return axiosAdmin.get(`/promotions/paged?${params}`, { signal });
+  },
 };
 
 export default PromotionApi;
