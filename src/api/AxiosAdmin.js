@@ -31,7 +31,7 @@ axiosClient.interceptors.response.use(
       localStorage.removeItem("UserId");
 
       // Chuyển về trang đăng nhập
-      window.location.href = "http://localhost:3000/login";
+      window.location.href = "http://localhost:3000/auth/sign-in";
     }
     return Promise.reject(error);
   }

@@ -1,52 +1,33 @@
-import { BrowserRouter } from "react-router-dom";
-import { useEffect } from "react";
-import AdminRoutes from "./routes/AdminRoutes";
-import { jwtDecode } from "jwt-decode";
+import './assets/css/App.css';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import AuthLayout from './layouts/auth';
+import AdminLayout from './layouts/admin';
+import PrivateRoute from './components/PrivateRoute'; // ← thêm dòng này
+import { ChakraProvider } from '@chakra-ui/react';
+import initialTheme from './theme/theme';
+import { useState } from 'react';
 
-function App() {
-  //  Hàm kiểm tra token hết hạn
-  const isTokenExpired = () => {
-    const token = localStorage.getItem("token");
-    if (!token) return false; //chưa đăng nhập
-
-    try {
-      const decoded = jwtDecode(token);
-      const currentTime = Date.now() / 1000; // giây
-      return decoded.exp < currentTime;
-    } catch (e) {
-      return true;
-    }
-  };
-
-  // Hàm logout
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    localStorage.removeItem("fullname");
-    localStorage.removeItem("UserId");
-    window.location.href = "http://localhost:3000/login";
-  };
-
-  useEffect(() => {
-    const checkToken = () => {
-      const token = localStorage.getItem("token");
-      // Chỉ kiểm tra nếu đã đăng nhập
-      if (token && isTokenExpired()) {
-        logout();
-      }
-    };
-    // Kiểm tra khi app load
-    checkToken();
-    // Kiểm tra định kỳ mỗi phút
-    const interval = setInterval(checkToken, 60 * 1000);
-    return () => clearInterval(interval);
-  }, []);
-
+export default function Main() {
+  const [currentTheme, setCurrentTheme] = useState(initialTheme);
   return (
-    <BrowserRouter>
-      <AdminRoutes />
-    </BrowserRouter>
+    <ChakraProvider theme={currentTheme}>
+      <Routes>
+        {/* Route công khai — trang đăng nhập */}
+        <Route path="auth/*" element={<AuthLayout />} />
+
+        {/* Route được bảo vệ — phải đăng nhập mới vào được */}
+        <Route
+          path="admin/*"
+          element={
+            <PrivateRoute>
+              <AdminLayout theme={currentTheme} setTheme={setCurrentTheme} />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Mặc định → /admin (nếu chưa login sẽ bị PrivateRoute đá về /auth/sign-in) */}
+        <Route path="/" element={<Navigate to="/admin" replace />} />
+      </Routes>
+    </ChakraProvider>
   );
 }
-
-export default App;

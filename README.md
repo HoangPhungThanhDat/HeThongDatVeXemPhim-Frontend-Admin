@@ -1474,6 +1474,6 @@ Made with ❤️ by **Gấu Phim Team**
 
 <img src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png" width="100%"/>
 
-*© 2025 Cinema Booking System. All rights reserved.*
+*© 2026 Cinema Booking System. All rights reserved.*
 
 </div>
