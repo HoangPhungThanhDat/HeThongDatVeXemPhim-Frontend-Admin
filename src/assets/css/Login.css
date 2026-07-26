@@ -1,0 +1,1197 @@
+/* src/assets/css/Login.css */
+
+/* ✅ TẤT CẢ CSS ĐỀU ĐƯỢC BỌC TRONG .ga-root */
+.ga-root {
+  /* ── Variables ── */
+  --primary: #f97316;
+  --primary-dark: #ea580c;
+  --primary-light: #fb923c;
+  --primary-gradient: linear-gradient(135deg, #f97316 0%, #fb923c 50%, #fbbf24 100%);
+  --primary-glow: 0 8px 32px rgba(249, 115, 22, 0.3);
+  --primary-glow-hover: 0 12px 48px rgba(249, 115, 22, 0.4);
+  
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --bg-input: #f1f5f9;
+  --bg-hover: #f1f5f9;
+  
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --text-accent: #f97316;
+  
+  --border-color: #e2e8f0;
+  --border-hover: #cbd5e1;
+  
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+}
+
+/* ── Reset (chỉ trong .ga-root) ── */
+.ga-root * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.ga-root {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(16px, 3vh, 32px);
+  background: var(--bg-primary);
+  overflow: hidden;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--text-primary);
+}
+
+/* ── Scrollbar (chỉ trong .ga-root) ── */
+.ga-root ::-webkit-scrollbar {
+  width: 4px;
+}
+.ga-root ::-webkit-scrollbar-track {
+  background: transparent;
+}
+.ga-root ::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 10px;
+}
+
+/* ── Animations ── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes blurIn {
+  from { filter: blur(20px); opacity: 0; }
+  to { filter: blur(0); opacity: 1; }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(249, 115, 22, 0.15); }
+  50% { box-shadow: 0 0 40px rgba(249, 115, 22, 0.25); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes loadingBar {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(0%); }
+  100% { transform: translateX(100%); }
+}
+
+/* ── Background Effects ── */
+.ga-root .ga-bg-gradient {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: 
+    radial-gradient(ellipse at 20% 50%, rgba(249, 115, 22, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, rgba(251, 146, 60, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 20%, rgba(249, 115, 22, 0.03) 0%, transparent 40%);
+}
+
+.ga-root .ga-bg-grid {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image: 
+    linear-gradient(rgba(15, 23, 42, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+}
+
+.ga-root .ga-bg-orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ga-root .ga-bg-orb-1 {
+  width: 500px;
+  height: 500px;
+  background: rgba(249, 115, 22, 0.06);
+  top: -150px;
+  right: -150px;
+  animation: float 20s ease-in-out infinite;
+}
+
+.ga-root .ga-bg-orb-2 {
+  width: 350px;
+  height: 350px;
+  background: rgba(251, 146, 60, 0.04);
+  bottom: -100px;
+  left: -100px;
+  animation: float 15s ease-in-out infinite reverse;
+}
+
+/* ── Card ── */
+.ga-root .ga-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1100px;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  background: var(--bg-secondary);
+  box-shadow: var(--shadow-xl);
+  max-height: calc(100svh - clamp(32px, 6vh, 64px));
+  animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Left Panel ── */
+.ga-root .ga-left {
+  background: linear-gradient(145deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  padding: clamp(40px, 5vh, 52px) clamp(32px, 4vw, 48px);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.ga-root .ga-left::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.ga-root .ga-left-glow {
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.1), transparent 70%);
+  top: -100px;
+  right: -100px;
+  pointer-events: none;
+}
+
+.ga-root .ga-left-glow-2 {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(251, 146, 60, 0.06), transparent 70%);
+  bottom: -80px;
+  left: -80px;
+  pointer-events: none;
+}
+
+/* ── Logo ── */
+.ga-root .ga-logo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  position: relative;
+  z-index: 2;
+  animation: slideInLeft 0.8s 0.1s both;
+  flex-shrink: 0;
+}
+
+.ga-root .ga-logo-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: rgba(249, 115, 22, 0.2);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+  border: 1px solid rgba(249, 115, 22, 0.2);
+}
+
+.ga-root .ga-logo-icon svg {
+  width: 24px;
+  height: 24px;
+  color: #f97316;
+}
+
+.ga-root .ga-logo-text {
+  font-size: clamp(24px, 3vh, 30px);
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #fff;
+}
+
+.ga-root .ga-logo-text span {
+  color: #f97316;
+}
+
+.ga-root .ga-logo-sub {
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  font-weight: 400;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* ── Hero ── */
+.ga-root .ga-hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: clamp(20px, 3vh, 40px) 0;
+  position: relative;
+  z-index: 2;
+  min-height: 0;
+  animation: blurIn 1s 0.3s both;
+}
+
+.ga-root .ga-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px 6px 10px;
+  background: rgba(249, 115, 22, 0.12);
+  border: 1px solid rgba(249, 115, 22, 0.1);
+  border-radius: 100px;
+  width: fit-content;
+  margin-bottom: clamp(16px, 2.5vh, 28px);
+  animation: fadeIn 1s 0.4s both;
+}
+
+.ga-root .ga-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f97316;
+  animation: pulse 2s ease-in-out infinite;
+  position: relative;
+}
+
+.ga-root .ga-badge-text {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 0.3px;
+}
+
+.ga-root .ga-title {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(36px, 5vw, 50px);
+  font-weight: 900;
+  line-height: 1.05;
+  color: #fff;
+  letter-spacing: -0.5px;
+  margin-bottom: 4px;
+}
+
+.ga-root .ga-title-highlight {
+  display: inline-block;
+  background: linear-gradient(135deg, #f97316, #fb923c, #fbbf24);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.ga-root .ga-subtitle {
+  font-size: clamp(13px, 1.4vh, 15px);
+  color: rgba(255,255,255,0.6);
+  line-height: 1.8;
+  max-width: 340px;
+  margin-top: 10px;
+  font-weight: 300;
+  letter-spacing: 0.2px;
+}
+
+.ga-root .ga-clock {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.ga-root .ga-clock svg {
+  width: 14px;
+  height: 14px;
+  color: rgba(255,255,255,0.3);
+}
+
+.ga-root .ga-clock-text {
+  font-family: 'Inter', monospace;
+  font-size: 13px;
+  color: rgba(255,255,255,0.3);
+  font-weight: 300;
+  letter-spacing: 1px;
+}
+
+/* ── Stats ── */
+.ga-root .ga-stats {
+  display: flex;
+  gap: 2px;
+  background: rgba(255,255,255,0.05);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.04);
+  flex-shrink: 0;
+  margin-top: 6px;
+  animation: fadeIn 1s 0.5s both;
+}
+
+.ga-root .ga-stat-item {
+  flex: 1;
+  padding: clamp(10px, 1.5vh, 16px) clamp(12px, 1.5vw, 20px);
+  text-align: center;
+  border-right: 1px solid rgba(255,255,255,0.04);
+  transition: background 0.3s;
+  cursor: default;
+}
+
+.ga-root .ga-stat-item:last-child {
+  border-right: none;
+}
+
+.ga-root .ga-stat-item:hover {
+  background: rgba(255,255,255,0.03);
+}
+
+.ga-root .ga-stat-number {
+  font-size: clamp(18px, 2.5vh, 24px);
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.ga-root .ga-stat-label {
+  font-size: clamp(9px, 1vh, 11px);
+  color: rgba(255,255,255,0.3);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 400;
+  margin-top: 2px;
+}
+
+/* ── Features ── */
+.ga-root .ga-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: clamp(12px, 1.8vh, 20px);
+  position: relative;
+  z-index: 2;
+  animation: fadeIn 1s 0.6s both;
+}
+
+.ga-root .ga-feature {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px 4px 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 100px;
+  font-size: clamp(10px, 1.1vh, 12px);
+  color: rgba(255,255,255,0.5);
+  transition: all 0.3s;
+  cursor: default;
+}
+
+.ga-root .ga-feature:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.7);
+  transform: translateY(-2px);
+}
+
+.ga-root .ga-feature-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #f97316;
+  flex-shrink: 0;
+}
+
+/* ── Footer ── */
+.ga-root .ga-footer {
+  padding-top: clamp(12px, 1.8vh, 20px);
+  border-top: 1px solid rgba(255,255,255,0.04);
+  margin-top: clamp(8px, 1.2vh, 16px);
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+  animation: fadeIn 1s 0.7s both;
+}
+
+.ga-root .ga-footer-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ga-root .ga-footer-flag {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.ga-root .ga-footer-text {
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  font-weight: 300;
+  line-height: 1.4;
+}
+
+.ga-root .ga-footer-text strong {
+  color: rgba(255,255,255,0.5);
+  font-weight: 500;
+}
+
+/* ── Right Panel ── */
+.ga-root .ga-right {
+  background: var(--bg-secondary);
+  padding: clamp(32px, 5vh, 52px) clamp(32px, 4.5vw, 52px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.ga-root .ga-right-header {
+  margin-bottom: clamp(20px, 3vh, 36px);
+  animation: slideInRight 0.8s 0.15s both;
+}
+
+.ga-root .ga-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 14px 4px 10px;
+  background: rgba(249, 115, 22, 0.06);
+  border: 1px solid rgba(249, 115, 22, 0.1);
+  border-radius: 100px;
+  margin-bottom: clamp(8px, 1.2vh, 16px);
+}
+
+.ga-root .ga-status-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f97316;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.ga-root .ga-status-badge-text {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--primary);
+  letter-spacing: 0.3px;
+}
+
+.ga-root .ga-right-title {
+  font-size: clamp(28px, 4.2vh, 38px);
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+}
+
+.ga-root .ga-right-title span {
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.ga-root .ga-right-sub {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 400;
+  margin-top: 4px;
+  letter-spacing: 0.2px;
+}
+
+/* ── Form ── */
+.ga-root .ga-form {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(14px, 1.8vh, 20px);
+}
+
+.ga-root .ga-field {
+  animation: fadeIn 0.8s both;
+}
+
+.ga-root .ga-field-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.ga-root .ga-field-label svg {
+  width: 14px;
+  height: 14px;
+  color: var(--text-muted);
+}
+
+.ga-root .ga-field-label span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.3px;
+}
+
+.ga-root .ga-input-wrap {
+  position: relative;
+}
+
+.ga-root .ga-input {
+  width: 100%;
+  height: clamp(44px, 5.5vh, 50px);
+  background: var(--bg-input);
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  padding: 0 44px 0 16px;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.ga-root .ga-input::placeholder {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 300;
+}
+
+.ga-root .ga-input:focus {
+  border-color: var(--primary);
+  background: var(--bg-secondary);
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.06);
+}
+
+.ga-root .ga-input.error {
+  border-color: #ef4444;
+}
+
+.ga-root .ga-input.error:focus {
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.06);
+}
+
+.ga-root .ga-input-shimmer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--primary-gradient);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.4s;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+
+.ga-root .ga-input-wrap:focus-within .ga-input-shimmer {
+  transform: scaleX(1);
+}
+
+.ga-root .ga-eye-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 6px;
+  display: flex;
+  transition: all 0.2s;
+  border-radius: 6px;
+}
+
+.ga-root .ga-eye-btn:hover {
+  color: var(--text-secondary);
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.ga-root .ga-error-msg {
+  font-size: 11px;
+  color: #ef4444;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  animation: fadeIn 0.3s both;
+}
+
+/* ── Actions ── */
+.ga-root .ga-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 2px 0;
+  animation: fadeIn 0.8s 0.4s both;
+}
+
+.ga-root .ga-remember {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s;
+}
+
+.ga-root .ga-checkbox {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border-color);
+  background: var(--bg-input);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s;
+  flex-shrink: 0;
+}
+
+.ga-root .ga-checkbox.checked {
+  background: var(--primary-gradient);
+  border-color: var(--primary);
+  box-shadow: var(--primary-glow);
+}
+
+.ga-root .ga-checkbox.checked::after {
+  content: '✓';
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.ga-root .ga-remember-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.ga-root .ga-forgot {
+  background: none;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary);
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 4px 0;
+}
+
+.ga-root .ga-forgot:hover {
+  color: var(--primary-dark);
+}
+
+/* ── Button ── */
+.ga-root .ga-btn-primary {
+  width: 100%;
+  height: clamp(46px, 5.8vh, 54px);
+  background: var(--primary-gradient);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  animation: fadeIn 0.8s 0.45s both;
+  box-shadow: var(--primary-glow);
+}
+
+.ga-root .ga-btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.15), transparent 60%);
+  pointer-events: none;
+}
+
+.ga-root .ga-btn-primary-shimmer {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent);
+  animation: shimmer 3s infinite;
+}
+
+.ga-root .ga-btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--primary-glow-hover);
+}
+
+.ga-root .ga-btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.ga-root .ga-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.ga-root .ga-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255,255,255,0.15);
+  border-top: 2px solid #fff;
+  border-radius: 50%;
+  animation: rotate 0.8s linear infinite;
+}
+
+/* ── Divider ── */
+.ga-root .ga-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 4px 0;
+  animation: fadeIn 0.8s 0.5s both;
+}
+
+.ga-root .ga-divider-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--border-color), transparent);
+}
+
+.ga-root .ga-divider-text {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ── Google Button ── */
+.ga-root .ga-btn-google {
+  width: 100%;
+  height: clamp(46px, 5.8vh, 54px);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  animation: fadeIn 0.8s 0.48s both;
+  position: relative;
+  overflow: hidden;
+}
+
+.ga-root .ga-btn-google:hover:not(:disabled) {
+  border-color: var(--primary);
+  background: rgba(249, 115, 22, 0.02);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.ga-root .ga-btn-google:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.ga-root .ga-btn-google:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.ga-root .ga-btn-google svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* ── Alt Buttons ── */
+.ga-root .ga-alt-btns {
+  display: flex;
+  gap: 10px;
+  animation: fadeIn 0.8s 0.55s both;
+}
+
+.ga-root .ga-btn-alt {
+  flex: 1;
+  height: clamp(40px, 4.8vh, 46px);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s;
+}
+
+.ga-root .ga-btn-alt:hover {
+  border-color: var(--primary);
+  background: rgba(249, 115, 22, 0.02);
+  color: var(--text-primary);
+  transform: translateY(-2px);
+}
+
+.ga-root .ga-btn-alt svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ── Security ── */
+.ga-root .ga-security {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: clamp(14px, 2vh, 22px);
+  padding-top: clamp(14px, 2vh, 22px);
+  border-top: 1px solid var(--border-color);
+  animation: fadeIn 0.8s 0.6s both;
+}
+
+.ga-root .ga-security-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: rgba(249, 115, 22, 0.06);
+  border: 1px solid rgba(249, 115, 22, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ga-root .ga-security-icon svg {
+  width: 18px;
+  height: 18px;
+  color: var(--primary);
+}
+
+.ga-root .ga-security-text {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+.ga-root .ga-security-text strong {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.ga-root .ga-security-text .highlight {
+  color: var(--primary);
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .ga-root .ga-left {
+    display: none !important;
+  }
+  .ga-root .ga-card {
+    grid-template-columns: 1fr !important;
+    max-width: 480px;
+    border-radius: var(--radius-xl);
+  }
+  .ga-root .ga-right {
+    padding: clamp(28px, 5vw, 40px) clamp(24px, 5vw, 32px) !important;
+  }
+}
+
+@media (max-height: 680px) {
+  .ga-root .ga-features {
+    display: none !important;
+  }
+  .ga-root .ga-footer {
+    display: none !important;
+  }
+  .ga-root .ga-subtitle {
+    display: none !important;
+  }
+  .ga-root .ga-stats {
+    margin-top: 0 !important;
+  }
+  .ga-root .ga-hero {
+    margin: 8px 0 !important;
+  }
+  .ga-root .ga-divider {
+    margin: 2px 0 !important;
+  }
+  .ga-root .ga-right-header {
+    margin-bottom: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .ga-root .ga-card {
+    border-radius: var(--radius-lg);
+  }
+  .ga-root .ga-right {
+    padding: clamp(20px, 4vw, 28px) clamp(16px, 4vw, 20px) !important;
+  }
+  .ga-root .ga-alt-btns {
+    flex-direction: column;
+  }
+  .ga-root .ga-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .ga-root .ga-remember {
+    justify-content: center;
+  }
+  .ga-root .ga-forgot {
+    text-align: center;
+  }
+}
+
+/* ── LOADING STYLES (chỉ trong .ga-root) ── */
+.ga-root .ga-loading-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100vh;
+  animation: fadeIn 0.5s ease both;
+}
+
+.ga-root .ga-loading-card {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-2xl);
+  padding: 48px 40px 40px;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--border-color);
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  position: relative;
+  overflow: hidden;
+}
+
+.ga-root .ga-loading-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--primary-gradient);
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+.ga-root .ga-loading-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.ga-root .ga-loading-logo-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: var(--primary-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--primary-glow);
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+.ga-root .ga-loading-logo-icon svg {
+  width: 24px;
+  height: 24px;
+  color: #fff;
+}
+
+.ga-root .ga-loading-logo-text {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+}
+
+.ga-root .ga-loading-logo-text span {
+  color: var(--primary);
+}
+
+.ga-root .ga-loading-spinner {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 24px;
+}
+
+.ga-root .spinner-ring {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 3.5px solid transparent;
+  animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+
+.ga-root .spinner-ring:nth-child(1) {
+  border-top-color: #f97316;
+  animation-delay: -0.45s;
+}
+
+.ga-root .spinner-ring:nth-child(2) {
+  border-right-color: #fb923c;
+  animation-delay: -0.3s;
+}
+
+.ga-root .spinner-ring:nth-child(3) {
+  border-bottom-color: #fbbf24;
+  animation-delay: -0.15s;
+}
+
+.ga-root .spinner-ring:nth-child(4) {
+  border-left-color: #f97316;
+  animation-delay: 0s;
+}
+
+.ga-root .spinner-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.ga-root .spinner-center svg {
+  width: 18px;
+  height: 18px;
+  color: var(--primary);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.ga-root .ga-loading-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.ga-root .ga-loading-sub {
+  font-size: 14px;
+  color: var(--text-muted);
+  font-weight: 400;
+  margin-bottom: 24px;
+}
+
+.ga-root .ga-loading-bar {
+  width: 100%;
+}
+
+.ga-root .ga-loading-bar-track {
+  width: 100%;
+  height: 4px;
+  border-radius: 4px;
+  background: var(--bg-input);
+  overflow: hidden;
+  position: relative;
+}
+
+.ga-root .ga-loading-bar-fill {
+  height: 100%;
+  width: 30%;
+  border-radius: 4px;
+  background: var(--primary-gradient);
+  animation: loadingBar 1.5s ease-in-out infinite;
+}

@@ -1,5 +1,5 @@
 // index.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Box, Flex, Text, Grid, SimpleGrid, Button, Select,
   Icon, useColorMode, useDisclosure, Spinner,
@@ -21,11 +21,38 @@ import { useSeatManagement } from "./hooks/useSeatManagement";
 import RoomApi from "../../../api/RoomApi";
 import CinemasApi from "../../../api/CinemasApi";
 
+// Màu sắc cho chế độ tối - tông xanh
+const DARK_THEME = {
+  bg: "#0a1628",
+  cardBg: "#0f1f3a",
+  border: "#1a3a5c",
+  text: "#e8f4f8",
+  textSecondary: "#88b4d8",
+  labelColor: "#5a8ab5",
+  inputBg: "#0a1f35",
+  hoverBg: "#142d4f",
+  accent: "#4a9eff",
+  accentLight: "#6ab0ff",
+  accentShadow: "rgba(74, 158, 255, 0.25)",
+  gradientFrom: "#4a9eff",
+  gradientTo: "#6ab0ff",
+};
+
 export default function QuanLyGhe() {
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
   const colors = getSeatColors(isDark);
   const navigate = useNavigate();
+  
+  // Dark mode colors
+  const accentColor = isDark ? DARK_THEME.accent : "#f97316";
+  const accentShadow = isDark ? DARK_THEME.accentShadow : "rgba(249,115,22,0.38)";
+  const gradientBg = isDark 
+    ? `linear-gradient(135deg, ${DARK_THEME.accent}, ${DARK_THEME.accentLight})`
+    : "linear-gradient(135deg, #f97316, #fb923c)";
+  const gradientSmall = isDark 
+    ? `linear-gradient(135deg, ${DARK_THEME.accent}, ${DARK_THEME.accentLight})`
+    : "linear-gradient(135deg, #f97316, #fb923c)";
   
   const [selectedCinema, setSelectedCinema] = useState(null);
   const [cinemas, setCinemas] = useState([]);
@@ -36,6 +63,7 @@ export default function QuanLyGhe() {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchKeyword, setSearchKeyword] = useState("");
+  const [isLoadingRooms, setIsLoadingRooms] = useState(false);
 
   // Modal controls
   const editSeatModal = useDisclosure();
@@ -60,10 +88,9 @@ export default function QuanLyGhe() {
       const cinemasData = res.data.data || res.data || [];
       setCinemas(cinemasData);
       
-      // Chọn rạp đầu tiên mặc định
       if (cinemasData.length > 0) {
         setSelectedCinema(cinemasData[0]);
-        loadRoomsByCinema(cinemasData[0].CinemaId);
+        await loadRoomsByCinema(cinemasData[0].CinemaId);
       }
     } catch (err) {
       console.error("Lỗi load rạp chiếu:", err);
@@ -74,12 +101,10 @@ export default function QuanLyGhe() {
 
   const loadRoomsByCinema = async (cinemaId) => {
     try {
-      setLoading(true);
-      // Lấy tất cả phòng và lọc theo rạp
+      setIsLoadingRooms(true);
       const res = await RoomApi.getAll();
       const roomsData = res.data.data || res.data || [];
       
-      // Format rooms data và lọc theo cinemaId
       const formattedRooms = roomsData
         .filter(room => room.CinemaId === cinemaId)
         .map(room => ({
@@ -96,24 +121,24 @@ export default function QuanLyGhe() {
     } catch (err) {
       console.error("Lỗi load phòng:", err);
     } finally {
-      setLoading(false);
+      setIsLoadingRooms(false);
     }
   };
 
-  // Use seat management hook when a room is selected
   const seatManagement = useSeatManagement(
     selectedRoom?.id || null,
     selectedRoom || null
   );
 
-  const handleCinemaChange = (cinema) => {
+  const handleCinemaChange = async (cinema) => {
     setSelectedCinema(cinema);
-    loadRoomsByCinema(cinema.CinemaId);
+    await loadRoomsByCinema(cinema.CinemaId);
   };
 
   const handleViewRoom = (room) => {
     setSelectedRoom(room);
     setIsEditMode(false);
+    setEditingRoom(null);
   };
 
   const handleEditMode = (room) => {
@@ -133,15 +158,15 @@ export default function QuanLyGhe() {
     setEditingRoom(null);
   };
 
-  // Lọc phòng theo từ khóa tìm kiếm
-  const filteredRooms = rooms.filter(room => {
-    const matchKeyword = room.name.toLowerCase().includes(searchKeyword.toLowerCase());
-    const matchType = filterType === "all" || 
-      (filterType === "maintenance" ? room.status === "maintenance" : room.type === filterType);
-    return matchKeyword && matchType;
-  });
+  const filteredRooms = useMemo(() => {
+    return rooms.filter(room => {
+      const matchKeyword = room.name.toLowerCase().includes(searchKeyword.toLowerCase());
+      const matchType = filterType === "all" || 
+        (filterType === "maintenance" ? room.status === "maintenance" : room.type === filterType);
+      return matchKeyword && matchType;
+    });
+  }, [rooms, searchKeyword, filterType]);
 
-  // Debug state
   useEffect(() => {
     console.log("📊 editSeatModal state:", {
       isOpen: editSeatModal.isOpen,
@@ -154,10 +179,25 @@ export default function QuanLyGhe() {
     console.log("📊 selectedSeat changed:", seatManagement.selectedSeat);
   }, [seatManagement.selectedSeat]);
 
+  useEffect(() => {
+    console.log("📊 seatsData in index:", {
+      length: seatManagement.seatsData?.length,
+      firstRowLength: seatManagement.seatsData?.[0]?.length,
+      totalSeats: seatManagement.seatsData?.flat()?.length,
+      loading: seatManagement.loading,
+      isInitialized: seatManagement.isInitialized
+    });
+  }, [seatManagement.seatsData, seatManagement.loading, seatManagement.isInitialized]);
+
+  const seatMapKey = useMemo(() => {
+    return `${selectedRoom?.id || ''}-${seatManagement.seatsData?.length || 0}-${seatManagement.isInitialized ? 'ready' : 'loading'}-${Date.now()}`;
+  }, [selectedRoom?.id, seatManagement.seatsData?.length, seatManagement.isInitialized]);
+
   if (selectedRoom) {
     return (
-      <Box pt={{ base: "100px", md: "80px" }} bg={isDark ? "#0f172a" : "#f8fafc"} minH="100vh" px="6px">
+      <Box pt={{ base: "100px", md: "80px" }} bg={isDark ? DARK_THEME.bg : "#f8fafc"} minH="100vh" px="6px">
         <SeatMapView
+          key={seatMapKey}
           room={selectedRoom}
           cinemaName={selectedCinema?.Name || ""}
           onBack={handleBack}
@@ -169,7 +209,6 @@ export default function QuanLyGhe() {
           stats={seatManagement.stats}
           selectedSeat={seatManagement.selectedSeat}
           loading={seatManagement.loading}
-          // Truyền modal dưới dạng object với đầy đủ props
           editSeatModal={{
             isOpen: editSeatModal.isOpen,
             onOpen: editSeatModal.onOpen,
@@ -192,12 +231,9 @@ export default function QuanLyGhe() {
             title: deleteDialogConfig.title,
             message: deleteDialogConfig.message
           }}
-          // Hàm xử lý - ĐẢM BẢO MỞ MODAL
           handleSeatEdit={(seat) => {
             console.log("📝 handleSeatEdit called in index:", seat);
-            // Gọi hàm từ hook để set selectedSeat
             seatManagement.handleSeatEdit(seat);
-            // Mở modal - QUAN TRỌNG: phải gọi onOpen
             console.log("📝 Opening edit modal...");
             editSeatModal.onOpen();
           }}
@@ -243,7 +279,7 @@ export default function QuanLyGhe() {
   const activeRooms = rooms.filter((r) => r.status === "active").length;
 
   return (
-    <Box pt={{ base: "100px", md: "80px" }} bg={isDark ? "#0f172a" : "#f8fafc"} minH="100vh" px="6px">
+    <Box pt={{ base: "100px", md: "80px" }} bg={isDark ? DARK_THEME.bg : "#f8fafc"} minH="100vh" px="6px">
       {/* Page header */}
       <Flex justify="space-between" align={{ base: "start", md: "center" }}
         direction={{ base: "column", md: "row" }} mb="20px" gap="12px"
@@ -251,18 +287,18 @@ export default function QuanLyGhe() {
         <Box sx={{ animation: `${fadeUp} 0.4s ease both` }}>
           <Flex align="center" gap="12px" mb="4px">
             <Box w="40px" h="40px" borderRadius="12px"
-              bg="linear-gradient(135deg, #f97316, #fb923c)"
+              bg={gradientBg}
               display="flex" alignItems="center" justifyContent="center"
-              boxShadow="0 4px 14px rgba(249,115,22,0.38)"
+              boxShadow={`0 4px 14px ${accentShadow}`}
             >
               <Icon as={MdChair} boxSize="18px" color="white" />
             </Box>
             <Box>
-              <Text fontSize={{ base: "22px", md: "26px" }} fontWeight="900" color={colors.textColor}
+              <Text fontSize={{ base: "22px", md: "26px" }} fontWeight="900" color={isDark ? DARK_THEME.text : "#0f172a"}
                 letterSpacing="-0.5px">
                 Ghế ngồi
               </Text>
-              <Text fontSize="12px" color={colors.subColor}>
+              <Text fontSize="12px" color={isDark ? DARK_THEME.textSecondary : "#64748b"}>
                 Xem và quản lý cấu hình ghế các phòng chiếu
               </Text>
             </Box>
@@ -272,17 +308,22 @@ export default function QuanLyGhe() {
         <Flex align="center" gap="10px" flexWrap="wrap">
           <InputGroup maxW="200px" size="sm">
             <InputLeftElement pointerEvents="none">
-              <Icon as={MdSearch} color={colors.subColor} boxSize="14px" />
+              <Icon as={MdSearch} color={isDark ? DARK_THEME.labelColor : "#94a3b8"} boxSize="14px" />
             </InputLeftElement>
             <Input
               placeholder="Search..."
               value={searchKeyword}
               onChange={(e) => setSearchKeyword(e.target.value)}
-              bg={isDark ? "#2d3748" : "#f8fafc"}
-              border={`1px solid ${colors.borderCard}`}
+              bg={isDark ? DARK_THEME.inputBg : "#f8fafc"}
+              border={`1px solid ${isDark ? DARK_THEME.border : "#e2e8f0"}`}
               borderRadius="10px"
-              color={colors.textColor}
-              _focus={{ border: "1.5px solid #f97316" }}
+              color={isDark ? DARK_THEME.text : "#0f172a"}
+              _focus={{ 
+                border: `1.5px solid ${isDark ? DARK_THEME.accent : "#f97316"}`,
+                boxShadow: isDark 
+                  ? `0 0 0 3px ${DARK_THEME.accentShadow}`
+                  : "0 0 0 3px rgba(249,115,22,0.12)"
+              }}
             />
           </InputGroup>
           
@@ -290,10 +331,10 @@ export default function QuanLyGhe() {
             leftIcon={<Icon as={MdRefresh} />}
             size="sm"
             borderRadius="10px"
-            bg={isDark ? "#2d3748" : "#f8fafc"}
-            border={`1px solid ${colors.borderCard}`}
-            color={colors.textColor}
-            _hover={{ bg: isDark ? "#374151" : "#f1f5f9" }}
+            bg={isDark ? DARK_THEME.inputBg : "#f8fafc"}
+            border={`1px solid ${isDark ? DARK_THEME.border : "#e2e8f0"}`}
+            color={isDark ? DARK_THEME.text : "#0f172a"}
+            _hover={{ bg: isDark ? DARK_THEME.hoverBg : "#f1f5f9" }}
             onClick={() => {
               loadCinemas();
               if (selectedCinema) {
@@ -305,20 +346,10 @@ export default function QuanLyGhe() {
             Làm mới
           </Button>
           
-          <Button
-            leftIcon={<Icon as={MdAdd} />}
-            size="sm"
-            borderRadius="10px"
-            bg="linear-gradient(135deg, #f97316, #fb923c)"
-            color="white"
-            _hover={{ boxShadow: "0 4px 16px rgba(249,115,22,0.4)" }}
-            onClick={() => navigate("/seats/create")}
-          >
-            Tạo phòng mới
-          </Button>
-          
-          <Box px="8px" py="4px" borderRadius="8px" bg="#fff7ed" border="1px solid #fed7aa">
-            <Text fontSize="11px" fontWeight="700" color="#f97316">
+          <Box px="8px" py="4px" borderRadius="8px" 
+            bg={isDark ? DARK_THEME.inputBg : "#fff7ed"} 
+            border={`1px solid ${isDark ? DARK_THEME.border : "#fed7aa"}`}>
+            <Text fontSize="11px" fontWeight="700" color={isDark ? DARK_THEME.accent : "#f97316"}>
               {rooms.length} phòng
             </Text>
           </Box>
@@ -326,47 +357,60 @@ export default function QuanLyGhe() {
       </Flex>
 
       {/* Cinema selector */}
-      <Box bg={colors.bgCard} borderRadius="16px" border={`1px solid ${colors.borderCard}`}
-        boxShadow={isDark ? "0 1px 4px rgba(0,0,0,0.2)" : "0 1px 4px rgba(0,0,0,0.04)"} p="16px 18px" mb="16px"
+      <Box bg={isDark ? DARK_THEME.cardBg : "white"} borderRadius="16px" border={`1px solid ${isDark ? DARK_THEME.border : "#f1f5f9"}`}
+        boxShadow={isDark ? `0 1px 4px ${DARK_THEME.accentShadow}` : "0 1px 4px rgba(0,0,0,0.04)"} p="16px 18px" mb="16px"
         sx={{ animation: `${fadeUp} 0.4s ease 0.05s both` }}
       >
-        <Text fontSize="10.5px" fontWeight="800" color={isDark ? "#64748b" : "#64748b"} letterSpacing="1px"
+        <Text fontSize="10.5px" fontWeight="800" color={isDark ? DARK_THEME.labelColor : "#64748b"} letterSpacing="1px"
           textTransform="uppercase" mb="10px">Chọn rạp chiếu</Text>
         
         {loading && cinemas.length === 0 ? (
           <Flex justify="center" py="20px">
-            <Spinner size="md" color="#f97316" thickness="3px" />
+            <Spinner size="md" color={isDark ? DARK_THEME.accent : "#f97316"} thickness="3px" />
           </Flex>
         ) : (
           <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap="10px">
             {cinemas.map((cinema) => (
               <Box key={cinema.CinemaId}
                 p="12px 14px" borderRadius="12px" cursor="pointer"
-                border={selectedCinema?.CinemaId === cinema.CinemaId ? "2px solid #f97316" : `1.5px solid ${colors.borderCard}`}
-                bg={selectedCinema?.CinemaId === cinema.CinemaId ? (isDark ? "#2d3748" : "#fff7ed") : (isDark ? "#1e293b" : "#fafbfc")}
-                boxShadow={selectedCinema?.CinemaId === cinema.CinemaId ? "0 2px 12px rgba(249,115,22,0.18)" : "none"}
-                _hover={{ border: "1.5px solid #f97316", bg: isDark ? "#2d3748" : "#fff7ed" }}
+                border={selectedCinema?.CinemaId === cinema.CinemaId 
+                  ? `2px solid ${isDark ? DARK_THEME.accent : "#f97316"}` 
+                  : `1.5px solid ${isDark ? DARK_THEME.border : "#e2e8f0"}`}
+                bg={selectedCinema?.CinemaId === cinema.CinemaId 
+                  ? (isDark ? DARK_THEME.hoverBg : "#fff7ed") 
+                  : (isDark ? DARK_THEME.inputBg : "#fafbfc")}
+                boxShadow={selectedCinema?.CinemaId === cinema.CinemaId 
+                  ? `0 2px 12px ${isDark ? DARK_THEME.accentShadow : "rgba(249,115,22,0.18)"}` 
+                  : "none"}
+                _hover={{ 
+                  border: `1.5px solid ${isDark ? DARK_THEME.accent : "#f97316"}`, 
+                  bg: isDark ? DARK_THEME.hoverBg : "#fff7ed" 
+                }}
                 transition="all 0.2s"
                 onClick={() => handleCinemaChange(cinema)}
               >
                 <Flex align="center" gap="10px">
                   <Box w="32px" h="32px" borderRadius="9px" flexShrink="0"
-                    bg={selectedCinema?.CinemaId === cinema.CinemaId ? "linear-gradient(135deg, #f97316, #fb923c)" : (isDark ? "#2d3748" : "#f1f5f9")}
+                    bg={selectedCinema?.CinemaId === cinema.CinemaId 
+                      ? gradientBg 
+                      : (isDark ? DARK_THEME.inputBg : "#f1f5f9")}
                     display="flex" alignItems="center" justifyContent="center"
                   >
                     <Icon as={MdTheaters} boxSize="14px"
-                      color={selectedCinema?.CinemaId === cinema.CinemaId ? "white" : (isDark ? "#64748b" : "#94a3b8")} />
+                      color={selectedCinema?.CinemaId === cinema.CinemaId 
+                        ? "white" 
+                        : (isDark ? DARK_THEME.labelColor : "#94a3b8")} />
                   </Box>
                   <Box flex="1" minW="0">
-                    <Text fontSize="12.5px" fontWeight="800" color={colors.textColor} noOfLines={1}>
+                    <Text fontSize="12.5px" fontWeight="800" color={isDark ? DARK_THEME.text : "#0f172a"} noOfLines={1}>
                       {cinema.Name}
                     </Text>
-                    <Text fontSize="10.5px" color={isDark ? "#64748b" : "#94a3b8"} noOfLines={1}>
+                    <Text fontSize="10.5px" color={isDark ? DARK_THEME.labelColor : "#94a3b8"} noOfLines={1}>
                       {cinema.Address || "Đang cập nhật địa chỉ"}
                     </Text>
                   </Box>
                   {selectedCinema?.CinemaId === cinema.CinemaId && (
-                    <Box w="8px" h="8px" borderRadius="full" bg="#f97316" flexShrink="0"
+                    <Box w="8px" h="8px" borderRadius="full" bg={isDark ? DARK_THEME.accent : "#f97316"} flexShrink="0"
                       sx={{ animation: `${pulse} 1.8s ease infinite` }} />
                   )}
                 </Flex>
@@ -376,14 +420,14 @@ export default function QuanLyGhe() {
         )}
         
         {cinemas.length === 0 && !loading && (
-          <Flex direction="column" align="center" py="20px" color={isDark ? "#64748b" : "#94a3b8"}>
+          <Flex direction="column" align="center" py="20px" color={isDark ? DARK_THEME.labelColor : "#94a3b8"}>
             <Icon as={MdTheaters} boxSize="24px" mb="8px" />
             <Text fontSize="13px">Chưa có rạp chiếu nào</Text>
             <Button
               mt="8px"
               size="sm"
               borderRadius="10px"
-              bg="linear-gradient(135deg, #f97316, #fb923c)"
+              bg={gradientBg}
               color="white"
               onClick={() => navigate("/cinemas/create")}
             >
@@ -396,38 +440,50 @@ export default function QuanLyGhe() {
       {/* Stats */}
       <SimpleGrid columns={{ base: 2, md: 4 }} spacing="12px" mb="16px">
         <StatCard label="Tổng phòng" value={rooms.length}
-          icon={MdMeetingRoom} accent="#f97316" delay={0} />
+          icon={MdMeetingRoom} accent={isDark ? DARK_THEME.accent : "#f97316"} delay={0} isDark={isDark} />
         <StatCard label="Hoạt động" value={activeRooms}
-          icon={FaFilm} accent="#10b981" delay={0.05} />
+          icon={FaFilm} accent="#10b981" delay={0.05} isDark={isDark} />
         <StatCard label="Tổng ghế" value={totalSeats}
-          icon={MdChair} accent="#7c3aed" delay={0.1} />
+          icon={MdChair} accent="#7c3aed" delay={0.1} isDark={isDark} />
         <StatCard label="Tỉ lệ lấp đầy" value="0%"
-          icon={FaCouch} accent="#dc2626" delay={0.15}
+          icon={FaCouch} accent="#dc2626" delay={0.15} isDark={isDark}
           sub="Chưa có dữ liệu" />
       </SimpleGrid>
 
       {/* Rooms grid */}
-      <Box bg={colors.bgCard} borderRadius="16px" border={`1px solid ${colors.borderCard}`}
-        boxShadow={isDark ? "0 1px 4px rgba(0,0,0,0.2)" : "0 1px 4px rgba(0,0,0,0.04)"}
+      <Box bg={isDark ? DARK_THEME.cardBg : "white"} borderRadius="16px" border={`1px solid ${isDark ? DARK_THEME.border : "#f1f5f9"}`}
+        boxShadow={isDark ? `0 1px 4px ${DARK_THEME.accentShadow}` : "0 1px 4px rgba(0,0,0,0.04)"}
         sx={{ animation: `${fadeUp} 0.4s ease 0.1s both` }}
       >
         <Flex align="center" justify="space-between" p="16px 18px 12px"
-          borderBottom={`1px solid ${isDark ? "#2d3748" : "#f8fafc"}`} flexWrap="wrap" gap="10px"
+          borderBottom={`1px solid ${isDark ? DARK_THEME.border : "#f8fafc"}`} flexWrap="wrap" gap="10px"
         >
           <Flex align="center" gap="8px">
             <Box w="3px" h="14px" borderRadius="full"
-              bg="linear-gradient(180deg, #f97316, #fbbf24)" />
-            <Text fontWeight="800" fontSize="14px" color={colors.textColor}>Danh sách phòng chiếu</Text>
-            <Box px="8px" py="2px" borderRadius="6px" bg="#fff7ed" border="1px solid #fed7aa">
-              <Text fontSize="10.5px" fontWeight="700" color="#f97316">
+              bg={isDark 
+                ? `linear-gradient(180deg, ${DARK_THEME.accent}, ${DARK_THEME.accentLight})`
+                : "linear-gradient(180deg, #f97316, #fbbf24)"
+              } />
+            <Text fontWeight="800" fontSize="14px" color={isDark ? DARK_THEME.text : "#0f172a"}>Danh sách phòng chiếu</Text>
+            <Box px="8px" py="2px" borderRadius="6px" 
+              bg={isDark ? DARK_THEME.inputBg : "#fff7ed"} 
+              border={`1px solid ${isDark ? DARK_THEME.border : "#fed7aa"}`}>
+              <Text fontSize="10.5px" fontWeight="700" color={isDark ? DARK_THEME.accent : "#f97316"}>
                 {filteredRooms.length} phòng
               </Text>
             </Box>
           </Flex>
-          <Select h="34px" fontSize="12.5px" fontWeight="600" color={colors.textColor}
-            bg={isDark ? "#2d3748" : "#f8fafc"} border={`1px solid ${colors.borderInput}`} borderRadius="9px" w="150px"
-            _focus={{ border: "1.5px solid #f97316", boxShadow: "0 0 0 3px rgba(249,115,22,0.08)" }}
-            _hover={{ border: "1px solid #f97316" }} transition="all 0.2s"
+          <Select h="34px" fontSize="12.5px" fontWeight="600" color={isDark ? DARK_THEME.text : "#0f172a"}
+            bg={isDark ? DARK_THEME.inputBg : "#f8fafc"} 
+            border={`1px solid ${isDark ? DARK_THEME.border : "#e2e8f0"}`} borderRadius="9px" w="150px"
+            _focus={{ 
+              border: `1.5px solid ${isDark ? DARK_THEME.accent : "#f97316"}`, 
+              boxShadow: isDark 
+                ? `0 0 0 3px ${DARK_THEME.accentShadow}`
+                : "0 0 0 3px rgba(249,115,22,0.08)" 
+            }}
+            _hover={{ border: `1px solid ${isDark ? DARK_THEME.accent : "#f97316"}` }} 
+            transition="all 0.2s"
             value={filterType} onChange={(e) => setFilterType(e.target.value)}
           >
             <option value="all">Tất cả loại</option>
@@ -442,17 +498,17 @@ export default function QuanLyGhe() {
         </Flex>
 
         <Box p="14px">
-          {loading ? (
-            <Flex direction="column" align="center" py="48px" color={isDark ? "#475569" : "#cbd5e1"}>
-              <Spinner size="xl" color="#f97316" thickness="4px" />
-              <Text fontSize="13px" fontWeight="600" mt="12px" color={isDark ? "#64748b" : "#94a3b8"}>
+          {isLoadingRooms ? (
+            <Flex direction="column" align="center" py="48px" color={isDark ? DARK_THEME.border : "#cbd5e1"}>
+              <Spinner size="xl" color={isDark ? DARK_THEME.accent : "#f97316"} thickness="4px" />
+              <Text fontSize="13px" fontWeight="600" mt="12px" color={isDark ? DARK_THEME.textSecondary : "#94a3b8"}>
                 Đang tải danh sách phòng...
               </Text>
             </Flex>
           ) : filteredRooms.length === 0 ? (
-            <Flex direction="column" align="center" py="48px" color={isDark ? "#475569" : "#cbd5e1"}>
+            <Flex direction="column" align="center" py="48px" color={isDark ? DARK_THEME.border : "#cbd5e1"}>
               <Icon as={MdMeetingRoom} boxSize="32px" mb="8px" />
-              <Text fontSize="13px" fontWeight="600" color={isDark ? "#64748b" : "#94a3b8"}>
+              <Text fontSize="13px" fontWeight="600" color={isDark ? DARK_THEME.textSecondary : "#94a3b8"}>
                 {searchKeyword ? "Không tìm thấy phòng phù hợp" : "Không có phòng nào trong rạp này"}
               </Text>
               {!searchKeyword && (
@@ -460,7 +516,7 @@ export default function QuanLyGhe() {
                   mt="12px"
                   size="sm"
                   borderRadius="10px"
-                  bg="linear-gradient(135deg, #f97316, #fb923c)"
+                  bg={gradientBg}
                   color="white"
                   onClick={() => navigate("/seats/create")}
                 >
@@ -474,6 +530,7 @@ export default function QuanLyGhe() {
                 <RoomCard key={room.id} room={room} index={i}
                   onView={handleViewRoom}
                   onEditMode={handleEditMode}
+                  isDark={isDark}
                 />
               ))}
             </Grid>

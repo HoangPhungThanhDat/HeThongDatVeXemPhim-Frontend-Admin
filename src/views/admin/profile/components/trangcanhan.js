@@ -10,12 +10,12 @@ import {
   MdAdminPanelSettings, MdConfirmationNumber, MdMovie, MdPeople,
   MdEmail, MdPhone, MdVerified, MdTrendingUp, MdCalendarToday,
   MdStar, MdCheckCircle, MdEdit, MdAccessTime, MdEventSeat,
-  MdWorkspacePremium, MdBarChart, MdHistory, MdAssignment, // Thay MdTasks bằng MdAssignment
+  MdWorkspacePremium, MdBarChart, MdHistory, MdAssignment,
   MdSettings, MdSave, MdLock, MdShield, MdPerson, MdEmail as MdEmailIcon,
   MdPhone as MdPhoneIcon, MdCake, MdIdBadge, MdCalendarPlus,
-  MdSyncAlt, MdFemale, MdMale, MdTransgender, MdWorkOutline // Thêm MdWorkOutline
+  MdSyncAlt, MdFemale, MdMale, MdTransgender, MdWorkOutline
 } from "react-icons/md";
-import { FaTicketAlt, FaFire, FaShieldAlt, FaUserCircle, FaTasks } from "react-icons/fa"; // Thêm FaTasks từ react-icons/fa
+import { FaTicketAlt, FaFire, FaShieldAlt, FaUserCircle, FaTasks } from "react-icons/fa";
 
 import UserApi from "../../../../api/UserApi";
 import RoleApi from "../../../../api/RoleApi";
@@ -32,8 +32,8 @@ const shimmer = keyframes`
   100% { background-position:  200% center; }
 `;
 const pulse = keyframes`
-  0%, 100% { box-shadow: 0 0 0 0 rgba(234,88,12,0.4); }
-  50%       { box-shadow: 0 0 0 8px rgba(234,88,12,0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(74,158,255,0.4); }
+  50%       { box-shadow: 0 0 0 8px rgba(74,158,255,0); }
 `;
 
 // ─── Palette ─────────────────────────────────────────────────────────────────
@@ -44,28 +44,43 @@ const ORPL = "#fff7ed";
 const ORSW = "rgba(234,88,12,0.2)";
 const DARK = "#0c0f1a";
 
+// ─── Dark Theme Colors ──────────────────────────────────────────────────────
+const DARK_THEME = {
+  bg: "#0a1628",
+  cardBg: "#0f1f3a",
+  border: "#1a3a5c",
+  text: "#e8f4f8",
+  textSecondary: "#88b4d8",
+  labelColor: "#5a8ab5",
+  inputBg: "#0a1f35",
+  hoverBg: "#142d4f",
+  accent: "#4a9eff",
+  accentLight: "#6ab0ff",
+  accentShadow: "rgba(74, 158, 255, 0.25)",
+};
+
 // ─── Dark mode helpers ──────────────────────────────────────────────────────
 const getColors = (isDark) => ({
-  bgPage: isDark ? "#0f172a" : "#f8fafc",
-  bgCard: isDark ? "#1e293b" : "white",
-  bgCardHover: isDark ? "#2d3748" : "#f8fafc",
-  bgInput: isDark ? "#2d3748" : "#fafafa",
-  bgSub: isDark ? "#2d3748" : "#f8fafc",
-  bgSub2: isDark ? "#2d3748" : "#fafbfc",
-  borderCard: isDark ? "#334155" : "#f1f5f9",
-  borderInput: isDark ? "#374151" : "#e8edf3",
-  borderLight: isDark ? "#2d3748" : "#f8fafc",
-  textPrimary: isDark ? "#f1f5f9" : "#0f172a",
-  textSecondary: isDark ? "#94a3b8" : "#64748b",
-  textMuted: isDark ? "#64748b" : "#94a3b8",
-  textDark: isDark ? "#f1f5f9" : "#1a202c",
-  textBody: isDark ? "#cbd5e1" : "#334155",
-  textLight: isDark ? "#94a3b8" : "#475569",
-  shadow: isDark ? "0 1px 4px rgba(0,0,0,0.3)" : "0 1px 4px rgba(0,0,0,0.04)",
-  shadowHover: isDark ? "0 8px 32px rgba(0,0,0,0.4)" : "0 8px 24px rgba(0,0,0,0.08)",
-  avatarBorder: isDark ? "#334155" : "white",
-  chipBg: isDark ? "#2d3748" : "#f8fafc",
-  chipBorder: isDark ? "#374151" : "#e8edf3",
+  bgPage: isDark ? DARK_THEME.bg : "#f8fafc",
+  bgCard: isDark ? DARK_THEME.cardBg : "white",
+  bgCardHover: isDark ? DARK_THEME.hoverBg : "#f8fafc",
+  bgInput: isDark ? DARK_THEME.inputBg : "#fafafa",
+  bgSub: isDark ? DARK_THEME.inputBg : "#f8fafc",
+  bgSub2: isDark ? DARK_THEME.cardBg : "#fafbfc",
+  borderCard: isDark ? DARK_THEME.border : "#f1f5f9",
+  borderInput: isDark ? DARK_THEME.border : "#e8edf3",
+  borderLight: isDark ? DARK_THEME.border : "#f8fafc",
+  textPrimary: isDark ? DARK_THEME.text : "#0f172a",
+  textSecondary: isDark ? DARK_THEME.textSecondary : "#64748b",
+  textMuted: isDark ? DARK_THEME.labelColor : "#94a3b8",
+  textDark: isDark ? DARK_THEME.text : "#1a202c",
+  textBody: isDark ? DARK_THEME.text : "#334155",
+  textLight: isDark ? DARK_THEME.textSecondary : "#475569",
+  shadow: isDark ? `0 1px 4px ${DARK_THEME.accentShadow}` : "0 1px 4px rgba(0,0,0,0.04)",
+  shadowHover: isDark ? `0 8px 32px ${DARK_THEME.accentShadow}` : "0 8px 24px rgba(0,0,0,0.08)",
+  avatarBorder: isDark ? DARK_THEME.border : "white",
+  chipBg: isDark ? DARK_THEME.inputBg : "#f8fafc",
+  chipBorder: isDark ? DARK_THEME.border : "#e8edf3",
 });
 
 // ─── Status Helpers ──────────────────────────────────────────────────────────
@@ -79,12 +94,12 @@ const getStatusLabel = (status) => {
 };
 
 const getStatusColor = (status, isDark) => {
-  if (!status) return isDark ? "#34d399" : "#059669";
+  if (!status) return isDark ? "#4ade80" : "#059669";
   const s = status.toLowerCase();
-  if (s === "active") return isDark ? "#34d399" : "#059669";
+  if (s === "active") return isDark ? "#4ade80" : "#059669";
   if (s === "inactive") return isDark ? "#fbbf24" : "#b45309";
   if (s === "banned") return isDark ? "#f87171" : "#dc2626";
-  return isDark ? "#94a3b8" : "#6b7280";
+  return isDark ? DARK_THEME.textSecondary : "#6b7280";
 };
 
 const getStatusBg = (status, isDark) => {
@@ -93,7 +108,7 @@ const getStatusBg = (status, isDark) => {
   if (s === "active") return isDark ? "#064e3b" : "#ecfdf5";
   if (s === "inactive") return isDark ? "#451a03" : "#fffbeb";
   if (s === "banned") return isDark ? "#7f1d1d" : "#fef2f2";
-  return isDark ? "#2d3748" : "#f9fafb";
+  return isDark ? DARK_THEME.inputBg : "#f9fafb";
 };
 
 // ─── Main Component ──────────────────────────────────────────────────────────
@@ -102,6 +117,17 @@ export default function TrangCaNhan() {
   const isDark = colorMode === "dark";
   const colors = getColors(isDark);
   const toast = useToast();
+
+  // Dark mode accent
+  const accentColor = isDark ? DARK_THEME.accent : OR;
+  const accentShadow = isDark ? DARK_THEME.accentShadow : ORSW;
+  const accentLight = isDark ? DARK_THEME.accentLight : ORL;
+  const gradientBg = isDark 
+    ? `linear-gradient(135deg, ${DARK_THEME.accent}, ${DARK_THEME.accentLight})`
+    : `linear-gradient(135deg, ${OR}, ${ORL})`;
+  const gradientHero = isDark
+    ? `linear-gradient(135deg, ${DARK} 0%, ${DARK_THEME.cardBg} 50%, ${DARK_THEME.bg} 100%)`
+    : `linear-gradient(135deg, ${DARK} 0%, #1e293b 50%, #0c1a2e 100%)`;
 
   const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
@@ -232,9 +258,9 @@ export default function TrangCaNhan() {
       {/* ── HERO BANNER ── */}
       <Box mb="24px" borderRadius="22px" overflow="hidden" position="relative"
         sx={{ animation: `${fadeIn} .5s ease both` }}
-        boxShadow={`0 16px 48px ${ORSW}`}>
+        boxShadow={`0 16px 48px ${accentShadow}`}>
         <Box h={{ base: "160px", md: "190px" }}
-          bg={`linear-gradient(135deg, ${DARK} 0%, #1e293b 50%, #0c1a2e 100%)`}
+          bg={gradientHero}
           position="relative">
 
           <Flex position="absolute" top="14px" left="20px" gap="6px" opacity=".25">
@@ -249,18 +275,18 @@ export default function TrangCaNhan() {
           </Flex>
 
           <Box position="absolute" bottom="0" left="0" right="0" h="2px"
-            bg={`linear-gradient(90deg, transparent, ${OR}, ${ORL}, #fbbf24, ${ORL}, ${OR}, transparent)`}
+            bg={`linear-gradient(90deg, transparent, ${isDark ? DARK_THEME.accent : OR}, ${isDark ? DARK_THEME.accentLight : ORL}, ${isDark ? DARK_THEME.accent : "#fbbf24"}, ${isDark ? DARK_THEME.accentLight : ORL}, ${isDark ? DARK_THEME.accent : OR}, transparent)`}
             bgSize="200% 100%" sx={{ animation: `${shimmer} 3s linear infinite` }} />
 
           <Box position="absolute" top="-40px" right={{ base: "-40px", md: "60px" }}
             w="220px" h="220px" borderRadius="full"
-            bg={`radial-gradient(circle, ${ORSW} 0%, transparent 70%)`} />
+            bg={`radial-gradient(circle, ${accentShadow} 0%, transparent 70%)`} />
 
           <Flex position="absolute" top="16px" right="20px" align="center" gap="6px"
             px="12px" py="6px" borderRadius="10px"
             bg="rgba(255,255,255,.08)" border="1px solid rgba(255,255,255,.15)"
             backdropFilter="blur(8px)">
-            <Icon as={FaShieldAlt} boxSize="12px" color={ORL} />
+            <Icon as={FaShieldAlt} boxSize="12px" color={isDark ? DARK_THEME.accentLight : ORL} />
             <Text fontSize="11px" fontWeight="800" color="white" letterSpacing="1.5px">
               {role?.RoleName || "Staff"}
             </Text>
@@ -274,9 +300,9 @@ export default function TrangCaNhan() {
               <Avatar
                 size={{ base: "xl", md: "2xl" }}
                 name={user.FullName || "User"}
-                src={user.Avatar || "https://cellphones.com.vn/sforum/wp-content/uploads/2024/02/anh-avatar-ngau-2.jpg"}
+                src={user.Avatar}
                 border={`4px solid ${colors.avatarBorder}`}
-                boxShadow={`0 0 0 3px ${OR}, 0 8px 24px rgba(0,0,0,.2)`}
+                boxShadow={`0 0 0 3px ${isDark ? DARK_THEME.accent : OR}, 0 8px 24px rgba(0,0,0,.2)`}
                 sx={{ animation: `${pulse} 3s ease infinite` }}
               />
               <Box position="absolute" bottom="6px" right="6px" w="14px" h="14px"
@@ -291,7 +317,7 @@ export default function TrangCaNhan() {
                   <Text fontSize={{ base: "20px", md: "24px" }} fontWeight="800" color={colors.textPrimary}>
                     {user.FullName || "Chưa cập nhật"}
                   </Text>
-                  {user.IsVerified && <Icon as={MdVerified} boxSize="20px" color={OR} />}
+                  {user.IsVerified && <Icon as={MdVerified} boxSize="20px" color={isDark ? DARK_THEME.accent : OR} />}
                 </Flex>
                 <Flex align="center" gap="6px" justify={{ base: "center", sm: "flex-start" }}>
                   <Icon as={MdAdminPanelSettings} boxSize="14px" color={colors.textMuted} />
@@ -302,10 +328,10 @@ export default function TrangCaNhan() {
               </Box>
 
               <Button h="40px" px="20px" borderRadius="10px" fontWeight="700" fontSize="13px"
-                bg={`linear-gradient(135deg,${OR},${ORL})`} color="white"
+                bg={gradientBg} color="white"
                 leftIcon={<Icon as={MdEdit} boxSize="14px" />}
-                boxShadow={`0 4px 14px ${ORSW}`}
-                _hover={{ transform: "translateY(-2px)", boxShadow: `0 8px 24px ${ORSW}` }}
+                boxShadow={`0 4px 14px ${accentShadow}`}
+                _hover={{ transform: "translateY(-2px)", boxShadow: `0 8px 24px ${accentShadow}` }}
                 _active={{ transform: "translateY(0)" }} transition="all .2s"
                 onClick={() => setActiveTab(2)}>
                 Chỉnh sửa hồ sơ
@@ -316,22 +342,22 @@ export default function TrangCaNhan() {
           <Flex gap="10px" flexWrap="wrap" justify={{ base: "center", sm: "flex-start" }}>
             <Flex align="center" gap="6px" px="12px" py="7px"
               borderRadius="10px" bg={colors.chipBg} border={`1px solid ${colors.chipBorder}`}>
-              <Icon as={MdEmailIcon} boxSize="13px" color={OR} />
-              <Text fontSize="12px" fontWeight="600" color={isDark ? "#cbd5e1" : "#374151"}>
+              <Icon as={MdEmailIcon} boxSize="13px" color={isDark ? DARK_THEME.accent : OR} />
+              <Text fontSize="12px" fontWeight="600" color={isDark ? DARK_THEME.text : "#374151"}>
                 {user.Email || "Chưa cập nhật"}
               </Text>
             </Flex>
             <Flex align="center" gap="6px" px="12px" py="7px"
               borderRadius="10px" bg={colors.chipBg} border={`1px solid ${colors.chipBorder}`}>
-              <Icon as={MdPhoneIcon} boxSize="13px" color={OR} />
-              <Text fontSize="12px" fontWeight="600" color={isDark ? "#cbd5e1" : "#374151"}>
+              <Icon as={MdPhoneIcon} boxSize="13px" color={isDark ? DARK_THEME.accent : OR} />
+              <Text fontSize="12px" fontWeight="600" color={isDark ? DARK_THEME.text : "#374151"}>
                 {user.PhoneNumber || "Chưa cập nhật"}
               </Text>
             </Flex>
             <Flex align="center" gap="6px" px="12px" py="7px"
               borderRadius="10px" bg={colors.chipBg} border={`1px solid ${colors.chipBorder}`}>
-              <Icon as={MdWorkspacePremium} boxSize="13px" color={OR} />
-              <Text fontSize="12px" fontWeight="600" color={isDark ? "#cbd5e1" : "#374151"}>
+              <Icon as={MdWorkspacePremium} boxSize="13px" color={isDark ? DARK_THEME.accent : OR} />
+              <Text fontSize="12px" fontWeight="600" color={isDark ? DARK_THEME.text : "#374151"}>
                 {role?.RoleName || "Người dùng"}
               </Text>
             </Flex>
@@ -353,40 +379,40 @@ export default function TrangCaNhan() {
         <Box bg={colors.bgCard} borderRadius="18px" border={`1px solid ${colors.borderCard}`}
           boxShadow={colors.shadow} overflow="hidden"
           sx={{ animation: `${fadeUp} .45s ease .2s both` }}>
-          <Box h="3px" bg={`linear-gradient(90deg,${OR},${ORL},#fbbf24)`} />
+          <Box h="3px" bg={gradientBg} />
           <Box p="22px">
             <Flex align="center" gap="8px" mb="18px">
-              <Box w="3px" h="16px" borderRadius="full" bg={`linear-gradient(180deg,${OR},${ORL})`} />
+              <Box w="3px" h="16px" borderRadius="full" bg={gradientBg} />
               <Text fontSize="13px" fontWeight="800" color={colors.textPrimary} letterSpacing=".5px"
                 textTransform="uppercase">Thông tin tài khoản</Text>
             </Flex>
 
             <VStack spacing={3} align="stretch">
-              <Flex justify="space-between" align="center" py="10px" borderBottom={`1px solid ${isDark ? "#2d3748" : "#f8fafc"}`}>
+              <Flex justify="space-between" align="center" py="10px" borderBottom={`1px solid ${isDark ? DARK_THEME.border : "#f8fafc"}`}>
                 <Text fontSize="12px" fontWeight="600" color={colors.textMuted}>Mã người dùng</Text>
                 <Text fontSize="12px" fontWeight="700" color={colors.textPrimary} fontFamily="monospace">
                   {user.UserId || "—"}
                 </Text>
               </Flex>
-              <Flex justify="space-between" align="center" py="10px" borderBottom={`1px solid ${isDark ? "#2d3748" : "#f8fafc"}`}>
+              <Flex justify="space-between" align="center" py="10px" borderBottom={`1px solid ${isDark ? DARK_THEME.border : "#f8fafc"}`}>
                 <Text fontSize="12px" fontWeight="600" color={colors.textMuted}>Vai trò</Text>
                 <Text fontSize="12px" fontWeight="700" color={colors.textPrimary}>
                   {role?.RoleName || "Người dùng"}
                 </Text>
               </Flex>
-              <Flex justify="space-between" align="center" py="10px" borderBottom={`1px solid ${isDark ? "#2d3748" : "#f8fafc"}`}>
+              <Flex justify="space-between" align="center" py="10px" borderBottom={`1px solid ${isDark ? DARK_THEME.border : "#f8fafc"}`}>
                 <Text fontSize="12px" fontWeight="600" color={colors.textMuted}>Giới tính</Text>
                 <Text fontSize="12px" fontWeight="700" color={colors.textPrimary}>
                   {user.Gender === "Male" ? "Nam" : user.Gender === "Female" ? "Nữ" : "Chưa cập nhật"}
                 </Text>
               </Flex>
-              <Flex justify="space-between" align="center" py="10px" borderBottom={`1px solid ${isDark ? "#2d3748" : "#f8fafc"}`}>
+              <Flex justify="space-between" align="center" py="10px" borderBottom={`1px solid ${isDark ? DARK_THEME.border : "#f8fafc"}`}>
                 <Text fontSize="12px" fontWeight="600" color={colors.textMuted}>Ngày sinh</Text>
                 <Text fontSize="12px" fontWeight="700" color={colors.textPrimary}>
                   {formatDate(user.DateOfBirth)}
                 </Text>
               </Flex>
-              <Flex justify="space-between" align="center" py="10px" borderBottom={`1px solid ${isDark ? "#2d3748" : "#f8fafc"}`}>
+              <Flex justify="space-between" align="center" py="10px" borderBottom={`1px solid ${isDark ? DARK_THEME.border : "#f8fafc"}`}>
                 <Text fontSize="12px" fontWeight="600" color={colors.textMuted}>Ngày tạo</Text>
                 <Text fontSize="12px" fontWeight="700" color={colors.textPrimary}>
                   {formatDate(user.CreatedAt)}
@@ -406,18 +432,18 @@ export default function TrangCaNhan() {
         <Box bg={colors.bgCard} borderRadius="18px" border={`1px solid ${colors.borderCard}`}
           boxShadow={colors.shadow} overflow="hidden"
           sx={{ animation: `${fadeUp} .45s ease .24s both` }}>
-          <Box h="3px" bg={`linear-gradient(90deg,${OR},${ORL},#fbbf24,${ORL},${OR})`}
+          <Box h="3px" bg={`linear-gradient(90deg,${isDark ? DARK_THEME.accent : OR},${isDark ? DARK_THEME.accentLight : ORL},${isDark ? DARK_THEME.accent : "#fbbf24"},${isDark ? DARK_THEME.accentLight : ORL},${isDark ? DARK_THEME.accent : OR})`}
             bgSize="200% 100%" sx={{ animation: `${shimmer} 4s linear infinite` }} />
 
           <Tabs index={activeTab} onChange={setActiveTab} variant="unstyled">
-            <TabList px="22px" pt="16px" gap="4px" borderBottom={`1px solid ${isDark ? "#2d3748" : "#f1f5f9"}`}>
+            <TabList px="22px" pt="16px" gap="4px" borderBottom={`1px solid ${isDark ? DARK_THEME.border : "#f1f5f9"}`}>
               <Tab
                 px="16px" py="10px"
                 fontSize="13px" fontWeight="600"
-                color={isDark ? "#94a3b8" : "#64748b"}
+                color={isDark ? DARK_THEME.labelColor : "#64748b"}
                 borderBottom="2px solid transparent"
-                _selected={{ color: OR, borderBottom: `2px solid ${OR}` }}
-                _hover={{ color: isDark ? "#f1f5f9" : "#0f172a" }}
+                _selected={{ color: isDark ? DARK_THEME.accent : OR, borderBottom: `2px solid ${isDark ? DARK_THEME.accent : OR}` }}
+                _hover={{ color: isDark ? DARK_THEME.text : "#0f172a" }}
                 transition="all 0.2s"
               >
                 <Icon as={MdHistory} mr="6px" /> Lịch sử
@@ -425,21 +451,21 @@ export default function TrangCaNhan() {
               <Tab
                 px="16px" py="10px"
                 fontSize="13px" fontWeight="600"
-                color={isDark ? "#94a3b8" : "#64748b"}
+                color={isDark ? DARK_THEME.labelColor : "#64748b"}
                 borderBottom="2px solid transparent"
-                _selected={{ color: OR, borderBottom: `2px solid ${OR}` }}
-                _hover={{ color: isDark ? "#f1f5f9" : "#0f172a" }}
+                _selected={{ color: isDark ? DARK_THEME.accent : OR, borderBottom: `2px solid ${isDark ? DARK_THEME.accent : OR}` }}
+                _hover={{ color: isDark ? DARK_THEME.text : "#0f172a" }}
                 transition="all 0.2s"
               >
-                <Icon as={FaTasks} mr="6px" /> Công việc {/* Sử dụng FaTasks từ react-icons/fa */}
+                <Icon as={FaTasks} mr="6px" /> Công việc
               </Tab>
               <Tab
                 px="16px" py="10px"
                 fontSize="13px" fontWeight="600"
-                color={isDark ? "#94a3b8" : "#64748b"}
+                color={isDark ? DARK_THEME.labelColor : "#64748b"}
                 borderBottom="2px solid transparent"
-                _selected={{ color: OR, borderBottom: `2px solid ${OR}` }}
-                _hover={{ color: isDark ? "#f1f5f9" : "#0f172a" }}
+                _selected={{ color: isDark ? DARK_THEME.accent : OR, borderBottom: `2px solid ${isDark ? DARK_THEME.accent : OR}` }}
+                _hover={{ color: isDark ? DARK_THEME.text : "#0f172a" }}
                 transition="all 0.2s"
               >
                 <Icon as={MdSettings} mr="6px" /> Cài đặt
@@ -459,8 +485,8 @@ export default function TrangCaNhan() {
                 <VStack spacing={4} align="stretch">
                   <Flex gap="14px">
                     <Box position="relative">
-                      <Box w="12px" h="12px" borderRadius="full" bg={OR} boxShadow={`0 0 0 3px ${ORSW}`} />
-                      <Box position="absolute" top="20px" left="5px" w="2px" h="40px" bg={isDark ? "#334155" : "#e2e8f0"} />
+                      <Box w="12px" h="12px" borderRadius="full" bg={isDark ? DARK_THEME.accent : OR} boxShadow={`0 0 0 3px ${isDark ? DARK_THEME.accentShadow : ORSW}`} />
+                      <Box position="absolute" top="20px" left="5px" w="2px" h="40px" bg={isDark ? DARK_THEME.border : "#e2e8f0"} />
                     </Box>
                     <Box flex="1">
                       <Text fontSize="12px" color={colors.textMuted} fontWeight="500">
@@ -494,9 +520,9 @@ export default function TrangCaNhan() {
 
               {/* ── Tasks Tab ── */}
               <TabPanel>
-                <Flex direction="column" align="center" justify="center" py="40px" color={isDark ? "#475569" : "#cbd5e1"}>
+                <Flex direction="column" align="center" justify="center" py="40px" color={isDark ? DARK_THEME.border : "#cbd5e1"}>
                   <Icon as={FaTasks} boxSize="48px" mb="12px" />
-                  <Text fontSize="16px" fontWeight="600" color={isDark ? "#64748b" : "#94a3b8"}>
+                  <Text fontSize="16px" fontWeight="600" color={isDark ? DARK_THEME.textSecondary : "#94a3b8"}>
                     Chưa có công việc nào được giao
                   </Text>
                 </Flex>
@@ -518,8 +544,8 @@ export default function TrangCaNhan() {
                           border={`1px solid ${colors.borderInput}`}
                           borderRadius="10px"
                           color={colors.textPrimary}
-                          _focus={{ border: `1.5px solid ${OR}` }}
-                          _hover={{ border: `1.5px solid ${OR}` }}
+                          _focus={{ border: `1.5px solid ${isDark ? DARK_THEME.accent : OR}` }}
+                          _hover={{ border: `1.5px solid ${isDark ? DARK_THEME.accent : OR}` }}
                           transition="all 0.2s"
                         />
                       </FormControl>
@@ -530,10 +556,10 @@ export default function TrangCaNhan() {
                         <Input
                           value={user.Email || ""}
                           disabled
-                          bg={isDark ? "#2d3748" : "#f8fafc"}
+                          bg={isDark ? DARK_THEME.inputBg : "#f8fafc"}
                           border={`1px solid ${colors.borderInput}`}
                           borderRadius="10px"
-                          color={isDark ? "#94a3b8" : "#6b7280"}
+                          color={isDark ? DARK_THEME.labelColor : "#6b7280"}
                           cursor="not-allowed"
                         />
                         <Text fontSize="11px" color={colors.textMuted} mt="4px">
@@ -552,8 +578,8 @@ export default function TrangCaNhan() {
                           border={`1px solid ${colors.borderInput}`}
                           borderRadius="10px"
                           color={colors.textPrimary}
-                          _focus={{ border: `1.5px solid ${OR}` }}
-                          _hover={{ border: `1.5px solid ${OR}` }}
+                          _focus={{ border: `1.5px solid ${isDark ? DARK_THEME.accent : OR}` }}
+                          _hover={{ border: `1.5px solid ${isDark ? DARK_THEME.accent : OR}` }}
                           transition="all 0.2s"
                         />
                       </FormControl>
@@ -572,8 +598,8 @@ export default function TrangCaNhan() {
                           border={`1px solid ${colors.borderInput}`}
                           borderRadius="10px"
                           color={colors.textPrimary}
-                          _focus={{ border: `1.5px solid ${OR}` }}
-                          _hover={{ border: `1.5px solid ${OR}` }}
+                          _focus={{ border: `1.5px solid ${isDark ? DARK_THEME.accent : OR}` }}
+                          _hover={{ border: `1.5px solid ${isDark ? DARK_THEME.accent : OR}` }}
                           transition="all 0.2s"
                         />
                       </FormControl>
@@ -589,8 +615,8 @@ export default function TrangCaNhan() {
                           border={`1px solid ${colors.borderInput}`}
                           borderRadius="10px"
                           color={colors.textPrimary}
-                          _focus={{ border: `1.5px solid ${OR}` }}
-                          _hover={{ border: `1.5px solid ${OR}` }}
+                          _focus={{ border: `1.5px solid ${isDark ? DARK_THEME.accent : OR}` }}
+                          _hover={{ border: `1.5px solid ${isDark ? DARK_THEME.accent : OR}` }}
                           transition="all 0.2s"
                           h="44px"
                         >
@@ -607,10 +633,10 @@ export default function TrangCaNhan() {
                         <Input
                           value={role?.RoleName || "Người dùng"}
                           disabled
-                          bg={isDark ? "#2d3748" : "#f8fafc"}
+                          bg={isDark ? DARK_THEME.inputBg : "#f8fafc"}
                           border={`1px solid ${colors.borderInput}`}
                           borderRadius="10px"
-                          color={isDark ? "#94a3b8" : "#6b7280"}
+                          color={isDark ? DARK_THEME.labelColor : "#6b7280"}
                           cursor="not-allowed"
                         />
                       </FormControl>
@@ -625,10 +651,10 @@ export default function TrangCaNhan() {
                       borderRadius="10px"
                       fontWeight="700"
                       fontSize="13px"
-                      bg={`linear-gradient(135deg,${OR},${ORL})`}
+                      bg={gradientBg}
                       color="white"
-                      boxShadow={`0 4px 14px ${ORSW}`}
-                      _hover={{ boxShadow: `0 8px 24px ${ORSW}`, transform: "translateY(-2px)" }}
+                      boxShadow={`0 4px 14px ${accentShadow}`}
+                      _hover={{ boxShadow: `0 8px 24px ${accentShadow}`, transform: "translateY(-2px)" }}
                       _active={{ transform: "translateY(0)" }}
                       transition="all .2s"
                       leftIcon={<Icon as={MdSave} />}
@@ -640,7 +666,7 @@ export default function TrangCaNhan() {
                   </Flex>
                 </form>
 
-                <Divider my="24px" borderColor={isDark ? "#2d3748" : "#f1f5f9"} />
+                <Divider my="24px" borderColor={isDark ? DARK_THEME.border : "#f1f5f9"} />
 
                 {/* ── Change Password ── */}
                 <Box>
@@ -659,8 +685,8 @@ export default function TrangCaNhan() {
                         border={`1px solid ${colors.borderInput}`}
                         borderRadius="10px"
                         color={colors.textPrimary}
-                        _focus={{ border: `1.5px solid ${OR}` }}
-                        _hover={{ border: `1.5px solid ${OR}` }}
+                        _focus={{ border: `1.5px solid ${isDark ? DARK_THEME.accent : OR}` }}
+                        _hover={{ border: `1.5px solid ${isDark ? DARK_THEME.accent : OR}` }}
                         transition="all 0.2s"
                       />
                     </FormControl>
@@ -675,8 +701,8 @@ export default function TrangCaNhan() {
                         border={`1px solid ${colors.borderInput}`}
                         borderRadius="10px"
                         color={colors.textPrimary}
-                        _focus={{ border: `1.5px solid ${OR}` }}
-                        _hover={{ border: `1.5px solid ${OR}` }}
+                        _focus={{ border: `1.5px solid ${isDark ? DARK_THEME.accent : OR}` }}
+                        _hover={{ border: `1.5px solid ${isDark ? DARK_THEME.accent : OR}` }}
                         transition="all 0.2s"
                       />
                     </FormControl>
@@ -688,10 +714,10 @@ export default function TrangCaNhan() {
                     borderRadius="10px"
                     fontWeight="700"
                     fontSize="13px"
-                    bg={isDark ? "#2d3748" : "#f8fafc"}
-                    color={isDark ? "#94a3b8" : "#64748b"}
-                    border={`1px solid ${isDark ? "#374151" : "#e2e8f0"}`}
-                    _hover={{ bg: isDark ? "#374151" : "#f1f5f9" }}
+                    bg={isDark ? DARK_THEME.inputBg : "#f8fafc"}
+                    color={isDark ? DARK_THEME.textSecondary : "#64748b"}
+                    border={`1px solid ${isDark ? DARK_THEME.border : "#e2e8f0"}`}
+                    _hover={{ bg: isDark ? DARK_THEME.hoverBg : "#f1f5f9" }}
                     leftIcon={<Icon as={MdLock} />}
                   >
                     Đổi mật khẩu

@@ -1,5 +1,3 @@
-
-
 import { useState } from "react";
 import {
   Box, Flex, Text, Button, Icon, Input, Select, SimpleGrid,
@@ -144,6 +142,12 @@ export function PhimList({
   // ✅ Không cần filter client-side nữa vì server đã filter
   // Dữ liệu movies đã được server lọc và phân trang
   const displayedMovies = movies;
+
+  // ✅ Tạo map thể loại từ genres prop
+  const genreMap = genres.reduce((acc, genre) => {
+    acc[genre.GenreId || genre.id] = genre.Name || genre.name;
+    return acc;
+  }, {});
 
   return (
     <>
@@ -340,10 +344,17 @@ export function PhimList({
               {displayedMovies.map((m, i) => {
                 // Tính index dựa trên trang hiện tại
                 const globalIndex = (page - 1) * 10 + i;
+                // Lấy tên thể loại từ genreMap
+                const genreName = genreMap[m.GenreId] || m.GenreName || 'Chưa phân loại';
+                // Tạo object movie mới với trường genreName
+                const movieWithGenre = {
+                  ...m,
+                  genreName: genreName
+                };
                 return isMobile ? (
                   <PhimCard
                     key={m.MovieId || m.id || i}
-                    movie={m}
+                    movie={movieWithGenre}
                     index={globalIndex}
                     onView={onView}
                     onEdit={onEdit}
@@ -353,7 +364,7 @@ export function PhimList({
                 ) : (
                   <PhimRow
                     key={m.MovieId || m.id || i}
-                    movie={m}
+                    movie={movieWithGenre}
                     index={globalIndex}
                     onView={onView}
                     onEdit={onEdit}

@@ -11,6 +11,24 @@ import {
   MdLightMode, MdDarkMode, MdNotifications,
 } from "react-icons/md";
 
+// ─── Dark Theme Colors ─────────────────────────────────────────────────────────
+const DARK_THEME = {
+  bg: "#0a1628",
+  cardBg: "#0f1f3a",
+  border: "#1a3a5c",
+  text: "#e8f4f8",
+  textSecondary: "#88b4d8",
+  labelColor: "#5a8ab5",
+  inputBg: "#0a1f35",
+  inputBorder: "#1a3a5c",
+  hoverBg: "#142d4f",
+  accent: "#4a9eff",
+  accentLight: "#6ab0ff",
+  accentShadow: "rgba(74, 158, 255, 0.25)",
+  gradientFrom: "#4a9eff",
+  gradientTo: "#6ab0ff",
+};
+
 // ─── Keyframes ───────────────────────────────────────────────────────────────
 const fadeUp   = keyframes`from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}`;
 const fadeIn   = keyframes`from{opacity:0}to{opacity:1}`;
@@ -92,14 +110,17 @@ function StatusBadge({ status }) {
 function DarkModeToggle() {
   const { colorMode, toggleColorMode } = useColorMode();
   const isDark = colorMode === "dark";
+  const accentColor = isDark ? DARK_THEME.accent : "#f97316";
+  const accentShadow = isDark ? DARK_THEME.accentShadow : "rgba(249,115,22,0.35)";
+  
   return (
     <Box
       as="button"
       onClick={toggleColorMode}
       w="56px" h="28px"
       borderRadius="full"
-      bg={isDark ? "linear-gradient(135deg,#1e293b,#334155)" : "linear-gradient(135deg,#f1f5f9,#e2e8f0)"}
-      border={isDark ? "1.5px solid #475569" : "1.5px solid #cbd5e1"}
+      bg={isDark ? `linear-gradient(135deg, ${DARK_THEME.cardBg}, ${DARK_THEME.border})` : "linear-gradient(135deg,#f1f5f9,#e2e8f0)"}
+      border={isDark ? `1.5px solid ${DARK_THEME.border}` : "1.5px solid #cbd5e1"}
       position="relative"
       transition="all 0.3s ease"
       _hover={{ opacity: 0.85 }}
@@ -108,8 +129,8 @@ function DarkModeToggle() {
     >
       <Box
         w="20px" h="20px" borderRadius="full"
-        bg={isDark ? "linear-gradient(135deg,#f97316,#fbbf24)" : "linear-gradient(135deg,#f97316,#fb923c)"}
-        boxShadow={isDark ? "0 2px 8px rgba(249,115,22,0.5)" : "0 2px 6px rgba(249,115,22,0.35)"}
+        bg={isDark ? `linear-gradient(135deg, ${DARK_THEME.accent}, ${DARK_THEME.accentLight})` : "linear-gradient(135deg,#f97316,#fb923c)"}
+        boxShadow={isDark ? `0 2px 8px ${DARK_THEME.accentShadow}` : "0 2px 6px rgba(249,115,22,0.35)"}
         transform={isDark ? "translateX(28px)" : "translateX(0)"}
         transition="transform 0.3s ease"
         display="flex" alignItems="center" justifyContent="center"
@@ -122,30 +143,34 @@ function DarkModeToggle() {
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────
 function StatCard({ label, value, icon, accent, sub, delay = 0, highlight }) {
-  const cardBg    = useColorModeValue("white", "#1e293b");
-  const cardBorder= useColorModeValue("#f1f5f9", "#334155");
-  const labelColor= useColorModeValue("#94a3b8", "#64748b");
-  const valueColor= useColorModeValue("#0f172a", "#f1f5f9");
-  const subColor  = useColorModeValue("#94a3b8", "#475569");
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === "dark";
+  
+  const cardBg    = isDark ? DARK_THEME.cardBg : "white";
+  const cardBorder= isDark ? DARK_THEME.border : "#f1f5f9";
+  const labelColor= isDark ? DARK_THEME.labelColor : "#94a3b8";
+  const valueColor= isDark ? DARK_THEME.text : "#0f172a";
+  const subColor  = isDark ? DARK_THEME.textSecondary : "#94a3b8";
+  const accentColor = isDark ? DARK_THEME.accent : accent;
 
   return (
-    <Box p="18px 20px" borderRadius="16px" bg={highlight ? `${accent}12` : cardBg}
-      border={highlight ? `1.5px solid ${accent}40` : `1px solid ${cardBorder}`}
-      boxShadow={highlight ? `0 4px 20px ${accent}20` : "0 1px 6px rgba(0,0,0,0.05)"}
+    <Box p="18px 20px" borderRadius="16px" bg={highlight ? `${accentColor}12` : cardBg}
+      border={highlight ? `1.5px solid ${accentColor}40` : `1px solid ${cardBorder}`}
+      boxShadow={highlight ? `0 4px 20px ${accentColor}20` : "0 1px 6px rgba(0,0,0,0.05)"}
       sx={{ animation: `${fadeUp} 0.4s ease ${delay}s both` }}
       transition="all 0.25s"
-      _hover={{ boxShadow: `0 6px 20px ${accent}20`, transform: "translateY(-2px)", border: `1px solid ${accent}40` }}
+      _hover={{ boxShadow: `0 6px 20px ${accentColor}20`, transform: "translateY(-2px)", border: `1px solid ${accentColor}40` }}
     >
       <Flex align="flex-start" justify="space-between">
         <Box>
           <Text fontSize="10.5px" fontWeight="800" color={labelColor} letterSpacing="0.9px"
             textTransform="uppercase" mb="6px">{label}</Text>
-          <Text fontSize="28px" fontWeight="800" color={highlight ? accent : valueColor} lineHeight="1">{value}</Text>
+          <Text fontSize="28px" fontWeight="800" color={highlight ? accentColor : valueColor} lineHeight="1">{value}</Text>
           {sub && <Text fontSize="11px" color={subColor} mt="4px">{sub}</Text>}
         </Box>
-        <Box w="42px" h="42px" borderRadius="12px" bg={`${accent}18`}
+        <Box w="42px" h="42px" borderRadius="12px" bg={`${accentColor}18`}
           display="flex" alignItems="center" justifyContent="center" flexShrink="0">
-          <Icon as={icon} boxSize="18px" color={accent} />
+          <Icon as={icon} boxSize="18px" color={accentColor} />
         </Box>
       </Flex>
     </Box>
@@ -154,17 +179,21 @@ function StatCard({ label, value, icon, accent, sub, delay = 0, highlight }) {
 
 // ─── Movie Score Card ─────────────────────────────────────────────────────────
 function MovieScoreCard({ movie, reviewCount, delay = 0 }) {
-  const cardBg    = useColorModeValue("white", "#1e293b");
-  const cardBorder= useColorModeValue("#f1f5f9", "#334155");
-  const titleColor= useColorModeValue("#0f172a", "#f1f5f9");
-  const subColor  = useColorModeValue("#94a3b8", "#475569");
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === "dark";
+  
+  const cardBg    = isDark ? DARK_THEME.cardBg : "white";
+  const cardBorder= isDark ? DARK_THEME.border : "#f1f5f9";
+  const titleColor= isDark ? DARK_THEME.text : "#0f172a";
+  const subColor  = isDark ? DARK_THEME.textSecondary : "#94a3b8";
   const pct = (movie.avgRating / 5) * 100;
+  const accentColor = isDark ? DARK_THEME.accent : "#f97316";
 
   return (
     <Box p="14px 16px" borderRadius="14px" bg={cardBg}
       border={`1px solid ${cardBorder}`} boxShadow="0 1px 4px rgba(0,0,0,0.04)"
       transition="all 0.2s"
-      _hover={{ boxShadow: "0 4px 16px rgba(249,115,22,0.1)", border: "1px solid #fed7aa" }}
+      _hover={{ boxShadow: isDark ? `0 4px 16px ${DARK_THEME.accentShadow}` : "0 4px 16px rgba(249,115,22,0.1)", border: `1px solid ${isDark ? DARK_THEME.border : "#fed7aa"}` }}
       sx={{ animation: `${fadeUp} 0.4s ease ${delay}s both` }}
     >
       <Flex align="center" gap="12px">
@@ -181,9 +210,10 @@ function MovieScoreCard({ movie, reviewCount, delay = 0 }) {
               <Text fontSize="13px" fontWeight="800" color={titleColor}>{movie.avgRating}</Text>
             </Flex>
           </Flex>
-          <Box mt="6px" h="4px" borderRadius="full" bg={useColorModeValue("#f1f5f9","#334155")} overflow="hidden">
+          <Box mt="6px" h="4px" borderRadius="full" bg={isDark ? DARK_THEME.inputBg : "#f1f5f9"} overflow="hidden">
             <Box h="100%" borderRadius="full" w={`${pct}%`}
-              bg="linear-gradient(90deg,#f97316,#fbbf24)" transition="width 0.6s ease" />
+              bg={isDark ? `linear-gradient(90deg, ${DARK_THEME.accent}, ${DARK_THEME.accentLight})` : "linear-gradient(90deg,#f97316,#fbbf24)"} 
+              transition="width 0.6s ease" />
           </Box>
         </Box>
       </Flex>
@@ -195,26 +225,28 @@ function MovieScoreCard({ movie, reviewCount, delay = 0 }) {
 function ReviewCard({ review, movie, index, onApprove, onReject, onDelete, isNew }) {
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
-  const cardBg      = useColorModeValue("white", "#1e293b");
-  const commentBg   = useColorModeValue("#f8fafc", "#0f172a");
-  const commentBorder= useColorModeValue("#f1f5f9", "#1e293b");
-  const nameColor   = useColorModeValue("#0f172a", "#f1f5f9");
-  const textColor   = useColorModeValue("#374151", "#94a3b8");
-  const metaColor   = useColorModeValue("#64748b", "#475569");
+  
+  const cardBg      = isDark ? DARK_THEME.cardBg : "white";
+  const commentBg   = isDark ? DARK_THEME.inputBg : "#f8fafc";
+  const commentBorder= isDark ? DARK_THEME.border : "#f1f5f9";
+  const nameColor   = isDark ? DARK_THEME.text : "#0f172a";
+  const textColor   = isDark ? DARK_THEME.textSecondary : "#374151";
+  const metaColor   = isDark ? DARK_THEME.labelColor : "#64748b";
   const isHighReport = review.report >= 3;
+  const accentColor = isDark ? DARK_THEME.accent : "#f97316";
 
   const borderColor = isNew
     ? "#10b981"
     : isHighReport
       ? (isDark ? "#991b1b" : "#fca5a5")
-      : (isDark ? "#334155" : "#f1f5f9");
+      : (isDark ? DARK_THEME.border : "#f1f5f9");
 
   return (
     <Box p="16px 18px" borderRadius="14px" bg={cardBg}
       border={`1.5px solid ${borderColor}`}
       boxShadow={isNew ? "0 2px 12px rgba(16,185,129,0.12)" : isHighReport ? "0 2px 12px rgba(239,68,68,0.08)" : "0 1px 4px rgba(0,0,0,0.04)"}
       transition="all 0.2s"
-      _hover={{ border: "1.5px solid #f97316", boxShadow: "0 4px 16px rgba(249,115,22,0.1)" }}
+      _hover={{ border: `1.5px solid ${accentColor}`, boxShadow: isDark ? `0 4px 16px ${DARK_THEME.accentShadow}` : "0 4px 16px rgba(249,115,22,0.1)" }}
       sx={{ animation: `${fadeUp} 0.35s ease ${index * 0.04}s both` }}
       position="relative"
     >
@@ -247,7 +279,7 @@ function ReviewCard({ review, movie, index, onApprove, onReject, onDelete, isNew
 
       <Flex gap="12px">
         <Box w="38px" h="38px" borderRadius="10px" flexShrink="0"
-          bg="linear-gradient(135deg,#f97316,#fbbf24)"
+          bg={isDark ? `linear-gradient(135deg, ${DARK_THEME.accent}, ${DARK_THEME.accentLight})` : "linear-gradient(135deg,#f97316,#fbbf24)"}
           display="flex" alignItems="center" justifyContent="center">
           <Text fontSize="14px" fontWeight="800" color="white">{review.avatar}</Text>
         </Box>
@@ -261,12 +293,12 @@ function ReviewCard({ review, movie, index, onApprove, onReject, onDelete, isNew
           </Flex>
           <Flex align="center" gap="10px" mb="7px" flexWrap="wrap">
             <Flex align="center" gap="4px">
-              <Icon as={MdMovie} boxSize="11px" color="#94a3b8" />
+              <Icon as={MdMovie} boxSize="11px" color={isDark ? DARK_THEME.labelColor : "#94a3b8"} />
               <Text fontSize="11px" color={metaColor} fontWeight="600" noOfLines={1}>{movie?.title}</Text>
             </Flex>
             <Flex align="center" gap="4px">
-              <Icon as={MdCalendarToday} boxSize="11px" color="#94a3b8" />
-              <Text fontSize="11px" color="#94a3b8">{review.date}</Text>
+              <Icon as={MdCalendarToday} boxSize="11px" color={isDark ? DARK_THEME.labelColor : "#94a3b8"} />
+              <Text fontSize="11px" color={isDark ? DARK_THEME.labelColor : "#94a3b8"}>{review.date}</Text>
             </Flex>
           </Flex>
           <Box mb="8px"><StarRating value={review.rating} size="13px" showValue /></Box>
@@ -282,11 +314,11 @@ function ReviewCard({ review, movie, index, onApprove, onReject, onDelete, isNew
                 _hover={{ bg:"#d1fae5", transform:"translateY(-1px)" }} transition="all 0.15s"
                 onClick={() => onApprove(review.id)}>Duyệt</Button>
               <Button size="xs" h="30px" px="12px" borderRadius="8px"
-                bg={isDark ? "#1e293b" : "#f9fafb"} color="#6b7280"
-                border={isDark ? "1px solid #334155" : "1px solid #e5e7eb"}
+                bg={isDark ? DARK_THEME.inputBg : "#f9fafb"} color="#6b7280"
+                border={isDark ? `1px solid ${DARK_THEME.border}` : "1px solid #e5e7eb"}
                 fontSize="11.5px" fontWeight="700"
                 leftIcon={<Icon as={MdBlock} boxSize="12px" />}
-                _hover={{ bg: isDark ? "#0f172a" : "#f1f5f9", transform:"translateY(-1px)" }} transition="all 0.15s"
+                _hover={{ bg: isDark ? DARK_THEME.hoverBg : "#f1f5f9", transform:"translateY(-1px)" }} transition="all 0.15s"
                 onClick={() => onReject(review.id)}>Từ chối</Button>
               {isHighReport && (
                 <Button size="xs" h="30px" px="12px" borderRadius="8px"
@@ -320,11 +352,12 @@ function ReviewCard({ review, movie, index, onApprove, onReject, onDelete, isNew
 function ConfirmModal({ action, review, movie, onConfirm, onCancel }) {
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
-  const modalBg = isDark ? "#1e293b" : "white";
-  const previewBg = isDark ? "#0f172a" : "#f8fafc";
-  const previewBorder = isDark ? "#334155" : "#f1f5f9";
-  const titleColor = isDark ? "#f1f5f9" : "#0f172a";
-  const descColor  = isDark ? "#94a3b8" : "#64748b";
+  
+  const modalBg = isDark ? DARK_THEME.cardBg : "white";
+  const previewBg = isDark ? DARK_THEME.inputBg : "#f8fafc";
+  const previewBorder = isDark ? DARK_THEME.border : "#f1f5f9";
+  const titleColor = isDark ? DARK_THEME.text : "#0f172a";
+  const descColor  = isDark ? DARK_THEME.textSecondary : "#64748b";
 
   const configs = {
     approve: { title:"Duyệt đánh giá", desc:"Đánh giá này sẽ được hiển thị công khai trên trang phim.", icon:MdCheckCircle, iconColor:"#059669", iconBg: isDark?"#022c22":"#ecfdf5", btnColor:"linear-gradient(135deg,#059669,#10b981)", btnText:"Xác nhận duyệt" },
@@ -358,8 +391,8 @@ function ConfirmModal({ action, review, movie, onConfirm, onCancel }) {
         <Flex gap="10px">
           <Button flex="1" h="42px" borderRadius="10px" variant="ghost"
             color={descColor} fontWeight="600" fontSize="13px"
-            border={`1.5px solid ${isDark ? "#334155" : "#e2e8f0"}`}
-            _hover={{ bg: isDark ? "#0f172a" : "#f8fafc" }}
+            border={`1.5px solid ${isDark ? DARK_THEME.border : "#e2e8f0"}`}
+            _hover={{ bg: isDark ? DARK_THEME.hoverBg : "#f8fafc" }}
             onClick={onCancel}>Hủy</Button>
           <Button flex="2" h="42px" borderRadius="10px"
             bg={cfg.btnColor} color="white" fontWeight="700" fontSize="13px"
@@ -377,36 +410,39 @@ function ConfirmModal({ action, review, movie, onConfirm, onCancel }) {
 function RealtimeToast({ count, onView, onDismiss }) {
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
+  const accentColor = isDark ? DARK_THEME.accent : "#f97316";
+  
   if (count === 0) return null;
   return (
     <Box position="fixed" bottom="24px" right="24px" zIndex="900"
-      bg={isDark ? "#1e293b" : "white"}
-      border="1.5px solid #f97316"
+      bg={isDark ? DARK_THEME.cardBg : "white"}
+      border={`1.5px solid ${accentColor}`}
       borderRadius="14px" p="14px 18px"
-      boxShadow="0 8px 32px rgba(249,115,22,0.2)"
+      boxShadow={isDark ? `0 8px 32px ${DARK_THEME.accentShadow}` : "0 8px 32px rgba(249,115,22,0.2)"}
       sx={{ animation: `${scaleIn} 0.3s ease both` }}
     >
       <Flex align="center" gap="12px">
         <Box w="36px" h="36px" borderRadius="10px"
-          bg="linear-gradient(135deg,#f97316,#fbbf24)"
+          bg={isDark ? `linear-gradient(135deg, ${DARK_THEME.accent}, ${DARK_THEME.accentLight})` : "linear-gradient(135deg,#f97316,#fbbf24)"}
           display="flex" alignItems="center" justifyContent="center" flexShrink="0">
           <Icon as={MdNotifications} boxSize="16px" color="white" />
         </Box>
         <Box>
-          <Text fontSize="13px" fontWeight="700" color={isDark ? "#f1f5f9" : "#0f172a"}>
+          <Text fontSize="13px" fontWeight="700" color={isDark ? DARK_THEME.text : "#0f172a"}>
             {count} đánh giá mới chờ duyệt
           </Text>
-          <Text fontSize="11px" color="#94a3b8">Vừa cập nhật từ hệ thống</Text>
+          <Text fontSize="11px" color={isDark ? DARK_THEME.textSecondary : "#94a3b8"}>Vừa cập nhật từ hệ thống</Text>
         </Box>
         <Flex gap="6px" ml="4px">
           <Button size="xs" h="28px" px="10px" borderRadius="7px"
-            bg="#fff7ed" color="#f97316" border="1px solid #fed7aa"
+            bg={isDark ? DARK_THEME.inputBg : "#fff7ed"} color={accentColor} 
+            border={`1px solid ${isDark ? DARK_THEME.border : "#fed7aa"}`}
             fontSize="11px" fontWeight="700"
-            _hover={{ bg:"#ffedd5" }} onClick={onView}>Xem</Button>
+            _hover={{ bg: isDark ? DARK_THEME.hoverBg : "#ffedd5" }} onClick={onView}>Xem</Button>
           <Button size="xs" h="28px" px="8px" borderRadius="7px"
-            bg={isDark ? "#334155" : "#f1f5f9"} color="#94a3b8"
+            bg={isDark ? DARK_THEME.inputBg : "#f1f5f9"} color={isDark ? DARK_THEME.textSecondary : "#94a3b8"}
             fontSize="11px" fontWeight="700"
-            _hover={{ bg: isDark ? "#475569" : "#e2e8f0" }}
+            _hover={{ bg: isDark ? DARK_THEME.hoverBg : "#e2e8f0" }}
             onClick={onDismiss}>
             <Icon as={MdClose} boxSize="12px" />
           </Button>
@@ -422,17 +458,19 @@ export default function QuanLyDanhGia() {
   const isDark = colorMode === "dark";
 
   // Colors
-  const pageBg      = useColorModeValue("transparent", "transparent");
-  const cardBg      = useColorModeValue("white", "#1e293b");
-  const cardBorder  = useColorModeValue("#f1f5f9", "#334155");
-  const titleColor  = useColorModeValue("#0f172a", "#f1f5f9");
-  const subColor    = useColorModeValue("#94a3b8", "#64748b");
-  const inputBg     = useColorModeValue("#fafafa", "#0f172a");
-  const inputBorder = useColorModeValue("#e8edf3", "#334155");
-  const sectionAccent = useColorModeValue("#94a3b8", "#475569");
-  const filterStripBg = useColorModeValue("#fafbfc", "#0f172a");
-  const filterStripBorder = useColorModeValue("#f8fafc", "#1e293b");
-  const barBg = useColorModeValue("#f1f5f9", "#334155");
+  const pageBg      = isDark ? DARK_THEME.bg : "transparent";
+  const cardBg      = isDark ? DARK_THEME.cardBg : "white";
+  const cardBorder  = isDark ? DARK_THEME.border : "#f1f5f9";
+  const titleColor  = isDark ? DARK_THEME.text : "#0f172a";
+  const subColor    = isDark ? DARK_THEME.textSecondary : "#94a3b8";
+  const inputBg     = isDark ? DARK_THEME.inputBg : "#fafafa";
+  const inputBorder = isDark ? DARK_THEME.inputBorder : "#e8edf3";
+  const sectionAccent = isDark ? DARK_THEME.labelColor : "#94a3b8";
+  const filterStripBg = isDark ? DARK_THEME.inputBg : "#fafbfc";
+  const filterStripBorder = isDark ? DARK_THEME.border : "#f8fafc";
+  const barBg = isDark ? DARK_THEME.inputBg : "#f1f5f9";
+  const accentColor = isDark ? DARK_THEME.accent : "#f97316";
+  const accentShadow = isDark ? DARK_THEME.accentShadow : "rgba(249,115,22,0.10)";
 
   const [reviews, setReviews]         = useState(INITIAL_REVIEWS);
   const [newReviewIds, setNewReviewIds] = useState(new Set());
@@ -549,9 +587,13 @@ export default function QuanLyDanhGia() {
   const inputSx = {
     bg: inputBg, border: `1.5px solid ${inputBorder}`, borderRadius:"10px",
     color: titleColor, fontSize:"13px", fontWeight:"500", px:"12px", h:"36px",
-    _placeholder: { color: "#b0bac8" },
-    _focus: { border:"1.5px solid #f97316", boxShadow:"0 0 0 3px rgba(249,115,22,0.10)", bg: isDark ? "#1e293b" : "#fff" },
-    _hover: { border:"1.5px solid #f97316" },
+    _placeholder: { color: isDark ? DARK_THEME.labelColor : "#b0bac8" },
+    _focus: { 
+      border: `1.5px solid ${accentColor}`, 
+      boxShadow: `0 0 0 3px ${accentShadow}`, 
+      bg: isDark ? DARK_THEME.cardBg : "#fff" 
+    },
+    _hover: { border: `1.5px solid ${accentColor}` },
     transition:"all 0.2s",
   };
 
@@ -569,9 +611,15 @@ export default function QuanLyDanhGia() {
         <Box sx={{ animation:`${fadeUp} 0.4s ease both` }}>
           <Flex align="center" gap="10px" mb="4px">
             <Box w="40px" h="40px" borderRadius="12px"
-              bg="linear-gradient(135deg,#f97316,#fb923c)"
+              bg={isDark 
+                ? `linear-gradient(135deg, ${DARK_THEME.accent}, ${DARK_THEME.accentLight})`
+                : "linear-gradient(135deg,#f97316,#fb923c)"
+              }
               display="flex" alignItems="center" justifyContent="center"
-              boxShadow="0 4px 14px rgba(249,115,22,0.35)">
+              boxShadow={isDark 
+                ? `0 4px 14px ${DARK_THEME.accentShadow}`
+                : "0 4px 14px rgba(249,115,22,0.35)"
+              }>
               <Icon as={MdRateReview} boxSize="18px" color="white" />
             </Box>
             <Box>
@@ -584,7 +632,7 @@ export default function QuanLyDanhGia() {
                 </Text>
                 {lastPolled && (
                   <Flex align="center" gap="4px" px="7px" py="2px" borderRadius="5px"
-                    bg={isDark ? "#0f172a" : "#f0fdf4"} border={`1px solid ${isDark ? "#334155" : "#bbf7d0"}`}>
+                    bg={isDark ? DARK_THEME.inputBg : "#f0fdf4"} border={`1px solid ${isDark ? DARK_THEME.border : "#bbf7d0"}`}>
                     <Box w="5px" h="5px" borderRadius="full" bg="#10b981"
                       sx={{ animation:`${pulse} 2s ease infinite` }} />
                     <Text fontSize="10px" fontWeight="600" color="#10b981">Realtime · {lastPolled}</Text>
@@ -634,16 +682,23 @@ export default function QuanLyDanhGia() {
 
           {/* Export CSV */}
           <Button h="38px" px="14px" borderRadius="10px" fontWeight="600" fontSize="12.5px"
-            bg="linear-gradient(135deg,#f97316,#fb923c)" color="white"
-            boxShadow="0 4px 12px rgba(249,115,22,0.3)"
+            bg={isDark 
+              ? `linear-gradient(135deg, ${DARK_THEME.accent}, ${DARK_THEME.accentLight})`
+              : "linear-gradient(135deg,#f97316,#fb923c)"
+            } 
+            color="white"
+            boxShadow={isDark 
+              ? `0 4px 12px ${DARK_THEME.accentShadow}`
+              : "0 4px 12px rgba(249,115,22,0.3)"
+            }
             _hover={{ opacity:0.9, transform:"translateY(-1px)" }} transition="all 0.2s"
             leftIcon={<Icon as={MdDownload} boxSize="13px" />}
             onClick={handleExportCSV}>Export CSV</Button>
 
           <Button h="38px" px="14px" borderRadius="10px" fontWeight="600" fontSize="12.5px"
-            bg={isDark ? "#1e293b" : "#f8fafc"} color={isDark ? "#94a3b8" : "#475569"}
-            border={isDark ? "1px solid #334155" : "1px solid #e2e8f0"}
-            _hover={{ bg: isDark ? "#334155" : "#f1f5f9" }} transition="all 0.2s"
+            bg={isDark ? DARK_THEME.inputBg : "#f8fafc"} color={isDark ? DARK_THEME.textSecondary : "#475569"}
+            border={isDark ? `1px solid ${DARK_THEME.border}` : "1px solid #e2e8f0"}
+            _hover={{ bg: isDark ? DARK_THEME.hoverBg : "#f1f5f9" }} transition="all 0.2s"
             leftIcon={<Icon as={MdRefresh} boxSize="13px" />}
             onClick={resetFilters}>Reset</Button>
         </Flex>
@@ -651,8 +706,8 @@ export default function QuanLyDanhGia() {
 
       {/* ── Stats Row ── */}
       <SimpleGrid columns={{ base:2, md:4 }} spacing="12px" mb="20px">
-        <StatCard label="Tổng đánh giá" value={counts.total}    icon={MdRateReview} accent="#f97316" delay={0}    />
-        <StatCard label="Chờ duyệt"     value={counts.pending}  icon={MdPending}    accent="#f59e0b" delay={0.05} sub={counts.pending > 0 ? "Cần xử lý" : "Đã xử lý hết"} highlight={counts.pending > 0} />
+        <StatCard label="Tổng đánh giá" value={counts.total}    icon={MdRateReview} accent={isDark ? DARK_THEME.accent : "#f97316"} delay={0}    />
+        <StatCard label="Chờ duyệt"     value={counts.pending}  icon={MdPending}    accent={isDark ? "#f59e0b" : "#f59e0b"} delay={0.05} sub={counts.pending > 0 ? "Cần xử lý" : "Đã xử lý hết"} highlight={counts.pending > 0} />
         <StatCard label="Đã duyệt"      value={counts.approved} icon={MdCheckCircle} accent="#10b981" delay={0.10} />
         <StatCard label="Báo cáo vi phạm" value={counts.reported} icon={MdWarning} accent="#ef4444" delay={0.15} sub={counts.reported > 0 ? "Cần xem xét" : "Không có"} highlight={counts.reported > 0} />
       </SimpleGrid>
@@ -663,25 +718,28 @@ export default function QuanLyDanhGia() {
         {/* ── LEFT: Review list ── */}
         <Box flex="1" minW="0">
           <Box bg={cardBg} borderRadius="16px" border={`1px solid ${cardBorder}`}
-            boxShadow="0 1px 4px rgba(0,0,0,0.04)"
+            boxShadow={isDark ? `0 1px 4px ${DARK_THEME.accentShadow}` : "0 1px 4px rgba(0,0,0,0.04)"}
             sx={{ animation:`${fadeUp} 0.4s ease 0.1s both` }}>
 
             {/* Card header */}
             <Box p="16px 18px 14px" borderBottom={`1px solid ${filterStripBorder}`}>
               <Flex align="center" justify="space-between" mb="12px">
                 <Flex align="center" gap="8px">
-                  <Box w="3px" h="14px" borderRadius="full" bg="linear-gradient(180deg,#f97316,#fbbf24)" />
+                  <Box w="3px" h="14px" borderRadius="full" bg={isDark 
+                    ? `linear-gradient(180deg, ${DARK_THEME.accent}, ${DARK_THEME.accentLight})`
+                    : "linear-gradient(180deg,#f97316,#fbbf24)"
+                  } />
                   <Text fontWeight="800" fontSize="14.5px" color={titleColor}>Danh sách đánh giá</Text>
                   <Box px="8px" py="2px" borderRadius="6px"
-                    bg={isDark ? "#1e293b" : "#fff7ed"}
-                    border={isDark ? "1px solid #f97316" : "1px solid #fed7aa"}>
-                    <Text fontSize="11px" fontWeight="700" color="#f97316">{filtered.length} kết quả</Text>
+                    bg={isDark ? DARK_THEME.inputBg : "#fff7ed"}
+                    border={isDark ? `1px solid ${DARK_THEME.accent}` : "1px solid #fed7aa"}>
+                    <Text fontSize="11px" fontWeight="700" color={isDark ? DARK_THEME.accent : "#f97316"}>{filtered.length} kết quả</Text>
                   </Box>
                 </Flex>
                 <Button display={{ base:"flex", md:"none" }}
                   size="sm" h="32px" px="10px" borderRadius="8px"
-                  bg={isDark?"#1e293b":"#f8fafc"} color={isDark?"#94a3b8":"#64748b"}
-                  border={isDark?"1px solid #334155":"1px solid #e2e8f0"}
+                  bg={isDark ? DARK_THEME.inputBg : "#f8fafc"} color={isDark ? DARK_THEME.textSecondary : "#64748b"}
+                  border={isDark ? `1px solid ${DARK_THEME.border}` : "1px solid #e2e8f0"}
                   fontSize="11.5px" fontWeight="600"
                   leftIcon={<Icon as={MdFilterList} boxSize="12px" />}
                   onClick={() => setShowFilters(v => !v)}>Lọc</Button>
@@ -691,7 +749,7 @@ export default function QuanLyDanhGia() {
                 <Flex gap="8px" wrap="wrap">
                   <Box position="relative" flex="1" minW="180px">
                     <Icon as={MdSearch} position="absolute" left="10px" top="50%"
-                      transform="translateY(-50%)" boxSize="13px" color="#94a3b8" zIndex="1" />
+                      transform="translateY(-50%)" boxSize="13px" color={isDark ? DARK_THEME.labelColor : "#94a3b8"} zIndex="1" />
                     <Input {...inputSx} pl="30px" placeholder="Tìm tên, nội dung..."
                       value={search} onChange={e => setSearch(e.target.value)} />
                   </Box>
@@ -731,25 +789,28 @@ export default function QuanLyDanhGia() {
                 <Text fontSize="11px" fontWeight="700" color={sectionAccent} alignSelf="center">Đang lọc:</Text>
                 {filterStatus !== "Tất cả" && (
                   <Flex align="center" gap="4px" px="8px" py="3px" borderRadius="6px"
-                    bg={isDark?"#1e293b":"#fff7ed"} border={isDark?"1px solid #f97316":"1px solid #fed7aa"}>
-                    <Text fontSize="11px" fontWeight="600" color="#f97316">{filterStatus}</Text>
-                    <Icon as={MdClose} boxSize="11px" color="#f97316" cursor="pointer" onClick={() => setFilterStatus("Tất cả")} />
+                    bg={isDark ? DARK_THEME.inputBg : "#fff7ed"} 
+                    border={isDark ? `1px solid ${DARK_THEME.accent}` : "1px solid #fed7aa"}>
+                    <Text fontSize="11px" fontWeight="600" color={isDark ? DARK_THEME.accent : "#f97316"}>{filterStatus}</Text>
+                    <Icon as={MdClose} boxSize="11px" color={isDark ? DARK_THEME.accent : "#f97316"} cursor="pointer" onClick={() => setFilterStatus("Tất cả")} />
                   </Flex>
                 )}
                 {filterMovie !== "Tất cả" && (
                   <Flex align="center" gap="4px" px="8px" py="3px" borderRadius="6px"
-                    bg={isDark?"#1e293b":"#fff7ed"} border={isDark?"1px solid #f97316":"1px solid #fed7aa"}>
-                    <Text fontSize="11px" fontWeight="600" color="#f97316" noOfLines={1} maxW="120px">
+                    bg={isDark ? DARK_THEME.inputBg : "#fff7ed"} 
+                    border={isDark ? `1px solid ${DARK_THEME.accent}` : "1px solid #fed7aa"}>
+                    <Text fontSize="11px" fontWeight="600" color={isDark ? DARK_THEME.accent : "#f97316"} noOfLines={1} maxW="120px">
                       {MOVIES_LIST.find(m => m.id === parseInt(filterMovie))?.title}
                     </Text>
-                    <Icon as={MdClose} boxSize="11px" color="#f97316" cursor="pointer" onClick={() => setFilterMovie("Tất cả")} />
+                    <Icon as={MdClose} boxSize="11px" color={isDark ? DARK_THEME.accent : "#f97316"} cursor="pointer" onClick={() => setFilterMovie("Tất cả")} />
                   </Flex>
                 )}
                 {filterRating !== "Tất cả" && (
                   <Flex align="center" gap="4px" px="8px" py="3px" borderRadius="6px"
-                    bg={isDark?"#1e293b":"#fff7ed"} border={isDark?"1px solid #f97316":"1px solid #fed7aa"}>
-                    <Text fontSize="11px" fontWeight="600" color="#f97316">{filterRating} sao</Text>
-                    <Icon as={MdClose} boxSize="11px" color="#f97316" cursor="pointer" onClick={() => setFilterRating("Tất cả")} />
+                    bg={isDark ? DARK_THEME.inputBg : "#fff7ed"} 
+                    border={isDark ? `1px solid ${DARK_THEME.accent}` : "1px solid #fed7aa"}>
+                    <Text fontSize="11px" fontWeight="600" color={isDark ? DARK_THEME.accent : "#f97316"}>{filterRating} sao</Text>
+                    <Icon as={MdClose} boxSize="11px" color={isDark ? DARK_THEME.accent : "#f97316"} cursor="pointer" onClick={() => setFilterRating("Tất cả")} />
                   </Flex>
                 )}
               </Flex>
@@ -785,11 +846,14 @@ export default function QuanLyDanhGia() {
         <Box w={{ base:"100%", xl:"320px" }} flexShrink="0">
           {/* Average rating by movie */}
           <Box bg={cardBg} borderRadius="16px" border={`1px solid ${cardBorder}`}
-            boxShadow="0 1px 4px rgba(0,0,0,0.04)" mb="14px"
+            boxShadow={isDark ? `0 1px 4px ${DARK_THEME.accentShadow}` : "0 1px 4px rgba(0,0,0,0.04)"} mb="14px"
             sx={{ animation:`${slideIn} 0.5s ease 0.2s both` }}>
             <Box p="16px 18px 12px" borderBottom={`1px solid ${filterStripBorder}`}>
               <Flex align="center" gap="8px">
-                <Box w="3px" h="14px" borderRadius="full" bg="linear-gradient(180deg,#f97316,#fbbf24)" />
+                <Box w="3px" h="14px" borderRadius="full" bg={isDark 
+                  ? `linear-gradient(180deg, ${DARK_THEME.accent}, ${DARK_THEME.accentLight})`
+                  : "linear-gradient(180deg,#f97316,#fbbf24)"
+                } />
                 <Text fontWeight="800" fontSize="13.5px" color={titleColor}>Điểm trung bình theo phim</Text>
               </Flex>
             </Box>
@@ -804,17 +868,20 @@ export default function QuanLyDanhGia() {
 
           {/* Status distribution */}
           <Box bg={cardBg} borderRadius="16px" border={`1px solid ${cardBorder}`}
-            boxShadow="0 1px 4px rgba(0,0,0,0.04)"
+            boxShadow={isDark ? `0 1px 4px ${DARK_THEME.accentShadow}` : "0 1px 4px rgba(0,0,0,0.04)"}
             sx={{ animation:`${slideIn} 0.5s ease 0.3s both` }}>
             <Box p="16px 18px 12px" borderBottom={`1px solid ${filterStripBorder}`}>
               <Flex align="center" gap="8px">
-                <Box w="3px" h="14px" borderRadius="full" bg="linear-gradient(180deg,#f97316,#fbbf24)" />
+                <Box w="3px" h="14px" borderRadius="full" bg={isDark 
+                  ? `linear-gradient(180deg, ${DARK_THEME.accent}, ${DARK_THEME.accentLight})`
+                  : "linear-gradient(180deg,#f97316,#fbbf24)"
+                } />
                 <Text fontWeight="800" fontSize="13.5px" color={titleColor}>Phân bố trạng thái</Text>
               </Flex>
             </Box>
             <Box p="14px 16px">
               {[
-                { label:"Chờ duyệt", value:counts.pending,  color:"#f59e0b" },
+                { label:"Chờ duyệt", value:counts.pending,  color: isDark ? "#f59e0b" : "#f59e0b" },
                 { label:"Đã duyệt",  value:counts.approved, color:"#10b981" },
                 { label:"Từ chối",   value:counts.rejected, color:"#6b7280" },
               ].map(({ label, value, color }) => {
@@ -822,7 +889,7 @@ export default function QuanLyDanhGia() {
                 return (
                   <Box key={label} mb="12px" _last={{ mb:0 }}>
                     <Flex justify="space-between" mb="5px">
-                      <Text fontSize="12px" fontWeight="600" color={useColorModeValue("#374151","#94a3b8")}>{label}</Text>
+                      <Text fontSize="12px" fontWeight="600" color={isDark ? DARK_THEME.textSecondary : "#374151"}>{label}</Text>
                       <Flex align="center" gap="6px">
                         <Text fontSize="12px" fontWeight="700" color={color}>{value}</Text>
                         <Text fontSize="10px" color={subColor}>({pct}%)</Text>
@@ -845,12 +912,15 @@ export default function QuanLyDanhGia() {
                   return (
                     <Flex key={star} align="center" gap="8px" mb="6px">
                       <Flex align="center" gap="2px" w="30px" flexShrink="0">
-                        <Text fontSize="11px" fontWeight="700" color={useColorModeValue("#374151","#94a3b8")}>{star}</Text>
+                        <Text fontSize="11px" fontWeight="700" color={isDark ? DARK_THEME.textSecondary : "#374151"}>{star}</Text>
                         <Icon as={MdStar} boxSize="10px" color="#f59e0b" />
                       </Flex>
                       <Box flex="1" h="5px" borderRadius="full" bg={barBg} overflow="hidden">
                         <Box h="100%" borderRadius="full"
-                          bg="linear-gradient(90deg,#f97316,#fbbf24)"
+                          bg={isDark 
+                            ? `linear-gradient(90deg, ${DARK_THEME.accent}, ${DARK_THEME.accentLight})`
+                            : "linear-gradient(90deg,#f97316,#fbbf24)"
+                          }
                           w={`${pct}%`} transition="width 0.8s ease" />
                       </Box>
                       <Text fontSize="11px" color={subColor} w="28px" textAlign="right">{cnt}</Text>

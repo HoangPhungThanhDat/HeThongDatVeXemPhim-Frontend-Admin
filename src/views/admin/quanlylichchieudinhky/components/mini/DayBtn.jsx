@@ -1,4 +1,4 @@
-// src/views/admin/quanlylichchieudinhky/components/mini/DayBtn.jsx
+
 
 import React, { useState } from "react";
 import { BASE, DAYS_VI } from "../../constants";

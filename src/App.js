@@ -1,17 +1,23 @@
+// src/App.js
 import './assets/css/App.css';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import AuthLayout from './layouts/auth';
 import AdminLayout from './layouts/admin';
-import PrivateRoute from './components/PrivateRoute'; // ← thêm dòng này
+import PrivateRoute from './components/PrivateRoute';
 import { ChakraProvider } from '@chakra-ui/react';
 import initialTheme from './theme/theme';
 import { useState } from 'react';
+import SignInCentered from 'views/auth/signIn'; // ✅ Thêm import
 
 export default function Main() {
   const [currentTheme, setCurrentTheme] = useState(initialTheme);
+  
   return (
     <ChakraProvider theme={currentTheme}>
       <Routes>
+        {/* ✅ Route /login dành cho Google callback (không cần layout) */}
+        <Route path="/login" element={<SignInCentered />} />
+        
         {/* Route công khai — trang đăng nhập */}
         <Route path="auth/*" element={<AuthLayout />} />
 

@@ -1,4 +1,4 @@
-// src/views/admin/quanlylichchieudinhky/components/WeekView.jsx
+
 
 import React, { useState } from "react";
 import { CINEMAS, DAYS_VI, getMovie, tierColor, tierBg, tierBdr } from "../constants";

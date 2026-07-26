@@ -1,4 +1,4 @@
-// src/views/admin/quanlylichchieudinhky/components/mini/Pill.jsx
+
 
 import React from "react";
 

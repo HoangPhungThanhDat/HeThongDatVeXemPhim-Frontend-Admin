@@ -1,10 +1,10 @@
-
+// views/admin/quanlysuatchieu/components/ShowtimeRow.jsx
 
 import React from "react";
-import { Box, Flex, Text, Button, Icon, Switch } from "@chakra-ui/react";
+import { Box, Flex, Text, Button, Icon, useColorModeValue, Tooltip } from "@chakra-ui/react";
 import {
   MdMeetingRoom, MdAccessTime, MdVisibility, MdEdit,
-  MdDelete, MdAttachMoney,
+  MdDelete, MdAttachMoney, MdMovie, MdCalendarToday
 } from "react-icons/md";
 import { BsCameraReelsFill } from "react-icons/bs";
 import { StatusPill } from "./StatusPill";
@@ -24,131 +24,173 @@ export const ShowtimeRow = ({
 }) => {
   const movieTitle = getMovieTitle(s.MovieId);
   const roomName = getRoomName(s.RoomId);
+  
+  const borderColor = useColorModeValue("#e2e8f0", "#2d3748");
+  const bgSelected = useColorModeValue("#fff7ed", "#2d3748");
+  const bgHover = useColorModeValue("#f8fafc", "#2d3748");
+  const textColor = useColorModeValue("#0f172a", "#f7fafc");
+  const subColor = useColorModeValue("#64748b", "#a0aec0");
+  
+  // Format date time
+  const formatDateTime = (dateStr) => {
+    if (!dateStr) return "N/A";
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return dateStr;
+    }
+  };
 
   return (
     <Flex
       align="center"
-      p="13px 16px"
-      borderRadius="12px"
-      bg={isSelected ? (isDark ? "#2d3748" : "#fff7ed") : (isDark ? "#1a202c" : "white")}
-      border={isSelected ? "1.5px solid #f97316" : (isDark ? "1.5px solid #4a5568" : "1.5px solid #f1f5f9")}
-      transition="all 0.18s"
+      p="12px 16px"
+      borderRadius="10px"
+      bg={isSelected ? bgSelected : "transparent"}
+      border={isSelected 
+        ? "2px solid #f97316" 
+        : `1px solid ${borderColor}`}
+      transition="all 0.2s"
       _hover={{
-        border: "1.5px solid #fdba74",
-        boxShadow: isDark ? "0 3px 14px rgba(0,0,0,0.2)" : "0 3px 14px rgba(249,115,22,0.1)",
-        bg: isDark ? "#2d3748" : "#fffbf7"
+        borderColor: isSelected ? "#f97316" : "#f97316",
+        boxShadow: "0 2px 12px rgba(249,115,22,0.08)",
+        bg: isSelected ? bgSelected : bgHover,
+        transform: "translateX(4px)"
       }}
-      sx={{ animation: `${fadeUp} 0.35s ease ${index * 0.045}s both` }}
+      sx={{ animation: `${fadeUp} 0.3s ease ${Math.min(index * 0.04, 0.4)}s both` }}
       cursor="pointer"
       onClick={() => onView(s)}
-      gap="0"
+      gap="8px"
     >
-      <Box w="36px" flexShrink="0">
-        <Text fontSize="12px" fontWeight="700" color={isDark ? "#4a5568" : "#d1d5db"}>
+      {/* STT */}
+      <Box w="32px" flexShrink="0">
+        <Text fontSize="11px" fontWeight="700" color={useColorModeValue("#cbd5e1", "#4a5568")}>
           {String(index + 1).padStart(2, "0")}
         </Text>
       </Box>
 
+      {/* Icon */}
       <Box
         w="36px"
         h="36px"
         borderRadius="10px"
-        bg="linear-gradient(135deg, #fff7ed, #ffe4c8)"
+        bg="linear-gradient(135deg, #fff7ed, #ffedd5)"
         border="1px solid #fed7aa"
         display="flex"
         alignItems="center"
         justifyContent="center"
         flexShrink="0"
-        mr="12px"
+        mr="8px"
       >
-        <Icon as={BsCameraReelsFill} boxSize="13px" color="#f97316" />
+        <Icon as={BsCameraReelsFill} boxSize="14px" color="#f97316" />
       </Box>
 
-      <Box flex="2.5" minW="0" pr="12px">
-        <Text fontSize="13.5px" fontWeight="700" color={isDark ? "#f7fafc" : "#111827"} noOfLines={1}>
-          {movieTitle}
+      {/* Movie Title */}
+      <Box flex="2" minW="0" pr="10px">
+        <Text fontSize="14px" fontWeight="700" color={textColor} noOfLines={1}>
+          {movieTitle || "Chưa có phim"}
         </Text>
         <Flex align="center" gap="4px" mt="1px">
-          <Icon as={MdMeetingRoom} boxSize="10px" color="#f97316" />
-          <Text fontSize="11px" color={isDark ? "#718096" : "#9ca3af"} fontWeight="500">
-            {roomName}
+          <Icon as={MdMeetingRoom} boxSize="11px" color="#f97316" />
+          <Text fontSize="11px" color={subColor} fontWeight="500" noOfLines={1}>
+            {roomName || "Chưa có phòng"}
           </Text>
         </Flex>
       </Box>
 
-      <Box flex="1.5" minW="0" pr="12px" display={{ base: "none", md: "block" }}>
-        <Flex align="center" gap="5px" mb="2px">
-          <Icon as={MdAccessTime} boxSize="10px" color="#94a3b8" />
-          <Text fontSize="12px" fontWeight="600" color={isDark ? "#a0aec0" : "#4b5563"}>
-            {s.StartTime?.replace('T', ' ') || "N/A"}
+      {/* Room & Date Time */}
+      <Box flex="1.8" minW="0" pr="10px" display={{ base: "none", md: "block" }}>
+        <Flex align="center" gap="5px" mb="1px">
+          <Icon as={MdCalendarToday} boxSize="11px" color={subColor} />
+          <Text fontSize="12px" fontWeight="600" color={subColor}>
+            {formatDateTime(s.StartTime)}
           </Text>
         </Flex>
         <Flex align="center" gap="5px">
-          <Icon as={MdAttachMoney} boxSize="10px" color="#10b981" />
-          <Text fontSize="12px" fontWeight="600" color={isDark ? "#a0aec0" : "#4b5563"}>
+          <Icon as={MdAccessTime} boxSize="11px" color={subColor} />
+          <Text fontSize="12px" fontWeight="600" color={subColor}>
+            {s.StartTime ? formatDateTime(s.StartTime).split(' ')[1] : "N/A"}
+          </Text>
+        </Flex>
+      </Box>
+
+      {/* Price */}
+      <Box flex="1.2" minW="0" pr="10px" display={{ base: "none", lg: "block" }}>
+        <Flex align="center" gap="5px">
+          <Icon as={MdAttachMoney} boxSize="12px" color="#10b981" />
+          <Text fontSize="13px" fontWeight="700" color="#10b981">
             {s.Price ? `${s.Price.toLocaleString('vi-VN')}đ` : "N/A"}
           </Text>
         </Flex>
       </Box>
 
-      <Box flex="1" minW="0" pr="12px" display={{ base: "none", sm: "block" }}>
+      {/* Status */}
+      <Box flex="1" minW="0" pr="10px" display={{ base: "none", sm: "block" }}>
         <StatusPill status={s.Status} size="sm" />
       </Box>
 
-      <Flex gap="6px" flexShrink="0" onClick={e => e.stopPropagation()}>
-        <Button
-          size="xs"
-          h="30px"
-          px="9px"
-          borderRadius="8px"
-          bg={isDark ? "#4a5568" : "#f8fafc"}
-          color={isDark ? "#e2e8f0" : "#374151"}
-          border={isDark ? "1px solid #4a5568" : "1px solid #e5e7eb"}
-          fontSize="11px"
-          fontWeight="600"
-          leftIcon={<Icon as={MdVisibility} boxSize="11px" />}
-          _hover={{ bg: isDark ? "#4a5568" : "#f1f5f9" }}
-          transition="all 0.15s"
-          onClick={() => onView(s)}
-          display={{ base: "none", md: "flex" }}
-        >
-          Xem
-        </Button>
-        <Button
-          size="xs"
-          h="30px"
-          px="9px"
-          borderRadius="8px"
-          bg="linear-gradient(135deg, #f97316, #fb923c)"
-          color="white"
-          fontSize="11px"
-          fontWeight="700"
-          leftIcon={<Icon as={MdEdit} boxSize="11px" />}
-          _hover={{ opacity: 0.88 }}
-          boxShadow="0 2px 8px rgba(249,115,22,0.28)"
-          transition="all 0.15s"
-          onClick={() => onEdit(s)}
-        >
-          Sửa
-        </Button>
-        <Button
-          size="xs"
-          h="30px"
-          px="9px"
-          borderRadius="8px"
-          bg={isDark ? "#4a5568" : "#fee2e2"}
-          color={isDark ? "#e2e8f0" : "#dc2626"}
-          border={isDark ? "1px solid #4a5568" : "1px solid #fecaca"}
-          fontSize="11px"
-          fontWeight="600"
-          leftIcon={<Icon as={MdDelete} boxSize="11px" />}
-          _hover={{ bg: isDark ? "#4a5568" : "#fecaca" }}
-          transition="all 0.15s"
-          onClick={() => onDelete(s.ShowtimeId)}
-          display={{ base: "none", md: "flex" }}
-        >
-          Xóa
-        </Button>
+      {/* Actions */}
+      <Flex gap="5px" flexShrink="0" onClick={e => e.stopPropagation()}>
+        <Tooltip label="Xem chi tiết" placement="top" hasArrow>
+          <Button
+            size="xs"
+            h="30px"
+            w="30px"
+            minW="30px"
+            borderRadius="8px"
+            bg={useColorModeValue("#f8fafc", "#2d3748")}
+            color={useColorModeValue("#64748b", "#a0aec0")}
+            border={`1px solid ${borderColor}`}
+            _hover={{ bg: "#f97316", color: "white", borderColor: "#f97316" }}
+            transition="all 0.15s"
+            onClick={() => onView(s)}
+          >
+            <Icon as={MdVisibility} boxSize="14px" />
+          </Button>
+        </Tooltip>
+
+        <Tooltip label="Chỉnh sửa" placement="top" hasArrow>
+          <Button
+            size="xs"
+            h="30px"
+            w="30px"
+            minW="30px"
+            borderRadius="8px"
+            bg="linear-gradient(135deg, #f97316, #fb923c)"
+            color="white"
+            _hover={{ opacity: 0.88, transform: "translateY(-1px)" }}
+            boxShadow="0 2px 8px rgba(249,115,22,0.25)"
+            transition="all 0.15s"
+            onClick={() => onEdit(s)}
+          >
+            <Icon as={MdEdit} boxSize="14px" />
+          </Button>
+        </Tooltip>
+
+        <Tooltip label="Xóa" placement="top" hasArrow>
+          <Button
+            size="xs"
+            h="30px"
+            w="30px"
+            minW="30px"
+            borderRadius="8px"
+            bg={useColorModeValue("#fef2f2", "#2d3748")}
+            color={useColorModeValue("#dc2626", "#f87171")}
+            border={useColorModeValue("1px solid #fca5a5", "1px solid #4a5568")}
+            _hover={{ bg: "#fee2e2", transform: "translateY(-1px)" }}
+            transition="all 0.15s"
+            onClick={() => onDelete(s.ShowtimeId)}
+          >
+            <Icon as={MdDelete} boxSize="14px" />
+          </Button>
+        </Tooltip>
       </Flex>
     </Flex>
   );

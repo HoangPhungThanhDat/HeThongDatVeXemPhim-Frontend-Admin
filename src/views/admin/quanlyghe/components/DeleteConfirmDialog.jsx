@@ -1,4 +1,4 @@
-// components/DeleteConfirmDialog.jsx
+
 import React from "react";
 import {
   AlertDialog, AlertDialogBody, AlertDialogFooter,

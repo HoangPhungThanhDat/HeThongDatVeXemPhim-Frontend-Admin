@@ -1,5 +1,3 @@
-// src/views/admin/quanlyphongchieu/components/AddRoomModal.jsx
-
 import React, { useState } from "react";
 import {
   Box, Flex, Text, Button, Icon, Grid, Input, Select,
@@ -11,34 +9,67 @@ import {
 import { MdAdd, MdClose, MdInfo, MdCheckCircle } from "react-icons/md";
 import { FaBuilding, FaDoorClosed, FaFilm, FaToggleOn } from "react-icons/fa";
 
+// Màu sắc cho chế độ tối - tông xanh
+const DARK_THEME = {
+  bg: "#0a1628",
+  cardBg: "#0f1f3a",
+  border: "#1a3a5c",
+  text: "#e8f4f8",
+  textSecondary: "#88b4d8",
+  labelColor: "#5a8ab5",
+  inputBg: "#0a1f35",
+  hoverBg: "#142d4f",
+  accent: "#4a9eff",
+  accentLight: "#6ab0ff",
+  accentShadow: "rgba(74, 158, 255, 0.25)",
+  gradientFrom: "#4a9eff",
+  gradientTo: "#6ab0ff",
+};
+
 const getInputStyle = (isDark) => ({
-  bg: isDark ? "#1e293b" : "#fafafa",
-  border: isDark ? "1.5px solid #334155" : "1.5px solid #e8edf3",
+  bg: isDark ? DARK_THEME.inputBg : "#fafafa",
+  border: isDark ? `1.5px solid ${DARK_THEME.border}` : "1.5px solid #e8edf3",
   borderRadius: "10px",
-  color: isDark ? "#f1f5f9" : "#1a202c",
+  color: isDark ? DARK_THEME.text : "#1a202c",
   fontSize: "14px",
   fontWeight: "500",
   px: "14px",
   h: "44px",
-  _placeholder: { color: isDark ? "#64748b" : "#b0bac8", fontWeight: "400" },
+  _placeholder: { color: isDark ? DARK_THEME.labelColor : "#b0bac8", fontWeight: "400" },
   _focus: {
-    border: "1.5px solid #f97316",
-    boxShadow: "0 0 0 3px rgba(249,115,22,0.10)",
-    bg: isDark ? "#1e293b" : "#fff"
+    border: `1.5px solid ${isDark ? DARK_THEME.accent : "#f97316"}`,
+    boxShadow: isDark 
+      ? `0 0 0 3px ${DARK_THEME.accentShadow}`
+      : "0 0 0 3px rgba(249,115,22,0.10)",
+    bg: isDark ? DARK_THEME.inputBg : "#fff"
   },
-  _hover: { border: "1.5px solid #f97316", bg: isDark ? "#1e293b" : "#fff" },
+  _hover: { 
+    border: `1.5px solid ${isDark ? DARK_THEME.accent : "#f97316"}`, 
+    bg: isDark ? DARK_THEME.inputBg : "#fff" 
+  },
   transition: "all 0.2s",
 });
 
-const AddRoomModal = ({ isOpen, onClose, onAdd, cinemas = [] }) => {
+const AddRoomModal = ({ isOpen, onClose, onAdd, cinemas = [], isDark }) => {
   const { colorMode } = useColorMode();
-  const isDark = colorMode === "dark";
+  const darkMode = isDark !== undefined ? isDark : (colorMode === "dark");
   const toast = useToast();
-  const bg = isDark ? "#1e293b" : "white";
-  const border = isDark ? "#334155" : "#e2e8f0";
-  const textColor = isDark ? "#f1f5f9" : "#1a202c";
-  const subColor = isDark ? "#94a3b8" : "#64748b";
-  const inputStyle = getInputStyle(isDark);
+  
+  // Dark mode colors
+  const accentColor = darkMode ? DARK_THEME.accent : "#f97316";
+  const accentShadow = darkMode ? DARK_THEME.accentShadow : "rgba(249,115,22,0.35)";
+  const gradientBg = darkMode 
+    ? `linear-gradient(135deg, ${DARK_THEME.accent}, ${DARK_THEME.accentLight})`
+    : "linear-gradient(135deg,#f97316 0%,#fb923c 60%,#fbbf24 100%)";
+  const gradientSmall = darkMode 
+    ? `linear-gradient(135deg, ${DARK_THEME.accent}, ${DARK_THEME.accentLight})`
+    : "linear-gradient(135deg,#f97316,#fb923c)";
+  
+  const bg = darkMode ? DARK_THEME.cardBg : "white";
+  const border = darkMode ? DARK_THEME.border : "#e2e8f0";
+  const textColor = darkMode ? DARK_THEME.text : "#1a202c";
+  const subColor = darkMode ? DARK_THEME.textSecondary : "#64748b";
+  const inputStyle = getInputStyle(darkMode);
   
   const [form, setForm] = useState({
     CinemaId: "",
@@ -99,15 +130,15 @@ const AddRoomModal = ({ isOpen, onClose, onAdd, cinemas = [] }) => {
     <Modal isOpen={isOpen} onClose={onClose} size="xl">
       <ModalOverlay backdropFilter="blur(4px)" />
       <ModalContent bg={bg} borderRadius="20px" border={`1px solid ${border}`} maxH="90vh" overflow="hidden">
-        <Box h="4px" bg="linear-gradient(90deg,#f97316,#fbbf24,#f97316)"
+        <Box h="4px" bg={gradientBg}
           bgSize="200% 100%" sx={{ animation: "shimmer 3s linear infinite" }} />
         
         <ModalHeader color={textColor} fontWeight="800" fontSize="18px" pt="20px" pb="4px">
           <Flex align="center" gap="10px">
             <Box w="40px" h="40px" borderRadius="11px"
-              bg="linear-gradient(135deg,#f97316,#fb923c)"
+              bg={gradientSmall}
               display="flex" alignItems="center" justifyContent="center"
-              boxShadow="0 4px 12px rgba(249,115,22,0.35)"
+              boxShadow={`0 4px 12px ${accentShadow}`}
             >
               <Icon as={FaDoorClosed} boxSize="18px" color="white" />
             </Box>
@@ -128,7 +159,7 @@ const AddRoomModal = ({ isOpen, onClose, onAdd, cinemas = [] }) => {
             {/* Chọn rạp */}
             <FormControl isRequired>
               <FormLabel fontSize="12px" fontWeight="700" color={subColor} display="flex" alignItems="center" gap="6px">
-                <Icon as={FaBuilding} boxSize="12px" color="#f97316" />
+                <Icon as={FaBuilding} boxSize="12px" color={accentColor} />
                 Chọn rạp
               </FormLabel>
               <Select
@@ -149,7 +180,7 @@ const AddRoomModal = ({ isOpen, onClose, onAdd, cinemas = [] }) => {
               {/* Tên phòng */}
               <FormControl isRequired>
                 <FormLabel fontSize="12px" fontWeight="700" color={subColor} display="flex" alignItems="center" gap="6px">
-                  <Icon as={FaDoorClosed} boxSize="12px" color="#f97316" />
+                  <Icon as={FaDoorClosed} boxSize="12px" color={accentColor} />
                   Tên phòng chiếu
                 </FormLabel>
                 <Input
@@ -163,7 +194,7 @@ const AddRoomModal = ({ isOpen, onClose, onAdd, cinemas = [] }) => {
               {/* Loại phòng */}
               <FormControl isRequired>
                 <FormLabel fontSize="12px" fontWeight="700" color={subColor} display="flex" alignItems="center" gap="6px">
-                  <Icon as={FaFilm} boxSize="12px" color="#f97316" />
+                  <Icon as={FaFilm} boxSize="12px" color={accentColor} />
                   Loại phòng
                 </FormLabel>
                 <Select
@@ -183,7 +214,7 @@ const AddRoomModal = ({ isOpen, onClose, onAdd, cinemas = [] }) => {
             {/* Trạng thái */}
             <FormControl isRequired>
               <FormLabel fontSize="12px" fontWeight="700" color={subColor} display="flex" alignItems="center" gap="6px">
-                <Icon as={FaToggleOn} boxSize="12px" color="#f97316" />
+                <Icon as={FaToggleOn} boxSize="12px" color={accentColor} />
                 Trạng thái
               </FormLabel>
               <Select
@@ -201,18 +232,18 @@ const AddRoomModal = ({ isOpen, onClose, onAdd, cinemas = [] }) => {
             <Box
               p="14px 16px"
               borderRadius="12px"
-              bg={isDark ? "rgba(59, 130, 246, 0.15)" : "rgba(59, 130, 246, 0.08)"}
-              border={`1.5px solid ${isDark ? "rgba(59, 130, 246, 0.3)" : "rgba(59, 130, 246, 0.25)"}`}
+              bg={darkMode ? `${DARK_THEME.accent}15` : "rgba(59, 130, 246, 0.08)"}
+              border={`1.5px solid ${darkMode ? DARK_THEME.border : "rgba(59, 130, 246, 0.25)"}`}
             >
               <Flex align="flex-start" gap="10px">
-                <Icon as={MdInfo} boxSize="18px" color="#3b82f6" mt="2px" flexShrink="0" />
-                <Box fontSize="13px" color={isDark ? "#94a3b8" : "#475569"}>
-                  <Text fontWeight="700" color={isDark ? "#f1f5f9" : "#1e293b"} mb="4px">
+                <Icon as={MdInfo} boxSize="18px" color={darkMode ? DARK_THEME.accent : "#3b82f6"} mt="2px" flexShrink="0" />
+                <Box fontSize="13px" color={darkMode ? DARK_THEME.textSecondary : "#475569"}>
+                  <Text fontWeight="700" color={darkMode ? DARK_THEME.text : "#1e293b"} mb="4px">
                     💡 Lưu ý về số ghế
                   </Text>
                   <Text fontSize="12px">
                     Số ghế sẽ được tính tự động sau khi bạn tạo ghế cho phòng này.
-                    Sau khi tạo phòng, hãy vào phần <strong>"Quản lý ghế"</strong> để tạo ghế hàng loạt.
+                    Sau khi tạo phòng, hãy vào phần <strong style={{ color: darkMode ? DARK_THEME.accent : "#3b82f6" }}>"Quản lý ghế"</strong> để tạo ghế hàng loạt.
                   </Text>
                 </Box>
               </Flex>
@@ -223,13 +254,13 @@ const AddRoomModal = ({ isOpen, onClose, onAdd, cinemas = [] }) => {
               <Box
                 p="16px 18px"
                 borderRadius="12px"
-                bg={isDark ? "rgba(247, 147, 30, 0.12)" : "rgba(247, 147, 30, 0.08)"}
-                border={`1.5px solid ${isDark ? "rgba(247, 147, 30, 0.25)" : "rgba(247, 147, 30, 0.3)"}`}
+                bg={darkMode ? `${DARK_THEME.accent}12` : "rgba(247, 147, 30, 0.08)"}
+                border={`1.5px solid ${darkMode ? DARK_THEME.border : "rgba(247, 147, 30, 0.3)"}`}
                 sx={{ animation: "fadeIn 0.3s ease both" }}
               >
                 <Flex align="center" gap="10px" mb="12px">
                   <Box w="28px" h="28px" borderRadius="8px"
-                    bg="linear-gradient(135deg,#f97316,#fb923c)"
+                    bg={gradientSmall}
                     display="flex" alignItems="center" justifyContent="center"
                   >
                     <Icon as={MdCheckCircle} boxSize="14px" color="white" />
@@ -241,30 +272,32 @@ const AddRoomModal = ({ isOpen, onClose, onAdd, cinemas = [] }) => {
 
                 <Grid templateColumns="1fr 1fr" gap="8px" fontSize="13px" color={subColor}>
                   <Flex align="center" gap="8px">
-                    <Icon as={FaBuilding} boxSize="12px" color="#f97316" />
+                    <Icon as={FaBuilding} boxSize="12px" color={accentColor} />
                     <Text>Rạp: <strong style={{ color: textColor }}>{selectedCinema?.Name}</strong></Text>
                   </Flex>
                   <Flex align="center" gap="8px">
-                    <Icon as={FaDoorClosed} boxSize="12px" color="#f97316" />
+                    <Icon as={FaDoorClosed} boxSize="12px" color={accentColor} />
                     <Text>Tên phòng: <strong style={{ color: textColor }}>{form.Name}</strong></Text>
                   </Flex>
                   <Flex align="center" gap="8px">
-                    <Icon as={FaFilm} boxSize="12px" color="#f97316" />
-                    <Text>Loại phòng: <strong style={{ color: "#3b82f6" }}>{getRoomTypeLabel(form.RoomType)}</strong></Text>
+                    <Icon as={FaFilm} boxSize="12px" color={accentColor} />
+                    <Text>Loại phòng: <strong style={{ color: darkMode ? DARK_THEME.accentLight : "#3b82f6" }}>
+                      {getRoomTypeLabel(form.RoomType)}
+                    </strong></Text>
                   </Flex>
                   <Flex align="center" gap="8px">
-                    <Icon as={FaToggleOn} boxSize="12px" color="#f97316" />
+                    <Icon as={FaToggleOn} boxSize="12px" color={accentColor} />
                     <Text>Trạng thái: <strong style={{ color: form.Status === "Active" ? "#10b981" : "#6b7280" }}>
                       {form.Status === "Active" ? "✅ Hoạt động" : form.Status === "Inactive" ? "⛔ Không hoạt động" : "🔧 Bảo trì"}
                     </strong></Text>
                   </Flex>
                 </Grid>
 
-                <Box mt="10px" pt="10px" borderTop={`1px solid ${isDark ? "#334155" : "#e8edf3"}`}>
+                <Box mt="10px" pt="10px" borderTop={`1px solid ${darkMode ? DARK_THEME.border : "#e8edf3"}`}>
                   <Flex align="center" gap="8px">
-                    <Icon as={FaDoorClosed} boxSize="12px" color="#fbbf24" />
-                    <Text fontSize="12px" color={isDark ? "#94a3b8" : "#64748b"}>
-                      Số ghế: <strong style={{ color: "#fbbf24" }}>Chưa có (sẽ tính tự động)</strong>
+                    <Icon as={FaDoorClosed} boxSize="12px" color={darkMode ? DARK_THEME.accentLight : "#fbbf24"} />
+                    <Text fontSize="12px" color={darkMode ? DARK_THEME.textSecondary : "#64748b"}>
+                      Số ghế: <strong style={{ color: darkMode ? DARK_THEME.accentLight : "#fbbf24" }}>Chưa có (sẽ tính tự động)</strong>
                     </Text>
                   </Flex>
                 </Box>
@@ -284,7 +317,7 @@ const AddRoomModal = ({ isOpen, onClose, onAdd, cinemas = [] }) => {
             fontWeight="600"
             fontSize="13px"
             border={`1.5px solid ${border}`}
-            _hover={{ bg: isDark ? "#2d3748" : "#f8fafc" }}
+            _hover={{ bg: darkMode ? DARK_THEME.hoverBg : "#f8fafc" }}
             leftIcon={<Icon as={MdClose} />}
             onClick={onClose}
           >
@@ -297,11 +330,11 @@ const AddRoomModal = ({ isOpen, onClose, onAdd, cinemas = [] }) => {
             borderRadius="10px"
             fontWeight="700"
             fontSize="13px"
-            bg="linear-gradient(135deg,#f97316 0%,#fb923c 60%,#fbbf24 100%)"
+            bg={gradientBg}
             color="white"
-            boxShadow="0 4px 16px rgba(249,115,22,0.35)"
+            boxShadow={`0 4px 16px ${accentShadow}`}
             _hover={{
-              boxShadow: "0 8px 24px rgba(249,115,22,0.45)",
+              boxShadow: `0 8px 24px ${accentShadow}`,
               transform: "translateY(-1px)"
             }}
             transition="all 0.2s"

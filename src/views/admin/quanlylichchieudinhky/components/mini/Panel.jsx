@@ -1,4 +1,4 @@
-// src/views/admin/quanlylichchieudinhky/components/mini/Panel.jsx
+
 
 import React from "react";
 

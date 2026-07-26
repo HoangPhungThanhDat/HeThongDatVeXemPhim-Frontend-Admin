@@ -3,9 +3,45 @@
 import React from "react";
 import { useColorMode } from "@chakra-ui/react";
 
+// Màu sắc cho chế độ tối - tông xanh
+const DARK_THEME = {
+  bg: "#0a1628",
+  cardBg: "#0f1f3a",
+  border: "#1a3a5c",
+  text: "#e8f4f8",
+  textSecondary: "#88b4d8",
+  labelColor: "#5a8ab5",
+  inputBg: "#0a1f35",
+  hoverBg: "#142d4f",
+  accent: "#4a9eff",
+  accentLight: "#6ab0ff",
+  accentShadow: "rgba(74, 158, 255, 0.25)",
+};
+
 export default function Loader() {
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
+
+  // Dark mode colors
+  const accentColor = isDark ? DARK_THEME.accent : "#ea580c";
+  const accentLight = isDark ? DARK_THEME.accentLight : "#fb923c";
+  const accentLighter = isDark ? "#6ab0ff" : "#fbbf24";
+  const bgPage = isDark ? DARK_THEME.bg : "#f8fafc";
+  const bgCard = isDark ? DARK_THEME.cardBg : "white";
+  const borderCard = isDark ? DARK_THEME.border : "#f1f5f9";
+  const textColor = isDark ? DARK_THEME.textSecondary : "#64748b";
+  const textDark = isDark ? DARK_THEME.text : "#0f172a";
+  const skeletonBg = isDark ? "#1a2a4a" : "#e8edf3";
+  const skeletonBg2 = isDark ? "#2a3a5a" : "#f1f5f9";
+  const skeletonBgDark = isDark ? "#2d3748" : "#e8edf3";
+  const skeletonBgDark2 = isDark ? "#4a5568" : "#f1f5f9";
+  const statBg = isDark ? DARK_THEME.cardBg : "white";
+  const statBorder = isDark ? DARK_THEME.border : "#f1f5f9";
+  const tableBg = isDark ? DARK_THEME.cardBg : "white";
+  const tableBorder = isDark ? DARK_THEME.border : "#f1f5f9";
+  const tableHeaderBg = isDark ? DARK_THEME.inputBg : "#fafbfc";
+  const tableHeaderBorder = isDark ? DARK_THEME.border : "#f1f5f9";
+  const rowBorder = isDark ? DARK_THEME.border : "#f8fafc";
 
   return (
     <div className={`loader-container ${isDark ? "dark-mode" : "light-mode"}`}>
@@ -103,11 +139,11 @@ export default function Loader() {
         }
 
         .loader-container.light-mode {
-          background: #f8fafc;
+          background: ${bgPage};
         }
 
         .loader-container.dark-mode {
-          background: #0f172a;
+          background: ${bgPage};
         }
 
         /* Background gradient orbs */
@@ -140,7 +176,7 @@ export default function Loader() {
           position: fixed;
           width: 600px;
           height: 600px;
-          background: radial-gradient(circle, rgba(234, 88, 12, 0.08) 0%, transparent 70%);
+          background: radial-gradient(circle, rgba(74, 158, 255, 0.08) 0%, transparent 70%);
           top: -200px;
           right: -200px;
           border-radius: 50%;
@@ -152,7 +188,7 @@ export default function Loader() {
           position: fixed;
           width: 400px;
           height: 400px;
-          background: radial-gradient(circle, rgba(251, 146, 60, 0.06) 0%, transparent 70%);
+          background: radial-gradient(circle, rgba(106, 176, 255, 0.06) 0%, transparent 70%);
           bottom: -100px;
           left: -100px;
           border-radius: 50%;
@@ -194,23 +230,43 @@ export default function Loader() {
           animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
         }
 
-        .spinner-ring:nth-child(1) {
+        .loader-container.light-mode .spinner-ring:nth-child(1) {
           border-top-color: #ea580c;
           animation-delay: -0.45s;
         }
 
-        .spinner-ring:nth-child(2) {
+        .loader-container.light-mode .spinner-ring:nth-child(2) {
           border-right-color: #fb923c;
           animation-delay: -0.3s;
         }
 
-        .spinner-ring:nth-child(3) {
+        .loader-container.light-mode .spinner-ring:nth-child(3) {
           border-bottom-color: #fbbf24;
           animation-delay: -0.15s;
         }
 
-        .spinner-ring:nth-child(4) {
+        .loader-container.light-mode .spinner-ring:nth-child(4) {
           border-left-color: #ea580c;
+          animation-delay: 0s;
+        }
+
+        .loader-container.dark-mode .spinner-ring:nth-child(1) {
+          border-top-color: ${accentColor};
+          animation-delay: -0.45s;
+        }
+
+        .loader-container.dark-mode .spinner-ring:nth-child(2) {
+          border-right-color: ${accentLight};
+          animation-delay: -0.3s;
+        }
+
+        .loader-container.dark-mode .spinner-ring:nth-child(3) {
+          border-bottom-color: ${accentLighter};
+          animation-delay: -0.15s;
+        }
+
+        .loader-container.dark-mode .spinner-ring:nth-child(4) {
+          border-left-color: ${accentColor};
           animation-delay: 0s;
         }
 
@@ -221,8 +277,15 @@ export default function Loader() {
           transform: translate(-50%, -50%);
           width: 24px;
           height: 24px;
-          color: #ea580c;
           animation: pulse 2s ease-in-out infinite;
+        }
+
+        .loader-container.light-mode .spinner-logo {
+          color: #ea580c;
+        }
+
+        .loader-container.dark-mode .spinner-logo {
+          color: ${accentColor};
         }
 
         .spinner-logo svg {
@@ -243,7 +306,7 @@ export default function Loader() {
         }
 
         .loader-container.dark-mode .loader-text {
-          color: #94a3b8;
+          color: ${textColor};
         }
 
         /* ===== SKELETON ===== */
@@ -274,7 +337,7 @@ export default function Loader() {
         }
 
         .loader-container.dark-mode .skeleton-avatar {
-          background: linear-gradient(135deg, #2d3748, #4a5568);
+          background: linear-gradient(135deg, #1a2a4a, #2a3a5a);
         }
 
         .avatar-shimmer,
@@ -295,7 +358,7 @@ export default function Loader() {
 
         .loader-container.dark-mode .avatar-shimmer,
         .loader-container.dark-mode .icon-shimmer {
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+          background: linear-gradient(90deg, transparent, rgba(74, 158, 255, 0.08), transparent);
         }
 
         .skeleton-header-content {
@@ -325,14 +388,14 @@ export default function Loader() {
         }
 
         .loader-container.light-mode .skeleton-stat-card {
-          background: white;
-          border: 1px solid #f1f5f9;
+          background: ${statBg};
+          border: 1px solid ${statBorder};
           box-shadow: 0 1px 3px rgba(0,0,0,0.04);
         }
 
         .loader-container.dark-mode .skeleton-stat-card {
-          background: #1e293b;
-          border: 1px solid #334155;
+          background: ${statBg};
+          border: 1px solid ${statBorder};
           box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
 
@@ -343,11 +406,16 @@ export default function Loader() {
           left: 0;
           width: 100%;
           height: 3px;
+          transition: background 0.3s ease;
+        }
+
+        .loader-container.light-mode .skeleton-stat-card::before {
           background: linear-gradient(90deg, #ea580c, #fb923c, #fbbf24);
           opacity: 0.3;
         }
 
         .loader-container.dark-mode .skeleton-stat-card::before {
+          background: linear-gradient(90deg, ${accentColor}, ${accentLight}, ${accentLighter});
           opacity: 0.4;
         }
 
@@ -373,7 +441,7 @@ export default function Loader() {
         }
 
         .loader-container.dark-mode .skeleton-stat-icon {
-          background: #2d3748;
+          background: #1a2a4a;
         }
 
         /* ===== TABLE ===== */
@@ -384,14 +452,14 @@ export default function Loader() {
         }
 
         .loader-container.light-mode .skeleton-table {
-          background: white;
-          border: 1px solid #f1f5f9;
+          background: ${tableBg};
+          border: 1px solid ${tableBorder};
           box-shadow: 0 1px 3px rgba(0,0,0,0.04);
         }
 
         .loader-container.dark-mode .skeleton-table {
-          background: #1e293b;
-          border: 1px solid #334155;
+          background: ${tableBg};
+          border: 1px solid ${tableBorder};
           box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
 
@@ -405,13 +473,13 @@ export default function Loader() {
         }
 
         .loader-container.light-mode .skeleton-table-header {
-          background: #fafbfc;
-          border-color: #f1f5f9;
+          background: ${tableHeaderBg};
+          border-color: ${tableHeaderBorder};
         }
 
         .loader-container.dark-mode .skeleton-table-header {
-          background: #16213e;
-          border-color: #334155;
+          background: ${tableHeaderBg};
+          border-color: ${tableHeaderBorder};
         }
 
         .skeleton-table-header .skeleton-line {
@@ -431,11 +499,11 @@ export default function Loader() {
         }
 
         .loader-container.light-mode .skeleton-table-row {
-          border-color: #f8fafc;
+          border-color: ${rowBorder};
         }
 
         .loader-container.dark-mode .skeleton-table-row {
-          border-color: #2d3748;
+          border-color: ${rowBorder};
         }
 
         .skeleton-table-row:last-child {
@@ -467,12 +535,12 @@ export default function Loader() {
         }
 
         .loader-container.light-mode .skeleton-line {
-          background: linear-gradient(90deg, #e8edf3 25%, #f1f5f9 50%, #e8edf3 75%);
+          background: linear-gradient(90deg, ${skeletonBg} 25%, ${skeletonBg2} 50%, ${skeletonBg} 75%);
           background-size: 200% 100%;
         }
 
         .loader-container.dark-mode .skeleton-line {
-          background: linear-gradient(90deg, #2d3748 25%, #4a5568 50%, #2d3748 75%);
+          background: linear-gradient(90deg, ${skeletonBgDark} 25%, ${skeletonBgDark2} 50%, ${skeletonBgDark} 75%);
           background-size: 200% 100%;
         }
 
@@ -509,12 +577,12 @@ export default function Loader() {
         }
 
         .loader-container.light-mode .skeleton-btn {
-          background: linear-gradient(90deg, #e8edf3 25%, #f1f5f9 50%, #e8edf3 75%);
+          background: linear-gradient(90deg, ${skeletonBg} 25%, ${skeletonBg2} 50%, ${skeletonBg} 75%);
           background-size: 200% 100%;
         }
 
         .loader-container.dark-mode .skeleton-btn {
-          background: linear-gradient(90deg, #2d3748 25%, #4a5568 50%, #2d3748 75%);
+          background: linear-gradient(90deg, ${skeletonBgDark} 25%, ${skeletonBgDark2} 50%, ${skeletonBgDark} 75%);
           background-size: 200% 100%;
         }
 
@@ -631,7 +699,7 @@ export default function Loader() {
           }
 
           .loader-container.dark-mode .skeleton-table-row {
-            border-bottom: 2px solid #2d3748;
+            border-bottom: 2px solid ${DARK_THEME.border};
           }
 
           .skeleton-cell {

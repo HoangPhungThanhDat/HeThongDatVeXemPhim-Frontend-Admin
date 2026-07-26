@@ -107,8 +107,12 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 // ─── KPI Card ────────────────────────────────────────────────────────────────
 const KpiCard = ({ icon, label, value, sub, growth, color }) => {
-  const bg = useColorModeValue("white", "gray.800");
-  const border = useColorModeValue("gray.100", "gray.700");
+  const bg = useColorModeValue("#EBF4FF", "#1A365D");
+  const border = useColorModeValue("#CBD5E0", "#2D3748");
+  const textColor = useColorModeValue("gray.800", "white");
+  const subColor = useColorModeValue("gray.600", "gray.400");
+  const iconBg = useColorModeValue(`${color}18`, `${color}30`);
+  
   return (
     <Box
       bg={bg}
@@ -118,9 +122,18 @@ const KpiCard = ({ icon, label, value, sub, growth, color }) => {
       p={5}
       position="relative"
       overflow="hidden"
-      _hover={{ transform: "translateY(-3px)", boxShadow: `0 12px 40px rgba(0,0,0,0.12)` }}
+      _hover={{ 
+        transform: "translateY(-3px)", 
+        boxShadow: useColorModeValue(
+          `0 12px 40px rgba(49,130,206,0.15)`,
+          `0 12px 40px rgba(49,130,206,0.25)`
+        )
+      }}
       transition="all 0.25s ease"
-      boxShadow="0 2px 12px rgba(0,0,0,0.06)"
+      boxShadow={useColorModeValue(
+        "0 2px 12px rgba(0,0,0,0.06)",
+        "0 2px 12px rgba(0,0,0,0.3)"
+      )}
     >
       {/* Accent glow góc trên phải */}
       <Box
@@ -138,7 +151,7 @@ const KpiCard = ({ icon, label, value, sub, growth, color }) => {
           w="44px"
           h="44px"
           borderRadius="12px"
-          bg={`${color}18`}
+          bg={iconBg}
           display="flex"
           alignItems="center"
           justifyContent="center"
@@ -155,27 +168,40 @@ const KpiCard = ({ icon, label, value, sub, growth, color }) => {
           {growth >= 0 ? "▲" : "▼"} {Math.abs(growth)}%
         </Badge>
       </HStack>
-      <Text fontSize="2xl" fontWeight="800" color={useColorModeValue("gray.800", "white")} lineHeight={1}>
+      <Text fontSize="2xl" fontWeight="800" color={textColor} lineHeight={1}>
         {value}
       </Text>
-      <Text fontSize="sm" color="gray.500" mt={1}>{label}</Text>
-      <Text fontSize="xs" color="gray.400" mt={1}>{sub}</Text>
+      <Text fontSize="sm" color={subColor} mt={1}>{label}</Text>
+      <Text fontSize="xs" color={subColor} mt={1}>{sub}</Text>
     </Box>
   );
 };
 
 // ─── Main Dashboard ──────────────────────────────────────────────────────────
 export default function CinemaDashboard() {
-  const bg = useColorModeValue("#F4F7FE", "#0B1437");
-  const cardBg = useColorModeValue("white", "gray.800");
-  const border = useColorModeValue("gray.100", "gray.700");
+  const bg = useColorModeValue("#EBF4FF", "#0B1437");
+  const cardBg = useColorModeValue("#EBF4FF", "#1A365D");
+  const border = useColorModeValue("#CBD5E0", "#2D3748");
   const textMain = useColorModeValue("gray.800", "white");
   const textSub = useColorModeValue("gray.500", "gray.400");
+  const hoverBg = useColorModeValue("whiteAlpha.300", "whiteAlpha.100");
 
   const statusColor = {
-    confirmed: { bg: "green.50", color: "green.600", label: "Đã xác nhận" },
-    pending:   { bg: "orange.50", color: "orange.500", label: "Chờ xử lý" },
-    cancelled: { bg: "red.50",   color: "red.500",    label: "Đã huỷ" },
+    confirmed: { 
+      bg: useColorModeValue("green.50", "green.900"), 
+      color: useColorModeValue("green.600", "green.300"), 
+      label: "Đã xác nhận" 
+    },
+    pending: { 
+      bg: useColorModeValue("orange.50", "orange.900"), 
+      color: useColorModeValue("orange.500", "orange.300"), 
+      label: "Chờ xử lý" 
+    },
+    cancelled: { 
+      bg: useColorModeValue("red.50", "red.900"), 
+      color: useColorModeValue("red.500", "red.300"), 
+      label: "Đã huỷ" 
+    },
   };
 
   return (
@@ -185,7 +211,7 @@ export default function CinemaDashboard() {
       <Flex justify="space-between" align="center" mb={6}>
         <Box>
           <Text fontSize="2xl" fontWeight="800" color={textMain}>
-            Tổng quan hệ thống 🎬
+            Tổng quan hệ thống 
           </Text>
           <HStack mt={1} spacing={2}>
             <Icon as={MdCalendarToday} w={3} h={3} color="gray.400" />
@@ -227,7 +253,10 @@ export default function CinemaDashboard() {
           borderColor={border}
           borderRadius="20px"
           p={5}
-          boxShadow="0 2px 12px rgba(0,0,0,0.06)"
+          boxShadow={useColorModeValue(
+            "0 2px 12px rgba(0,0,0,0.06)",
+            "0 2px 12px rgba(0,0,0,0.3)"
+          )}
         >
           <Flex justify="space-between" align="center" mb={5}>
             <Box>
@@ -257,9 +286,22 @@ export default function CinemaDashboard() {
                   <stop offset="95%" stopColor="#ED8936" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.04)" vertical={false} />
-              <XAxis dataKey="day" tick={{ fontSize: 12, fill: "#A0AEC0" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: "#A0AEC0" }} axisLine={false} tickLine={false} />
+              <CartesianGrid 
+                strokeDasharray="3 3" 
+                stroke={useColorModeValue("rgba(0,0,0,0.04)", "rgba(255,255,255,0.04)")} 
+                vertical={false} 
+              />
+              <XAxis 
+                dataKey="day" 
+                tick={{ fontSize: 12, fill: useColorModeValue("#A0AEC0", "#4A5568") }} 
+                axisLine={false} 
+                tickLine={false} 
+              />
+              <YAxis 
+                tick={{ fontSize: 11, fill: useColorModeValue("#A0AEC0", "#4A5568") }} 
+                axisLine={false} 
+                tickLine={false} 
+              />
               <Tooltip content={<CustomTooltip />} />
               <Area type="monotone" dataKey="revenue" name="revenue" stroke="#E53E3E" strokeWidth={2.5} fill="url(#gradRev)" dot={false} activeDot={{ r: 5, fill: "#E53E3E" }} />
               <Area type="monotone" dataKey="tickets" name="tickets" stroke="#ED8936" strokeWidth={2} fill="url(#gradTix)" dot={false} activeDot={{ r: 4, fill: "#ED8936" }} />
@@ -274,7 +316,10 @@ export default function CinemaDashboard() {
           borderColor={border}
           borderRadius="20px"
           p={5}
-          boxShadow="0 2px 12px rgba(0,0,0,0.06)"
+          boxShadow={useColorModeValue(
+            "0 2px 12px rgba(0,0,0,0.06)",
+            "0 2px 12px rgba(0,0,0,0.3)"
+          )}
         >
           <Text fontWeight="700" fontSize="md" color={textMain} mb={1}>Thể loại phim</Text>
           <Text fontSize="xs" color={textSub} mb={4}>Tỷ lệ vé theo thể loại</Text>
@@ -320,7 +365,10 @@ export default function CinemaDashboard() {
           borderColor={border}
           borderRadius="20px"
           p={5}
-          boxShadow="0 2px 12px rgba(0,0,0,0.06)"
+          boxShadow={useColorModeValue(
+            "0 2px 12px rgba(0,0,0,0.06)",
+            "0 2px 12px rgba(0,0,0,0.3)"
+          )}
         >
           <Flex justify="space-between" align="center" mb={4}>
             <Text fontWeight="700" fontSize="md" color={textMain}>Top phim đang chiếu</Text>
@@ -356,7 +404,7 @@ export default function CinemaDashboard() {
                     borderRadius="full"
                     flex={1}
                     mr={3}
-                    bg={useColorModeValue("gray.100", "gray.700")}
+                    bg={useColorModeValue("gray.200", "gray.700")}
                   />
                   <Text fontSize="xs" color={textSub} flexShrink={0}>
                     {m.tickets.toLocaleString()} vé
@@ -375,7 +423,10 @@ export default function CinemaDashboard() {
           borderColor={border}
           borderRadius="20px"
           p={5}
-          boxShadow="0 2px 12px rgba(0,0,0,0.06)"
+          boxShadow={useColorModeValue(
+            "0 2px 12px rgba(0,0,0,0.06)",
+            "0 2px 12px rgba(0,0,0,0.3)"
+          )}
           overflowX="auto"
         >
           <Flex justify="space-between" align="center" mb={4}>
@@ -388,7 +439,7 @@ export default function CinemaDashboard() {
           {/* Header */}
           <SimpleGrid columns={5} gap={2} mb={2} px={2}>
             {["Khách hàng", "Phim", "Ghế", "Giờ chiếu", "Trạng thái"].map((h) => (
-              <Text key={h} fontSize="10px" fontWeight="700" color="gray.400" textTransform="uppercase" letterSpacing="0.5px">
+              <Text key={h} fontSize="10px" fontWeight="700" color={textSub} textTransform="uppercase" letterSpacing="0.5px">
                 {h}
               </Text>
             ))}
@@ -396,35 +447,38 @@ export default function CinemaDashboard() {
           <Divider mb={2} borderColor={border} />
 
           <VStack spacing={0} align="stretch">
-            {recentBookings.map((b, i) => (
-              <Box
-                key={i}
-                px={2}
-                py={3}
-                borderRadius="10px"
-                _hover={{ bg: useColorModeValue("gray.50", "whiteAlpha.50") }}
-                transition="background 0.15s"
-              >
-                <SimpleGrid columns={5} gap={2} alignItems="center">
-                  <Text fontSize="sm" fontWeight="600" color={textMain} noOfLines={1}>{b.name}</Text>
-                  <Text fontSize="xs" color={textSub} noOfLines={1}>{b.movie}</Text>
-                  <Text fontSize="xs" color={textSub}>{b.seats}</Text>
-                  <Text fontSize="xs" color={textSub}>{b.time}</Text>
-                  <Badge
-                    bg={statusColor[b.status].bg}
-                    color={statusColor[b.status].color}
-                    fontSize="10px"
-                    fontWeight="700"
-                    px={2}
-                    py="2px"
-                    borderRadius="full"
-                    w="fit-content"
-                  >
-                    {statusColor[b.status].label}
-                  </Badge>
-                </SimpleGrid>
-              </Box>
-            ))}
+            {recentBookings.map((b, i) => {
+              const status = statusColor[b.status];
+              return (
+                <Box
+                  key={i}
+                  px={2}
+                  py={3}
+                  borderRadius="10px"
+                  _hover={{ bg: hoverBg }}
+                  transition="background 0.15s"
+                >
+                  <SimpleGrid columns={5} gap={2} alignItems="center">
+                    <Text fontSize="sm" fontWeight="600" color={textMain} noOfLines={1}>{b.name}</Text>
+                    <Text fontSize="xs" color={textSub} noOfLines={1}>{b.movie}</Text>
+                    <Text fontSize="xs" color={textSub}>{b.seats}</Text>
+                    <Text fontSize="xs" color={textSub}>{b.time}</Text>
+                    <Badge
+                      bg={status.bg}
+                      color={status.color}
+                      fontSize="10px"
+                      fontWeight="700"
+                      px={2}
+                      py="2px"
+                      borderRadius="full"
+                      w="fit-content"
+                    >
+                      {status.label}
+                    </Badge>
+                  </SimpleGrid>
+                </Box>
+              );
+            })}
           </VStack>
         </Box>
       </SimpleGrid>

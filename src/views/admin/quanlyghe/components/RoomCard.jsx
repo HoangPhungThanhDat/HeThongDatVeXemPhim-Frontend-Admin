@@ -10,13 +10,45 @@ import StatusDot from "./StatusDot";
 import { SEAT_TYPES } from "../constants";
 import SeatApi from "../../../../api/SeatApi";
 
-export default function RoomCard({ room, index, onView, onEditMode }) {
+// Màu sắc cho chế độ tối - tông xanh
+const DARK_THEME = {
+  bg: "#0a1628",
+  cardBg: "#0f1f3a",
+  border: "#1a3a5c",
+  text: "#e8f4f8",
+  textSecondary: "#88b4d8",
+  labelColor: "#5a8ab5",
+  inputBg: "#0a1f35",
+  hoverBg: "#142d4f",
+  accent: "#4a9eff",
+  accentLight: "#6ab0ff",
+  accentShadow: "rgba(74, 158, 255, 0.25)",
+};
+
+export default function RoomCard({ room, index, onView, onEditMode, isDark }) {
   const { colorMode } = useColorMode();
-  const isDark = colorMode === "dark";
-  const colors = getSeatColors(isDark);
+  const darkMode = isDark !== undefined ? isDark : (colorMode === "dark");
+  const colors = getSeatColors(darkMode);
   const [seatCount, setSeatCount] = useState(0);
   const [bookedCount, setBookedCount] = useState(0);
   const [loading, setLoading] = useState(true);
+
+  // Dark mode colors
+  const accentColor = darkMode ? DARK_THEME.accent : "#f97316";
+  const accentShadow = darkMode ? DARK_THEME.accentShadow : "rgba(249,115,22,0.3)";
+  const gradientBg = darkMode 
+    ? `linear-gradient(135deg, ${DARK_THEME.accent}, ${DARK_THEME.accentLight})`
+    : "linear-gradient(135deg, #f97316, #fb923c)";
+  const borderCard = darkMode ? DARK_THEME.border : "#f1f5f9";
+  const statBg = darkMode ? DARK_THEME.inputBg : "#f8fafc";
+  const statBorder = darkMode ? DARK_THEME.border : "#f1f5f9";
+  const btnBg = darkMode ? DARK_THEME.inputBg : "#f8fafc";
+  const btnBorder = darkMode ? DARK_THEME.border : "#e2e8f0";
+  const btnColor = darkMode ? DARK_THEME.textSecondary : "#475569";
+  const btnHoverBg = darkMode ? DARK_THEME.hoverBg : "#f1f5f9";
+  const previewBg = darkMode ? DARK_THEME.inputBg : "#fafbfc";
+  const textColor = darkMode ? DARK_THEME.text : "#0f172a";
+  const subColor = darkMode ? DARK_THEME.textSecondary : "#94a3b8";
 
   useEffect(() => {
     loadSeatCount();
@@ -50,18 +82,23 @@ export default function RoomCard({ room, index, onView, onEditMode }) {
     <Box 
       bg={colors.bgCard} 
       borderRadius="16px" 
-      border={`1.5px solid ${colors.borderCard}`}
-      boxShadow={isDark ? "0 1px 4px rgba(0,0,0,0.2)" : "0 1px 4px rgba(0,0,0,0.04)"}
+      border={`1.5px solid ${borderCard}`}
+      boxShadow={darkMode ? `0 1px 4px ${DARK_THEME.accentShadow}` : "0 1px 4px rgba(0,0,0,0.04)"}
       sx={{ animation: `${fadeUp} 0.4s ease ${index * 0.07}s both` }}
       overflow="hidden"
-      _hover={{ border: "1.5px solid #f97316", boxShadow: "0 4px 20px rgba(249,115,22,0.12)" }}
+      _hover={{ 
+        border: `1.5px solid ${darkMode ? DARK_THEME.accent : "#f97316"}`, 
+        boxShadow: darkMode 
+          ? `0 4px 20px ${DARK_THEME.accentShadow}`
+          : "0 4px 20px rgba(249,115,22,0.12)" 
+      }}
       transition="all 0.2s"
     >
       <Box 
         h="3px" 
         bg={room.status === "maintenance"
-          ? "linear-gradient(90deg, #f59e0b, #fbbf24)"
-          : "linear-gradient(90deg, #f97316, #fbbf24, #f97316)"}
+          ? `linear-gradient(90deg, ${darkMode ? "#fbbf24" : "#f59e0b"}, ${darkMode ? "#fde68a" : "#fbbf24"})`
+          : `linear-gradient(90deg, ${darkMode ? DARK_THEME.accent : "#f97316"}, ${darkMode ? DARK_THEME.accentLight : "#fbbf24"}, ${darkMode ? DARK_THEME.accent : "#f97316"})`}
         bgSize="200% 100%"
         sx={room.status === "active" ? { animation: `${shimmer} 3s linear infinite` } : {}}
       />
@@ -70,31 +107,34 @@ export default function RoomCard({ room, index, onView, onEditMode }) {
         <Flex justify="space-between" align="flex-start" mb="12px">
           <Box flex="1" minW="0">
             <Flex align="center" gap="8px" mb="5px" flexWrap="wrap">
-              <Text fontSize="14px" fontWeight="800" color={colors.textColor} noOfLines={1}>
+              <Text fontSize="14px" fontWeight="800" color={textColor} noOfLines={1}>
                 {room.name}
               </Text>
-              <RoomTypeBadge type={room.type} />
+              <RoomTypeBadge type={room.type} isDark={darkMode} />
             </Flex>
-            <StatusDot status={room.status} />
+            <StatusDot status={room.status} isDark={darkMode} />
           </Box>
           <Box textAlign="right" flexShrink="0" ml="8px">
-            <Text fontSize="20px" fontWeight="900" color={colors.textColor}>
+            <Text fontSize="20px" fontWeight="900" color={textColor}>
               {loading ? "..." : total}
             </Text>
-            <Text fontSize="10px" color={isDark ? "#64748b" : "#94a3b8"} fontWeight="600">
+            <Text fontSize="10px" color={subColor} fontWeight="600">
               ghế
             </Text>
           </Box>
         </Flex>
 
         {/* Preview seats */}
-        <Box bg={isDark ? "#2d3748" : "#fafbfc"} borderRadius="10px" p="10px" mb="12px" overflow="hidden">
+        <Box bg={previewBg} borderRadius="10px" p="10px" mb="12px" overflow="hidden">
           <Flex direction="column" gap="4px" align="center">
             <Box 
               w="80%" 
               h="4px" 
               borderRadius="2px"
-              bg="linear-gradient(90deg, transparent, #f97316, transparent)" 
+              bg={darkMode 
+                ? `linear-gradient(90deg, transparent, ${DARK_THEME.accent}, transparent)` 
+                : "linear-gradient(90deg, transparent, #f97316, transparent)"
+              } 
               mb="4px" 
             />
             {previewSeats.slice(0, 4).map((row, ri) => (
@@ -107,16 +147,16 @@ export default function RoomCard({ room, index, onView, onEditMode }) {
                     borderRadius="2px"
                     bg={seat.booked
                       ? SEAT_TYPES[seat.type]?.bookedBg || "#dc2626"
-                      : SEAT_TYPES[seat.type]?.border || "#fb923c"}
+                      : (darkMode ? DARK_THEME.accent : "#fb923c")}
                   />
                 ))}
                 {row.length > 8 && (
-                  <Text fontSize="7px" color={isDark ? "#64748b" : "#94a3b8"}>...</Text>
+                  <Text fontSize="7px" color={subColor}>...</Text>
                 )}
               </Flex>
             ))}
             {previewSeats.length > 4 && (
-              <Text fontSize="9px" color={isDark ? "#64748b" : "#94a3b8"} mt="2px">
+              <Text fontSize="9px" color={subColor} mt="2px">
                 +{previewSeats.length - 4} hàng nữa
               </Text>
             )}
@@ -127,18 +167,18 @@ export default function RoomCard({ room, index, onView, onEditMode }) {
           {[
             { label: "Đã đặt", value: loading ? "..." : booked, color: "#dc2626" },
             { label: "Còn trống", value: loading ? "..." : empty, color: "#059669" },
-            { label: "Lấp đầy", value: loading ? "..." : `${pct}%`, color: "#f97316" },
+            { label: "Lấp đầy", value: loading ? "..." : `${pct}%`, color: darkMode ? DARK_THEME.accent : "#f97316" },
           ].map(({ label, value, color }) => (
             <Box 
               key={label} 
               p="8px" 
               borderRadius="8px" 
-              bg={isDark ? "#2d3748" : "#f8fafc"}
-              border={`1px solid ${isDark ? "#374151" : "#f1f5f9"}`} 
+              bg={statBg}
+              border={`1px solid ${statBorder}`} 
               textAlign="center"
             >
               <Text fontSize="14px" fontWeight="800" color={color}>{value}</Text>
-              <Text fontSize="9px" fontWeight="700" color={isDark ? "#64748b" : "#94a3b8"} textTransform="uppercase" letterSpacing="0.5px">
+              <Text fontSize="9px" fontWeight="700" color={subColor} textTransform="uppercase" letterSpacing="0.5px">
                 {label}
               </Text>
             </Box>
@@ -146,12 +186,12 @@ export default function RoomCard({ room, index, onView, onEditMode }) {
         </Grid>
 
         <Box mb="14px">
-          <Box h="5px" borderRadius="full" bg={isDark ? "#2d3748" : "#f1f5f9"} overflow="hidden">
+          <Box h="5px" borderRadius="full" bg={darkMode ? DARK_THEME.inputBg : "#f1f5f9"} overflow="hidden">
             <Box 
               h="100%" 
               borderRadius="full" 
               w={`${pct}%`}
-              bg={pct > 80 ? "#dc2626" : pct > 50 ? "#f97316" : "#10b981"}
+              bg={pct > 80 ? "#dc2626" : pct > 50 ? accentColor : "#10b981"}
               transition="width 0.6s ease" 
             />
           </Box>
@@ -164,10 +204,13 @@ export default function RoomCard({ room, index, onView, onEditMode }) {
             borderRadius="9px" 
             fontSize="12.5px" 
             fontWeight="700"
-            bg="linear-gradient(135deg, #f97316, #fb923c)" 
+            bg={gradientBg}
             color="white"
-            boxShadow="0 3px 10px rgba(249,115,22,0.3)"
-            _hover={{ boxShadow: "0 5px 18px rgba(249,115,22,0.4)", transform: "translateY(-1px)" }}
+            boxShadow={`0 3px 10px ${accentShadow}`}
+            _hover={{ 
+              boxShadow: `0 5px 18px ${accentShadow}`, 
+              transform: "translateY(-1px)" 
+            }}
             _active={{ transform: "translateY(0)" }} 
             transition="all 0.2s"
             leftIcon={<Icon as={MdLayers} boxSize="13px" />}
@@ -179,10 +222,10 @@ export default function RoomCard({ room, index, onView, onEditMode }) {
             h="36px" 
             w="36px" 
             borderRadius="9px"
-            bg={isDark ? "#2d3748" : "#f8fafc"} 
-            color={isDark ? "#94a3b8" : "#475569"}
-            border={`1px solid ${isDark ? "#374151" : "#e2e8f0"}`}
-            _hover={{ bg: isDark ? "#374151" : "#f1f5f9" }} 
+            bg={btnBg}
+            color={btnColor}
+            border={`1px solid ${btnBorder}`}
+            _hover={{ bg: btnHoverBg }} 
             transition="all 0.15s"
             onClick={() => onEditMode(room)}
           >

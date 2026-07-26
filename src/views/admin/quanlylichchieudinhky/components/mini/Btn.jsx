@@ -1,4 +1,4 @@
-// src/views/admin/quanlylichchieudinhky/components/mini/Btn.jsx
+
 
 import React, { useState } from "react";
 import { BASE } from "../../constants";

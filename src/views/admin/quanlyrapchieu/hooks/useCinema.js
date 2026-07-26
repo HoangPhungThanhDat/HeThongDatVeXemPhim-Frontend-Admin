@@ -8,7 +8,7 @@ export const useCinema = () => {
   const [cinemas, setCinemas] = useState([]);
   const [rooms, setRooms] = useState({});
   const [loading, setLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false); // ✅ Đã có
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const loadData = useCallback(async () => {
     try {
@@ -68,7 +68,6 @@ export const useCinema = () => {
       payload.append("Description", formData.Description || "");
       payload.append("Manager", formData.Manager || "");
       
-      // Nếu có file ảnh
       if (formData.ImageFile) {
         payload.append("ImageUrl", formData.ImageFile);
       }
@@ -105,7 +104,6 @@ export const useCinema = () => {
       payload.append("Description", formData.Description || "");
       payload.append("Manager", formData.Manager || "");
       
-      // Nếu có file ảnh mới
       if (formData.ImageFile) {
         payload.append("ImageUrl", formData.ImageFile);
       }
@@ -215,7 +213,6 @@ export const useCinema = () => {
       return { ...prev, [cinemaId]: updated };
     });
     
-    // Update cinema stats
     const room = (rooms[cinemaId] || []).find(r => r.RoomId === roomId || r.id === roomId);
     const isActive = room?.Status === "Active";
     setCinemas((prev) => prev.map((c) => {
@@ -237,7 +234,6 @@ export const useCinema = () => {
       [cinemaId]: (prev[cinemaId] || []).filter(r => r.RoomId !== roomId && r.id !== roomId),
     }));
     
-    // Update cinema stats
     const room = (rooms[cinemaId] || []).find(r => r.RoomId === roomId || r.id === roomId);
     setCinemas((prev) => prev.map((c) => {
       if (c.CinemaId === cinemaId) {
@@ -255,12 +251,25 @@ export const useCinema = () => {
     showToast("info", "🗑️ Đã xóa phòng chiếu");
   }, [rooms, showToast]);
 
-  const getCinemaStats = useCallback(() => ({
-    total: cinemas.length,
-    active: cinemas.filter(c => c.Status === "Active").length,
-    inactive: cinemas.filter(c => c.Status === "Inactive").length,
-    totalRooms: cinemas.reduce((s, c) => s + (c.TotalRooms || 0), 0),
-  }), [cinemas]);
+  // ✅ Cập nhật getCinemaStats - TÍNH TỔNG GHẾ
+  const getCinemaStats = useCallback(() => {
+    let totalRooms = 0;
+    let totalSeats = 0;
+    
+    // Tính tổng số phòng và ghế từ tất cả rạp
+    cinemas.forEach(cinema => {
+      totalRooms += cinema.TotalRooms || 0;
+      totalSeats += cinema.TotalSeats || 0;
+    });
+    
+    return {
+      total: cinemas.length,
+      active: cinemas.filter(c => c.Status === "Active").length,
+      inactive: cinemas.filter(c => c.Status === "Inactive").length,
+      totalRooms: totalRooms,
+      totalSeats: totalSeats,
+    };
+  }, [cinemas]);
 
   return {
     cinemas,
@@ -268,7 +277,7 @@ export const useCinema = () => {
     rooms,
     loading,
     isSubmitting,
-    setIsSubmitting, // ✅ Export setIsSubmitting
+    setIsSubmitting,
     loadData,
     handleAddCinema,
     handleUpdateCinema,

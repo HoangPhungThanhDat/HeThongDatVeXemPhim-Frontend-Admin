@@ -1,13 +1,13 @@
-// views/admin/quanlykhuyenmai/components/KhuyenMaiList.jsx
+
 
 import { useState } from "react";
 import {
   Box, Flex, Text, Button, Icon, Input, Select, SimpleGrid,
-  useColorModeValue, useDisclosure, Spinner, useBreakpointValue
+  useColorModeValue, useDisclosure, Spinner, useBreakpointValue,
+  Image
 } from "@chakra-ui/react";
-// Thay đổi import:
 import { MdAdd, MdSearch, MdFilterList, MdLocalOffer, MdSchedule, MdBarChart } from "react-icons/md";
-import { FaTag } from "react-icons/fa";  // <-- Thêm dòng này
+import { FaTag } from "react-icons/fa";
 import { StatCard } from "./shared/StatCard";
 import { KhuyenMaiRow } from "./KhuyenMaiRow";
 import { KhuyenMaiCard } from "./KhuyenMaiCard";
@@ -248,22 +248,31 @@ export function KhuyenMaiList({
             <Box w="32px" flexShrink="0">
               <Text fontSize="10px" fontWeight="800" color={useColorModeValue("#cbd5e1", "#4a5568")} letterSpacing="1px">#</Text>
             </Box>
-            <Box w="36px" mr="14px" flexShrink="0" />
-            {["Tên KM / Loại", "Áp dụng", "Thời gian", "Sử dụng", "Trạng thái"].map((h, idx) => (
-              <Box key={h} flex={[2.2, 1.2, 1.4, 1, 1][idx]}>
-                <Text fontSize="10px" fontWeight="800" color={subColor} letterSpacing="1px" textTransform="uppercase">
-                  {h}
-                </Text>
-              </Box>
-            ))}
-            <Box w="220px" flexShrink="0" textAlign="right">
-              <Text fontSize="10px" fontWeight="800" color={subColor} letterSpacing="1px" textTransform="uppercase">
-                Hành động
-              </Text>
+            <Box w="50px" flexShrink="0" mr="12px">
+              <Text fontSize="10px" fontWeight="800" color={useColorModeValue("#cbd5e1", "#4a5568")} letterSpacing="1px">ẢNH</Text>
+            </Box>
+            <Box flex="1.8">
+              <Text fontSize="10px" fontWeight="800" color={subColor} letterSpacing="1px" textTransform="uppercase">Tên KM / Loại</Text>
+            </Box>
+            <Box flex="1.2">
+              <Text fontSize="10px" fontWeight="800" color={subColor} letterSpacing="1px" textTransform="uppercase">Áp dụng</Text>
+            </Box>
+            <Box flex="1.4">
+              <Text fontSize="10px" fontWeight="800" color={subColor} letterSpacing="1px" textTransform="uppercase">Thời gian</Text>
+            </Box>
+            <Box flex="1">
+              <Text fontSize="10px" fontWeight="800" color={subColor} letterSpacing="1px" textTransform="uppercase">Sử dụng</Text>
+            </Box>
+            <Box flex="1">
+              <Text fontSize="10px" fontWeight="800" color={subColor} letterSpacing="1px" textTransform="uppercase">Trạng thái</Text>
+            </Box>
+            <Box w="200px" flexShrink="0" textAlign="right">
+              <Text fontSize="10px" fontWeight="800" color={subColor} letterSpacing="1px" textTransform="uppercase">Hành động</Text>
             </Box>
           </Flex>
         </Box>
 
+        {/* Rows */}
         <Box p="10px">
           {loading ? (
             <Flex direction="column" align="center" justify="center" py="40px">

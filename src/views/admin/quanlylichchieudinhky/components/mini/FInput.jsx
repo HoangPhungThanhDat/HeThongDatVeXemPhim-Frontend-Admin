@@ -1,4 +1,4 @@
-// src/views/admin/quanlylichchieudinhky/components/mini/FInput.jsx
+
 
 import React, { useState } from "react";
 import { BASE } from "../../constants";

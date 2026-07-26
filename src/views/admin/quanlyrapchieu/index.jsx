@@ -9,7 +9,7 @@ import {
 import {
   MdAdd, MdSearch, MdFilterList, MdDarkMode, MdLightMode,
   MdClose, MdTheaters, MdCheckCircle, MdBuild, MdMeetingRoom,
-  MdInfo, MdLocalMovies,
+  MdInfo, MdLocalMovies, MdChair,
 } from "react-icons/md";
 import { FaUsers, FaUserShield, FaUserTie, FaUserCog } from "react-icons/fa";
 
@@ -34,8 +34,7 @@ export default function QuanLyRap() {
     setCinemas,
     rooms,
     loading,
-    isSubmitting, // ✅ Lấy isSubmitting từ hook
-    // setIsSubmitting, // ✅ KHÔNG lấy setIsSubmitting
+    isSubmitting,
     handleAddCinema,
     handleUpdateCinema,
     handleDeleteCinema,
@@ -97,7 +96,6 @@ export default function QuanLyRap() {
     }
   };
 
-  // ✅ Sửa onSaveCinema - KHÔNG gọi setIsSubmitting
   const onSaveCinema = async (formData) => {
     let success;
     if (view === "add") {
@@ -263,12 +261,36 @@ export default function QuanLyRap() {
         </Flex>
       </Flex>
 
-      {/* Stats */}
+      {/* ✅ Stats - Đã cập nhật tổng ghế */}
       <SimpleGrid columns={{ base: 2, md: 4 }} spacing="12px" mb="20px">
-        <StatCard label="Tổng rạp" value={stats.total} icon={MdTheaters} accent="#f97316" delay={0} />
-        <StatCard label="Đang hoạt động" value={stats.active} icon={MdCheckCircle} accent="#059669" delay={0.05} />
-        <StatCard label="Đã khóa" value={stats.inactive} icon={MdBuild} accent="#dc2626" delay={0.1} />
-        <StatCard label="Tổng phòng" value={stats.totalRooms} icon={MdMeetingRoom} accent="#0284c7" delay={0.15} />
+        <StatCard 
+          label="Tổng rạp" 
+          value={stats.total} 
+          icon={MdTheaters} 
+          accent="#f97316" 
+          delay={0} 
+        />
+        <StatCard 
+          label="Đang hoạt động" 
+          value={stats.active} 
+          icon={MdCheckCircle} 
+          accent="#059669" 
+          delay={0.05} 
+        />
+        <StatCard 
+          label="Tổng phòng" 
+          value={stats.totalRooms} 
+          icon={MdMeetingRoom} 
+          accent="#0284c7" 
+          delay={0.1} 
+        />
+        <StatCard 
+          label="Tổng ghế" 
+          value={stats.totalSeats} 
+          icon={MdChair} 
+          accent="#8b5cf6" 
+          delay={0.15} 
+        />
       </SimpleGrid>
 
       {/* Filter bar */}
@@ -325,10 +347,14 @@ export default function QuanLyRap() {
       ) : (
         <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" }} gap="16px">
           {filtered.map((c, i) => (
-            <CinemaCard key={c.CinemaId} cinema={c} index={i}
+            <CinemaCard 
+              key={c.CinemaId} 
+              cinema={c} 
+              index={i}
               onView={handleView}
               onEdit={handleEdit}
-              onDelete={handleDelete} />
+              onDelete={handleDelete} 
+            />
           ))}
         </Grid>
       )}

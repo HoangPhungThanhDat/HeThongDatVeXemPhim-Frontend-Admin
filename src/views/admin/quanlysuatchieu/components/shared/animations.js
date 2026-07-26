@@ -1,4 +1,4 @@
-// src/views/admin/quanlysuatchieu/components/shared/animations.js
+
 
 import { keyframes } from "@chakra-ui/react";
 

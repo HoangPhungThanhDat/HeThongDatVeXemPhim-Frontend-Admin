@@ -10,17 +10,50 @@ import {
 } from "react-icons/md";
 import { fadeUp } from "./shared/animations";
 import SeatApi from "../../../../api/SeatApi";
-// Import default và function từ StatCard
 import StatCard, { getSeatColors } from "./shared/StatCard";
 
-export default function RoomCard({ room, index, onView, onToggle, onEdit, onDelete }) {
+// Màu sắc cho chế độ tối - tông xanh
+const DARK_THEME = {
+  bg: "#0a1628",
+  cardBg: "#0f1f3a",
+  border: "#1a3a5c",
+  text: "#e8f4f8",
+  textSecondary: "#88b4d8",
+  labelColor: "#5a8ab5",
+  inputBg: "#0a1f35",
+  hoverBg: "#142d4f",
+  accent: "#4a9eff",
+  accentLight: "#6ab0ff",
+  accentShadow: "rgba(74, 158, 255, 0.25)",
+};
+
+export default function RoomCard({ room, index, onView, onToggle, onEdit, onDelete, isDark }) {
+  // Nếu isDark không được truyền, lấy từ colorMode
   const { colorMode } = useColorMode();
-  const isDark = colorMode === "dark";
-  const colors = getSeatColors(isDark);
+  const darkMode = isDark !== undefined ? isDark : (colorMode === "dark");
+  
+  const colors = getSeatColors(darkMode);
   
   const [seatCount, setSeatCount] = useState(0);
   const [bookedCount, setBookedCount] = useState(0);
   const [loadingSeats, setLoadingSeats] = useState(true);
+
+  // Dark mode colors
+  const accentColor = darkMode ? DARK_THEME.accent : "#f97316";
+  const accentShadow = darkMode ? DARK_THEME.accentShadow : "rgba(249,115,22,0.25)";
+  const gradientBg = darkMode 
+    ? `linear-gradient(135deg, ${DARK_THEME.accent}, ${DARK_THEME.accentLight})`
+    : "linear-gradient(135deg, #f97316, #fb923c)";
+  const bgCard = darkMode ? DARK_THEME.cardBg : "white";
+  const borderCard = darkMode ? DARK_THEME.border : "#f1f5f9";
+  const textColor = darkMode ? DARK_THEME.text : "#0f172a";
+  const subColor = darkMode ? DARK_THEME.textSecondary : "#94a3b8";
+  const statBg = darkMode ? DARK_THEME.inputBg : "#f8fafc";
+  const statBorder = darkMode ? DARK_THEME.border : "#f1f5f9";
+  const btnBg = darkMode ? DARK_THEME.inputBg : "#f8fafc";
+  const btnBorder = darkMode ? DARK_THEME.border : "#e2e8f0";
+  const btnColor = darkMode ? DARK_THEME.textSecondary : "#475569";
+  const btnHoverBg = darkMode ? DARK_THEME.hoverBg : "#f1f5f9";
 
   // Load số ghế của phòng
   useEffect(() => {
@@ -49,9 +82,9 @@ export default function RoomCard({ room, index, onView, onToggle, onEdit, onDele
 
   // Xác định màu sắc theo trạng thái
   const statusColors = {
-    Active: { bg: isDark ? "#064e3b" : "#ecfdf5", color: isDark ? "#34d399" : "#059669", dot: "#10b981" },
-    Inactive: { bg: isDark ? "#451a03" : "#fffbeb", color: isDark ? "#fbbf24" : "#b45309", dot: "#f59e0b" },
-    Maintenance: { bg: isDark ? "#7f1d1d" : "#fef2f2", color: isDark ? "#f87171" : "#dc2626", dot: "#ef4444" },
+    Active: { bg: darkMode ? "#064e3b" : "#ecfdf5", color: darkMode ? "#34d399" : "#059669", dot: "#10b981" },
+    Inactive: { bg: darkMode ? "#451a03" : "#fffbeb", color: darkMode ? "#fbbf24" : "#b45309", dot: "#f59e0b" },
+    Maintenance: { bg: darkMode ? "#7f1d1d" : "#fef2f2", color: darkMode ? "#f87171" : "#dc2626", dot: "#ef4444" },
   };
 
   const statusStyle = statusColors[room.Status] || statusColors.Inactive;
@@ -63,13 +96,18 @@ export default function RoomCard({ room, index, onView, onToggle, onEdit, onDele
 
   return (
     <Box
-      bg={colors.bgCard}
+      bg={bgCard}
       borderRadius="16px"
-      border={`1.5px solid ${colors.borderCard}`}
-      boxShadow={isDark ? "0 1px 4px rgba(0,0,0,0.2)" : "0 1px 4px rgba(0,0,0,0.04)"}
+      border={`1.5px solid ${borderCard}`}
+      boxShadow={darkMode ? `0 1px 4px ${DARK_THEME.accentShadow}` : "0 1px 4px rgba(0,0,0,0.04)"}
       sx={{ animation: `${fadeUp} 0.4s ease ${index * 0.07}s both` }}
       overflow="hidden"
-      _hover={{ border: "1.5px solid #f97316", boxShadow: "0 4px 20px rgba(249,115,22,0.12)" }}
+      _hover={{ 
+        border: `1.5px solid ${darkMode ? DARK_THEME.accent : "#f97316"}`, 
+        boxShadow: darkMode 
+          ? `0 4px 20px ${DARK_THEME.accentShadow}`
+          : "0 4px 20px rgba(249,115,22,0.12)" 
+      }}
       transition="all 0.2s"
     >
       {/* Header với màu sắc theo trạng thái */}
@@ -84,15 +122,15 @@ export default function RoomCard({ room, index, onView, onToggle, onEdit, onDele
         <Flex justify="space-between" align="flex-start" mb="12px">
           <Box flex="1" minW="0">
             <Flex align="center" gap="8px" mb="4px" flexWrap="wrap">
-              <Text fontSize="15px" fontWeight="800" color={colors.textColor} noOfLines={1}>
+              <Text fontSize="15px" fontWeight="800" color={textColor} noOfLines={1}>
                 {room.Name}
               </Text>
               <Badge
                 px="8px"
                 py="2px"
                 borderRadius="6px"
-                bg={isDark ? "#2d3748" : "#f1f5f9"}
-                color={isDark ? "#94a3b8" : "#475569"}
+                bg={darkMode ? DARK_THEME.inputBg : "#f1f5f9"}
+                color={darkMode ? DARK_THEME.textSecondary : "#475569"}
                 fontSize="9px"
                 fontWeight="700"
                 textTransform="none"
@@ -115,10 +153,10 @@ export default function RoomCard({ room, index, onView, onToggle, onEdit, onDele
             </Flex>
           </Box>
           <Box textAlign="right" flexShrink="0" ml="8px">
-            <Text fontSize="20px" fontWeight="900" color={colors.textColor}>
+            <Text fontSize="20px" fontWeight="900" color={textColor}>
               {loadingSeats ? "..." : seatCount}
             </Text>
-            <Text fontSize="10px" color={isDark ? "#64748b" : "#94a3b8"} fontWeight="600">
+            <Text fontSize="10px" color={subColor} fontWeight="600">
               ghế
             </Text>
           </Box>
@@ -126,24 +164,24 @@ export default function RoomCard({ room, index, onView, onToggle, onEdit, onDele
 
         {/* Thống kê ghế */}
         <Flex gap="8px" mb="12px">
-          <Box flex="1" p="8px 10px" borderRadius="8px" bg={isDark ? "#2d3748" : "#f8fafc"}
-            border={`1px solid ${isDark ? "#374151" : "#f1f5f9"}`} textAlign="center">
-            <Text fontSize="10px" fontWeight="700" color={isDark ? "#64748b" : "#94a3b8"}>
+          <Box flex="1" p="8px 10px" borderRadius="8px" bg={statBg}
+            border={`1px solid ${statBorder}`} textAlign="center">
+            <Text fontSize="10px" fontWeight="700" color={subColor}>
               Tổng ghế
             </Text>
-            <Text fontSize="16px" fontWeight="800" color={colors.textColor}>
+            <Text fontSize="16px" fontWeight="800" color={textColor}>
               {loadingSeats ? "..." : totalSeats}
             </Text>
           </Box>
-          <Box flex="1" p="8px 10px" borderRadius="8px" bg={isDark ? "#2d3748" : "#f8fafc"}
-            border={`1px solid ${isDark ? "#374151" : "#f1f5f9"}`} textAlign="center">
+          <Box flex="1" p="8px 10px" borderRadius="8px" bg={statBg}
+            border={`1px solid ${statBorder}`} textAlign="center">
             <Text fontSize="10px" fontWeight="700" color="#059669">Trống</Text>
             <Text fontSize="16px" fontWeight="800" color="#059669">
               {loadingSeats ? "..." : availableSeats}
             </Text>
           </Box>
-          <Box flex="1" p="8px 10px" borderRadius="8px" bg={isDark ? "#2d3748" : "#f8fafc"}
-            border={`1px solid ${isDark ? "#374151" : "#f1f5f9"}`} textAlign="center">
+          <Box flex="1" p="8px 10px" borderRadius="8px" bg={statBg}
+            border={`1px solid ${statBorder}`} textAlign="center">
             <Text fontSize="10px" fontWeight="700" color="#dc2626">Đã đặt</Text>
             <Text fontSize="16px" fontWeight="800" color="#dc2626">
               {loadingSeats ? "..." : bookedSeats}
@@ -155,19 +193,19 @@ export default function RoomCard({ room, index, onView, onToggle, onEdit, onDele
         {seatCount > 0 && (
           <Box mb="14px">
             <Flex justify="space-between" mb="4px">
-              <Text fontSize="10px" fontWeight="600" color={isDark ? "#64748b" : "#94a3b8"}>
+              <Text fontSize="10px" fontWeight="600" color={subColor}>
                 Lấp đầy
               </Text>
-              <Text fontSize="10px" fontWeight="700" color={filledPercent > 80 ? "#dc2626" : filledPercent > 50 ? "#f97316" : "#059669"}>
+              <Text fontSize="10px" fontWeight="700" color={filledPercent > 80 ? "#dc2626" : filledPercent > 50 ? accentColor : "#059669"}>
                 {filledPercent}%
               </Text>
             </Flex>
-            <Box h="5px" borderRadius="full" bg={isDark ? "#2d3748" : "#f1f5f9"} overflow="hidden">
+            <Box h="5px" borderRadius="full" bg={darkMode ? DARK_THEME.inputBg : "#f1f5f9"} overflow="hidden">
               <Box
                 h="100%"
                 borderRadius="full"
                 w={`${filledPercent}%`}
-                bg={filledPercent > 80 ? "#dc2626" : filledPercent > 50 ? "#f97316" : "#10b981"}
+                bg={filledPercent > 80 ? "#dc2626" : filledPercent > 50 ? accentColor : "#10b981"}
                 transition="width 0.6s ease"
               />
             </Box>
@@ -182,10 +220,10 @@ export default function RoomCard({ room, index, onView, onToggle, onEdit, onDele
             borderRadius="9px"
             fontSize="11.5px"
             fontWeight="700"
-            bg="linear-gradient(135deg, #f97316, #fb923c)"
+            bg={gradientBg}
             color="white"
-            boxShadow="0 3px 10px rgba(249,115,22,0.25)"
-            _hover={{ boxShadow: "0 5px 16px rgba(249,115,22,0.35)", transform: "translateY(-1px)" }}
+            boxShadow={`0 3px 10px ${accentShadow}`}
+            _hover={{ boxShadow: `0 5px 16px ${accentShadow}`, transform: "translateY(-1px)" }}
             _active={{ transform: "translateY(0)" }}
             transition="all 0.2s"
             leftIcon={<Icon as={MdVisibility} boxSize="13px" />}
@@ -198,10 +236,10 @@ export default function RoomCard({ room, index, onView, onToggle, onEdit, onDele
             w="34px"
             p="0"
             borderRadius="9px"
-            bg={isDark ? "#2d3748" : "#f8fafc"}
-            color={isDark ? "#94a3b8" : "#475569"}
-            border={`1px solid ${isDark ? "#374151" : "#e2e8f0"}`}
-            _hover={{ bg: isDark ? "#374151" : "#f1f5f9" }}
+            bg={btnBg}
+            color={btnColor}
+            border={`1px solid ${btnBorder}`}
+            _hover={{ bg: btnHoverBg }}
             transition="all 0.15s"
             onClick={() => onToggle(room.RoomId)}
           >
@@ -214,10 +252,10 @@ export default function RoomCard({ room, index, onView, onToggle, onEdit, onDele
             w="34px"
             p="0"
             borderRadius="9px"
-            bg={isDark ? "#2d3748" : "#f8fafc"}
-            color={isDark ? "#94a3b8" : "#475569"}
-            border={`1px solid ${isDark ? "#374151" : "#e2e8f0"}`}
-            _hover={{ bg: isDark ? "#374151" : "#f1f5f9" }}
+            bg={btnBg}
+            color={btnColor}
+            border={`1px solid ${btnBorder}`}
+            _hover={{ bg: btnHoverBg }}
             transition="all 0.15s"
             onClick={() => onEdit(room)}
           >
@@ -228,9 +266,9 @@ export default function RoomCard({ room, index, onView, onToggle, onEdit, onDele
             w="34px"
             p="0"
             borderRadius="9px"
-            bg={isDark ? "#2d3748" : "#f8fafc"}
-            color={isDark ? "#94a3b8" : "#475569"}
-            border={`1px solid ${isDark ? "#374151" : "#e2e8f0"}`}
+            bg={btnBg}
+            color={btnColor}
+            border={`1px solid ${btnBorder}`}
             _hover={{ bg: "#fef2f2", color: "#dc2626", border: "1px solid #fca5a5" }}
             transition="all 0.15s"
             onClick={() => onDelete(room)}

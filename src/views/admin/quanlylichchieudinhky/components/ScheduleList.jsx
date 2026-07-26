@@ -1,4 +1,4 @@
-// src/views/admin/quanlylichchieudinhky/components/ScheduleList.jsx
+
 
 import React from "react";
 import { ScheduleCard } from "./ScheduleCard";

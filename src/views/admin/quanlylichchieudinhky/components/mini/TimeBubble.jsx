@@ -1,4 +1,4 @@
-// src/views/admin/quanlylichchieudinhky/components/mini/TimeBubble.jsx
+
 
 import React, { useState } from "react";
 import { tierColor, tierBg, tierBdr } from "../../constants";

@@ -1,4 +1,4 @@
-// src/views/admin/quanlylichchieudinhky/components/shared/animations.js
+
 
 export const ANIMATIONS = `
   @keyframes gfadeUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }

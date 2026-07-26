@@ -15,16 +15,42 @@ import { BulkEditPriceModal } from "./components/BulkEditPriceModal";
 import { CloneWeekModal } from "./components/CloneWeekModal";
 import Loader from "../../../layouts/Loader";
 
+// Màu sắc cho chế độ tối - tông xanh
+const DARK_THEME = {
+  bg: "#0a1628",
+  cardBg: "#0f1f3a",
+  border: "#1a3a5c",
+  text: "#e8f4f8",
+  textSecondary: "#88b4d8",
+  labelColor: "#5a8ab5",
+  inputBg: "#0a1f35",
+  hoverBg: "#142d4f",
+  accent: "#4a9eff",
+  accentLight: "#6ab0ff",
+  accentShadow: "rgba(74, 158, 255, 0.25)",
+  gradientFrom: "#4a9eff",
+  gradientTo: "#6ab0ff",
+};
+
 export default function LichChieuDinhKy() {
   const { colorMode, toggleColorMode } = useColorMode();
   const isDark = colorMode === "dark";
 
-  const bg = useColorModeValue("#f5f4f1", "#0a0a18");
-  const ink = useColorModeValue("#111827", "#f7fafc");
-  const ink3 = useColorModeValue("#6b7280", "#a0aec0");
-  const ink4 = useColorModeValue("#9ca3af", "#718096");
-  const ink5 = useColorModeValue("#d1d5db", "#4a5568");
-  const ink6 = useColorModeValue("#f3f4f6", "#2d3748");
+  // Dark theme colors
+  const accentColor = isDark ? DARK_THEME.accent : "#f97316";
+  const accentShadow = isDark ? DARK_THEME.accentShadow : "rgba(249,115,22,0.38)";
+  const gradientBg = isDark 
+    ? `linear-gradient(135deg, ${DARK_THEME.accent}, ${DARK_THEME.accentLight})`
+    : `linear-gradient(135deg,${BASE.or1},#fbbf24)`;
+
+  const bg = isDark ? DARK_THEME.bg : "#f5f4f1";
+  const ink = isDark ? DARK_THEME.text : "#111827";
+  const ink3 = isDark ? DARK_THEME.textSecondary : "#6b7280";
+  const ink4 = isDark ? DARK_THEME.labelColor : "#9ca3af";
+  const ink5 = isDark ? DARK_THEME.border : "#d1d5db";
+  const ink6 = isDark ? DARK_THEME.inputBg : "#f3f4f6";
+  const cardBg = isDark ? DARK_THEME.cardBg : "#ffffff";
+  const cardBorder = isDark ? DARK_THEME.border : ink6;
 
   const [view, setView] = useState("list");
   const [sel, setSel] = useState(null);
@@ -94,8 +120,8 @@ export default function LichChieuDinhKy() {
     input[type=number]::-webkit-inner-spin-button { opacity:1; }
     select { appearance: auto; }
     ::-webkit-scrollbar { width:6px; height:6px; }
-    ::-webkit-scrollbar-track { background: ${ink6}; }
-    ::-webkit-scrollbar-thumb { background: ${ink5}; border-radius:99px; }
+    ::-webkit-scrollbar-track { background: ${isDark ? DARK_THEME.inputBg : "#f3f4f6"}; }
+    ::-webkit-scrollbar-thumb { background: ${isDark ? DARK_THEME.border : "#d1d5db"}; border-radius:99px; }
 
     @media (max-width: 992px) {
       .resp-form-grid { grid-template-columns: 1fr !important; }
@@ -181,14 +207,15 @@ export default function LichChieuDinhKy() {
           transform: "translateX(-50%)",
           padding: "13px 22px",
           borderRadius: 14,
-          background: isDark ? "#1a1a2e" : "#1a1a2e",
-          color: "#fff",
+          background: isDark ? DARK_THEME.cardBg : "#1a1a2e",
+          color: isDark ? DARK_THEME.text : "#fff",
           fontSize: 13.5,
           fontWeight: 700,
-          boxShadow: "0 8px 32px rgba(0,0,0,.30)",
+          boxShadow: isDark ? `0 8px 32px ${DARK_THEME.accentShadow}` : "0 8px 32px rgba(0,0,0,.30)",
           zIndex: 9999,
           animation: "gtoastIn 0.3s ease",
           whiteSpace: "nowrap",
+          border: isDark ? `1px solid ${DARK_THEME.border}` : "none",
         }}>
           {toast.message || toast}
         </div>
@@ -199,6 +226,7 @@ export default function LichChieuDinhKy() {
           schedules={schedules.filter(s => s.Status === "Active")} 
           onClose={() => setShowBulk(false)} 
           onApply={() => {}} 
+          isDark={isDark}
         />
       )}
       {showClone && (
@@ -206,6 +234,7 @@ export default function LichChieuDinhKy() {
           schedules={schedules.filter(s => s.Status === "Active")} 
           onClose={() => setShowClone(false)} 
           onClone={() => {}} 
+          isDark={isDark}
         />
       )}
 
@@ -225,12 +254,12 @@ export default function LichChieuDinhKy() {
               width: 50,
               height: 50,
               borderRadius: 15,
-              background: `linear-gradient(135deg,${BASE.or1},#fbbf24)`,
+              background: gradientBg,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               fontSize: 22,
-              boxShadow: `0 6px 18px rgba(249,115,22,.38)`,
+              boxShadow: `0 6px 18px ${accentShadow}`,
               flexShrink: 0,
             }}>
               🗓
@@ -258,27 +287,35 @@ export default function LichChieuDinhKy() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: isDark ? "#f7fafc" : "#374151",
+                color: isDark ? DARK_THEME.text : "#374151",
               }}
             >
               {isDark ? "☀️" : "🌙"}
             </button>
-            <Btn variant="warn" icon="💰" onClick={() => setShowBulk(true)}>Chỉnh giá loạt</Btn>
-            <Btn variant="warn" icon="📋" onClick={() => setShowClone(true)}>Nhân bản tuần</Btn>
-            <Btn variant="dark" icon="+" onClick={() => setView("add")}>Tạo lịch chiếu</Btn>
+            <Btn variant="warn" icon="💰" onClick={() => setShowBulk(true)} isDark={isDark}>Chỉnh giá loạt</Btn>
+            <Btn variant="warn" icon="📋" onClick={() => setShowClone(true)} isDark={isDark}>Nhân bản tuần</Btn>
+            <Btn variant="primary" icon="+" onClick={() => setView("add")} isDark={isDark}>Tạo lịch chiếu</Btn>
           </div>
         </div>
 
         {/* Stats */}
         <div className="resp-grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 24 }}>
-          <StatCard label="Tổng lịch chiếu" value={stats.total} emoji="🗓" accent={BASE.or1} sub={`${stats.slots} suất/tuần`} />
-          <StatCard label="Đang hoạt động" value={stats.active} emoji="▶" accent={BASE.green} />
-          <StatCard label="Tạm dừng" value={stats.paused} emoji="⏸" accent={BASE.amber} />
-          <StatCard label="Suất chiếu/tuần" value={stats.slots} emoji="🎬" accent={BASE.violet} />
+          <StatCard label="Tổng lịch chiếu" value={stats.total} emoji="🗓" accent={isDark ? DARK_THEME.accent : BASE.or1} sub={`${stats.slots} suất/tuần`} isDark={isDark} />
+          <StatCard label="Đang hoạt động" value={stats.active} emoji="▶" accent={isDark ? "#4ade80" : BASE.green} isDark={isDark} />
+          <StatCard label="Tạm dừng" value={stats.paused} emoji="⏸" accent={isDark ? "#fbbf24" : BASE.amber} isDark={isDark} />
+          <StatCard label="Suất chiếu/tuần" value={stats.slots} emoji="🎬" accent={isDark ? "#6ab0ff" : BASE.violet} isDark={isDark} />
         </div>
 
         {/* Tabs */}
-        <div style={{ display: "flex", gap: 2, marginBottom: 18, background: ink6, borderRadius: 12, padding: 4, width: "fit-content" }}>
+        <div style={{ 
+          display: "flex", 
+          gap: 2, 
+          marginBottom: 18, 
+          background: ink6, 
+          borderRadius: 12, 
+          padding: 4, 
+          width: "fit-content" 
+        }}>
           {[
             { k: "list", l: "📋 Danh sách" },
             { k: "calendar", l: "📅 Lịch tuần" },
@@ -294,9 +331,9 @@ export default function LichChieuDinhKy() {
                 border: "none",
                 cursor: "pointer",
                 transition: "all 0.18s",
-                background: tab === k ? BASE.or1 : "transparent",
+                background: tab === k ? (isDark ? DARK_THEME.accent : BASE.or1) : "transparent",
                 color: tab === k ? "#fff" : ink3,
-                boxShadow: tab === k ? "0 2px 10px rgba(249,115,22,.35)" : "none",
+                boxShadow: tab === k ? `0 2px 10px ${isDark ? DARK_THEME.accentShadow : "rgba(249,115,22,.35)"}` : "none",
               }}
             >
               {l}
@@ -307,19 +344,19 @@ export default function LichChieuDinhKy() {
         {/* Content */}
         {tab === "calendar" ? (
           <div style={{ animation: "gfadeIn 0.3s ease" }}>
-            <WeekView schedules={schedules} />
+            <WeekView schedules={schedules} isDark={isDark} />
           </div>
         ) : (
           <div style={{ animation: "gfadeIn 0.3s ease" }}>
             <div style={{
-              background: isDark ? "#16213e" : "#ffffff",
+              background: cardBg,
               borderRadius: 16,
-              border: `1px solid ${ink6}`,
-              boxShadow: "0 2px 8px rgba(0,0,0,.05)",
+              border: `1px solid ${cardBorder}`,
+              boxShadow: isDark ? `0 2px 8px ${DARK_THEME.accentShadow}` : "0 2px 8px rgba(0,0,0,.05)",
               marginBottom: 14,
             }}>
               {/* Filters */}
-              <div style={{ padding: "16px 20px 14px", borderBottom: `1px solid ${ink6}` }}>
+              <div style={{ padding: "16px 20px 14px", borderBottom: `1px solid ${cardBorder}` }}>
                 <div style={{
                   display: "flex",
                   alignItems: "center",
@@ -335,9 +372,9 @@ export default function LichChieuDinhKy() {
                       borderRadius: 20,
                       fontSize: 11.5,
                       fontWeight: 700,
-                      background: BASE.or3,
-                      border: `1px solid ${BASE.or4}`,
-                      color: BASE.or1,
+                      background: isDark ? DARK_THEME.inputBg : BASE.or3,
+                      border: `1px solid ${isDark ? DARK_THEME.border : BASE.or4}`,
+                      color: isDark ? DARK_THEME.accent : BASE.or1,
                     }}>
                       {filtered.length} lịch
                     </span>
@@ -355,11 +392,20 @@ export default function LichChieuDinhKy() {
                       borderRadius: 10,
                       fontSize: 12.5,
                       fontWeight: 600,
-                      border: `1.5px solid ${ink5}`,
-                      background: ink6,
-                      color: isDark ? "#e2e8f0" : "#374151",
+                      border: `1.5px solid ${isDark ? DARK_THEME.border : ink5}`,
+                      background: isDark ? DARK_THEME.inputBg : ink6,
+                      color: isDark ? DARK_THEME.text : "#374151",
                       cursor: "pointer",
                       outline: "none",
+                      transition: "all 0.2s",
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = isDark ? DARK_THEME.accent : BASE.or1;
+                      e.target.style.boxShadow = isDark ? `0 0 0 3px ${DARK_THEME.accentShadow}` : "0 0 0 3px rgba(249,115,22,0.12)";
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = isDark ? DARK_THEME.border : ink5;
+                      e.target.style.boxShadow = "none";
                     }}
                   >
                     <option value="all">Tất cả rạp</option>
@@ -376,11 +422,20 @@ export default function LichChieuDinhKy() {
                       borderRadius: 10,
                       fontSize: 12.5,
                       fontWeight: 600,
-                      border: `1.5px solid ${ink5}`,
-                      background: ink6,
-                      color: isDark ? "#e2e8f0" : "#374151",
+                      border: `1.5px solid ${isDark ? DARK_THEME.border : ink5}`,
+                      background: isDark ? DARK_THEME.inputBg : ink6,
+                      color: isDark ? DARK_THEME.text : "#374151",
                       cursor: "pointer",
                       outline: "none",
+                      transition: "all 0.2s",
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = isDark ? DARK_THEME.accent : BASE.or1;
+                      e.target.style.boxShadow = isDark ? `0 0 0 3px ${DARK_THEME.accentShadow}` : "0 0 0 3px rgba(249,115,22,0.12)";
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = isDark ? DARK_THEME.border : ink5;
+                      e.target.style.boxShadow = "none";
                     }}
                   >
                     <option value="all">Tất cả phim</option>
@@ -397,11 +452,20 @@ export default function LichChieuDinhKy() {
                       borderRadius: 10,
                       fontSize: 12.5,
                       fontWeight: 600,
-                      border: `1.5px solid ${ink5}`,
-                      background: ink6,
-                      color: isDark ? "#e2e8f0" : "#374151",
+                      border: `1.5px solid ${isDark ? DARK_THEME.border : ink5}`,
+                      background: isDark ? DARK_THEME.inputBg : ink6,
+                      color: isDark ? DARK_THEME.text : "#374151",
                       cursor: "pointer",
                       outline: "none",
+                      transition: "all 0.2s",
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = isDark ? DARK_THEME.accent : BASE.or1;
+                      e.target.style.boxShadow = isDark ? `0 0 0 3px ${DARK_THEME.accentShadow}` : "0 0 0 3px rgba(249,115,22,0.12)";
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = isDark ? DARK_THEME.border : ink5;
+                      e.target.style.boxShadow = "none";
                     }}
                   >
                     <option value="Tất cả">Tất cả trạng thái</option>
@@ -415,8 +479,8 @@ export default function LichChieuDinhKy() {
               {/* Column Headers */}
               <div className="resp-hide" style={{
                 padding: "9px 22px",
-                background: ink6,
-                borderBottom: `1px solid ${ink6}`,
+                background: isDark ? DARK_THEME.inputBg : ink6,
+                borderBottom: `1px solid ${isDark ? DARK_THEME.border : ink6}`,
                 display: "flex",
                 gap: 16,
                 alignItems: "center",
@@ -433,7 +497,7 @@ export default function LichChieuDinhKy() {
                   <div key={l} style={{
                     fontSize: 9.5,
                     fontWeight: 900,
-                    color: ink4,
+                    color: isDark ? DARK_THEME.labelColor : ink4,
                     textTransform: "uppercase",
                     letterSpacing: "1px",
                     [f.startsWith("flex") ? "flex" : "width"]: f.split(":")[1],
@@ -454,6 +518,7 @@ export default function LichChieuDinhKy() {
                   onDelete={handleDelete}
                   getMovieTitle={getMovieTitle}
                   getRoomName={getRoomName}
+                  isDark={isDark}
                 />
               </div>
             </div>

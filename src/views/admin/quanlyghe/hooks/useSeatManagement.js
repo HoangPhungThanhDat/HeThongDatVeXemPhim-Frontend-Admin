@@ -1,5 +1,5 @@
 // hooks/useSeatManagement.js
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useToast } from "@chakra-ui/react";
 import SeatApi from "../../../../api/SeatApi";
 import RoomApi from "../../../../api/RoomApi";
@@ -51,29 +51,43 @@ export function useSeatManagement(roomId, roomData) {
   const [filter, setFilter] = useState("all");
   const [selectedSeat, setSelectedSeat] = useState(null);
   const [roomSeats, setRoomSeats] = useState([]);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const loadTimeoutRef = useRef(null);
 
   // Load seats from API
   const loadSeats = useCallback(async () => {
-    if (!roomId) return;
+    if (!roomId) {
+      setLoading(false);
+      return;
+    }
     
     try {
       setLoading(true);
+      console.log("🔄 Đang tải ghế cho phòng:", roomId);
+      
       const seatsRes = await SeatApi.getAll();
       const allSeats = seatsRes.data.data || seatsRes.data || [];
       
       // Filter seats by room
       const seatsInRoom = allSeats.filter(s => s.RoomId === parseInt(roomId));
+      console.log(`✅ Tìm thấy ${seatsInRoom.length} ghế trong phòng ${roomId}`);
       setRoomSeats(seatsInRoom);
       
       // Convert to grid format for display
       if (room) {
         const grid = generateSeats(room);
-        // Merge with actual seat data
+        
+        // Merge with actual seat data from API
         const mergedGrid = grid.map(row => 
           row.map(seat => {
+            const rowLabel = ROW_LABELS[seat.row];
+            const seatNumber = seat.col + 1;
+            
+            // Tìm ghế trong dữ liệu từ API
             const existingSeat = seatsInRoom.find(
-              s => s.Row === ROW_LABELS[seat.row] && s.Number === seat.col + 1
+              s => s.Row === rowLabel && s.Number === seatNumber
             );
+            
             if (existingSeat) {
               return {
                 ...seat,
@@ -86,7 +100,7 @@ export function useSeatManagement(roomId, roomData) {
                 Number: existingSeat.Number,
               };
             }
-            // Nếu ghế chưa có trong DB, đánh dấu là trống
+            // Nếu ghế không có trong API, đánh dấu là trống nhưng vẫn giữ lại
             return {
               ...seat,
               booked: false,
@@ -94,10 +108,31 @@ export function useSeatManagement(roomId, roomData) {
             };
           })
         );
-        setSeatsData(mergedGrid);
+        
+        // ✅ Lọc bỏ các hàng trống (không có ghế nào)
+        const filteredGrid = mergedGrid.filter(row => row.length > 0);
+        
+        // ✅ Lọc bỏ các ghế không tồn tại trong API (đã bị xóa)
+        // Chỉ giữ lại ghế có SeatId (đã tồn tại trong DB)
+        const cleanedGrid = filteredGrid.map(row => 
+          row.filter(seat => seat.SeatId !== undefined)
+        );
+        
+        // Nếu sau khi lọc mà hàng nào trống thì bỏ hàng đó
+        const finalGrid = cleanedGrid.filter(row => row.length > 0);
+        
+        console.log("📊 Dữ liệu ghế sau khi load:", {
+          totalRows: finalGrid.length,
+          totalCols: finalGrid[0]?.length || 0,
+          totalSeats: finalGrid.flat().length,
+          seatsInRoom: seatsInRoom.length
+        });
+        
+        setSeatsData(finalGrid);
+        setIsInitialized(true);
       }
     } catch (err) {
-      console.error("Lỗi load ghế:", err);
+      console.error("❌ Lỗi load ghế:", err);
       toast({
         title: "Lỗi khi tải ghế",
         status: "error",
@@ -130,7 +165,7 @@ export function useSeatManagement(roomId, roomData) {
       setRoom(formattedRoom);
       return formattedRoom;
     } catch (err) {
-      console.error("Lỗi load phòng:", err);
+      console.error("❌ Lỗi load phòng:", err);
       toast({
         title: "Lỗi khi tải phòng",
         status: "error",
@@ -143,13 +178,38 @@ export function useSeatManagement(roomId, roomData) {
 
   // Initialize data
   useEffect(() => {
+    let isMounted = true;
+    
     const init = async () => {
+      setLoading(true);
       const loadedRoom = await loadRoom();
-      if (loadedRoom) {
+      if (loadedRoom && isMounted) {
         await loadSeats();
       }
+      if (isMounted) {
+        setLoading(false);
+      }
     };
+    
     init();
+    
+    return () => {
+      isMounted = false;
+      if (loadTimeoutRef.current) {
+        clearTimeout(loadTimeoutRef.current);
+      }
+    };
+  }, [roomId]);
+
+  // Load lại khi roomId thay đổi
+  useEffect(() => {
+    if (roomId) {
+      setLoading(true);
+      setIsInitialized(false);
+      loadRoom().then(() => {
+        loadSeats();
+      });
+    }
   }, [roomId]);
 
   const flat = seatsData.flat();
@@ -191,7 +251,7 @@ export function useSeatManagement(roomId, roomData) {
     return "Available";
   };
 
-  // SỬA LẠI HÀM handleSaveSeat - ĐẢM BẢO STATUS ĐÚNG
+  // Hàm handleSaveSeat - ĐẢM BẢO STATUS ĐÚNG
   const handleSaveSeat = useCallback(async (updatedSeat) => {
     try {
       console.log("📝 Bắt đầu cập nhật ghế với dữ liệu:", updatedSeat);
@@ -309,22 +369,91 @@ export function useSeatManagement(roomId, roomData) {
     }
   }, [roomId, roomSeats, loadSeats, toast]);
 
-  // SỬA LẠI HÀM handleAddRows
+  // ============================================================
+  // SỬA LẠI HÀM handleAddRows - CHO PHÉP THÊM HÀNG KHI CHƯA CÓ CỘT
+  // ============================================================
   const handleAddRows = useCallback(async (count, position) => {
     try {
       const currentCols = seatsData[0]?.length || 0;
       
+      // ✅ Nếu chưa có cột, tự động tạo 1 cột mặc định cùng với hàng mới
       if (currentCols === 0) {
         toast({
-          title: "Chưa có cột ghế",
-          description: "Vui lòng tạo cột ghế trước",
-          status: "warning",
+          title: "ℹ️ Chưa có cột ghế",
+          description: "Hệ thống sẽ tự động tạo 1 cột mặc định cùng với hàng mới",
+          status: "info",
           duration: 3000,
           isClosable: true,
         });
+        
+        // Lấy danh sách hàng đã tồn tại
+        const existingRows = [...new Set(roomSeats.map(s => s.Row))];
+        
+        // Xác định hàng mới sẽ thêm
+        let newRowLabels = [];
+        if (position === "start") {
+          let index = 0;
+          while (newRowLabels.length < count && index < ROW_LABELS.length) {
+            const rowLabel = ROW_LABELS[index];
+            if (!existingRows.includes(rowLabel)) {
+              newRowLabels.push(rowLabel);
+            }
+            index++;
+          }
+        } else {
+          const maxRowIndex = Math.max(-1, ...existingRows.map(r => ROW_LABELS.indexOf(r)));
+          let index = maxRowIndex + 1;
+          while (newRowLabels.length < count && index < ROW_LABELS.length) {
+            const rowLabel = ROW_LABELS[index];
+            if (!existingRows.includes(rowLabel)) {
+              newRowLabels.push(rowLabel);
+            }
+            index++;
+          }
+        }
+
+        if (newRowLabels.length === 0) {
+          toast({
+            title: "⚠️ Không có hàng mới để thêm",
+            description: "Đã đạt giới hạn số hàng (A-Z)",
+            status: "warning",
+            duration: 3000,
+            isClosable: true,
+          });
+          return;
+        }
+
+        // Tạo ghế với 1 cột cho mỗi hàng mới
+        const seatsToCreate = [];
+        for (const rowLabel of newRowLabels) {
+          seatsToCreate.push({
+            RoomId: parseInt(roomId),
+            Row: rowLabel,
+            Number: 1, // Cột mặc định số 1
+            SeatType: "Normal",
+            Status: "Available"
+          });
+        }
+
+        console.log("📤 Tạo hàng mới (kèm cột mặc định):", { seats: seatsToCreate });
+
+        await SeatApi.createBulk({ seats: seatsToCreate });
+        
+        toast({
+          title: `✅ Đã thêm ${seatsToCreate.length} ghế (${newRowLabels.length} hàng × 1 cột)`,
+          description: `💡 Bạn có thể thêm cột sau khi đã có hàng`,
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+        
+        await loadSeats();
         return;
       }
       
+      // ============================================================
+      // Logic thêm hàng khi đã có cột (giữ nguyên)
+      // ============================================================
       const existingRows = [...new Set(roomSeats.map(s => s.Row))];
       
       let newRowLabels = [];
@@ -351,7 +480,7 @@ export function useSeatManagement(roomId, roomData) {
 
       if (newRowLabels.length === 0) {
         toast({
-          title: "Không có hàng mới để thêm",
+          title: "⚠️ Không có hàng mới để thêm",
           description: "Đã đạt giới hạn số hàng (A-Z)",
           status: "warning",
           duration: 3000,
@@ -360,6 +489,7 @@ export function useSeatManagement(roomId, roomData) {
         return;
       }
 
+      // Tạo ghế cho các hàng mới với tất cả cột hiện có
       const seatsToCreate = [];
       for (const rowLabel of newRowLabels) {
         for (let col = 1; col <= currentCols; col++) {
@@ -378,7 +508,7 @@ export function useSeatManagement(roomId, roomData) {
 
       if (seatsToCreate.length === 0) {
         toast({
-          title: "Không có ghế mới để thêm",
+          title: "⚠️ Không có ghế mới để thêm",
           description: "Tất cả ghế trong các hàng này đã tồn tại",
           status: "warning",
           duration: 3000,
@@ -387,7 +517,7 @@ export function useSeatManagement(roomId, roomData) {
         return;
       }
 
-      console.log("📤 Dữ liệu gửi lên API (thêm hàng):", { seats: seatsToCreate });
+      console.log("📤 Thêm hàng mới:", { seats: seatsToCreate });
 
       await SeatApi.createBulk({ seats: seatsToCreate });
       
@@ -421,22 +551,96 @@ export function useSeatManagement(roomId, roomData) {
     }
   }, [roomId, seatsData, roomSeats, loadSeats, toast]);
 
-  // SỬA LẠI HÀM handleAddCols
+  // ============================================================
+  // SỬA LẠI HÀM handleAddCols - CHO PHÉP THÊM CỘT KHI CHƯA CÓ HÀNG
+  // ============================================================
   const handleAddCols = useCallback(async (count, position) => {
     try {
       const currentRows = seatsData.length;
       
+      // ✅ Nếu chưa có hàng, tự động tạo 1 hàng mặc định cùng với cột mới
       if (currentRows === 0) {
         toast({
-          title: "Chưa có hàng ghế",
-          description: "Vui lòng tạo hàng ghế trước",
-          status: "warning",
+          title: "ℹ️ Chưa có hàng ghế",
+          description: "Hệ thống sẽ tự động tạo 1 hàng mặc định cùng với cột mới",
+          status: "info",
           duration: 3000,
           isClosable: true,
         });
+        
+        // Lấy danh sách hàng đã tồn tại
+        const existingRows = [...new Set(roomSeats.map(s => s.Row))];
+        let rowLabel = "A"; // Hàng mặc định
+        
+        // Tìm hàng trống đầu tiên
+        for (let i = 0; i < ROW_LABELS.length; i++) {
+          if (!existingRows.includes(ROW_LABELS[i])) {
+            rowLabel = ROW_LABELS[i];
+            break;
+          }
+        }
+        
+        // Lấy danh sách cột đã tồn tại
+        const existingCols = [...new Set(roomSeats.map(s => s.Number))];
+        const maxCol = existingCols.length > 0 ? Math.max(...existingCols) : 0;
+        
+        // Xác định cột mới sẽ thêm
+        let startCol = position === "start" ? 1 : maxCol + 1;
+        const newCols = [];
+        for (let i = 0; i < count; i++) {
+          const colNum = startCol + i;
+          // Nếu thêm ở đầu, kiểm tra không trùng
+          if (position === "start") {
+            if (!existingCols.includes(colNum)) {
+              newCols.push(colNum);
+            }
+          } else {
+            newCols.push(colNum);
+          }
+        }
+
+        if (newCols.length === 0) {
+          toast({
+            title: "⚠️ Không có cột mới để thêm",
+            description: "Các cột đã tồn tại",
+            status: "warning",
+            duration: 3000,
+            isClosable: true,
+          });
+          return;
+        }
+
+        // Tạo ghế cho 1 hàng với các cột mới
+        const seatsToCreate = [];
+        for (const colNum of newCols) {
+          seatsToCreate.push({
+            RoomId: parseInt(roomId),
+            Row: rowLabel,
+            Number: colNum,
+            SeatType: "Normal",
+            Status: "Available"
+          });
+        }
+
+        console.log("📤 Tạo cột mới (kèm hàng mặc định):", { seats: seatsToCreate });
+
+        await SeatApi.createBulk({ seats: seatsToCreate });
+        
+        toast({
+          title: `✅ Đã thêm ${seatsToCreate.length} ghế (1 hàng × ${newCols.length} cột)`,
+          description: `💡 Hàng "${rowLabel}" đã được tạo tự động. Bạn có thể thêm hàng sau khi đã có cột.`,
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+        
+        await loadSeats();
         return;
       }
       
+      // ============================================================
+      // Logic thêm cột khi đã có hàng (giữ nguyên)
+      // ============================================================
       const existingCols = [...new Set(roomSeats.map(s => s.Number))];
       const maxCol = existingCols.length > 0 ? Math.max(...existingCols) : 0;
       
@@ -451,7 +655,7 @@ export function useSeatManagement(roomId, roomData) {
 
       if (newCols.length === 0) {
         toast({
-          title: "Không có cột mới để thêm",
+          title: "⚠️ Không có cột mới để thêm",
           description: "Các cột đã tồn tại",
           status: "warning",
           duration: 3000,
@@ -462,6 +666,7 @@ export function useSeatManagement(roomId, roomData) {
 
       const existingRows = [...new Set(roomSeats.map(s => s.Row))];
       
+      // Tạo ghế cho tất cả hàng với các cột mới
       const seatsToCreate = [];
       for (const rowLabel of existingRows) {
         for (const colNum of newCols) {
@@ -480,7 +685,7 @@ export function useSeatManagement(roomId, roomData) {
 
       if (seatsToCreate.length === 0) {
         toast({
-          title: "Không có ghế mới để thêm",
+          title: "⚠️ Không có ghế mới để thêm",
           description: "Tất cả ghế trong các cột này đã tồn tại",
           status: "warning",
           duration: 3000,
@@ -489,7 +694,7 @@ export function useSeatManagement(roomId, roomData) {
         return;
       }
 
-      console.log("📤 Dữ liệu gửi lên API (thêm cột):", { seats: seatsToCreate });
+      console.log("📤 Thêm cột mới:", { seats: seatsToCreate });
 
       await SeatApi.createBulk({ seats: seatsToCreate });
       
@@ -523,15 +728,19 @@ export function useSeatManagement(roomId, roomData) {
     }
   }, [roomId, seatsData, roomSeats, loadSeats, toast]);
 
-  // Hàm xóa hàng
+  // ============================================================
+  // SỬA LẠI HÀM handleDeleteRow - XÓA HÀNG VÀ CẬP NHẬT STATE
+  // ============================================================
   const handleDeleteRow = useCallback(async (rowIndex) => {
     try {
       const rowLabel = ROW_LABELS[rowIndex];
+      
+      // Tìm tất cả ghế trong hàng cần xóa
       const seatsToDelete = roomSeats.filter(s => s.Row === rowLabel);
       
       if (seatsToDelete.length === 0) {
         toast({
-          title: "Hàng này không có ghế",
+          title: "⚠️ Hàng này không có ghế",
           status: "warning",
           duration: 3000,
           isClosable: true,
@@ -539,39 +748,68 @@ export function useSeatManagement(roomId, roomData) {
         return;
       }
 
+      console.log(`🗑️ Đang xóa hàng ${rowLabel} với ${seatsToDelete.length} ghế...`);
+
+      // Xóa từng ghế trong hàng
       for (const seat of seatsToDelete) {
+        console.log(`🗑️ Xóa ghế ${seat.Row}${seat.Number} (ID: ${seat.SeatId})`);
         await SeatApi.delete(seat.SeatId);
       }
 
+      // ✅ Cập nhật lại roomSeats - loại bỏ các ghế đã xóa
+      const updatedRoomSeats = roomSeats.filter(s => s.Row !== rowLabel);
+      setRoomSeats(updatedRoomSeats);
+
+      // ✅ Cập nhật lại seatsData - loại bỏ hàng đã xóa
+      const updatedSeatsData = seatsData.filter((row, index) => index !== rowIndex);
+      setSeatsData(updatedSeatsData);
+
       toast({
-        title: `✅ Đã xóa hàng ${rowLabel} (${seatsToDelete.length} ghế)`,
+        title: `✅ Đã xóa hàng ${rowLabel}`,
+        description: `Đã xóa ${seatsToDelete.length} ghế trong hàng ${rowLabel}`,
         status: "success",
         duration: 3000,
         isClosable: true,
       });
       
+      // ✅ Reload để đồng bộ với database (kiểm tra lần cuối)
       await loadSeats();
+      
     } catch (err) {
       console.error("❌ Lỗi xóa hàng:", err);
+      console.error("❌ Chi tiết lỗi:", err.response?.data);
+      
+      let errorMessage = "Vui lòng thử lại";
+      if (err.response?.data?.errors) {
+        const errors = err.response.data.errors;
+        errorMessage = Object.values(errors).flat().join(", ");
+      } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      }
+      
       toast({
         title: "❌ Lỗi xóa hàng ghế",
-        description: err.response?.data?.message || "Vui lòng thử lại",
+        description: errorMessage,
         status: "error",
-        duration: 3000,
+        duration: 5000,
         isClosable: true,
       });
     }
-  }, [roomSeats, loadSeats, toast]);
+  }, [roomSeats, seatsData, loadSeats, toast]);
 
-  // Hàm xóa cột
+  // ============================================================
+  // SỬA LẠI HÀM handleDeleteCol - XÓA CỘT VÀ CẬP NHẬT STATE
+  // ============================================================
   const handleDeleteCol = useCallback(async (colIndex) => {
     try {
       const colNumber = colIndex + 1;
+      
+      // Tìm tất cả ghế trong cột cần xóa
       const seatsToDelete = roomSeats.filter(s => s.Number === colNumber);
       
       if (seatsToDelete.length === 0) {
         toast({
-          title: "Cột này không có ghế",
+          title: "⚠️ Cột này không có ghế",
           status: "warning",
           duration: 3000,
           isClosable: true,
@@ -579,29 +817,57 @@ export function useSeatManagement(roomId, roomData) {
         return;
       }
 
+      console.log(`🗑️ Đang xóa cột ${colNumber} với ${seatsToDelete.length} ghế...`);
+
+      // Xóa từng ghế trong cột
       for (const seat of seatsToDelete) {
+        console.log(`🗑️ Xóa ghế ${seat.Row}${seat.Number} (ID: ${seat.SeatId})`);
         await SeatApi.delete(seat.SeatId);
       }
 
+      // ✅ Cập nhật lại roomSeats - loại bỏ các ghế đã xóa
+      const updatedRoomSeats = roomSeats.filter(s => s.Number !== colNumber);
+      setRoomSeats(updatedRoomSeats);
+
+      // ✅ Cập nhật lại seatsData - loại bỏ cột đã xóa
+      const updatedSeatsData = seatsData.map(row => 
+        row.filter(seat => seat.col !== colIndex)
+      ).filter(row => row.length > 0); // Xóa hàng nào trống
+      
+      setSeatsData(updatedSeatsData);
+
       toast({
-        title: `✅ Đã xóa cột ${colNumber} (${seatsToDelete.length} ghế)`,
+        title: `✅ Đã xóa cột ${colNumber}`,
+        description: `Đã xóa ${seatsToDelete.length} ghế trong cột ${colNumber}`,
         status: "success",
         duration: 3000,
         isClosable: true,
       });
       
+      // ✅ Reload để đồng bộ với database (kiểm tra lần cuối)
       await loadSeats();
+      
     } catch (err) {
       console.error("❌ Lỗi xóa cột:", err);
+      console.error("❌ Chi tiết lỗi:", err.response?.data);
+      
+      let errorMessage = "Vui lòng thử lại";
+      if (err.response?.data?.errors) {
+        const errors = err.response.data.errors;
+        errorMessage = Object.values(errors).flat().join(", ");
+      } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      }
+      
       toast({
         title: "❌ Lỗi xóa cột ghế",
-        description: err.response?.data?.message || "Vui lòng thử lại",
+        description: errorMessage,
         status: "error",
-        duration: 3000,
+        duration: 5000,
         isClosable: true,
       });
     }
-  }, [roomSeats, loadSeats, toast]);
+  }, [roomSeats, seatsData, loadSeats, toast]);
 
   // Hàm xóa ghế
   const handleDeleteSeat = useCallback(async (seat) => {
@@ -624,6 +890,10 @@ export function useSeatManagement(roomId, roomData) {
       }
 
       await SeatApi.delete(seatToDelete.SeatId);
+      
+      // Cập nhật roomSeats
+      const updatedRoomSeats = roomSeats.filter(s => s.SeatId !== seatToDelete.SeatId);
+      setRoomSeats(updatedRoomSeats);
       
       toast({
         title: `✅ Đã xóa ghế ${rowLabel}${seatNumber}`,
@@ -731,5 +1001,6 @@ export function useSeatManagement(roomId, roomData) {
     zoomOut,
     loadSeats,
     loadRoom,
+    isInitialized,
   };
 }

@@ -17,7 +17,7 @@ import {
   MdStarHalf, MdStarBorder, MdLunchDining,
   MdTrendingFlat, MdInfo, MdCheckCircle, MdWarning,
   MdPeople, MdPercent, MdStore, MdFoodBank,
-  MdReceipt, MdMonetizationOn, MdDateRange
+  MdReceipt, MdMonetizationOn, MdDateRange, MdShowChart
 } from "react-icons/md";
 import {
   FaUtensils, FaBoxOpen, FaChartLine, FaBolt,
@@ -39,8 +39,8 @@ const shimmer = keyframes`
   100% { background-position: 200% center; }
 `;
 const pulse = keyframes`
-  0%, 100% { box-shadow: 0 0 0 0 rgba(234,88,12,0.4); }
-  50% { box-shadow: 0 0 0 8px rgba(234,88,12,0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(74,158,255,0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(74,158,255,0); }
 `;
 const float = keyframes`
   0%, 100% { transform: translateY(0px); }
@@ -50,6 +50,28 @@ const scaleIn = keyframes`
   from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }
 `;
+const rotate = keyframes`
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+`;
+
+// ─── Dark Theme Colors ─────────────────────────────────────────────────────────
+const DARK_THEME = {
+  bg: "#0a1628",
+  cardBg: "#0f1f3a",
+  border: "#1a3a5c",
+  text: "#e8f4f8",
+  textSecondary: "#88b4d8",
+  labelColor: "#5a8ab5",
+  inputBg: "#0a1f35",
+  inputBorder: "#1a3a5c",
+  hoverBg: "#142d4f",
+  accent: "#4a9eff",
+  accentLight: "#6ab0ff",
+  accentShadow: "rgba(74, 158, 255, 0.25)",
+  gradientFrom: "#4a9eff",
+  gradientTo: "#6ab0ff",
+};
 
 // ─── Palette ─────────────────────────────────────────────────────────────────
 const OR = "#ea580c";
@@ -64,32 +86,37 @@ const PURPLE = "#7c3aed";
 const PINK = "#db2777";
 const CYAN = "#0891b2";
 
+// Dark mode accent
+const DARK_ACCENT = DARK_THEME.accent;
+const DARK_ACCENT_SHADOW = DARK_THEME.accentShadow;
+const DARK_ACCENT_LIGHT = DARK_THEME.accentLight;
+
 // ─── Dark mode helpers ──────────────────────────────────────────────────────
 const getColors = (isDark) => ({
-  bgPage: isDark ? "#0f172a" : "#f8fafc",
-  bgCard: isDark ? "#1e293b" : "white",
-  bgCardHover: isDark ? "#2d3748" : "#f8fafc",
-  bgInput: isDark ? "#2d3748" : "#fafafa",
-  bgSub: isDark ? "#2d3748" : "#f8fafc",
-  bgSub2: isDark ? "#2d3748" : "#fafbfc",
-  borderCard: isDark ? "#334155" : "#f1f5f9",
-  borderInput: isDark ? "#374151" : "#e8edf3",
-  borderLight: isDark ? "#2d3748" : "#f8fafc",
-  textPrimary: isDark ? "#f1f5f9" : "#0f172a",
-  textSecondary: isDark ? "#94a3b8" : "#64748b",
-  textMuted: isDark ? "#64748b" : "#94a3b8",
-  textDark: isDark ? "#f1f5f9" : "#1a202c",
-  textBody: isDark ? "#cbd5e1" : "#334155",
-  textLight: isDark ? "#94a3b8" : "#475569",
+  bgPage: isDark ? DARK_THEME.bg : "#f8fafc",
+  bgCard: isDark ? DARK_THEME.cardBg : "white",
+  bgCardHover: isDark ? DARK_THEME.hoverBg : "#f8fafc",
+  bgInput: isDark ? DARK_THEME.inputBg : "#fafafa",
+  bgSub: isDark ? DARK_THEME.inputBg : "#f8fafc",
+  bgSub2: isDark ? DARK_THEME.cardBg : "#fafbfc",
+  borderCard: isDark ? DARK_THEME.border : "#f1f5f9",
+  borderInput: isDark ? DARK_THEME.inputBorder : "#e8edf3",
+  borderLight: isDark ? DARK_THEME.border : "#f8fafc",
+  textPrimary: isDark ? DARK_THEME.text : "#0f172a",
+  textSecondary: isDark ? DARK_THEME.textSecondary : "#64748b",
+  textMuted: isDark ? DARK_THEME.labelColor : "#94a3b8",
+  textDark: isDark ? DARK_THEME.text : "#1a202c",
+  textBody: isDark ? DARK_THEME.text : "#334155",
+  textLight: isDark ? DARK_THEME.textSecondary : "#475569",
   shadow: isDark ? "0 1px 4px rgba(0,0,0,0.3)" : "0 1px 4px rgba(0,0,0,0.04)",
   shadowHover: isDark ? "0 8px 32px rgba(0,0,0,0.4)" : "0 8px 24px rgba(0,0,0,0.08)",
-  glassBg: isDark ? "rgba(30, 41, 59, 0.6)" : "rgba(255, 255, 255, 0.6)",
-  glassBorder: isDark ? "rgba(51, 65, 85, 0.5)" : "rgba(255, 255, 255, 0.8)",
+  glassBg: isDark ? "rgba(15, 33, 58, 0.6)" : "rgba(255, 255, 255, 0.6)",
+  glassBorder: isDark ? "rgba(26, 58, 92, 0.5)" : "rgba(255, 255, 255, 0.8)",
 });
 
 // ─── Category Config ─────────────────────────────────────────────────────────
 const CATEGORY_CONFIG = {
-  "Bắp": { icon: MdFastfood, color: OR, bg: ORPL, gradient: `linear-gradient(135deg, ${OR}, ${ORL})` },
+  "Bắp": { icon: MdFastfood, color: DARK_ACCENT, bg: DARK_THEME.inputBg, gradient: `linear-gradient(135deg, ${DARK_ACCENT}, ${DARK_ACCENT_LIGHT})` },
   "Nước ngọt": { icon: MdLocalDrink, color: BLUE, bg: "#eff6ff", gradient: `linear-gradient(135deg, ${BLUE}, #60a5fa)` },
   "Combo": { icon: FaUtensils, color: PURPLE, bg: "#f5f3ff", gradient: `linear-gradient(135deg, ${PURPLE}, #a78bfa)` },
   "Snack": { icon: MdLunchDining, color: PINK, bg: "#fdf2f8", gradient: `linear-gradient(135deg, ${PINK}, #f472b6)` },
@@ -100,7 +127,7 @@ function StatCard({ label, value, icon, accent, sub, trend, delay = 0, color }) 
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
   const colors = getColors(isDark);
-  const iconBg = color || accent;
+  const iconBg = isDark ? DARK_ACCENT : (color || accent);
 
   return (
     <Box
@@ -113,17 +140,19 @@ function StatCard({ label, value, icon, accent, sub, trend, delay = 0, color }) 
       transition="all .3s cubic-bezier(0.4, 0, 0.2, 1)"
       _hover={{ 
         transform: "translateY(-6px)", 
-        boxShadow: `0 20px 40px ${iconBg}20`,
-        border: `1px solid ${iconBg}`
+        boxShadow: isDark 
+          ? `0 20px 40px ${DARK_ACCENT_SHADOW}`
+          : `0 20px 40px ${iconBg}20`,
+        border: `1px solid ${isDark ? DARK_ACCENT : iconBg}`
       }}
       position="relative"
       overflow="hidden"
     >
       {/* Decorative background */}
       <Box position="absolute" top="-30px" right="-30px" w="100px" h="100px"
-        borderRadius="full" bg={`${iconBg}10`} />
+        borderRadius="full" bg={`${isDark ? DARK_ACCENT : iconBg}10`} />
       <Box position="absolute" bottom="-50px" left="-50px" w="120px" h="120px"
-        borderRadius="full" bg={`${iconBg}08`} />
+        borderRadius="full" bg={`${isDark ? DARK_ACCENT : iconBg}08`} />
 
       <Flex align="flex-start" justify="space-between" mb="12px">
         <Box>
@@ -142,9 +171,12 @@ function StatCard({ label, value, icon, accent, sub, trend, delay = 0, color }) 
         </Box>
         <Box 
           w="48px" h="48px" borderRadius="14px" 
-          bg={iconBg}
+          bg={isDark ? `linear-gradient(135deg, ${DARK_ACCENT}, ${DARK_ACCENT_LIGHT})` : iconBg}
           display="flex" alignItems="center" justifyContent="center"
-          boxShadow={`0 8px 20px ${iconBg}40`}
+          boxShadow={isDark 
+            ? `0 8px 20px ${DARK_ACCENT_SHADOW}`
+            : `0 8px 20px ${iconBg}40`
+          }
           sx={{ animation: `${float} 3s ease-in-out infinite` }}
         >
           <Icon as={icon} boxSize="20px" color="white" />
@@ -185,22 +217,27 @@ function CategoryCard({ category, data }) {
       sx={{ animation: `${fadeUp} .4s ease both` }}
       transition="all .3s ease"
       _hover={{ 
-        border: `1.5px solid ${config.color}`, 
-        boxShadow: `0 8px 24px ${config.color}20`,
+        border: `1.5px solid ${isDark ? DARK_ACCENT : config.color}`, 
+        boxShadow: isDark 
+          ? `0 8px 24px ${DARK_ACCENT_SHADOW}`
+          : `0 8px 24px ${config.color}20`,
         transform: "translateX(4px)"
       }}
       position="relative"
       overflow="hidden"
     >
       <Box position="absolute" top="0" right="0" w="120px" h="120px"
-        borderRadius="full" bg={`${config.color}05`} />
+        borderRadius="full" bg={`${isDark ? DARK_ACCENT : config.color}05`} />
       
       <Flex align="center" gap="14px" mb="12px">
         <Box 
           w="44px" h="44px" borderRadius="12px" 
-          bg={config.gradient}
+          bg={isDark ? `linear-gradient(135deg, ${DARK_ACCENT}, ${DARK_ACCENT_LIGHT})` : config.gradient}
           display="flex" alignItems="center" justifyContent="center"
-          boxShadow={`0 4px 12px ${config.color}30`}
+          boxShadow={isDark 
+            ? `0 4px 12px ${DARK_ACCENT_SHADOW}`
+            : `0 4px 12px ${config.color}30`
+          }
         >
           <Icon as={config.icon} boxSize="20px" color="white" />
         </Box>
@@ -214,8 +251,8 @@ function CategoryCard({ category, data }) {
         </Box>
         <Badge 
           px="10px" py="4px" borderRadius="full"
-          bg={`${config.color}15`}
-          color={config.color}
+          bg={isDark ? `${DARK_ACCENT}20` : `${config.color}15`}
+          color={isDark ? DARK_ACCENT : config.color}
           fontSize="12px" fontWeight="700"
         >
           {data.percentage}%
@@ -223,20 +260,21 @@ function CategoryCard({ category, data }) {
       </Flex>
 
       <Flex gap="10px">
-        <Box flex="1" p="10px" borderRadius="10px" bg={isDark ? "#2d3748" : "#f8fafc"} textAlign="center">
+        <Box flex="1" p="10px" borderRadius="10px" bg={isDark ? DARK_THEME.inputBg : "#f8fafc"} textAlign="center">
           <Text fontSize="10px" fontWeight="700" color={colors.textMuted} letterSpacing="0.5px" textTransform="uppercase">
             Doanh thu
           </Text>
-          <Text fontSize="16px" fontWeight="800" color={config.color} mt="2px">
+          <Text fontSize="16px" fontWeight="800" color={isDark ? DARK_ACCENT : config.color} mt="2px">
             {data.revenue.toLocaleString()}đ
           </Text>
         </Box>
-        <Box flex="1" p="10px" borderRadius="10px" bg={isDark ? "#2d3748" : "#f8fafc"} textAlign="center">
+        <Box flex="1" p="10px" borderRadius="10px" bg={isDark ? DARK_THEME.inputBg : "#f8fafc"} textAlign="center">
           <Text fontSize="10px" fontWeight="700" color={colors.textMuted} letterSpacing="0.5px" textTransform="uppercase">
             Tỉ lệ
           </Text>
           <Box display="flex" alignItems="center" justifyContent="center" gap="6px" mt="2px">
-            <CircularProgress value={data.percentage || 0} size="32px" thickness="4px" color={config.color}>
+            <CircularProgress value={data.percentage || 0} size="32px" thickness="4px" 
+              color={isDark ? DARK_ACCENT : config.color}>
               <CircularProgressLabel fontSize="8px" fontWeight="700">
                 {data.percentage || 0}%
               </CircularProgressLabel>
@@ -254,13 +292,15 @@ function TopProductRow({ product, index }) {
   const isDark = colorMode === "dark";
   const colors = getColors(isDark);
 
-  const rankColors = ["#f97316", "#fbbf24", "#94a3b8"];
+  const rankColors = isDark 
+    ? [DARK_ACCENT, DARK_ACCENT_LIGHT, DARK_THEME.labelColor]
+    : ["#f97316", "#fbbf24", "#94a3b8"];
   const rankIcons = [FaCrown, FaMedal, FaTrophy];
 
   return (
     <Tr 
       sx={{ animation: `${fadeUp} .3s ease ${index * 0.05}s both` }}
-      _hover={{ bg: isDark ? "#2d3748" : "#f8fafc" }}
+      _hover={{ bg: isDark ? DARK_THEME.hoverBg : "#f8fafc" }}
       transition="all .2s"
     >
       <Td>
@@ -296,7 +336,7 @@ function TopProductRow({ product, index }) {
         <Text fontWeight="700" color={colors.textPrimary}>{product.sold}</Text>
       </Td>
       <Td isNumeric>
-        <Text fontWeight="700" color={GREEN}>
+        <Text fontWeight="700" color={isDark ? DARK_ACCENT : GREEN}>
           {product.revenue.toLocaleString()}đ
         </Text>
       </Td>
@@ -304,8 +344,9 @@ function TopProductRow({ product, index }) {
         <Box w="100px" display="inline-block">
           <Flex align="center" gap="8px">
             <Progress value={product.percentage || 0} size="sm"
-              colorScheme="orange" borderRadius="full"
-              bg={isDark ? "#2d3748" : "#f1f5f9"} 
+              colorScheme={isDark ? "blue" : "orange"} 
+              borderRadius="full"
+              bg={isDark ? DARK_THEME.inputBg : "#f1f5f9"} 
               flex="1"
             />
             <Text fontSize="11px" fontWeight="700" color={colors.textMuted} minW="40px">
@@ -325,15 +366,22 @@ function RevenueChart({ data }) {
   const colors = getColors(isDark);
 
   const maxValue = Math.max(...data.map(d => d.value), 1);
+  const accentColor = isDark ? DARK_ACCENT : OR;
 
   return (
     <Box p="24px" borderRadius="20px" bg={colors.bgCard} border={`1px solid ${colors.borderCard}`}>
       <Flex justify="space-between" align="center" mb="20px">
         <Flex align="center" gap="10px">
           <Box w="36px" h="36px" borderRadius="10px"
-            bg={`linear-gradient(135deg, ${OR}, ${ORL})`}
+            bg={isDark 
+              ? `linear-gradient(135deg, ${DARK_ACCENT}, ${DARK_ACCENT_LIGHT})`
+              : `linear-gradient(135deg, ${OR}, ${ORL})`
+            }
             display="flex" alignItems="center" justifyContent="center"
-            boxShadow={`0 4px 12px ${ORSW}`}>
+            boxShadow={isDark 
+              ? `0 4px 12px ${DARK_ACCENT_SHADOW}`
+              : `0 4px 12px ${ORSW}`
+            }>
             <Icon as={MdBarChart} boxSize="18px" color="white" />
           </Box>
           <Box>
@@ -346,8 +394,8 @@ function RevenueChart({ data }) {
           </Box>
         </Flex>
         <Flex align="center" gap="6px" px="10px" py="5px" borderRadius="full"
-          bg={isDark ? "#2d3748" : "#f1f5f9"}>
-          <Box w="8px" h="8px" borderRadius="full" bg={OR} />
+          bg={isDark ? DARK_THEME.inputBg : "#f1f5f9"}>
+          <Box w="8px" h="8px" borderRadius="full" bg={accentColor} />
           <Text fontSize="11px" fontWeight="600" color={colors.textMuted}>Doanh thu</Text>
         </Flex>
       </Flex>
@@ -358,15 +406,19 @@ function RevenueChart({ data }) {
           const isPeak = item.value === maxValue;
           return (
             <Box key={i} flex="1" display="flex" flexDirection="column" align="center" gap="6px">
-              <Text fontSize="10px" fontWeight="700" color={isPeak ? OR : colors.textMuted}>
+              <Text fontSize="10px" fontWeight="700" color={isPeak ? accentColor : colors.textMuted}>
                 {Math.round(item.value / 1000)}k
               </Text>
               <Box
                 w="100%"
                 h={`${Math.max(height, 4)}px`}
                 borderRadius="8px 8px 0 0"
-                bg={isPeak ? `linear-gradient(180deg, ${OR}, ${ORL})` : 
-                   `linear-gradient(180deg, ${isDark ? '#475569' : '#cbd5e1'}, ${isDark ? '#334155' : '#e2e8f0'}`}
+                bg={isPeak 
+                  ? (isDark 
+                      ? `linear-gradient(180deg, ${DARK_ACCENT}, ${DARK_ACCENT_LIGHT})`
+                      : `linear-gradient(180deg, ${OR}, ${ORL})`
+                    )
+                  : `linear-gradient(180deg, ${isDark ? DARK_THEME.border : '#cbd5e1'}, ${isDark ? DARK_THEME.inputBg : '#e2e8f0'}`}
                 opacity={isPeak ? 1 : 0.6}
                 transition="all 0.6s cubic-bezier(0.4, 0, 0.2, 1)"
                 position="relative"
@@ -375,15 +427,273 @@ function RevenueChart({ data }) {
               >
                 {isPeak && (
                   <Box position="absolute" top="-8px" left="50%" transform="translateX(-50%)"
-                    w="8px" h="8px" borderRadius="full" bg={OR} 
-                    boxShadow={`0 0 20px ${ORSW}`}
+                    w="8px" h="8px" borderRadius="full" bg={accentColor} 
+                    boxShadow={isDark 
+                      ? `0 0 20px ${DARK_ACCENT_SHADOW}`
+                      : `0 0 20px ${ORSW}`
+                    }
                     sx={{ animation: `${pulse} 2s ease infinite` }}
                   />
                 )}
               </Box>
-              <Text fontSize="10px" fontWeight="600" color={isPeak ? OR : colors.textMuted}>
+              <Text fontSize="10px" fontWeight="600" color={isPeak ? accentColor : colors.textMuted}>
                 {item.label}
               </Text>
+            </Box>
+          );
+        })}
+      </Flex>
+    </Box>
+  );
+}
+
+// ─── New Chart: Pie Chart for Category Distribution ──────────────────────────
+function CategoryPieChart({ categories }) {
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === "dark";
+  const colors = getColors(isDark);
+  
+  const total = Object.values(categories).reduce((sum, cat) => sum + cat.percentage, 0);
+  const colors_pie = isDark 
+    ? [DARK_ACCENT, DARK_ACCENT_LIGHT, '#6ab0ff', '#4ade80']
+    : ['#f97316', '#fb923c', '#a78bfa', '#f472b6'];
+
+  return (
+    <Box p="24px" borderRadius="20px" bg={colors.bgCard} border={`1px solid ${colors.borderCard}`}>
+      <Flex justify="space-between" align="center" mb="20px">
+        <Flex align="center" gap="10px">
+          <Box w="36px" h="36px" borderRadius="10px"
+            bg={isDark 
+              ? `linear-gradient(135deg, ${DARK_ACCENT}, ${DARK_ACCENT_LIGHT})`
+              : `linear-gradient(135deg, ${PURPLE}, #a78bfa)`
+            }
+            display="flex" alignItems="center" justifyContent="center"
+            boxShadow={isDark 
+              ? `0 4px 12px ${DARK_ACCENT_SHADOW}`
+              : "0 4px 12px rgba(124,58,237,0.2)"
+            }>
+            <Icon as={MdPercent} boxSize="18px" color="white" />
+          </Box>
+          <Box>
+            <Text fontSize="14px" fontWeight="700" color={colors.textPrimary}>
+              Phân bổ danh mục
+            </Text>
+            <Text fontSize="11px" color={colors.textMuted}>
+              Tỉ lệ đóng góp theo danh mục
+            </Text>
+          </Box>
+        </Flex>
+      </Flex>
+
+      <Flex direction="column" gap="12px">
+        {Object.entries(categories).map(([name, data], index) => {
+          const percentage = (data.percentage / total) * 100;
+          const color = colors_pie[index % colors_pie.length];
+          
+          return (
+            <Box key={name}>
+              <Flex justify="space-between" mb="4px">
+                <Text fontSize="12px" fontWeight="600" color={colors.textPrimary}>
+                  {name}
+                </Text>
+                <Text fontSize="12px" fontWeight="700" color={color}>
+                  {Math.round(percentage)}%
+                </Text>
+              </Flex>
+              <Box w="100%" h="6px" borderRadius="full" bg={isDark ? DARK_THEME.inputBg : "#f1f5f9"}>
+                <Box 
+                  w={`${percentage}%`} 
+                  h="100%" 
+                  borderRadius="full" 
+                  bg={color}
+                  transition="width 1s ease"
+                  sx={{ animation: `${scaleIn} .6s ease ${index * 0.1}s both` }}
+                />
+              </Box>
+            </Box>
+          );
+        })}
+      </Flex>
+    </Box>
+  );
+}
+
+// ─── New Chart: Growth Trend ──────────────────────────────────────────────────
+function GrowthTrend({ data }) {
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === "dark";
+  const colors = getColors(isDark);
+  
+  const months = ['Thg1', 'Thg2', 'Thg3', 'Thg4', 'Thg5', 'Thg6'];
+  const values = [12, 19, 15, 22, 28, 35];
+  
+  return (
+    <Box p="24px" borderRadius="20px" bg={colors.bgCard} border={`1px solid ${colors.borderCard}`}>
+      <Flex justify="space-between" align="center" mb="20px">
+        <Flex align="center" gap="10px">
+          <Box w="36px" h="36px" borderRadius="10px"
+            bg={isDark 
+              ? `linear-gradient(135deg, ${DARK_ACCENT}, ${DARK_ACCENT_LIGHT})`
+              : `linear-gradient(135deg, ${GREEN}, ${GREEN_LIGHT})`
+            }
+            display="flex" alignItems="center" justifyContent="center"
+            boxShadow={isDark 
+              ? `0 4px 12px ${DARK_ACCENT_SHADOW}`
+              : "0 4px 12px rgba(5,150,105,0.2)"
+            }>
+            <Icon as={MdShowChart} boxSize="18px" color="white" />
+          </Box>
+          <Box>
+            <Text fontSize="14px" fontWeight="700" color={colors.textPrimary}>
+              Xu hướng tăng trưởng
+            </Text>
+            <Text fontSize="11px" color={colors.textMuted}>
+              Doanh thu theo tháng
+            </Text>
+          </Box>
+        </Flex>
+        <Badge px="10px" py="4px" borderRadius="full" bg={isDark ? `${DARK_ACCENT}20` : `${GREEN}15`} 
+          color={isDark ? DARK_ACCENT : GREEN} fontSize="12px" fontWeight="700">
+          ↑ +15.3%
+        </Badge>
+      </Flex>
+
+      <Flex h="120px" align="flex-end" gap="12px" pt="10px">
+        {values.map((val, i) => {
+          const max = Math.max(...values);
+          const height = (val / max) * 100;
+          const isGrowing = i > 0 && val > values[i - 1];
+          
+          return (
+            <Box key={i} flex="1" display="flex" flexDirection="column" align="center" gap="6px">
+              <Text fontSize="9px" fontWeight="700" color={isDark ? DARK_ACCENT : GREEN}>
+                {val}tr
+              </Text>
+              <Box
+                w="100%"
+                h={`${height}px`}
+                borderRadius="6px 6px 0 0"
+                bg={isGrowing 
+                  ? (isDark 
+                      ? `linear-gradient(180deg, ${DARK_ACCENT}, ${DARK_ACCENT_LIGHT})`
+                      : `linear-gradient(180deg, ${GREEN}, ${GREEN_LIGHT})`
+                    )
+                  : isDark 
+                      ? DARK_THEME.border
+                      : '#cbd5e1'
+                }
+                transition="all 0.6s cubic-bezier(0.4, 0, 0.2, 1)"
+                _hover={{ opacity: 0.8 }}
+                position="relative"
+              >
+                {isGrowing && (
+                  <Box position="absolute" top="-4px" left="50%" transform="translateX(-50%)"
+                    w="6px" h="6px" borderRadius="full" 
+                    bg={isDark ? DARK_ACCENT : GREEN}
+                  />
+                )}
+              </Box>
+              <Text fontSize="9px" fontWeight="600" color={isGrowing ? (isDark ? DARK_ACCENT : GREEN) : colors.textMuted}>
+                {months[i]}
+              </Text>
+            </Box>
+          );
+        })}
+      </Flex>
+    </Box>
+  );
+}
+
+// ─── New Chart: Customer Satisfaction ────────────────────────────────────────
+function CustomerSatisfaction() {
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === "dark";
+  const colors = getColors(isDark);
+  
+  const satisfaction = {
+    excellent: 45,
+    good: 30,
+    average: 15,
+    poor: 10
+  };
+  
+  const total = Object.values(satisfaction).reduce((a, b) => a + b, 0);
+  const rating = ((satisfaction.excellent * 5 + satisfaction.good * 4 + satisfaction.average * 3 + satisfaction.poor * 2) / total).toFixed(1);
+
+  return (
+    <Box p="24px" borderRadius="20px" bg={colors.bgCard} border={`1px solid ${colors.borderCard}`}>
+      <Flex justify="space-between" align="center" mb="20px">
+        <Flex align="center" gap="10px">
+          <Box w="36px" h="36px" borderRadius="10px"
+            bg={isDark 
+              ? `linear-gradient(135deg, ${DARK_ACCENT}, ${DARK_ACCENT_LIGHT})`
+              : `linear-gradient(135deg, ${BLUE}, #60a5fa)`
+            }
+            display="flex" alignItems="center" justifyContent="center"
+            boxShadow={isDark 
+              ? `0 4px 12px ${DARK_ACCENT_SHADOW}`
+              : "0 4px 12px rgba(37,99,235,0.2)"
+            }>
+            <Icon as={MdStar} boxSize="18px" color="white" />
+          </Box>
+          <Box>
+            <Text fontSize="14px" fontWeight="700" color={colors.textPrimary}>
+              Hài lòng khách hàng
+            </Text>
+            <Text fontSize="11px" color={colors.textMuted}>
+              Đánh giá về sản phẩm combo
+            </Text>
+          </Box>
+        </Flex>
+        <Flex align="center" gap="6px">
+          <Text fontSize="24px" fontWeight="800" color={isDark ? DARK_ACCENT : BLUE}>
+            {rating}
+          </Text>
+          <Flex>
+            {[1,2,3,4,5].map(i => (
+              <Icon key={i} as={i <= Math.round(rating) ? MdStar : MdStarBorder} 
+                boxSize="14px" color={isDark ? DARK_ACCENT : "#f59e0b"} />
+            ))}
+          </Flex>
+        </Flex>
+      </Flex>
+
+      <Flex direction="column" gap="8px">
+        {Object.entries(satisfaction).map(([level, value]) => {
+          const percentage = (value / total) * 100;
+          const labels = {
+            excellent: 'Rất hài lòng',
+            good: 'Hài lòng',
+            average: 'Trung bình',
+            poor: 'Chưa hài lòng'
+          };
+          const colors_level = isDark 
+            ? [DARK_ACCENT, DARK_ACCENT_LIGHT, '#6ab0ff', DARK_THEME.border]
+            : ['#059669', '#f59e0b', '#f97316', '#dc2626'];
+          const colorMap = {
+            excellent: colors_level[0],
+            good: colors_level[1],
+            average: colors_level[2],
+            poor: colors_level[3]
+          };
+          
+          return (
+            <Box key={level}>
+              <Flex justify="space-between" mb="2px">
+                <Text fontSize="11px" color={colors.textSecondary}>{labels[level]}</Text>
+                <Text fontSize="11px" fontWeight="600" color={colorMap[level]}>
+                  {value} ({Math.round(percentage)}%)
+                </Text>
+              </Flex>
+              <Box w="100%" h="4px" borderRadius="full" bg={isDark ? DARK_THEME.inputBg : "#f1f5f9"}>
+                <Box 
+                  w={`${percentage}%`} 
+                  h="100%" 
+                  borderRadius="full" 
+                  bg={colorMap[level]}
+                  transition="width 1s ease"
+                />
+              </Box>
             </Box>
           );
         })}
@@ -508,9 +818,15 @@ export default function Thongkecombo() {
           <Flex align="center" gap="14px" mb="4px">
             <Box 
               w="52px" h="52px" borderRadius="14px"
-              bg={`linear-gradient(135deg, ${OR}, ${ORL})`}
+              bg={isDark 
+                ? `linear-gradient(135deg, ${DARK_ACCENT}, ${DARK_ACCENT_LIGHT})`
+                : `linear-gradient(135deg, ${OR}, ${ORL})`
+              }
               display="flex" alignItems="center" justifyContent="center"
-              boxShadow={`0 8px 24px ${ORSW}`}
+              boxShadow={isDark 
+                ? `0 8px 24px ${DARK_ACCENT_SHADOW}`
+                : `0 8px 24px ${ORSW}`
+              }
               sx={{ animation: `${pulse} 3s ease infinite` }}
             >
               <Icon as={MdFastfood} boxSize="24px" color="white" />
@@ -533,14 +849,19 @@ export default function Thongkecombo() {
             h="42px"
             fontSize="13px"
             fontWeight="600"
-            bg={isDark ? "#2d3748" : "#f8fafc"}
-            border={`1px solid ${isDark ? "#374151" : "#e8edf3"}`}
+            bg={isDark ? DARK_THEME.inputBg : "#f8fafc"}
+            border={`1px solid ${isDark ? DARK_THEME.inputBorder : "#e8edf3"}`}
             borderRadius="12px"
             color={colors.textPrimary}
             value={period}
             onChange={(e) => setPeriod(e.target.value)}
-            _focus={{ border: `1.5px solid ${OR}`, boxShadow: `0 0 0 3px ${ORSW}` }}
-            _hover={{ border: `1px solid ${OR}` }}
+            _focus={{ 
+              border: `1.5px solid ${isDark ? DARK_ACCENT : OR}`, 
+              boxShadow: isDark 
+                ? `0 0 0 3px ${DARK_ACCENT_SHADOW}`
+                : `0 0 0 3px ${ORSW}`
+            }}
+            _hover={{ border: `1px solid ${isDark ? DARK_ACCENT : OR}` }}
           >
             <option value="7days">📅 7 ngày qua</option>
             <option value="30days">📅 30 ngày qua</option>
@@ -554,10 +875,21 @@ export default function Thongkecombo() {
             borderRadius="12px"
             fontWeight="600"
             fontSize="13px"
-            bg={`linear-gradient(135deg, ${OR}, ${ORL})`}
+            bg={isDark 
+              ? `linear-gradient(135deg, ${DARK_ACCENT}, ${DARK_ACCENT_LIGHT})`
+              : `linear-gradient(135deg, ${OR}, ${ORL})`
+            }
             color="white"
-            boxShadow={`0 4px 14px ${ORSW}`}
-            _hover={{ boxShadow: `0 8px 24px ${ORSW}`, transform: "translateY(-2px)" }}
+            boxShadow={isDark 
+              ? `0 4px 14px ${DARK_ACCENT_SHADOW}`
+              : `0 4px 14px ${ORSW}`
+            }
+            _hover={{ 
+              boxShadow: isDark 
+                ? `0 8px 24px ${DARK_ACCENT_SHADOW}`
+                : `0 8px 24px ${ORSW}`, 
+              transform: "translateY(-2px)" 
+            }}
             _active={{ transform: "translateY(0)" }}
             transition="all .2s"
             leftIcon={<Icon as={MdRefresh} />}
@@ -574,8 +906,8 @@ export default function Thongkecombo() {
           label="Tổng doanh thu"
           value={comboStats.totalRevenue.toLocaleString() + "đ"}
           icon={MdMonetizationOn}
-          accent={OR}
-          color={OR}
+          accent={isDark ? DARK_ACCENT : OR}
+          color={isDark ? DARK_ACCENT : OR}
           trend={comboStats.growth}
           delay={0}
           sub={`+${comboStats.growth}% so với kỳ trước`}
@@ -584,8 +916,8 @@ export default function Thongkecombo() {
           label="Đơn hàng"
           value={comboStats.totalOrders}
           icon={MdReceipt}
-          accent={BLUE}
-          color={BLUE}
+          accent={isDark ? DARK_ACCENT_LIGHT : BLUE}
+          color={isDark ? DARK_ACCENT_LIGHT : BLUE}
           delay={0.05}
           sub={`${comboStats.totalItems} sản phẩm đã bán`}
         />
@@ -593,19 +925,25 @@ export default function Thongkecombo() {
           label="Sản phẩm đã bán"
           value={comboStats.totalItems}
           icon={MdFoodBank}
-          accent={PURPLE}
-          color={PURPLE}
+          accent={isDark ? "#6ab0ff" : PURPLE}
+          color={isDark ? "#6ab0ff" : PURPLE}
           delay={0.1}
         />
         <StatCard
           label="Giá trị đơn hàng TB"
           value={comboStats.avgOrderValue.toLocaleString() + "đ"}
           icon={MdLocalOffer}
-          accent={GREEN}
-          color={GREEN}
+          accent={isDark ? "#4ade80" : GREEN}
+          color={isDark ? "#4ade80" : GREEN}
           delay={0.15}
         />
       </SimpleGrid>
+
+      {/* ── Charts Grid ── */}
+      <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap="20px" mb="24px">
+        <CategoryPieChart categories={categories} />
+        <GrowthTrend data={dailyRevenue} />
+      </Grid>
 
       {/* ── Main Content ── */}
       <Grid templateColumns={{ base: "1fr", lg: "1fr 1.4fr" }} gap="20px" mb="24px">
@@ -620,11 +958,15 @@ export default function Thongkecombo() {
           sx={{ animation: `${fadeUp} .5s ease .1s both` }}
         >
           <Flex align="center" gap="10px" mb="20px">
-            <Box w="4px" h="20px" borderRadius="full" bg={`linear-gradient(180deg, ${OR}, ${ORL})`} />
+            <Box w="4px" h="20px" borderRadius="full" bg={isDark 
+              ? `linear-gradient(180deg, ${DARK_ACCENT}, ${DARK_ACCENT_LIGHT})`
+              : `linear-gradient(180deg, ${OR}, ${ORL})`
+            } />
             <Text fontSize="15px" fontWeight="800" color={colors.textPrimary}>
               Phân loại sản phẩm
             </Text>
-            <Badge px="8px" py="3px" borderRadius="full" bg={ORPL} color={OR} fontSize="11px" fontWeight="700">
+            <Badge px="8px" py="3px" borderRadius="full" bg={isDark ? `${DARK_ACCENT}20` : ORPL} 
+              color={isDark ? DARK_ACCENT : OR} fontSize="11px" fontWeight="700">
               {Object.keys(categories).length} danh mục
             </Badge>
           </Flex>
@@ -636,10 +978,11 @@ export default function Thongkecombo() {
           </Flex>
         </Box>
 
-        {/* Revenue Chart */}
-        <Box sx={{ animation: `${fadeUp} .5s ease .15s both` }}>
+        {/* Revenue Chart & Satisfaction */}
+        <Flex direction="column" gap="20px">
           <RevenueChart data={dailyRevenue} />
-        </Box>
+          <CustomerSatisfaction />
+        </Flex>
       </Grid>
 
       {/* ── Top Products Table ── */}
@@ -653,16 +996,20 @@ export default function Thongkecombo() {
       >
         <Box 
           p="20px 24px" 
-          borderBottom={`1px solid ${isDark ? "#2d3748" : "#f8fafc"}`}
-          bg={isDark ? "#1a1a2e" : "#fafafa"}
+          borderBottom={`1px solid ${isDark ? DARK_THEME.border : "#f8fafc"}`}
+          bg={isDark ? DARK_THEME.inputBg : "#fafafa"}
         >
           <Flex justify="space-between" align="center">
             <Flex align="center" gap="10px">
-              <Box w="4px" h="20px" borderRadius="full" bg={`linear-gradient(180deg, ${OR}, ${ORL})`} />
+              <Box w="4px" h="20px" borderRadius="full" bg={isDark 
+                ? `linear-gradient(180deg, ${DARK_ACCENT}, ${DARK_ACCENT_LIGHT})`
+                : `linear-gradient(180deg, ${OR}, ${ORL})`
+              } />
               <Text fontSize="15px" fontWeight="800" color={colors.textPrimary}>
                 Top sản phẩm bán chạy
               </Text>
-              <Badge px="8px" py="3px" borderRadius="full" bg={ORPL} color={OR} fontSize="11px" fontWeight="700">
+              <Badge px="8px" py="3px" borderRadius="full" bg={isDark ? `${DARK_ACCENT}20` : ORPL} 
+                color={isDark ? DARK_ACCENT : OR} fontSize="11px" fontWeight="700">
                 🏆 {topProducts.length} sản phẩm
               </Badge>
             </Flex>
@@ -678,7 +1025,7 @@ export default function Thongkecombo() {
           <TableContainer>
             <Table variant="simple" size="md">
               <Thead>
-                <Tr bg={isDark ? "#16213e" : "#f8fafc"}>
+                <Tr bg={isDark ? DARK_THEME.inputBg : "#f8fafc"}>
                   <Th fontSize="11px" fontWeight="700" color={colors.textMuted} textTransform="uppercase" letterSpacing="0.5px" w="60px">#</Th>
                   <Th fontSize="11px" fontWeight="700" color={colors.textMuted} textTransform="uppercase" letterSpacing="0.5px">Sản phẩm</Th>
                   <Th fontSize="11px" fontWeight="700" color={colors.textMuted} textTransform="uppercase" letterSpacing="0.5px">Danh mục</Th>
@@ -702,22 +1049,27 @@ export default function Thongkecombo() {
         mt="20px" 
         p="16px 20px" 
         borderRadius="16px"
-        bg={isDark ? "#1e293b" : ORPL}
-        border={`1px solid ${isDark ? "#374151" : ORXL}`}
+        bg={isDark ? DARK_THEME.inputBg : ORPL}
+        border={`1px solid ${isDark ? DARK_THEME.border : ORXL}`}
         sx={{ animation: `${fadeIn} .5s ease .25s both` }}
         backdropFilter="blur(8px)"
       >
         <Flex align="center" gap="12px" flexWrap="wrap">
           <Box w="32px" h="32px" borderRadius="8px"
-            bg={`linear-gradient(135deg, ${OR}, ${ORL})`}
+            bg={isDark 
+              ? `linear-gradient(135deg, ${DARK_ACCENT}, ${DARK_ACCENT_LIGHT})`
+              : `linear-gradient(135deg, ${OR}, ${ORL})`
+            }
             display="flex" alignItems="center" justifyContent="center">
             <Icon as={MdInfo} boxSize="16px" color="white" />
           </Box>
-          <Text fontSize="13px" color={isDark ? "#cbd5e1" : "#92400e"} fontWeight="500" flex="1">
+          <Text fontSize="13px" color={isDark ? DARK_THEME.text : "#92400e"} fontWeight="500" flex="1">
             💡 Dữ liệu được cập nhật tự động từ các đơn hàng thành công. 
             Thời gian thực tế có thể chậm 5-10 phút.
           </Text>
-          <Badge px="8px" py="3px" borderRadius="full" bg={OR} color="white" fontSize="10px" fontWeight="700">
+          <Badge px="8px" py="3px" borderRadius="full" 
+            bg={isDark ? DARK_ACCENT : OR} 
+            color="white" fontSize="10px" fontWeight="700">
             Live
           </Badge>
         </Flex>

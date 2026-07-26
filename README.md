@@ -345,267 +345,9 @@ Password: Staff@123
 
 ```
 ├── 📁 public
-│   ├── 📁 plugins
-│   │   ├── 📁 air-datepicker
-│   │   ├── 📁 apexcharts
-│   │   │   └── 🎨 apexcharts.css
-│   │   ├── 📁 bootstrap
-│   │   │   ├── 🎨 bootstrap.css
-│   │   │   └── 📄 bootstrap.js
-│   │   ├── 📁 bootstrap-select
-│   │   │   ├── 📁 js
-│   │   │   │   ├── 📁 i18n
-│   │   │   │   │   ├── 📄 defaults-ar_AR.js
-│   │   │   │   │   ├── 📄 defaults-bg_BG.js
-│   │   │   │   │   ├── 📄 defaults-cro_CRO.js
-│   │   │   │   │   ├── 📄 defaults-cs_CZ.js
-│   │   │   │   │   ├── 📄 defaults-da_DK.js
-│   │   │   │   │   ├── 📄 defaults-de_DE.js
-│   │   │   │   │   ├── 📄 defaults-en_US.js
-│   │   │   │   │   ├── 📄 defaults-es_CL.js
-│   │   │   │   │   ├── 📄 defaults-es_ES.js
-│   │   │   │   │   ├── 📄 defaults-et_EE.js
-│   │   │   │   │   ├── 📄 defaults-eu.js
-│   │   │   │   │   ├── 📄 defaults-fa_IR.js
-│   │   │   │   │   ├── 📄 defaults-fi_FI.js
-│   │   │   │   │   ├── 📄 defaults-fr_FR.js
-│   │   │   │   │   ├── 📄 defaults-hu_HU.js
-│   │   │   │   │   ├── 📄 defaults-id_ID.js
-│   │   │   │   │   ├── 📄 defaults-it_IT.js
-│   │   │   │   │   ├── 📄 defaults-ja_JP.js
-│   │   │   │   │   ├── 📄 defaults-kh_KM.js
-│   │   │   │   │   ├── 📄 defaults-ko_KR.js
-│   │   │   │   │   ├── 📄 defaults-lt_LT.js
-│   │   │   │   │   ├── 📄 defaults-nb_NO.js
-│   │   │   │   │   ├── 📄 defaults-nl_NL.js
-│   │   │   │   │   ├── 📄 defaults-pl_PL.js
-│   │   │   │   │   ├── 📄 defaults-pt_BR.js
-│   │   │   │   │   ├── 📄 defaults-pt_PT.js
-│   │   │   │   │   ├── 📄 defaults-ro_RO.js
-│   │   │   │   │   ├── 📄 defaults-ru_RU.js
-│   │   │   │   │   ├── 📄 defaults-sk_SK.js
-│   │   │   │   │   ├── 📄 defaults-sl_SI.js
-│   │   │   │   │   ├── 📄 defaults-sv_SE.js
-│   │   │   │   │   ├── 📄 defaults-tr_TR.js
-│   │   │   │   │   ├── 📄 defaults-ua_UA.js
-│   │   │   │   │   ├── 📄 defaults-vi_VN.js
-│   │   │   │   │   ├── 📄 defaults-zh_CN.js
-│   │   │   │   │   └── 📄 defaults-zh_TW.js
-│   │   │   │   ├── ⚙️ .jshintrc
-│   │   │   │   └── 📄 bootstrap-select.js
-│   │   │   ├── 🎨 bootstrap-select.css
-│   │   │   ├── 📄 bootstrap-select.js
-│   │   │   └── 🌐 test.html
-│   │   ├── 📁 bootstrap-tagsinput
-│   │   │   ├── 🎨 bootstrap-tagsinput.css
-│   │   │   └── 📄 bootstrap-tagsinput.js
-│   │   ├── 📁 bootstrap-touchspin
-│   │   │   ├── 🎨 jquery.bootstrap-touchspin.css
-│   │   │   └── 📄 jquery.bootstrap-touchspin.js
-│   │   ├── 📁 bootstrap-wysihtml5-master
-│   │   │   ├── 🎨 bootstrap-wysihtml5.css
-│   │   │   └── 📄 bootstrap-wysihtml5.js
-│   │   ├── 📁 cropperjs
-│   │   ├── 📁 datatables
-│   │   │   ├── 📁 css
-│   │   │   ├── 📁 images
-│   │   │   │   ├── 🖼️ sort_asc.png
-│   │   │   │   ├── 🖼️ sort_asc_disabled.png
-│   │   │   │   ├── 🖼️ sort_both.png
-│   │   │   │   ├── 🖼️ sort_desc.png
-│   │   │   │   └── 🖼️ sort_desc_disabled.png
-│   │   │   └── 📁 js
-│   │   │       └── 📄 vfs_fonts.js
-│   │   ├── 📁 dropzone
-│   │   │   └── 📁 src
-│   │   │       ├── 🎨 basic.scss
-│   │   │       ├── 🎨 dropzone.css
-│   │   │       ├── 📄 dropzone.js
-│   │   │       └── 🎨 dropzone.scss
-│   │   ├── 📁 fancybox
-│   │   ├── 📁 fullcalendar
-│   │   │   └── 🎨 fullcalendar.css
-│   │   ├── 📁 highcharts-6.0.7
-│   │   │   └── 📁 code
-│   │   │       ├── 📄 highcharts-3d.js
-│   │   │       ├── 📄 highcharts-3d.src.js
-│   │   │       ├── 📄 highcharts-more.js
-│   │   │       ├── 📄 highcharts-more.src.js
-│   │   │       ├── 📄 highcharts.js
-│   │   │       └── 📄 highcharts.src.js
-│   │   ├── 📁 highlight.js
-│   │   │   └── 📁 src
-│   │   │       ├── 📁 styles
-│   │   │       │   └── 🎨 solarized-dark.css
-│   │   │       ├── 📄 highlight.js
-│   │   │       └── 📄 highlight.pack.js
-│   │   ├── 📁 ion-rangeslider
-│   │   │   ├── 📁 css
-│   │   │   │   └── 🎨 ion.rangeSlider.css
-│   │   │   └── 📁 js
-│   │   ├── 📁 jQuery-Knob-master
-│   │   ├── 📁 jquery-asColor
-│   │   ├── 📁 jquery-asColorPicker
-│   │   │   └── 📄 jquery-asColorPicker.js
-│   │   ├── 📁 jquery-asGradient
-│   │   ├── 📁 jquery-steps
-│   │   │   ├── 🎨 jquery.steps.css
-│   │   │   └── 📄 jquery.steps.js
-│   │   ├── 📁 jvectormap
-│   │   │   ├── 🎨 jquery-jvectormap-2.0.3.css
-│   │   │   ├── 📄 jquery-jvectormap-world-mill-en.js
-│   │   │   ├── 🎨 jquery-jvectormap.css
-│   │   │   └── 📄 jquery-jvectormap.js
-│   │   ├── 📁 malihu-custom-scrollbar-plugin-master
-│   │   │   ├── 🎨 jquery.mCustomScrollbar.css
-│   │   │   └── 📄 jquery.mCustomScrollbar.js
-│   │   ├── 📁 plyr
-│   │   ├── 📁 select2
-│   │   ├── 📁 slick
-│   │   │   └── 🎨 slick.css
-│   │   ├── 📁 sweetalert2
-│   │   │   ├── 📄 sweet-alert.init.js
-│   │   │   ├── 📄 sweetalert2.all.js
-│   │   │   └── 🎨 sweetalert2.css
-│   │   ├── 📁 switchery
-│   │   ├── 📁 timedropper
-│   │   │   ├── 🎨 timedropper.css
-│   │   │   └── 📄 timedropper.js
-│   │   └── 📁 wysihtml5-master
-│   ├── 📁 vendors
-│   │   ├── 📁 fonts
-│   │   │   ├── 📁 font-awesome
-│   │   │   │   └── 📁 css
-│   │   │   │       └── 🎨 font-awesome.css
-│   │   │   ├── 📁 ionicons-master
-│   │   │   │   └── 📁 css
-│   │   │   │       └── 🎨 ionicons.css
-│   │   │   ├── 📁 themify-icons
-│   │   │   │   └── 🎨 themify-icons.css
-│   │   │   ├── 📄 FontAwesome.otf
-│   │   │   ├── 🎨 dropways.css
-│   │   │   ├── 📄 dropways.eot
-│   │   │   ├── 🖼️ dropways.svg
-│   │   │   ├── 📄 dropways.ttf
-│   │   │   ├── 📄 dropways.woff
-│   │   │   ├── 📄 fontawesome-webfont.eot
-│   │   │   ├── 🖼️ fontawesome-webfont.svg
-│   │   │   ├── 📄 fontawesome-webfont.ttf
-│   │   │   ├── 📄 fontawesome-webfont.woff
-│   │   │   ├── 📄 fontawesome-webfont.woff2
-│   │   │   ├── 🎨 foundation-icons.css
-│   │   │   ├── 📄 foundation-icons.eot
-│   │   │   ├── 🖼️ foundation-icons.svg
-│   │   │   ├── 📄 foundation-icons.ttf
-│   │   │   ├── 📄 foundation-icons.woff
-│   │   │   ├── 📄 ionicons.eot
-│   │   │   ├── 🖼️ ionicons.svg
-│   │   │   ├── 📄 ionicons.ttf
-│   │   │   ├── 📄 ionicons.woff
-│   │   │   ├── 📄 themify.eot
-│   │   │   ├── 🖼️ themify.svg
-│   │   │   ├── 📄 themify.ttf
-│   │   │   └── 📄 themify.woff
-│   │   ├── 📁 images
-│   │   │   ├── 📁 layout
-│   │   │   │   ├── 🖼️ header-dark.png
-│   │   │   │   ├── 🖼️ header-white.png
-│   │   │   │   ├── 🖼️ sidebar-dark.png
-│   │   │   │   └── 🖼️ sidebar-white.png
-│   │   │   ├── 🖼️ apple-touch-icon.png
-│   │   │   ├── 🖼️ banner-img.png
-│   │   │   ├── 🖼️ blue-logo.png
-│   │   │   ├── 🖼️ briefcase.svg
-│   │   │   ├── 🖼️ cancel.svg
-│   │   │   ├── 🖼️ caution-sign.png
-│   │   │   ├── 🖼️ chat-img1.jpg
-│   │   │   ├── 🖼️ chat-img2.jpg
-│   │   │   ├── 🖼️ check-mark-green.png
-│   │   │   ├── 🖼️ check-mark.png
-│   │   │   ├── 🖼️ chrome.png
-│   │   │   ├── 🖼️ coming-soon.png
-│   │   │   ├── 🖼️ cross.png
-│   │   │   ├── 🖼️ demo.svg
-│   │   │   ├── 🖼️ deskapp-logo-white.svg
-│   │   │   ├── 🖼️ deskapp-logo.svg
-│   │   │   ├── 🖼️ edge.png
-│   │   │   ├── 🖼️ favicon-16x16.png
-│   │   │   ├── 🖼️ favicon-32x32.png
-│   │   │   ├── 🖼️ firefox.png
-│   │   │   ├── 🖼️ forgot-password.png
-│   │   │   ├── 🖼️ github.svg
-│   │   │   ├── 🖼️ icon-Cash.png
-│   │   │   ├── 🖼️ icon-debit.png
-│   │   │   ├── 🖼️ icon-online-wallet.png
-│   │   │   ├── 🖼️ img.jpg
-│   │   │   ├── 🖼️ img1.jpg
-│   │   │   ├── 🖼️ img2.jpg
-│   │   │   ├── 🖼️ img3.jpg
-│   │   │   ├── 🖼️ img4.jpg
-│   │   │   ├── 🖼️ img5.jpg
-│   │   │   ├── 🖼️ internet-explorer.png
-│   │   │   ├── 🖼️ login-img.png
-│   │   │   ├── 🖼️ login-page-img.png
-│   │   │   ├── 🖼️ logo-icon.png
-│   │   │   ├── 🖼️ menu-icon.svg
-│   │   │   ├── 🖼️ modal-img1.jpg
-│   │   │   ├── 🖼️ modal-img2.jpg
-│   │   │   ├── 🖼️ modal-img3.jpg
-│   │   │   ├── 🖼️ new-loader.gif
-│   │   │   ├── 🖼️ opera.png
-│   │   │   ├── 🖼️ page-icon.svg
-│   │   │   ├── 🖼️ person.svg
-│   │   │   ├── 🖼️ photo1.jpg
-│   │   │   ├── 🖼️ photo2.jpg
-│   │   │   ├── 🖼️ photo3.jpg
-│   │   │   ├── 🖼️ photo4.jpg
-│   │   │   ├── 🖼️ photo5.jpg
-│   │   │   ├── 🖼️ photo6.jpg
-│   │   │   ├── 🖼️ photo7.jpg
-│   │   │   ├── 🖼️ photo8.jpg
-│   │   │   ├── 🖼️ photo9.jpg
-│   │   │   ├── 🖼️ plyr.svg
-│   │   │   ├── 🖼️ product-1.jpg
-│   │   │   ├── 🖼️ product-2.jpg
-│   │   │   ├── 🖼️ product-3.jpg
-│   │   │   ├── 🖼️ product-4.jpg
-│   │   │   ├── 🖼️ product-5.jpg
-│   │   │   ├── 🖼️ product-img1.jpg
-│   │   │   ├── 🖼️ product-img2.jpg
-│   │   │   ├── 🖼️ product-img3.jpg
-│   │   │   ├── 🖼️ product-img4.jpg
-│   │   │   ├── 🖼️ profile-photo.jpg
-│   │   │   ├── 🖼️ register-page-img.png
-│   │   │   ├── 🖼️ safari.png
-│   │   │   ├── 🖼️ success.png
-│   │   │   ├── 🖼️ tick.svg
-│   │   │   ├── 🖼️ upload-file-img.jpg
-│   │   │   └── 🖼️ wave.png
-│   │   ├── 📁 scripts
-│   │   │   ├── 📄 advanced-components.js
-│   │   │   ├── 📄 apexcharts-setting.js
-│   │   │   ├── 📄 calendar-setting.js
-│   │   │   ├── 📄 colorpicker.js
-│   │   │   ├── 📄 core.js
-│   │   │   ├── 📄 dashboard.js
-│   │   │   ├── 📄 dashboard2.js
-│   │   │   ├── 📄 datatable-setting.js
-│   │   │   ├── 📄 highchart-setting.js
-│   │   │   ├── 📄 jvectormap-setting.js
-│   │   │   ├── 📄 knob-chart-setting.js
-│   │   │   ├── 📄 layout-settings.js
-│   │   │   ├── 📄 process.js
-│   │   │   ├── 📄 range-slider-setting.js
-│   │   │   ├── 📄 script.js
-│   │   │   └── 📄 steps-setting.js
-│   │   └── 📁 styles
-│   │       ├── 🎨 core.css
-│   │       ├── 🎨 icon-font.css
-│   │       └── 🎨 style.css
+│   ├── 🖼️ banner12.png
 │   ├── 📄 favicon.ico
 │   ├── 🌐 index.html
-│   ├── 🖼️ logo192.png
-│   ├── 🖼️ logo512.png
 │   ├── ⚙️ manifest.json
 │   └── 📄 robots.txt
 ├── 📁 src
@@ -614,566 +356,813 @@ Password: Staff@123
 │   │   ├── 📄 AxiosAdmin.js
 │   │   ├── 📄 BannerApi.js
 │   │   ├── 📄 CinemasApi.js
+│   │   ├── 📄 ContactApi.js
 │   │   ├── 📄 DistributorApi.js
 │   │   ├── 📄 FoodAndDrinkApi.js
 │   │   ├── 📄 GenreApi.js
-│   │   ├── 📄 MembershipApi.js
 │   │   ├── 📄 MovieApi.js
 │   │   ├── 📄 MovieCastApi.js
-│   │   ├── 📄 MovieGenresApi.js
-│   │   ├── 📄 NotificationApi.js
+│   │   ├── 📄 NewApi.js
 │   │   ├── 📄 OrderApi.js
 │   │   ├── 📄 OrderDetailApi.js
 │   │   ├── 📄 PromotionApi.js
-│   │   ├── 📄 ReviewApi.js
 │   │   ├── 📄 RoleApi.js
-│   │   ├── 📄 RoomApi (1).js
 │   │   ├── 📄 RoomApi.js
 │   │   ├── 📄 ScheduleApi.js
 │   │   ├── 📄 SeatApi.js
 │   │   ├── 📄 ShowtimeApi.js
 │   │   ├── 📄 ShowtimeSeatApi.js
-│   │   ├── 📄 StaffApi.js
 │   │   ├── 📄 TicketApi.js
-│   │   ├── 📄 UserApi.js
-│   │   └── 📄 WishlistApi.js
+│   │   └── 📄 UserApi.js
 │   ├── 📁 assets
-│   │   ├── 📁 fonts
-│   │   │   ├── 📁 dropways
-│   │   │   │   ├── 🎨 dropways.css
-│   │   │   │   ├── 📄 dropways.eot
-│   │   │   │   ├── 🖼️ dropways.svg
-│   │   │   │   ├── 📄 dropways.ttf
-│   │   │   │   └── 📄 dropways.woff
-│   │   │   ├── 📁 font-awesome
-│   │   │   │   ├── 📁 css
-│   │   │   │   │   └── 🎨 font-awesome.css
-│   │   │   │   └── 📁 fonts
-│   │   │   │       ├── 📄 FontAwesome.otf
-│   │   │   │       ├── 📄 fontawesome-webfont.eot
-│   │   │   │       ├── 🖼️ fontawesome-webfont.svg
-│   │   │   │       ├── 📄 fontawesome-webfont.ttf
-│   │   │   │       ├── 📄 fontawesome-webfont.woff
-│   │   │   │       └── 📄 fontawesome-webfont.woff2
-│   │   │   ├── 📁 foundation-icons
-│   │   │   │   ├── 🎨 foundation-icons.css
-│   │   │   │   ├── 📄 foundation-icons.eot
-│   │   │   │   ├── 🖼️ foundation-icons.svg
-│   │   │   │   ├── 📄 foundation-icons.ttf
-│   │   │   │   └── 📄 foundation-icons.woff
-│   │   │   ├── 📁 ionicons-master
-│   │   │   │   ├── 📁 css
-│   │   │   │   │   └── 🎨 ionicons.css
-│   │   │   │   └── 📁 fonts
-│   │   │   │       ├── 📄 ionicons.eot
-│   │   │   │       ├── 🖼️ ionicons.svg
-│   │   │   │       ├── 📄 ionicons.ttf
-│   │   │   │       └── 📄 ionicons.woff
-│   │   │   └── 📁 themify-icons
-│   │   │       ├── 📁 fonts
-│   │   │       │   ├── 📄 themify.eot
-│   │   │       │   ├── 🖼️ themify.svg
-│   │   │       │   ├── 📄 themify.ttf
-│   │   │       │   └── 📄 themify.woff
-│   │   │       └── 🎨 themify-icons.css
-│   │   ├── 📁 icons
-│   │   ├── 📁 images
-│   │   │   ├── 📁 layout
-│   │   │   │   ├── 🖼️ header-dark.png
-│   │   │   │   ├── 🖼️ header-white.png
-│   │   │   │   ├── 🖼️ sidebar-dark.png
-│   │   │   │   └── 🖼️ sidebar-white.png
-│   │   │   ├── 🖼️ apple-touch-icon.png
-│   │   │   ├── 🖼️ banner-img.png
-│   │   │   ├── 🖼️ bannergau2.png
-│   │   │   ├── 🖼️ briefcase.svg
-│   │   │   ├── 🖼️ cancel.svg
-│   │   │   ├── 🖼️ caution-sign.png
-│   │   │   ├── 🖼️ chat-img1.jpg
-│   │   │   ├── 🖼️ chat-img2.jpg
-│   │   │   ├── 🖼️ check-mark-green.png
-│   │   │   ├── 🖼️ check-mark.png
-│   │   │   ├── 🖼️ chrome.png
-│   │   │   ├── 🖼️ coming-soon.png
-│   │   │   ├── 🖼️ cross.png
-│   │   │   ├── 🖼️ demo.svg
-│   │   │   ├── 🖼️ deskapp-logo-white.svg
-│   │   │   ├── 🖼️ deskapp-logo.svg
-│   │   │   ├── 🖼️ edge.png
-│   │   │   ├── 🖼️ favicon-16x16.png
-│   │   │   ├── 🖼️ favicon-32x32.png
-│   │   │   ├── 🖼️ firefox.png
-│   │   │   ├── 🖼️ forgot-password.png
-│   │   │   ├── 🖼️ github.svg
-│   │   │   ├── 🖼️ icon-Cash.png
-│   │   │   ├── 🖼️ icon-debit.png
-│   │   │   ├── 🖼️ icon-online-wallet.png
-│   │   │   ├── 🖼️ img.jpg
-│   │   │   ├── 🖼️ img1.jpg
-│   │   │   ├── 🖼️ img2.jpg
-│   │   │   ├── 🖼️ img3.jpg
-│   │   │   ├── 🖼️ img4.jpg
-│   │   │   ├── 🖼️ img5.jpg
-│   │   │   ├── 🖼️ internet-explorer.png
-│   │   │   ├── 🖼️ login-page-img.png
-│   │   │   ├── 🖼️ logo-icon.png
-│   │   │   ├── 🖼️ menu-icon.svg
-│   │   │   ├── 🖼️ modal-img1.jpg
-│   │   │   ├── 🖼️ modal-img2.jpg
-│   │   │   ├── 🖼️ modal-img3.jpg
-│   │   │   ├── 🖼️ new-loader.gif
-│   │   │   ├── 🖼️ opera.png
-│   │   │   ├── 🖼️ page-icon.svg
-│   │   │   ├── 🖼️ person.svg
-│   │   │   ├── 🖼️ photo1.jpg
-│   │   │   ├── 🖼️ photo2.jpg
-│   │   │   ├── 🖼️ photo3.jpg
-│   │   │   ├── 🖼️ photo4.jpg
-│   │   │   ├── 🖼️ photo5.jpg
-│   │   │   ├── 🖼️ photo6.jpg
-│   │   │   ├── 🖼️ photo7.jpg
-│   │   │   ├── 🖼️ photo8.jpg
-│   │   │   ├── 🖼️ photo9.jpg
-│   │   │   ├── 🖼️ plyr.svg
-│   │   │   ├── 🖼️ product-1.jpg
-│   │   │   ├── 🖼️ product-2.jpg
-│   │   │   ├── 🖼️ product-3.jpg
-│   │   │   ├── 🖼️ product-4.jpg
-│   │   │   ├── 🖼️ product-5.jpg
-│   │   │   ├── 🖼️ product-img1.jpg
-│   │   │   ├── 🖼️ product-img2.jpg
-│   │   │   ├── 🖼️ product-img3.jpg
-│   │   │   ├── 🖼️ product-img4.jpg
-│   │   │   ├── 🖼️ profile-photo.jpg
-│   │   │   ├── 🖼️ register-page-img.png
-│   │   │   ├── 🖼️ safari.png
-│   │   │   ├── 🖼️ success.png
-│   │   │   ├── 🖼️ tick.svg
-│   │   │   ├── 🖼️ upload-file-img.jpg
-│   │   │   └── 🖼️ wave.png
-│   │   ├── 📁 plugins
-│   │   │   ├── 📁 air-datepicker
-│   │   │   ├── 📁 apexcharts
-│   │   │   │   └── 🎨 apexcharts.css
-│   │   │   ├── 📁 bootstrap
-│   │   │   │   ├── 🎨 bootstrap.css
-│   │   │   │   └── 📄 bootstrap.js
-│   │   │   ├── 📁 bootstrap-select
-│   │   │   │   ├── 📁 js
-│   │   │   │   │   ├── 📁 i18n
-│   │   │   │   │   │   ├── 📄 defaults-ar_AR.js
-│   │   │   │   │   │   ├── 📄 defaults-bg_BG.js
-│   │   │   │   │   │   ├── 📄 defaults-cro_CRO.js
-│   │   │   │   │   │   ├── 📄 defaults-cs_CZ.js
-│   │   │   │   │   │   ├── 📄 defaults-da_DK.js
-│   │   │   │   │   │   ├── 📄 defaults-de_DE.js
-│   │   │   │   │   │   ├── 📄 defaults-en_US.js
-│   │   │   │   │   │   ├── 📄 defaults-es_CL.js
-│   │   │   │   │   │   ├── 📄 defaults-es_ES.js
-│   │   │   │   │   │   ├── 📄 defaults-et_EE.js
-│   │   │   │   │   │   ├── 📄 defaults-eu.js
-│   │   │   │   │   │   ├── 📄 defaults-fa_IR.js
-│   │   │   │   │   │   ├── 📄 defaults-fi_FI.js
-│   │   │   │   │   │   ├── 📄 defaults-fr_FR.js
-│   │   │   │   │   │   ├── 📄 defaults-hu_HU.js
-│   │   │   │   │   │   ├── 📄 defaults-id_ID.js
-│   │   │   │   │   │   ├── 📄 defaults-it_IT.js
-│   │   │   │   │   │   ├── 📄 defaults-ja_JP.js
-│   │   │   │   │   │   ├── 📄 defaults-kh_KM.js
-│   │   │   │   │   │   ├── 📄 defaults-ko_KR.js
-│   │   │   │   │   │   ├── 📄 defaults-lt_LT.js
-│   │   │   │   │   │   ├── 📄 defaults-nb_NO.js
-│   │   │   │   │   │   ├── 📄 defaults-nl_NL.js
-│   │   │   │   │   │   ├── 📄 defaults-pl_PL.js
-│   │   │   │   │   │   ├── 📄 defaults-pt_BR.js
-│   │   │   │   │   │   ├── 📄 defaults-pt_PT.js
-│   │   │   │   │   │   ├── 📄 defaults-ro_RO.js
-│   │   │   │   │   │   ├── 📄 defaults-ru_RU.js
-│   │   │   │   │   │   ├── 📄 defaults-sk_SK.js
-│   │   │   │   │   │   ├── 📄 defaults-sl_SI.js
-│   │   │   │   │   │   ├── 📄 defaults-sv_SE.js
-│   │   │   │   │   │   ├── 📄 defaults-tr_TR.js
-│   │   │   │   │   │   ├── 📄 defaults-ua_UA.js
-│   │   │   │   │   │   ├── 📄 defaults-vi_VN.js
-│   │   │   │   │   │   ├── 📄 defaults-zh_CN.js
-│   │   │   │   │   │   └── 📄 defaults-zh_TW.js
-│   │   │   │   │   ├── ⚙️ .jshintrc
-│   │   │   │   │   └── 📄 bootstrap-select.js
-│   │   │   │   ├── 🎨 bootstrap-select.css
-│   │   │   │   ├── 📄 bootstrap-select.js
-│   │   │   │   └── 🌐 test.html
-│   │   │   ├── 📁 bootstrap-tagsinput
-│   │   │   │   ├── 🎨 bootstrap-tagsinput.css
-│   │   │   │   └── 📄 bootstrap-tagsinput.js
-│   │   │   ├── 📁 bootstrap-touchspin
-│   │   │   │   ├── 🎨 jquery.bootstrap-touchspin.css
-│   │   │   │   └── 📄 jquery.bootstrap-touchspin.js
-│   │   │   ├── 📁 bootstrap-wysihtml5-master
-│   │   │   │   ├── 🎨 bootstrap-wysihtml5.css
-│   │   │   │   └── 📄 bootstrap-wysihtml5.js
-│   │   │   ├── 📁 cropperjs
-│   │   │   ├── 📁 datatables
-│   │   │   │   ├── 📁 css
-│   │   │   │   ├── 📁 images
-│   │   │   │   │   ├── 🖼️ sort_asc.png
-│   │   │   │   │   ├── 🖼️ sort_asc_disabled.png
-│   │   │   │   │   ├── 🖼️ sort_both.png
-│   │   │   │   │   ├── 🖼️ sort_desc.png
-│   │   │   │   │   └── 🖼️ sort_desc_disabled.png
-│   │   │   │   └── 📁 js
-│   │   │   │       └── 📄 vfs_fonts.js
-│   │   │   ├── 📁 dropzone
-│   │   │   │   └── 📁 src
-│   │   │   │       ├── 🎨 basic.scss
-│   │   │   │       ├── 🎨 dropzone.css
-│   │   │   │       ├── 📄 dropzone.js
-│   │   │   │       └── 🎨 dropzone.scss
-│   │   │   ├── 📁 fancybox
-│   │   │   ├── 📁 fullcalendar
-│   │   │   │   └── 🎨 fullcalendar.css
-│   │   │   ├── 📁 highcharts-6.0.7
-│   │   │   │   └── 📁 code
-│   │   │   │       ├── 📄 highcharts-3d.js
-│   │   │   │       ├── 📄 highcharts-3d.src.js
-│   │   │   │       ├── 📄 highcharts-more.js
-│   │   │   │       ├── 📄 highcharts-more.src.js
-│   │   │   │       ├── 📄 highcharts.js
-│   │   │   │       └── 📄 highcharts.src.js
-│   │   │   ├── 📁 highlight.js
-│   │   │   │   └── 📁 src
-│   │   │   │       ├── 📁 styles
-│   │   │   │       │   └── 🎨 solarized-dark.css
-│   │   │   │       ├── 📄 highlight.js
-│   │   │   │       └── 📄 highlight.pack.js
-│   │   │   ├── 📁 ion-rangeslider
-│   │   │   │   ├── 📁 css
-│   │   │   │   │   └── 🎨 ion.rangeSlider.css
-│   │   │   │   └── 📁 js
-│   │   │   ├── 📁 jQuery-Knob-master
-│   │   │   ├── 📁 jquery-asColor
-│   │   │   ├── 📁 jquery-asColorPicker
-│   │   │   │   └── 📄 jquery-asColorPicker.js
-│   │   │   ├── 📁 jquery-asGradient
-│   │   │   ├── 📁 jquery-steps
-│   │   │   │   ├── 🎨 jquery.steps.css
-│   │   │   │   └── 📄 jquery.steps.js
-│   │   │   ├── 📁 jvectormap
-│   │   │   │   ├── 🎨 jquery-jvectormap-2.0.3.css
-│   │   │   │   ├── 📄 jquery-jvectormap-world-mill-en.js
-│   │   │   │   ├── 🎨 jquery-jvectormap.css
-│   │   │   │   └── 📄 jquery-jvectormap.js
-│   │   │   ├── 📁 malihu-custom-scrollbar-plugin-master
-│   │   │   │   ├── 🎨 jquery.mCustomScrollbar.css
-│   │   │   │   └── 📄 jquery.mCustomScrollbar.js
-│   │   │   ├── 📁 plyr
-│   │   │   ├── 📁 select2
-│   │   │   ├── 📁 slick
-│   │   │   │   └── 🎨 slick.css
-│   │   │   ├── 📁 sweetalert2
-│   │   │   │   ├── 📄 sweet-alert.init.js
-│   │   │   │   ├── 📄 sweetalert2.all.js
-│   │   │   │   └── 🎨 sweetalert2.css
-│   │   │   ├── 📁 switchery
-│   │   │   ├── 📁 timedropper
-│   │   │   │   ├── 🎨 timedropper.css
-│   │   │   │   └── 📄 timedropper.js
-│   │   │   └── 📁 wysihtml5-master
-│   │   ├── 📁 scripts
-│   │   │   ├── 📄 moment.js
-│   │   │   └── 📄 setting.js
-│   │   └── 📁 styles
-│   │       ├── 🎨 media.css
-│   │       ├── 🎨 style.css
-│   │       └── 🎨 theme.css
+│   │   ├── 📁 css
+│   │   │   ├── 🎨 App.css
+│   │   │   ├── 🎨 Contact.css
+│   │   │   ├── 🎨 Login.css
+│   │   │   └── 🎨 MiniCalendar.css
+│   │   └── 📁 img
+│   │       ├── 📁 auth
+│   │       │   ├── 🖼️ auth.png
+│   │       │   └── 🖼️ banner.png
+│   │       ├── 📁 avatars
+│   │       │   ├── 🖼️ avatar1.png
+│   │       │   ├── 🖼️ avatar10.png
+│   │       │   ├── 🖼️ avatar2.png
+│   │       │   ├── 🖼️ avatar3.png
+│   │       │   ├── 🖼️ avatar4.png
+│   │       │   ├── 🖼️ avatar5.png
+│   │       │   ├── 🖼️ avatar6.png
+│   │       │   ├── 🖼️ avatar7.png
+│   │       │   ├── 🖼️ avatar8.png
+│   │       │   ├── 🖼️ avatar9.png
+│   │       │   └── 🖼️ avatarSimmmple.png
+│   │       ├── 📁 dashboards
+│   │       │   ├── 🖼️ Debit.png
+│   │       │   ├── 🖼️ balanceImg.png
+│   │       │   ├── 🖼️ elipse-light.png
+│   │       │   ├── 🖼️ fakeGraph.png
+│   │       │   └── 🖼️ usa.png
+│   │       ├── 📁 layout
+│   │       │   ├── 🖼️ Navbar.png
+│   │       │   └── 🖼️ logoWhite.png
+│   │       ├── 📁 nfts
+│   │       │   ├── 🖼️ Nft1.png
+│   │       │   ├── 🖼️ Nft2.png
+│   │       │   ├── 🖼️ Nft3.png
+│   │       │   ├── 🖼️ Nft4.png
+│   │       │   ├── 🖼️ Nft5.png
+│   │       │   ├── 🖼️ Nft6.png
+│   │       │   └── 🖼️ NftBanner1.png
+│   │       ├── 📁 profile
+│   │       │   ├── 🖼️ Project1.png
+│   │       │   ├── 🖼️ Project2.png
+│   │       │   └── 🖼️ Project3.png
+│   │       ├── 🖼️ Announcement.png
+│   │       ├── 🖼️ AnnouncementWinter.png
+│   │       ├── 🖼️ banner12.png
+│   │       ├── 🖼️ bannergau21.png
+│   │       └── 🖼️ br.png
 │   ├── 📁 components
-│   │   ├── 📁 common
-│   │   └── 📁 ui
-│   ├── 📁 config
-│   ├── 📁 constants
-│   ├── 📁 contexts
-│   ├── 📁 hooks
-│   ├── 📁 layouts
-│   │   ├── 📄 Footer.js
-│   │   ├── 📄 Header.js
-│   │   ├── 📄 Loader.js
-│   │   └── 📄 MainLayout.js
-│   ├── 📁 pages
-│   │   ├── 📁 Banner
-│   │   │   ├── 📄 delete.js
-│   │   │   ├── 📄 edit.js
-│   │   │   ├── 📄 index.js
-│   │   │   └── 📄 show.js
-│   │   ├── 📁 Cinemas
-│   │   │   ├── 📄 delete.js
-│   │   │   ├── 📄 edit.js
-│   │   │   ├── 📄 index.js
-│   │   │   └── 📄 show.js
-│   │   ├── 📁 Distributor
-│   │   │   ├── 📄 delete.js
-│   │   │   ├── 📄 edit.js
-│   │   │   ├── 📄 index.js
-│   │   │   └── 📄 show.js
-│   │   ├── 📁 Genres
-│   │   │   ├── 📄 delete.js
-│   │   │   ├── 📄 edit.js
-│   │   │   ├── 📄 index.js
-│   │   │   └── 📄 show.js
-│   │   ├── 📁 Membership
-│   │   │   ├── 📄 delete.js
-│   │   │   ├── 📄 edit.js
-│   │   │   ├── 📄 index.js
-│   │   │   └── 📄 show.js
-│   │   ├── 📁 Movie
-│   │   │   ├── 📄 delete.js
-│   │   │   ├── 📄 edit.js
-│   │   │   ├── 📄 index.js
-│   │   │   └── 📄 show.js
-│   │   ├── 📁 MovieCast
-│   │   │   ├── 📄 delete.js
-│   │   │   ├── 📄 edit.js
-│   │   │   ├── 📄 index.js
-│   │   │   └── 📄 show.js
-│   │   ├── 📁 MovieGenres
-│   │   │   ├── 📄 delete.js
-│   │   │   ├── 📄 edit.js
-│   │   │   ├── 📄 index.js
-│   │   │   └── 📄 show.js
-│   │   ├── 📁 Notifications
-│   │   │   ├── 📄 delete.js
-│   │   │   ├── 📄 edit.js
-│   │   │   ├── 📄 index.js
-│   │   │   └── 📄 show.js
-│   │   ├── 📁 Order
-│   │   │   ├── 📄 delete.js
-│   │   │   ├── 📄 edit.js
-│   │   │   ├── 📄 index.js
-│   │   │   └── 📄 show.js
-│   │   ├── 📁 OrderDetail
-│   │   │   ├── 📄 delete.js
-│   │   │   ├── 📄 edit.js
-│   │   │   ├── 📄 index.js
-│   │   │   └── 📄 show.js
-│   │   ├── 📁 Promotions
-│   │   │   ├── 📄 delete.js
-│   │   │   ├── 📄 edit.js
-│   │   │   ├── 📄 index.js
-│   │   │   └── 📄 show.js
-│   │   ├── 📁 Review
-│   │   │   ├── 📄 delete.js
-│   │   │   ├── 📄 edit.js
-│   │   │   ├── 📄 index.js
-│   │   │   └── 📄 show.js
-│   │   ├── 📁 Role
-│   │   │   ├── 📄 delete.js
-│   │   │   ├── 📄 edit.js
-│   │   │   ├── 📄 index.js
-│   │   │   └── 📄 show.js
-│   │   ├── 📁 Room
-│   │   │   ├── 📄 delete.js
-│   │   │   ├── 📄 edit.js
-│   │   │   ├── 📄 index.js
-│   │   │   └── 📄 show.js
-│   │   ├── 📁 Schedule
-│   │   │   ├── 📄 delete.js
-│   │   │   ├── 📄 edit.js
-│   │   │   ├── 📄 index.js
-│   │   │   └── 📄 show.js
-│   │   ├── 📁 Showtime
-│   │   │   ├── 📄 delete.js
-│   │   │   ├── 📄 edit.js
-│   │   │   ├── 📄 index.js
-│   │   │   └── 📄 show.js
-│   │   ├── 📁 ShowtimeSeats
-│   │   │   ├── 📄 delete.js
-│   │   │   ├── 📄 edit.js
-│   │   │   ├── 📄 index.js
-│   │   │   └── 📄 show.js
-│   │   ├── 📁 Staff
-│   │   │   ├── 📄 delete.js
-│   │   │   ├── 📄 edit.js
-│   │   │   ├── 📄 index.js
-│   │   │   └── 📄 show.js
-│   │   ├── 📁 Ticket
-│   │   │   ├── 📄 delete.js
-│   │   │   ├── 📄 edit.js
-│   │   │   ├── 📄 index.js
-│   │   │   └── 📄 show.js
-│   │   ├── 📁 User
-│   │   │   ├── 📄 delete.js
-│   │   │   ├── 📄 edit.js
-│   │   │   ├── 📄 index.js
-│   │   │   └── 📄 show.js
-│   │   ├── 📁 Wishlist
-│   │   │   ├── 📄 delete.js
-│   │   │   ├── 📄 edit.js
-│   │   │   ├── 📄 index.js
-│   │   │   └── 📄 show.js
-│   │   ├── 📄 home.js
-│   │   ├── 📄 home2.js
-│   │   ├── 📄 login.js
-│   │   ├── 📄 logout.js
-│   │   ├── 📄 profile.js
-│   │   └── 📄 register.js
-│   ├── 📁 routes
-│   │   ├── 📄 AdminRoutes.js
+│   │   ├── 📁 calendar
+│   │   │   └── 📄 MiniCalendar.js
+│   │   ├── 📁 card
+│   │   │   ├── 📄 Card.js
+│   │   │   ├── 📄 Mastercard.js
+│   │   │   ├── 📄 Member.js
+│   │   │   ├── 📄 MiniStatistics.js
+│   │   │   └── 📄 NFT.js
+│   │   ├── 📁 charts
+│   │   │   ├── 📄 BarChart.js
+│   │   │   ├── 📄 LineAreaChart.js
+│   │   │   ├── 📄 LineChart.js
+│   │   │   └── 📄 PieChart.js
+│   │   ├── 📁 dataDispaly
+│   │   │   └── 📄 TimelineRow.js
+│   │   ├── 📁 fields
+│   │   │   ├── 📄 InputField.js
+│   │   │   └── 📄 SwitchField.js
+│   │   ├── 📁 fixedPlugin
+│   │   │   └── 📄 FixedPlugin.js
+│   │   ├── 📁 footer
+│   │   │   ├── 📄 FooterAdmin.js
+│   │   │   └── 📄 FooterAuth.js
+│   │   ├── 📁 icons
+│   │   │   ├── 📄 IconBox.js
+│   │   │   └── 📄 Icons.js
+│   │   ├── 📁 menu
+│   │   │   ├── 📄 ItemContent.js
+│   │   │   ├── 📄 MainMenu.js
+│   │   │   └── 📄 TransparentMenu.js
+│   │   ├── 📁 navbar
+│   │   │   ├── 📁 searchBar
+│   │   │   │   └── 📄 SearchBar.js
+│   │   │   ├── 📄 NavbarAdmin.js
+│   │   │   ├── 📄 NavbarAuth.js
+│   │   │   ├── 📄 NavbarExample.js
+│   │   │   ├── 📄 NavbarLinksAdmin.js
+│   │   │   └── 📄 NavbarRTL.js
+│   │   ├── 📁 rtlProvider
+│   │   │   └── 📄 RtlProvider.js
+│   │   ├── 📁 scroll
+│   │   │   └── 📄 ScrollToTop.js
+│   │   ├── 📁 scrollbar
+│   │   │   └── 📄 Scrollbar.js
+│   │   ├── 📁 separator
+│   │   │   └── 📄 Separator.jsx
+│   │   ├── 📁 sidebar
+│   │   │   ├── 📁 components
+│   │   │   │   ├── 📄 Brand.js
+│   │   │   │   ├── 📄 Content.js
+│   │   │   │   └── 📄 Links.js
+│   │   │   └── 📄 Sidebar.js
 │   │   └── 📄 PrivateRoute.js
-│   ├── 📁 store
-│   ├── 📁 styles
-│   │   ├── 📁 Role
-│   │   │   ├── 🎨 Edit.css
-│   │   │   └── 🎨 Show.css
-│   │   ├── 📁 wishlist
-│   │   │   └── 🎨 Show.css
-│   │   ├── 🎨 Edit.css
-│   │   ├── 🎨 Show.css
-│   │   └── 🎨 User.css
-│   ├── 📁 utils
-│   │   └── 📄 auth.js
-│   ├── 📁 vendors
-│   │   ├── 📁 fonts
-│   │   │   ├── 📁 font-awesome
-│   │   │   │   └── 📁 css
-│   │   │   │       └── 🎨 font-awesome.css
-│   │   │   ├── 📁 ionicons-master
-│   │   │   │   └── 📁 css
-│   │   │   │       └── 🎨 ionicons.css
-│   │   │   ├── 📁 themify-icons
-│   │   │   │   └── 🎨 themify-icons.css
-│   │   │   ├── 📄 FontAwesome.otf
-│   │   │   ├── 🎨 dropways.css
-│   │   │   ├── 📄 dropways.eot
-│   │   │   ├── 🖼️ dropways.svg
-│   │   │   ├── 📄 dropways.ttf
-│   │   │   ├── 📄 dropways.woff
-│   │   │   ├── 📄 fontawesome-webfont.eot
-│   │   │   ├── 🖼️ fontawesome-webfont.svg
-│   │   │   ├── 📄 fontawesome-webfont.ttf
-│   │   │   ├── 📄 fontawesome-webfont.woff
-│   │   │   ├── 📄 fontawesome-webfont.woff2
-│   │   │   ├── 🎨 foundation-icons.css
-│   │   │   ├── 📄 foundation-icons.eot
-│   │   │   ├── 🖼️ foundation-icons.svg
-│   │   │   ├── 📄 foundation-icons.ttf
-│   │   │   ├── 📄 foundation-icons.woff
-│   │   │   ├── 📄 ionicons.eot
-│   │   │   ├── 🖼️ ionicons.svg
-│   │   │   ├── 📄 ionicons.ttf
-│   │   │   ├── 📄 ionicons.woff
-│   │   │   ├── 📄 themify.eot
-│   │   │   ├── 🖼️ themify.svg
-│   │   │   ├── 📄 themify.ttf
-│   │   │   └── 📄 themify.woff
-│   │   ├── 📁 images
-│   │   │   ├── 📁 layout
-│   │   │   │   ├── 🖼️ header-dark.png
-│   │   │   │   ├── 🖼️ header-white.png
-│   │   │   │   ├── 🖼️ sidebar-dark.png
-│   │   │   │   └── 🖼️ sidebar-white.png
-│   │   │   ├── 🖼️ apple-touch-icon.png
-│   │   │   ├── 🖼️ banner-img.png
-│   │   │   ├── 🖼️ bannergau.png
-│   │   │   ├── 🖼️ bannergau21.png
-│   │   │   ├── 🖼️ blue-logo.png
-│   │   │   ├── 🖼️ briefcase.svg
-│   │   │   ├── 🖼️ cancel.svg
-│   │   │   ├── 🖼️ caution-sign.png
-│   │   │   ├── 🖼️ chat-img1.jpg
-│   │   │   ├── 🖼️ chat-img2.jpg
-│   │   │   ├── 🖼️ check-mark-green.png
-│   │   │   ├── 🖼️ check-mark.png
-│   │   │   ├── 🖼️ chrome.png
-│   │   │   ├── 🖼️ coming-soon.png
-│   │   │   ├── 🖼️ cross.png
-│   │   │   ├── 🖼️ demo.svg
-│   │   │   ├── 🖼️ deskapp-logo-white.svg
-│   │   │   ├── 🖼️ deskapp-logo.svg
-│   │   │   ├── 🖼️ edge.png
-│   │   │   ├── 🖼️ favicon-16x16.png
-│   │   │   ├── 🖼️ favicon-32x32.png
-│   │   │   ├── 🖼️ firefox.png
-│   │   │   ├── 🖼️ forgot-password.png
-│   │   │   ├── 🖼️ gau1.jpg
-│   │   │   ├── 🖼️ github.svg
-│   │   │   ├── 🖼️ icon-Cash.png
-│   │   │   ├── 🖼️ icon-debit.png
-│   │   │   ├── 🖼️ icon-online-wallet.png
-│   │   │   ├── 🖼️ img.jpg
-│   │   │   ├── 🖼️ img1.jpg
-│   │   │   ├── 🖼️ img2.jpg
-│   │   │   ├── 🖼️ img3.jpg
-│   │   │   ├── 🖼️ img4.jpg
-│   │   │   ├── 🖼️ img5.jpg
-│   │   │   ├── 🖼️ internet-explorer.png
-│   │   │   ├── 🖼️ login-img.png
-│   │   │   ├── 🖼️ login-page-img.png
-│   │   │   ├── 🖼️ logo-icon.png
-│   │   │   ├── 🖼️ menu-icon.svg
-│   │   │   ├── 🖼️ modal-img1.jpg
-│   │   │   ├── 🖼️ modal-img2.jpg
-│   │   │   ├── 🖼️ modal-img3.jpg
-│   │   │   ├── 🖼️ new-loader.gif
-│   │   │   ├── 🖼️ opera.png
-│   │   │   ├── 🖼️ page-icon.svg
-│   │   │   ├── 🖼️ person.svg
-│   │   │   ├── 🖼️ photo1.jpg
-│   │   │   ├── 🖼️ photo2.jpg
-│   │   │   ├── 🖼️ photo3.jpg
-│   │   │   ├── 🖼️ photo4.jpg
-│   │   │   ├── 🖼️ photo5.jpg
-│   │   │   ├── 🖼️ photo6.jpg
-│   │   │   ├── 🖼️ photo7.jpg
-│   │   │   ├── 🖼️ photo8.jpg
-│   │   │   ├── 🖼️ photo9.jpg
-│   │   │   ├── 🖼️ plyr.svg
-│   │   │   ├── 🖼️ product-1.jpg
-│   │   │   ├── 🖼️ product-2.jpg
-│   │   │   ├── 🖼️ product-3.jpg
-│   │   │   ├── 🖼️ product-4.jpg
-│   │   │   ├── 🖼️ product-5.jpg
-│   │   │   ├── 🖼️ product-img1.jpg
-│   │   │   ├── 🖼️ product-img2.jpg
-│   │   │   ├── 🖼️ product-img3.jpg
-│   │   │   ├── 🖼️ product-img4.jpg
-│   │   │   ├── 🖼️ profile-photo.jpg
-│   │   │   ├── 🖼️ register-page-img.png
-│   │   │   ├── 🖼️ safari.png
-│   │   │   ├── 🖼️ success.png
-│   │   │   ├── 🖼️ tick.svg
-│   │   │   ├── 🖼️ upload-file-img.jpg
-│   │   │   └── 🖼️ wave.png
-│   │   ├── 📁 scripts
-│   │   │   ├── 📄 advanced-components.js
-│   │   │   ├── 📄 apexcharts-setting.js
-│   │   │   ├── 📄 calendar-setting.js
-│   │   │   ├── 📄 colorpicker.js
-│   │   │   ├── 📄 core.js
-│   │   │   ├── 📄 dashboard.js
-│   │   │   ├── 📄 dashboard2.js
-│   │   │   ├── 📄 datatable-setting.js
-│   │   │   ├── 📄 highchart-setting.js
-│   │   │   ├── 📄 jvectormap-setting.js
-│   │   │   ├── 📄 knob-chart-setting.js
-│   │   │   ├── 📄 layout-settings.js
-│   │   │   ├── 📄 process.js
-│   │   │   ├── 📄 range-slider-setting.js
-│   │   │   ├── 📄 script.js
-│   │   │   └── 📄 steps-setting.js
-│   │   └── 📁 styles
-│   │       ├── 🎨 core.css
-│   │       ├── 🎨 icon-font.css
-│   │       └── 🎨 style.css
-│   ├── 🎨 App.css
+│   ├── 📁 contexts
+│   │   └── 📄 SidebarContext.js
+│   ├── 📁 hooks
+│   │   └── 📄 useServerPagination.js
+│   ├── 📁 layouts
+│   │   ├── 📁 admin
+│   │   │   └── 📄 index.js
+│   │   ├── 📁 auth
+│   │   │   ├── 📄 Default.js
+│   │   │   └── 📄 index.js
+│   │   └── 📄 Loader.jsx
+│   ├── 📁 theme
+│   │   ├── 📁 additions
+│   │   │   └── 📁 card
+│   │   │       └── 📄 card.js
+│   │   ├── 📁 components
+│   │   │   ├── 📄 badge.js
+│   │   │   ├── 📄 button.js
+│   │   │   ├── 📄 input.js
+│   │   │   ├── 📄 link.js
+│   │   │   ├── 📄 progress.js
+│   │   │   ├── 📄 slider.js
+│   │   │   ├── 📄 switch.js
+│   │   │   └── 📄 textarea.js
+│   │   ├── 📁 foundations
+│   │   │   └── 📄 breakpoints.js
+│   │   ├── 📄 styles.js
+│   │   └── 📄 theme.js
+│   ├── 📁 variables
+│   │   └── 📄 charts.js
+│   ├── 📁 views
+│   │   ├── 📁 admin
+│   │   │   ├── 📁 LogHeThong
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📄 Banner.js
+│   │   │   │   │   ├── 📄 HistoryItem.js
+│   │   │   │   │   └── 📄 TableTopCreators.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 tableColumnsTopCreators.js
+│   │   │   │   │   └── ⚙️ tableDataTopCreators.json
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 default
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📄 CheckTable.js
+│   │   │   │   │   ├── 📄 ComplexTable.js
+│   │   │   │   │   ├── 📄 DailyTraffic.js
+│   │   │   │   │   ├── 📄 PieCard.js
+│   │   │   │   │   ├── 📄 Tasks.js
+│   │   │   │   │   ├── 📄 TotalSpent.js
+│   │   │   │   │   ├── 📄 UserActivity.js
+│   │   │   │   │   └── 📄 WeeklyRevenue.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 columnsData.js
+│   │   │   │   │   ├── ⚙️ tableDataCheck.json
+│   │   │   │   │   └── ⚙️ tableDataComplex.json
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 hotrokhachhang
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📁 shared
+│   │   │   │   │   │   ├── 📄 SectionTitle.jsx
+│   │   │   │   │   │   ├── 📄 StatCard.jsx
+│   │   │   │   │   │   ├── 📄 StatusBadge.jsx
+│   │   │   │   │   │   └── 📄 animations.js
+│   │   │   │   │   ├── 📄 AddContactModal.jsx
+│   │   │   │   │   ├── 📄 Banner.js
+│   │   │   │   │   ├── 📄 ContactCard.jsx
+│   │   │   │   │   ├── 📄 ContactDetail.jsx
+│   │   │   │   │   ├── 📄 ContactList.jsx
+│   │   │   │   │   ├── 📄 ContactProcess.jsx
+│   │   │   │   │   ├── 📄 ContactRow.jsx
+│   │   │   │   │   ├── 📄 FilterDrawer.jsx
+│   │   │   │   │   ├── 📄 HistoryItem.js
+│   │   │   │   │   ├── 📄 PageHeader.jsx
+│   │   │   │   │   ├── 📄 StatsRow.jsx
+│   │   │   │   │   └── 📄 TableTopCreators.js
+│   │   │   │   ├── 📁 hooks
+│   │   │   │   │   └── 📄 useContact.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 tableColumnsTopCreators.js
+│   │   │   │   │   └── ⚙️ tableDataTopCreators.json
+│   │   │   │   ├── 📄 constants.js
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 profile
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   └── 📄 trangcanhan.js
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 quanlybanner
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📁 shared
+│   │   │   │   │   │   ├── 📄 LinkBadge.jsx
+│   │   │   │   │   │   ├── 📄 SectionTitle.jsx
+│   │   │   │   │   │   ├── 📄 StatCard.jsx
+│   │   │   │   │   │   ├── 📄 StatusBadge.jsx
+│   │   │   │   │   │   └── 📄 animations.js
+│   │   │   │   │   ├── 📄 Banner.js
+│   │   │   │   │   ├── 📄 BannerCard.jsx
+│   │   │   │   │   ├── 📄 BannerDetail.jsx
+│   │   │   │   │   ├── 📄 BannerForm.jsx
+│   │   │   │   │   ├── 📄 BannerList.jsx
+│   │   │   │   │   ├── 📄 BannerRow.jsx
+│   │   │   │   │   ├── 📄 ConfirmDeleteModal.jsx
+│   │   │   │   │   ├── 📄 HistoryItem.js
+│   │   │   │   │   ├── 📄 ImageUploadButton.jsx
+│   │   │   │   │   └── 📄 TableTopCreators.js
+│   │   │   │   ├── 📁 hooks
+│   │   │   │   │   └── 📄 useDragSort.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 data.js
+│   │   │   │   │   ├── 📄 tableColumnsTopCreators.js
+│   │   │   │   │   └── ⚙️ tableDataTopCreators.json
+│   │   │   │   ├── 📄 constants.js
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 quanlycombo
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📁 shared
+│   │   │   │   │   │   ├── 📄 SectionTitle.jsx
+│   │   │   │   │   │   ├── 📄 StatCard.jsx
+│   │   │   │   │   │   └── 📄 animations.js
+│   │   │   │   │   ├── 📄 Banner.js
+│   │   │   │   │   ├── 📄 DeleteModal.jsx
+│   │   │   │   │   ├── 📄 FoodItemCard.jsx
+│   │   │   │   │   ├── 📄 FoodItemForm.jsx
+│   │   │   │   │   ├── 📄 FoodItemRow.jsx
+│   │   │   │   │   ├── 📄 HistoryItem.js
+│   │   │   │   │   ├── 📄 TableTopCreators.js
+│   │   │   │   │   └── 📄 TagBadge.jsx
+│   │   │   │   ├── 📁 hooks
+│   │   │   │   │   └── 📄 useFoodDrink.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 tableColumnsTopCreators.js
+│   │   │   │   │   └── ⚙️ tableDataTopCreators.json
+│   │   │   │   ├── 📄 constants.js
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 quanlydanhgia
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📄 Banner.js
+│   │   │   │   │   ├── 📄 HistoryItem.js
+│   │   │   │   │   └── 📄 TableTopCreators.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 tableColumnsTopCreators.js
+│   │   │   │   │   └── ⚙️ tableDataTopCreators.json
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 quanlydanhsachyeuthich
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📄 Banner.js
+│   │   │   │   │   ├── 📄 HistoryItem.js
+│   │   │   │   │   └── 📄 TableTopCreators.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 tableColumnsTopCreators.js
+│   │   │   │   │   └── ⚙️ tableDataTopCreators.json
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 quanlydatve
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📄 Banner.js
+│   │   │   │   │   ├── 📄 HistoryItem.js
+│   │   │   │   │   └── 📄 TableTopCreators.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 tableColumnsTopCreators.js
+│   │   │   │   │   └── ⚙️ tableDataTopCreators.json
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 quanlydienvien
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📁 shared
+│   │   │   │   │   │   ├── 📄 RoleBadge.jsx
+│   │   │   │   │   │   ├── 📄 SectionTitle.jsx
+│   │   │   │   │   │   ├── 📄 StatCard.jsx
+│   │   │   │   │   │   ├── 📄 StatusBadge.jsx
+│   │   │   │   │   │   └── 📄 animations.js
+│   │   │   │   │   ├── 📄 Banner.js
+│   │   │   │   │   ├── 📄 ConfirmDeleteModal.jsx
+│   │   │   │   │   ├── 📄 DienVienCard.jsx
+│   │   │   │   │   ├── 📄 DienVienDetail.jsx
+│   │   │   │   │   ├── 📄 DienVienForm.jsx
+│   │   │   │   │   ├── 📄 DienVienList.jsx
+│   │   │   │   │   ├── 📄 DienVienRow.jsx
+│   │   │   │   │   ├── 📄 FilterDrawer.jsx
+│   │   │   │   │   ├── 📄 HistoryItem.js
+│   │   │   │   │   └── 📄 TableTopCreators.js
+│   │   │   │   ├── 📁 hooks
+│   │   │   │   │   └── 📄 useDienVien.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 tableColumnsTopCreators.js
+│   │   │   │   │   └── ⚙️ tableDataTopCreators.json
+│   │   │   │   ├── 📄 constants.js
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 quanlydonhang
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📁 shared
+│   │   │   │   │   │   ├── 📄 Badge.jsx
+│   │   │   │   │   │   ├── 📄 Btn.jsx
+│   │   │   │   │   │   ├── 📄 Panel.jsx
+│   │   │   │   │   │   ├── 📄 PayChip.jsx
+│   │   │   │   │   │   ├── 📄 SectionHead.jsx
+│   │   │   │   │   │   ├── 📄 Stat.jsx
+│   │   │   │   │   │   ├── 📄 StatusChip.jsx
+│   │   │   │   │   │   ├── 📄 Tag.jsx
+│   │   │   │   │   │   └── 📄 animations.js
+│   │   │   │   │   ├── 📄 Banner.js
+│   │   │   │   │   ├── 📄 FilterBar.jsx
+│   │   │   │   │   ├── 📄 HistoryItem.js
+│   │   │   │   │   ├── 📄 OrderCard.jsx
+│   │   │   │   │   ├── 📄 OrderDetail.jsx
+│   │   │   │   │   ├── 📄 OrderRow.jsx
+│   │   │   │   │   ├── 📄 PageHeader.jsx
+│   │   │   │   │   ├── 📄 RefundModal.jsx
+│   │   │   │   │   ├── 📄 StatsRow.jsx
+│   │   │   │   │   └── 📄 TableTopCreators.js
+│   │   │   │   ├── 📁 hooks
+│   │   │   │   │   └── 📄 useOrders.js
+│   │   │   │   ├── 📁 utils
+│   │   │   │   │   └── 📄 exportExcel.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 tableColumnsTopCreators.js
+│   │   │   │   │   └── ⚙️ tableDataTopCreators.json
+│   │   │   │   ├── 📄 constants.js
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 quanlyghe
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📁 shared
+│   │   │   │   │   │   ├── 📄 SectionTitle.jsx
+│   │   │   │   │   │   ├── 📄 StatCard.jsx
+│   │   │   │   │   │   └── 📄 animations.js
+│   │   │   │   │   ├── 📄 AddColumnModal.jsx
+│   │   │   │   │   ├── 📄 AddRowModal.jsx
+│   │   │   │   │   ├── 📄 Banner.js
+│   │   │   │   │   ├── 📄 CinemaSelector.jsx
+│   │   │   │   │   ├── 📄 DeleteConfirmDialog.jsx
+│   │   │   │   │   ├── 📄 EditSeatModal.jsx
+│   │   │   │   │   ├── 📄 HistoryItem.js
+│   │   │   │   │   ├── 📄 PageHeader.jsx
+│   │   │   │   │   ├── 📄 RoomCard.jsx
+│   │   │   │   │   ├── 📄 RoomTypeBadge.jsx
+│   │   │   │   │   ├── 📄 Seat.jsx
+│   │   │   │   │   ├── 📄 SeatMapView.jsx
+│   │   │   │   │   ├── 📄 StatCard.jsx
+│   │   │   │   │   ├── 📄 StatusDot.jsx
+│   │   │   │   │   └── 📄 TableTopCreators.js
+│   │   │   │   ├── 📁 hooks
+│   │   │   │   │   └── 📄 useSeatManagement.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 data.js
+│   │   │   │   │   ├── 📄 tableColumnsTopCreators.js
+│   │   │   │   │   └── ⚙️ tableDataTopCreators.json
+│   │   │   │   ├── 📄 constants.js
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 quanlyhoivien
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📄 Banner.js
+│   │   │   │   │   ├── 📄 HistoryItem.js
+│   │   │   │   │   └── 📄 TableTopCreators.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 tableColumnsTopCreators.js
+│   │   │   │   │   └── ⚙️ tableDataTopCreators.json
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 quanlykhuyenmai
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📁 shared
+│   │   │   │   │   │   ├── 📄 SectionTitle.jsx
+│   │   │   │   │   │   ├── 📄 StatCard.jsx
+│   │   │   │   │   │   ├── 📄 StatusBadge.jsx
+│   │   │   │   │   │   ├── 📄 TypeBadge.jsx
+│   │   │   │   │   │   └── 📄 animations.js
+│   │   │   │   │   ├── 📄 Banner.js
+│   │   │   │   │   ├── 📄 ConfirmDeleteModal.jsx
+│   │   │   │   │   ├── 📄 FilterDrawer.jsx
+│   │   │   │   │   ├── 📄 HistoryItem.js
+│   │   │   │   │   ├── 📄 KhuyenMaiCard.jsx
+│   │   │   │   │   ├── 📄 KhuyenMaiDetail.jsx
+│   │   │   │   │   ├── 📄 KhuyenMaiForm.jsx
+│   │   │   │   │   ├── 📄 KhuyenMaiList.jsx
+│   │   │   │   │   ├── 📄 KhuyenMaiRow.jsx
+│   │   │   │   │   └── 📄 TableTopCreators.js
+│   │   │   │   ├── 📁 hooks
+│   │   │   │   │   └── 📄 useKhuyenMai.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 tableColumnsTopCreators.js
+│   │   │   │   │   └── ⚙️ tableDataTopCreators.json
+│   │   │   │   ├── 📄 constants.js
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 quanlylichchieudinhky
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📁 mini
+│   │   │   │   │   │   ├── 📄 Btn.jsx
+│   │   │   │   │   │   ├── 📄 DayBtn.jsx
+│   │   │   │   │   │   ├── 📄 FInput.jsx
+│   │   │   │   │   │   ├── 📄 FSelect.jsx
+│   │   │   │   │   │   ├── 📄 Panel.jsx
+│   │   │   │   │   │   ├── 📄 Pill.jsx
+│   │   │   │   │   │   └── 📄 TimeBubble.jsx
+│   │   │   │   │   ├── 📁 shared
+│   │   │   │   │   │   ├── 📄 SectionTitle.jsx
+│   │   │   │   │   │   ├── 📄 StatCard.jsx
+│   │   │   │   │   │   ├── 📄 StatusBadge.jsx
+│   │   │   │   │   │   └── 📄 animations.js
+│   │   │   │   │   ├── 📄 Banner.js
+│   │   │   │   │   ├── 📄 BulkEditPriceModal.jsx
+│   │   │   │   │   ├── 📄 CloneWeekModal.jsx
+│   │   │   │   │   ├── 📄 ConfirmDeleteModal.jsx
+│   │   │   │   │   ├── 📄 FilterDrawer.jsx
+│   │   │   │   │   ├── 📄 HistoryItem.js
+│   │   │   │   │   ├── 📄 ScheduleCard.jsx
+│   │   │   │   │   ├── 📄 ScheduleDetail.jsx
+│   │   │   │   │   ├── 📄 ScheduleForm.jsx
+│   │   │   │   │   ├── 📄 ScheduleList.jsx
+│   │   │   │   │   ├── 📄 TableTopCreators.js
+│   │   │   │   │   └── 📄 WeekView.jsx
+│   │   │   │   ├── 📁 hooks
+│   │   │   │   │   └── 📄 useSchedule.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 tableColumnsTopCreators.js
+│   │   │   │   │   └── ⚙️ tableDataTopCreators.json
+│   │   │   │   ├── 📄 constants.js
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 quanlymenu
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📄 Banner.js
+│   │   │   │   │   ├── 📄 HistoryItem.js
+│   │   │   │   │   └── 📄 TableTopCreators.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 tableColumnsTopCreators.js
+│   │   │   │   │   └── ⚙️ tableDataTopCreators.json
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 quanlynguoidung
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📁 shared
+│   │   │   │   │   │   ├── 📄 SectionTitle.jsx
+│   │   │   │   │   │   ├── 📄 StatCard.jsx
+│   │   │   │   │   │   └── 📄 animations.js
+│   │   │   │   │   ├── 📄 AddUserModal.jsx
+│   │   │   │   │   ├── 📄 Banner.js
+│   │   │   │   │   ├── 📄 DeleteModal.jsx
+│   │   │   │   │   ├── 📄 HistoryItem.js
+│   │   │   │   │   ├── 📄 NotificationModal.jsx
+│   │   │   │   │   ├── 📄 RankBadge.jsx
+│   │   │   │   │   ├── 📄 StatusDot.jsx
+│   │   │   │   │   ├── 📄 TableTopCreators.js
+│   │   │   │   │   ├── 📄 UserDetail.jsx
+│   │   │   │   │   ├── 📄 UserForm.jsx
+│   │   │   │   │   └── 📄 UserRow.jsx
+│   │   │   │   ├── 📁 hooks
+│   │   │   │   │   └── 📄 useUser.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 tableColumnsTopCreators.js
+│   │   │   │   │   └── ⚙️ tableDataTopCreators.json
+│   │   │   │   ├── 📄 constants.js
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 quanlynhaphathanh
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📁 shared
+│   │   │   │   │   │   ├── 📄 RegionBadge.jsx
+│   │   │   │   │   │   ├── 📄 SectionTitle.jsx
+│   │   │   │   │   │   ├── 📄 StatCard.jsx
+│   │   │   │   │   │   ├── 📄 StatusBadge.jsx
+│   │   │   │   │   │   └── 📄 animations.js
+│   │   │   │   │   ├── 📄 Banner.js
+│   │   │   │   │   ├── 📄 ConfirmDeleteModal.jsx
+│   │   │   │   │   ├── 📄 FilterDrawer.jsx
+│   │   │   │   │   ├── 📄 HistoryItem.js
+│   │   │   │   │   ├── 📄 NhaPhatHanhCard.jsx
+│   │   │   │   │   ├── 📄 NhaPhatHanhDetail.jsx
+│   │   │   │   │   ├── 📄 NhaPhatHanhForm.jsx
+│   │   │   │   │   ├── 📄 NhaPhatHanhList.jsx
+│   │   │   │   │   ├── 📄 NhaPhatHanhRow.jsx
+│   │   │   │   │   └── 📄 TableTopCreators.js
+│   │   │   │   ├── 📁 hooks
+│   │   │   │   │   └── 📄 useNhaPhatHanh.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 tableColumnsTopCreators.js
+│   │   │   │   │   └── ⚙️ tableDataTopCreators.json
+│   │   │   │   ├── 📄 constants.js
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 quanlyphanquyen
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📁 shared
+│   │   │   │   │   │   ├── 📄 SectionTitle.jsx
+│   │   │   │   │   │   ├── 📄 StatCard.jsx
+│   │   │   │   │   │   └── 📄 animations.js
+│   │   │   │   │   ├── 📄 AssignRoleModal.jsx
+│   │   │   │   │   ├── 📄 Banner.js
+│   │   │   │   │   ├── 📄 DeleteModal.jsx
+│   │   │   │   │   ├── 📄 HistoryItem.js
+│   │   │   │   │   ├── 📄 RoleCard.jsx
+│   │   │   │   │   ├── 📄 RoleDetail.jsx
+│   │   │   │   │   ├── 📄 RoleForm.jsx
+│   │   │   │   │   ├── 📄 RoleRow.jsx
+│   │   │   │   │   ├── 📄 StatusPill.jsx
+│   │   │   │   │   └── 📄 TableTopCreators.js
+│   │   │   │   ├── 📁 hooks
+│   │   │   │   │   └── 📄 useRole.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 tableColumnsTopCreators.js
+│   │   │   │   │   └── ⚙️ tableDataTopCreators.json
+│   │   │   │   ├── 📄 constants.js
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 quanlyphim
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📁 shared
+│   │   │   │   │   │   ├── 📄 AgeBadge.jsx
+│   │   │   │   │   │   ├── 📄 SectionTitle.jsx
+│   │   │   │   │   │   ├── 📄 StatCard.jsx
+│   │   │   │   │   │   ├── 📄 StatusBadge.jsx
+│   │   │   │   │   │   └── 📄 animations.js
+│   │   │   │   │   ├── 📄 Banner.js
+│   │   │   │   │   ├── 📄 ConfirmDeleteModal.jsx
+│   │   │   │   │   ├── 📄 FilterDrawer.jsx
+│   │   │   │   │   ├── 📄 HistoryItem.js
+│   │   │   │   │   ├── 📄 PhimCard.jsx
+│   │   │   │   │   ├── 📄 PhimDetail.jsx
+│   │   │   │   │   ├── 📄 PhimForm.jsx
+│   │   │   │   │   ├── 📄 PhimList.jsx
+│   │   │   │   │   ├── 📄 PhimRow.jsx
+│   │   │   │   │   └── 📄 TableTopCreators.js
+│   │   │   │   ├── 📁 hooks
+│   │   │   │   │   └── 📄 usePhim.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 data.js
+│   │   │   │   │   ├── 📄 tableColumnsTopCreators.js
+│   │   │   │   │   └── ⚙️ tableDataTopCreators.json
+│   │   │   │   ├── 📄 constants.js
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 quanlyphongchieu
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📁 shared
+│   │   │   │   │   │   ├── 📄 SectionTitle.jsx
+│   │   │   │   │   │   ├── 📄 StatCard.jsx
+│   │   │   │   │   │   └── 📄 animations.js
+│   │   │   │   │   ├── 📄 AddRoomModal.jsx
+│   │   │   │   │   ├── 📄 Banner.js
+│   │   │   │   │   ├── 📄 DeleteConfirmDialog.jsx
+│   │   │   │   │   ├── 📄 EditRoomModal.jsx
+│   │   │   │   │   ├── 📄 HistoryItem.js
+│   │   │   │   │   ├── 📄 RoomCard.jsx
+│   │   │   │   │   ├── 📄 RoomDetail.jsx
+│   │   │   │   │   ├── 📄 RoomListRow.jsx
+│   │   │   │   │   ├── 📄 SeatMapPreview.jsx
+│   │   │   │   │   ├── 📄 StatusPill.jsx
+│   │   │   │   │   ├── 📄 TableTopCreators.js
+│   │   │   │   │   └── 📄 TypeBadge.jsx
+│   │   │   │   ├── 📁 hooks
+│   │   │   │   │   └── 📄 useRoom.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 tableColumnsTopCreators.js
+│   │   │   │   │   └── ⚙️ tableDataTopCreators.json
+│   │   │   │   ├── 📄 constants.js
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 quanlyrapchieu
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📁 shared
+│   │   │   │   │   │   ├── 📄 SectionTitle.jsx
+│   │   │   │   │   │   ├── 📄 StatCard.jsx
+│   │   │   │   │   │   └── 📄 animations.js
+│   │   │   │   │   ├── 📄 AddCinemaPage.jsx
+│   │   │   │   │   ├── 📄 AddRoomModal.jsx
+│   │   │   │   │   ├── 📄 Banner.js
+│   │   │   │   │   ├── 📄 CinemaCard.jsx
+│   │   │   │   │   ├── 📄 CinemaDetail.jsx
+│   │   │   │   │   ├── 📄 CinemaForm.jsx
+│   │   │   │   │   ├── 📄 DeleteConfirmDialog.jsx
+│   │   │   │   │   ├── 📄 HistoryItem.js
+│   │   │   │   │   ├── 📄 RoomRow.jsx
+│   │   │   │   │   ├── 📄 RoomTypeBadge.jsx
+│   │   │   │   │   ├── 📄 StatusDot.jsx
+│   │   │   │   │   └── 📄 TableTopCreators.js
+│   │   │   │   ├── 📁 hooks
+│   │   │   │   │   └── 📄 useCinema.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 tableColumnsTopCreators.js
+│   │   │   │   │   └── ⚙️ tableDataTopCreators.json
+│   │   │   │   ├── 📄 constants.js
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 quanlysuatchieu
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📁 shared
+│   │   │   │   │   │   ├── 📄 SectionTitle.jsx
+│   │   │   │   │   │   ├── 📄 StatCard.jsx
+│   │   │   │   │   │   └── 📄 animations.js
+│   │   │   │   │   ├── 📄 AddModal.jsx
+│   │   │   │   │   ├── 📄 Banner.js
+│   │   │   │   │   ├── 📄 BulkEditPriceModal.jsx
+│   │   │   │   │   ├── 📄 CloneWeekModal.jsx
+│   │   │   │   │   ├── 📄 DetailPanel.jsx
+│   │   │   │   │   ├── 📄 EditModal.jsx
+│   │   │   │   │   ├── 📄 EmptyState.jsx
+│   │   │   │   │   ├── 📄 FormField.jsx
+│   │   │   │   │   ├── 📄 HistoryItem.js
+│   │   │   │   │   ├── 📄 ModalLeftPanel.jsx
+│   │   │   │   │   ├── 📄 ModalShell.jsx
+│   │   │   │   │   ├── 📄 ShowtimeCard.jsx
+│   │   │   │   │   ├── 📄 ShowtimeRow.jsx
+│   │   │   │   │   ├── 📄 StatusPill.jsx
+│   │   │   │   │   └── 📄 TableTopCreators.js
+│   │   │   │   ├── 📁 hooks
+│   │   │   │   │   └── 📄 useShowtime.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 tableColumnsTopCreators.js
+│   │   │   │   │   └── ⚙️ tableDataTopCreators.json
+│   │   │   │   ├── 📄 constants.js
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 quanlythanhtoan
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📄 Banner.js
+│   │   │   │   │   ├── 📄 HistoryItem.js
+│   │   │   │   │   └── 📄 TableTopCreators.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 tableColumnsTopCreators.js
+│   │   │   │   │   └── ⚙️ tableDataTopCreators.json
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 quanlytheloai
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📁 shared
+│   │   │   │   │   │   ├── 📄 SectionTitle.jsx
+│   │   │   │   │   │   ├── 📄 StatCard.jsx
+│   │   │   │   │   │   ├── 📄 StatusBadge.jsx
+│   │   │   │   │   │   └── 📄 animations.js
+│   │   │   │   │   ├── 📄 Banner.js
+│   │   │   │   │   ├── 📄 ConfirmDeleteModal.jsx
+│   │   │   │   │   ├── 📄 FilterDrawer.jsx
+│   │   │   │   │   ├── 📄 HistoryItem.js
+│   │   │   │   │   ├── 📄 TableTopCreators.js
+│   │   │   │   │   ├── 📄 TheLoaiCard.jsx
+│   │   │   │   │   ├── 📄 TheLoaiDetail.jsx
+│   │   │   │   │   ├── 📄 TheLoaiForm.jsx
+│   │   │   │   │   └── 📄 TheLoaiList.jsx
+│   │   │   │   ├── 📁 hooks
+│   │   │   │   │   └── 📄 useTheLoai.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 data.js
+│   │   │   │   │   ├── 📄 tableColumnsTopCreators.js
+│   │   │   │   │   └── ⚙️ tableDataTopCreators.json
+│   │   │   │   ├── 📄 constants.js
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 quanlythongbao
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📄 CheckTable.js
+│   │   │   │   │   ├── 📄 ColumnsTable.js
+│   │   │   │   │   ├── 📄 ComplexTable.js
+│   │   │   │   │   └── 📄 DevelopmentTable.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 columnsData.js
+│   │   │   │   │   ├── ⚙️ tableDataCheck.json
+│   │   │   │   │   ├── ⚙️ tableDataColumns.json
+│   │   │   │   │   ├── ⚙️ tableDataComplex.json
+│   │   │   │   │   └── ⚙️ tableDataDevelopment.json
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 quanlytintuc
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📁 shared
+│   │   │   │   │   │   ├── 📄 CategoryBadge.jsx
+│   │   │   │   │   │   ├── 📄 SectionTitle.jsx
+│   │   │   │   │   │   ├── 📄 StatCard.jsx
+│   │   │   │   │   │   ├── 📄 StatusBadge.jsx
+│   │   │   │   │   │   └── 📄 animations.js
+│   │   │   │   │   ├── 📄 Banner.js
+│   │   │   │   │   ├── 📄 ConfirmDeleteModal.jsx
+│   │   │   │   │   ├── 📄 FilterDrawer.jsx
+│   │   │   │   │   ├── 📄 HistoryItem.js
+│   │   │   │   │   ├── 📄 TableTopCreators.js
+│   │   │   │   │   ├── 📄 TinTucCard.jsx
+│   │   │   │   │   ├── 📄 TinTucDetail.jsx
+│   │   │   │   │   ├── 📄 TinTucForm.jsx
+│   │   │   │   │   ├── 📄 TinTucList.jsx
+│   │   │   │   │   └── 📄 TinTucRow.jsx
+│   │   │   │   ├── 📁 hooks
+│   │   │   │   │   └── 📄 useTinTuc.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 data.js
+│   │   │   │   │   ├── 📄 tableColumnsTopCreators.js
+│   │   │   │   │   └── ⚙️ tableDataTopCreators.json
+│   │   │   │   ├── 📄 constants.js
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 quanlytrangthaighe
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📁 shared
+│   │   │   │   │   │   ├── 📄 SectionTitle.jsx
+│   │   │   │   │   │   ├── 📄 StatCard.jsx
+│   │   │   │   │   │   ├── 📄 StatusBadge.jsx
+│   │   │   │   │   │   └── 📄 animations.js
+│   │   │   │   │   ├── 📄 CheckTable.js
+│   │   │   │   │   ├── 📄 ColumnsTable.js
+│   │   │   │   │   ├── 📄 ComplexTable.js
+│   │   │   │   │   ├── 📄 DevelopmentTable.js
+│   │   │   │   │   ├── 📄 EnhancedSelect.jsx
+│   │   │   │   │   ├── 📄 LiveBadge.jsx
+│   │   │   │   │   ├── 📄 ResetSeatModal.jsx
+│   │   │   │   │   ├── 📄 SeatButton.jsx
+│   │   │   │   │   ├── 📄 SeatDetailDrawer.jsx
+│   │   │   │   │   ├── 📄 SeatInfoPanel.jsx
+│   │   │   │   │   ├── 📄 SeatLegend.jsx
+│   │   │   │   │   └── 📄 SeatMapView.jsx
+│   │   │   │   ├── 📁 hooks
+│   │   │   │   │   ├── 📄 useSeatData.js
+│   │   │   │   │   └── 📄 useSeatTheme.js
+│   │   │   │   ├── 📁 services
+│   │   │   │   │   └── 📄 showtimeSeatService.js
+│   │   │   │   ├── 📁 utils
+│   │   │   │   │   └── 📄 seatGenerator.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 columnsData.js
+│   │   │   │   │   ├── ⚙️ tableDataCheck.json
+│   │   │   │   │   ├── ⚙️ tableDataColumns.json
+│   │   │   │   │   ├── ⚙️ tableDataComplex.json
+│   │   │   │   │   └── ⚙️ tableDataDevelopment.json
+│   │   │   │   ├── 📄 constants.js
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 quanlyve
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📄 CheckTable.js
+│   │   │   │   │   ├── 📄 ColumnsTable.js
+│   │   │   │   │   ├── 📄 ComplexTable.js
+│   │   │   │   │   ├── 📄 DevelopmentTable.js
+│   │   │   │   │   ├── 📄 FilterDrawer.jsx
+│   │   │   │   │   ├── 📄 MobileTicketList.jsx
+│   │   │   │   │   ├── 📄 PageHeader.jsx
+│   │   │   │   │   ├── 📄 QRModal.jsx
+│   │   │   │   │   ├── 📄 StatCard.jsx
+│   │   │   │   │   ├── 📄 TaoVeMoi.jsx
+│   │   │   │   │   ├── 📄 TicketDetail.jsx
+│   │   │   │   │   ├── 📄 TicketEdit.jsx
+│   │   │   │   │   └── 📄 TicketTable.jsx
+│   │   │   │   ├── 📁 hooks
+│   │   │   │   │   ├── 📄 useCreateTicketForm.js
+│   │   │   │   │   └── 📄 useTicket.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 columnsData.js
+│   │   │   │   │   ├── ⚙️ tableDataCheck.json
+│   │   │   │   │   ├── ⚙️ tableDataColumns.json
+│   │   │   │   │   ├── ⚙️ tableDataComplex.json
+│   │   │   │   │   └── ⚙️ tableDataDevelopment.json
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 quanlyvoucher
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📄 Banner.js
+│   │   │   │   │   ├── 📄 HistoryItem.js
+│   │   │   │   │   └── 📄 TableTopCreators.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 tableColumnsTopCreators.js
+│   │   │   │   │   └── ⚙️ tableDataTopCreators.json
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 rtl
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📄 CheckTable.js
+│   │   │   │   │   ├── 📄 ComplexTable.js
+│   │   │   │   │   ├── 📄 DailyTraffic.js
+│   │   │   │   │   ├── 📄 PieCard.js
+│   │   │   │   │   ├── 📄 Tasks.js
+│   │   │   │   │   ├── 📄 TotalSpent.js
+│   │   │   │   │   ├── 📄 UserActivity.js
+│   │   │   │   │   └── 📄 WeeklyRevenue.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 columnsData.js
+│   │   │   │   │   ├── ⚙️ tableDataCheck.json
+│   │   │   │   │   └── ⚙️ tableDataComplex.json
+│   │   │   │   └── 📄 index.jsx
+│   │   │   ├── 📁 thongke
+│   │   │   │   ├── 📁 components
+│   │   │   │   │   ├── 📄 Banner.js
+│   │   │   │   │   ├── 📄 HistoryItem.js
+│   │   │   │   │   └── 📄 TableTopCreators.js
+│   │   │   │   ├── 📁 variables
+│   │   │   │   │   ├── 📄 tableColumnsTopCreators.js
+│   │   │   │   │   └── ⚙️ tableDataTopCreators.json
+│   │   │   │   └── 📄 index.jsx
+│   │   │   └── 📁 thongkecombo
+│   │   │       ├── 📁 components
+│   │   │       │   ├── 📄 Banner.js
+│   │   │       │   ├── 📄 HistoryItem.js
+│   │   │       │   └── 📄 TableTopCreators.js
+│   │   │       ├── 📁 variables
+│   │   │       │   ├── 📄 tableColumnsTopCreators.js
+│   │   │       │   └── ⚙️ tableDataTopCreators.json
+│   │   │       └── 📄 index.jsx
+│   │   └── 📁 auth
+│   │       └── 📁 signIn
+│   │           └── 📄 index.jsx
 │   ├── 📄 App.js
-│   ├── 📄 App.test.js
-│   ├── 🎨 index.css
 │   ├── 📄 index.js
-│   ├── 🖼️ logo.svg
-│   ├── 📄 reportWebVitals.js
-│   └── 📄 setupTests.js
+│   └── 📄 routes.js
+├── ⚙️ .gitattributes
 ├── ⚙️ .gitignore
+├── 📝 CHANGELOG.md
+├── 📄 LICENSE
 ├── 📝 README.md
-├── ⚙️ package-lock.json
-└── ⚙️ package.json
+├── ⚙️ jsconfig.json
+├── ⚙️ package.json
+└── 📄 prettier.config.js
+
+
 ```
 
 ---

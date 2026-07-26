@@ -1,4 +1,4 @@
-// src/views/admin/quanlysuatchieu/components/shared/SectionTitle.jsx
+
 
 import React from "react";
 import { Box, Flex, Text } from "@chakra-ui/react";

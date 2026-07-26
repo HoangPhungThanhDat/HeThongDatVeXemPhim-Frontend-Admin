@@ -3,7 +3,7 @@ import {
   Box, Grid, Text, Button, Flex, Badge, SimpleGrid, Divider,
   FormControl, Input, Select, Textarea, Switch,
   Icon, keyframes, Progress, Table, Thead, Tbody, Tr, Th, Td,
-  Tag, TagLabel, Tooltip, useColorMode, useColorModeValue, IconButton,
+  Tag, TagLabel, Tooltip, IconButton, useColorMode, useColorModeValue,
 } from "@chakra-ui/react";
 import {
   MdAdd, MdVisibility, MdEdit, MdArrowBack, MdClose, MdCheckCircle,
@@ -17,6 +17,24 @@ import {
 } from "react-icons/md";
 import { FaTicketAlt, FaFire, FaGift, FaCoins, FaPercent } from "react-icons/fa";
 import Card from "components/card/Card";
+
+// ─── Dark Theme Colors ─────────────────────────────────────────────────────────
+const DARK_THEME = {
+  bg: "#0a1628",
+  cardBg: "#0f1f3a",
+  border: "#1a3a5c",
+  text: "#e8f4f8",
+  textSecondary: "#88b4d8",
+  labelColor: "#5a8ab5",
+  inputBg: "#0a1f35",
+  inputBorder: "#1a3a5c",
+  hoverBg: "#142d4f",
+  accent: "#4a9eff",
+  accentLight: "#6ab0ff",
+  accentShadow: "rgba(74, 158, 255, 0.25)",
+  gradientFrom: "#4a9eff",
+  gradientTo: "#6ab0ff",
+};
 
 // ─── Keyframes ────────────────────────────────────────────────────────────
 const fadeUp = keyframes`
@@ -173,29 +191,52 @@ function exportHistoryToCSV(history) {
 }
 
 // ─── Shared styles ────────────────────────────────────────────────────────
-const inputStyle = {
-  bg: "#fafafa", border: "1.5px solid #e8edf3", borderRadius: "10px",
-  color: "#1a202c", fontSize: "14px", fontWeight: "500", px: "14px",
+const getInputStyle = (isDark) => ({
+  bg: isDark ? DARK_THEME.inputBg : "#fafafa",
+  border: isDark ? `1.5px solid ${DARK_THEME.inputBorder}` : "1.5px solid #e8edf3",
+  borderRadius: "10px",
+  color: isDark ? DARK_THEME.text : "#1a202c",
+  fontSize: "14px",
+  fontWeight: "500",
+  px: "14px",
   h: { base: "48px", md: "44px" },
-  _placeholder: { color: "#b0bac8", fontWeight: "400" },
-  _focus: { border: "1.5px solid #f97316", boxShadow: "0 0 0 3px rgba(249,115,22,0.10)", bg: "#fff" },
-  _hover: { border: "1.5px solid #f97316", bg: "#fff" },
+  _placeholder: { color: isDark ? DARK_THEME.labelColor : "#b0bac8", fontWeight: "400" },
+  _focus: { 
+    border: `1.5px solid ${isDark ? DARK_THEME.accent : "#f97316"}`, 
+    boxShadow: isDark 
+      ? `0 0 0 3px ${DARK_THEME.accentShadow}`
+      : "0 0 0 3px rgba(249,115,22,0.10)", 
+    bg: isDark ? DARK_THEME.inputBg : "#fff" 
+  },
+  _hover: { 
+    border: `1.5px solid ${isDark ? DARK_THEME.accent : "#f97316"}`, 
+    bg: isDark ? DARK_THEME.inputBg : "#fff" 
+  },
   transition: "all 0.2s ease",
-};
-const labelStyle = {
-  fontSize: "10.5px", fontWeight: "800", letterSpacing: "0.9px",
-  textTransform: "uppercase", color: "#64748b", mb: "7px",
-};
+});
+
+const getLabelStyle = (isDark) => ({
+  fontSize: "10.5px",
+  fontWeight: "800",
+  letterSpacing: "0.9px",
+  textTransform: "uppercase",
+  color: isDark ? DARK_THEME.labelColor : "#64748b",
+  mb: "7px",
+});
 
 // ─── Sub-components ───────────────────────────────────────────────────────
 function SectionTitle({ label, isDark }) {
+  const borderColor = useColorModeValue("rgba(0,0,0,0.06)", DARK_THEME.border);
+  const textColor = useColorModeValue("#374151", DARK_THEME.textSecondary);
+  const accentColor = isDark ? DARK_THEME.accent : "#f97316";
+  
   return (
     <Box mb="14px">
       <Flex align="center" gap="8px">
-        <Box w="3px" h="14px" borderRadius="full" bg="linear-gradient(180deg,#f97316,#fbbf24)" />
-        <Text fontSize="10.5px" fontWeight="800" color={isDark ? "#cbd5e1" : "#374151"} letterSpacing="1.2px" textTransform="uppercase">{label}</Text>
+        <Box w="3px" h="14px" borderRadius="full" bg={accentColor} />
+        <Text fontSize="10.5px" fontWeight="800" color={textColor} letterSpacing="1.2px" textTransform="uppercase">{label}</Text>
       </Flex>
-      <Box mt="7px" h="1px" bg={isDark ? "rgba(255,255,255,0.06)" : "linear-gradient(90deg,#f1f5f9,transparent)"} />
+      <Box mt="7px" h="1px" bg={borderColor} />
     </Box>
   );
 }
@@ -228,44 +269,60 @@ function TypeBadge({ type }) {
 }
 
 function StatCard({ label, value, sub, icon, accent, delay = 0, isDark }) {
+  const bg = useColorModeValue("white", DARK_THEME.cardBg);
+  const border = useColorModeValue("#f1f5f9", DARK_THEME.border);
+  const shadow = useColorModeValue("0 1px 4px rgba(0,0,0,0.05)", "0 1px 4px rgba(0,0,0,0.3)");
+  const hoverShadow = useColorModeValue("0 4px 16px rgba(0,0,0,0.09)", `0 4px 16px ${DARK_THEME.accentShadow}`);
+  const textColor = useColorModeValue("#0f172a", DARK_THEME.text);
+  const labelColor = useColorModeValue("#94a3b8", DARK_THEME.labelColor);
+  const accentColor = isDark ? DARK_THEME.accent : accent;
+
   return (
     <Box p={{ base:"14px 16px", md:"18px 20px" }} borderRadius="14px"
-      bg={isDark ? "rgba(255,255,255,0.05)" : "white"}
-      border={`1px solid ${isDark ? "rgba(255,255,255,0.08)" : "#f1f5f9"}`}
-      boxShadow={isDark ? "0 1px 4px rgba(0,0,0,0.3)" : "0 1px 4px rgba(0,0,0,0.05)"}
+      bg={bg}
+      border={`1px solid ${border}`}
+      boxShadow={shadow}
       sx={{ animation:`${fadeUp} 0.4s ease ${delay}s both` }}
       transition="all 0.2s"
-      _hover={{ boxShadow: isDark ? "0 4px 16px rgba(0,0,0,0.4)" : "0 4px 16px rgba(0,0,0,0.09)", transform:"translateY(-2px)" }}
+      _hover={{ boxShadow: hoverShadow, transform:"translateY(-2px)" }}
     >
       <Flex align="center" justify="space-between">
         <Box>
-          <Text fontSize="10.5px" fontWeight="700" color={isDark ? "#94a3b8" : "#94a3b8"} letterSpacing="0.8px" textTransform="uppercase" mb="4px">{label}</Text>
-          <Text fontSize={{ base:"24px", md:"28px" }} fontWeight="800" color={isDark ? "#f1f5f9" : "#0f172a"} lineHeight="1">{value}</Text>
+          <Text fontSize="10.5px" fontWeight="700" color={labelColor} letterSpacing="0.8px" textTransform="uppercase" mb="4px">{label}</Text>
+          <Text fontSize={{ base:"24px", md:"28px" }} fontWeight="800" color={textColor} lineHeight="1">{value}</Text>
           {sub && <Text fontSize="11px" color="#94a3b8" mt="3px">{sub}</Text>}
         </Box>
         <Box w={{ base:"36px", md:"42px" }} h={{ base:"36px", md:"42px" }} borderRadius="12px"
-          bg={`${accent}18`} display="flex" alignItems="center" justifyContent="center"
+          bg={isDark ? `${DARK_THEME.accent}20` : `${accent}18`}
+          display="flex" alignItems="center" justifyContent="center"
           sx={{ animation:`${float} 3s ease infinite` }}
         >
-          <Icon as={icon} boxSize={{ base:"15px", md:"18px" }} color={accent} />
+          <Icon as={icon} boxSize={{ base:"15px", md:"18px" }} color={accentColor} />
         </Box>
       </Flex>
     </Box>
   );
 }
 
-function UsageBar({ used, max }) {
+function UsageBar({ used, max, isDark }) {
   const pct = max === 0 ? 0 : Math.round((used / max) * 100);
   const color = pct >= 90 ? "#ef4444" : pct >= 70 ? "#f59e0b" : "#10b981";
+  const accentColor = isDark ? DARK_THEME.accent : "#10b981";
+  
   return (
     <Box>
       <Flex justify="space-between" mb="4px">
-        <Text fontSize="11px" fontWeight="700" color="#374151">{used.toLocaleString()} / {max.toLocaleString()}</Text>
+        <Text fontSize="11px" fontWeight="700" color={isDark ? DARK_THEME.textSecondary : "#374151"}>
+          {used.toLocaleString()} / {max.toLocaleString()}
+        </Text>
         <Text fontSize="11px" fontWeight="700" color={color}>{pct}%</Text>
       </Flex>
-      <Box h="5px" bg="#f1f5f9" borderRadius="full" overflow="hidden">
+      <Box h="5px" bg={isDark ? DARK_THEME.inputBg : "#f1f5f9"} borderRadius="full" overflow="hidden">
         <Box h="100%" w={`${pct}%`} borderRadius="full"
-          bg={pct >= 90 ? "linear-gradient(90deg,#f97316,#ef4444)" : pct >= 70 ? "linear-gradient(90deg,#f97316,#fbbf24)" : "linear-gradient(90deg,#10b981,#34d399)"}
+          bg={isDark 
+            ? `linear-gradient(90deg, ${DARK_THEME.accent}, ${DARK_THEME.accentLight})`
+            : pct >= 90 ? "linear-gradient(90deg,#f97316,#ef4444)" : pct >= 70 ? "linear-gradient(90deg,#f97316,#fbbf24)" : "linear-gradient(90deg,#10b981,#34d399)"
+          }
           transition="width 0.6s ease"
         />
       </Box>
@@ -275,43 +332,55 @@ function UsageBar({ used, max }) {
 
 function CopyCodeBtn({ code }) {
   const [copied, setCopied] = useState(false);
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === "dark";
+  
   const copy = () => {
     navigator.clipboard?.writeText(code);
     setCopied(true);
     setTimeout(() => setCopied(false), 1800);
   };
+  
   return (
     <Flex align="center" gap="6px" px="10px" py="5px" borderRadius="8px"
-      bg={copied ? "#ecfdf5" : "#fff7ed"} border={`1px solid ${copied ? "#6ee7b7" : "#fed7aa"}`}
+      bg={copied ? "#ecfdf5" : (isDark ? DARK_THEME.inputBg : "#fff7ed")}
+      border={`1px solid ${copied ? "#6ee7b7" : (isDark ? DARK_THEME.border : "#fed7aa")}`}
       cursor="pointer" onClick={copy} transition="all 0.2s" _hover={{ transform:"scale(1.03)" }}
       display="inline-flex" w="fit-content"
     >
-      <Text fontSize="12.5px" fontWeight="800" color={copied ? "#059669" : "#c2410c"} letterSpacing="1px" fontFamily="monospace">
+      <Text fontSize="12.5px" fontWeight="800" color={copied ? "#059669" : (isDark ? DARK_THEME.accent : "#c2410c")} 
+        letterSpacing="1px" fontFamily="monospace">
         {code}
       </Text>
-      <Icon as={copied ? MdCheck : MdContentCopy} boxSize="12px" color={copied ? "#059669" : "#f97316"} />
+      <Icon as={copied ? MdCheck : MdContentCopy} boxSize="12px" color={copied ? "#059669" : (isDark ? DARK_THEME.accent : "#f97316")} />
     </Flex>
   );
 }
 
 // ─── Delete Confirm Modal ─────────────────────────────────────────────────
-function DeleteModal({ voucher, onConfirm, onCancel, isDark }) {
+function DeleteModal({ voucher, onConfirm, onCancel }) {
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === "dark";
+  
+  const bg = isDark ? DARK_THEME.cardBg : "white";
+  const border = isDark ? DARK_THEME.border : "#f1f5f9";
+  const textColor = isDark ? DARK_THEME.text : "#0f172a";
+  const cancelBorder = isDark ? DARK_THEME.border : "#e2e8f0";
+  const accentColor = isDark ? DARK_THEME.accent : "#f97316";
+  
   return (
     <Box position="fixed" inset="0" zIndex="1000" display="flex" alignItems="center" justifyContent="center"
       sx={{ animation:`${fadeIn} 0.2s ease both` }}
     >
-      {/* Backdrop */}
       <Box position="absolute" inset="0" bg="rgba(0,0,0,0.55)" backdropFilter="blur(4px)" onClick={onCancel} />
 
-      {/* Modal */}
       <Box position="relative" w={{ base:"90%", md:"440px" }} borderRadius="20px"
-        bg={isDark ? "#1e293b" : "white"}
-        border={`1px solid ${isDark ? "rgba(255,255,255,0.1)" : "#f1f5f9"}`}
+        bg={bg}
+        border={`1px solid ${border}`}
         boxShadow="0 24px 64px rgba(0,0,0,0.25)"
         p={{ base:"24px", md:"28px" }}
         sx={{ animation:`${scaleIn} 0.25s ease both` }}
       >
-        {/* Icon */}
         <Flex justify="center" mb="16px">
           <Box w="56px" h="56px" borderRadius="18px" bg="#fef2f2"
             border="2px solid #fca5a5"
@@ -321,20 +390,23 @@ function DeleteModal({ voucher, onConfirm, onCancel, isDark }) {
           </Box>
         </Flex>
 
-        <Text fontSize="18px" fontWeight="800" color={isDark ? "#f1f5f9" : "#0f172a"} textAlign="center" mb="8px">
+        <Text fontSize="18px" fontWeight="800" color={textColor} textAlign="center" mb="8px">
           Xóa vĩnh viễn voucher?
         </Text>
-        <Text fontSize="13px" color="#64748b" textAlign="center" lineHeight="1.7" mb="6px">
+        <Text fontSize="13px" color={isDark ? DARK_THEME.textSecondary : "#64748b"} textAlign="center" lineHeight="1.7" mb="6px">
           Bạn sắp xóa voucher
         </Text>
         <Box mx="auto" mb="16px" px="14px" py="8px" borderRadius="10px"
-          bg={isDark ? "rgba(249,115,22,0.12)" : "#fff7ed"}
-          border="1px solid #fed7aa" w="fit-content"
+          bg={isDark ? DARK_THEME.inputBg : "#fff7ed"}
+          border={`1px solid ${isDark ? DARK_THEME.border : "#fed7aa"}`} w="fit-content"
         >
-          <Text fontSize="14px" fontWeight="800" color="#c2410c" fontFamily="monospace" letterSpacing="1px">
+          <Text fontSize="14px" fontWeight="800" color={isDark ? DARK_THEME.accent : "#c2410c"} 
+            fontFamily="monospace" letterSpacing="1px">
             {voucher.code}
           </Text>
-          <Text fontSize="12px" color="#b45309" textAlign="center" mt="2px">{voucher.name}</Text>
+          <Text fontSize="12px" color={isDark ? DARK_THEME.textSecondary : "#b45309"} textAlign="center" mt="2px">
+            {voucher.name}
+          </Text>
         </Box>
 
         <Box p="12px 14px" borderRadius="10px" bg="#fef2f2" border="1px solid #fca5a5" mb="20px">
@@ -348,9 +420,9 @@ function DeleteModal({ voucher, onConfirm, onCancel, isDark }) {
 
         <Flex gap="10px">
           <Button flex="1" h="44px" borderRadius="11px" variant="ghost"
-            color={isDark ? "#94a3b8" : "#64748b"} fontWeight="600" fontSize="14px"
-            border={`1.5px solid ${isDark ? "rgba(255,255,255,0.1)" : "#e2e8f0"}`}
-            _hover={{ bg: isDark ? "rgba(255,255,255,0.06)" : "#f8fafc" }}
+            color={isDark ? DARK_THEME.textSecondary : "#64748b"} fontWeight="600" fontSize="14px"
+            border={`1.5px solid ${cancelBorder}`}
+            _hover={{ bg: isDark ? DARK_THEME.hoverBg : "#f8fafc" }}
             onClick={onCancel}
           >Hủy bỏ</Button>
           <Button flex="1" h="44px" borderRadius="11px"
@@ -369,17 +441,20 @@ function DeleteModal({ voucher, onConfirm, onCancel, isDark }) {
 }
 
 // ─── Dark Mode Toggle ─────────────────────────────────────────────────────
-function DarkModeToggle({ isDark, onToggle }) {
+function DarkModeToggle() {
+  const { colorMode, toggleColorMode } = useColorMode();
+  const isDark = colorMode === "dark";
+  
   return (
     <Tooltip label={isDark ? "Chuyển sang sáng" : "Chuyển sang tối"} placement="bottom">
       <Box
         as="button"
-        onClick={onToggle}
+        onClick={toggleColorMode}
         w="44px" h="24px" borderRadius="full" position="relative" cursor="pointer"
-        bg={isDark ? "linear-gradient(135deg,#1e3a5f,#2563eb)" : "linear-gradient(135deg,#f97316,#fbbf24)"}
-        border={`1.5px solid ${isDark ? "#3b82f6" : "#fb923c"}`}
+        bg={isDark ? `linear-gradient(135deg, ${DARK_THEME.accent}, ${DARK_THEME.accentLight})` : "linear-gradient(135deg,#f97316,#fbbf24)"}
+        border={`1.5px solid ${isDark ? DARK_THEME.accent : "#fb923c"}`}
         transition="all 0.3s ease"
-        boxShadow={isDark ? "0 0 10px rgba(59,130,246,0.4)" : "0 0 10px rgba(249,115,22,0.3)"}
+        boxShadow={isDark ? `0 0 10px ${DARK_THEME.accentShadow}` : "0 0 10px rgba(249,115,22,0.3)"}
         flexShrink="0"
       >
         <Box
@@ -391,7 +466,7 @@ function DarkModeToggle({ isDark, onToggle }) {
           boxShadow="0 1px 4px rgba(0,0,0,0.3)"
           display="flex" alignItems="center" justifyContent="center"
         >
-          <Icon as={isDark ? MdDarkMode : MdLightMode} boxSize="9px" color={isDark ? "#1e3a5f" : "#f97316"} />
+          <Icon as={isDark ? MdDarkMode : MdLightMode} boxSize="9px" color={isDark ? DARK_THEME.accent : "#f97316"} />
         </Box>
       </Box>
     </Tooltip>
@@ -399,28 +474,38 @@ function DarkModeToggle({ isDark, onToggle }) {
 }
 
 // ─── Voucher Card (Grid View) ─────────────────────────────────────────────
-function VoucherCard({ v, index, onView, onEdit, onToggle, onDelete, isDark }) {
+function VoucherCard({ v, index, onView, onEdit, onToggle, onDelete }) {
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === "dark";
+  
   const typeCfg = TYPE_CFG[v.type] || TYPE_CFG["Giảm %"];
+  const bg = isDark ? DARK_THEME.cardBg : "white";
+  const border = isDark ? DARK_THEME.border : "#f1f5f9";
+  const hoverBorder = isDark ? DARK_THEME.accent : "#f97316";
+  const textColor = isDark ? DARK_THEME.text : "#0f172a";
+  const subTextColor = isDark ? DARK_THEME.textSecondary : "#64748b";
+  const shadow = isDark ? `0 4px 20px ${DARK_THEME.accentShadow}` : "0 4px 20px rgba(249,115,22,0.12)";
+  const accentColor = isDark ? DARK_THEME.accent : "#f97316";
 
   return (
     <Box borderRadius="16px"
-      bg={isDark ? "rgba(255,255,255,0.05)" : "white"}
-      border={`1.5px solid ${isDark ? "rgba(255,255,255,0.08)" : "#f1f5f9"}`}
+      bg={bg}
+      border={`1.5px solid ${border}`}
       overflow="hidden"
       transition="all 0.22s"
       _hover={{
-        border:`1.5px solid #f97316`,
-        boxShadow: isDark ? "0 4px 20px rgba(249,115,22,0.2)" : "0 4px 20px rgba(249,115,22,0.12)",
+        border:`1.5px solid ${hoverBorder}`,
+        boxShadow: shadow,
         transform:"translateY(-2px)"
       }}
       sx={{ animation:`${fadeUp} 0.4s ease ${index * 0.06}s both` }}
     >
-      <Box h="3px" bg={`linear-gradient(90deg, ${typeCfg.color}, #f97316)`} />
+      <Box h="3px" bg={`linear-gradient(90deg, ${isDark ? DARK_THEME.accent : typeCfg.color}, ${isDark ? DARK_THEME.accentLight : "#f97316"})`} />
 
       <Box p="16px">
         <Flex justify="space-between" align="flex-start" mb="10px">
           <Box flex="1" minW="0" pr="8px">
-            <Text fontSize="13.5px" fontWeight="800" color={isDark ? "#f1f5f9" : "#0f172a"} noOfLines={2} lineHeight="1.35" mb="6px">
+            <Text fontSize="13.5px" fontWeight="800" color={textColor} noOfLines={2} lineHeight="1.35" mb="6px">
               {v.name}
             </Text>
             <Flex gap="5px" flexWrap="wrap">
@@ -429,36 +514,37 @@ function VoucherCard({ v, index, onView, onEdit, onToggle, onDelete, isDark }) {
             </Flex>
           </Box>
           <Box flexShrink="0" textAlign="center" px="10px" py="6px" borderRadius="10px"
-            bg={`${typeCfg.bg}`} border={`1.5px solid ${typeCfg.border}`}
+            bg={isDark ? `${DARK_THEME.accent}20` : `${typeCfg.bg}`} 
+            border={`1.5px solid ${isDark ? DARK_THEME.border : typeCfg.border}`}
           >
-            <Text fontSize="16px" fontWeight="900" color={typeCfg.color} lineHeight="1">
+            <Text fontSize="16px" fontWeight="900" color={isDark ? DARK_THEME.accent : typeCfg.color} lineHeight="1">
               {v.type === "Giảm %" ? `${v.value}%` : v.type === "Giảm tiền" ? `${(v.value/1000).toFixed(0)}K` : "Gift"}
             </Text>
-            <Text fontSize="9px" fontWeight="600" color="#94a3b8" mt="1px">giảm giá</Text>
+            <Text fontSize="9px" fontWeight="600" color={isDark ? DARK_THEME.labelColor : "#94a3b8"} mt="1px">giảm giá</Text>
           </Box>
         </Flex>
 
         <Box mb="10px"><CopyCodeBtn code={v.code} /></Box>
-        <Box mb="10px"><UsageBar used={v.usedCount} max={v.maxUses} /></Box>
+        <Box mb="10px"><UsageBar used={v.usedCount} max={v.maxUses} isDark={isDark} /></Box>
 
         <Flex gap="10px" flexWrap="wrap" mb="12px">
           <Flex align="center" gap="4px">
-            <Icon as={MdCalendarToday} boxSize="10px" color="#94a3b8" />
-            <Text fontSize="10.5px" color={isDark ? "#94a3b8" : "#64748b"} fontWeight="500">{v.startDate} → {v.endDate}</Text>
+            <Icon as={MdCalendarToday} boxSize="10px" color={isDark ? DARK_THEME.labelColor : "#94a3b8"} />
+            <Text fontSize="10.5px" color={subTextColor} fontWeight="500">{v.startDate} → {v.endDate}</Text>
           </Flex>
           {v.minOrder > 0 && (
             <Flex align="center" gap="4px">
-              <Icon as={MdShoppingCart} boxSize="10px" color="#94a3b8" />
-              <Text fontSize="10.5px" color={isDark ? "#94a3b8" : "#64748b"} fontWeight="500">Tối thiểu {(v.minOrder/1000).toFixed(0)}K</Text>
+              <Icon as={MdShoppingCart} boxSize="10px" color={isDark ? DARK_THEME.labelColor : "#94a3b8"} />
+              <Text fontSize="10.5px" color={subTextColor} fontWeight="500">Tối thiểu {(v.minOrder/1000).toFixed(0)}K</Text>
             </Flex>
           )}
         </Flex>
 
         <Box mb="12px">
           <Box px="7px" py="3px" borderRadius="6px" display="inline-block"
-            bg={APPLY_CFG[v.applyFor]?.bg || "#f9fafb"}
+            bg={isDark ? DARK_THEME.inputBg : (APPLY_CFG[v.applyFor]?.bg || "#f9fafb")}
           >
-            <Text fontSize="10.5px" fontWeight="700" color={APPLY_CFG[v.applyFor]?.color || "#374151"}>
+            <Text fontSize="10.5px" fontWeight="700" color={isDark ? DARK_THEME.textSecondary : (APPLY_CFG[v.applyFor]?.color || "#374151")}>
               Áp dụng: {v.applyFor}
             </Text>
           </Box>
@@ -466,16 +552,24 @@ function VoucherCard({ v, index, onView, onEdit, onToggle, onDelete, isDark }) {
 
         <Flex gap="6px">
           <Button flex="1" size="xs" h="32px" borderRadius="8px"
-            bg={isDark ? "rgba(255,255,255,0.08)" : "#f8fafc"}
-            color={isDark ? "#94a3b8" : "#475569"}
-            border={`1px solid ${isDark ? "rgba(255,255,255,0.1)" : "#e2e8f0"}`}
+            bg={isDark ? DARK_THEME.inputBg : "#f8fafc"}
+            color={isDark ? DARK_THEME.textSecondary : "#475569"}
+            border={`1px solid ${isDark ? DARK_THEME.border : "#e2e8f0"}`}
             fontSize="11px" fontWeight="600" leftIcon={<Icon as={MdVisibility} boxSize="12px" />}
-            _hover={{ bg: isDark ? "rgba(255,255,255,0.12)" : "#f1f5f9" }} transition="all 0.15s" onClick={() => onView(v)}
+            _hover={{ bg: isDark ? DARK_THEME.hoverBg : "#f1f5f9" }} transition="all 0.15s" onClick={() => onView(v)}
           >Xem</Button>
           <Button flex="1" size="xs" h="32px" borderRadius="8px"
-            bg="linear-gradient(135deg,#f97316,#fb923c)" color="white"
+            bg={isDark 
+              ? `linear-gradient(135deg, ${DARK_THEME.accent}, ${DARK_THEME.accentLight})`
+              : "linear-gradient(135deg,#f97316,#fb923c)"
+            } 
+            color="white"
             fontSize="11px" fontWeight="600" leftIcon={<Icon as={MdEdit} boxSize="12px" />}
-            _hover={{ opacity:0.88 }} boxShadow="0 2px 8px rgba(249,115,22,0.3)"
+            _hover={{ opacity:0.88 }} 
+            boxShadow={isDark 
+              ? `0 2px 8px ${DARK_THEME.accentShadow}`
+              : "0 2px 8px rgba(249,115,22,0.3)"
+            }
             transition="all 0.15s" onClick={() => onEdit(v)}
           >Sửa</Button>
           <Button size="xs" h="32px" px="8px" borderRadius="8px"
@@ -488,7 +582,6 @@ function VoucherCard({ v, index, onView, onEdit, onToggle, onDelete, isDark }) {
           >
             <Icon as={v.status === "Tạm dừng" ? MdPlayCircle : MdPause} boxSize="13px" />
           </Button>
-          {/* Nút Xóa vĩnh viễn */}
           <Tooltip label="Xóa vĩnh viễn" placement="top">
             <Button size="xs" h="32px" px="8px" borderRadius="8px"
               bg="#fef2f2" color="#dc2626" border="1px solid #fca5a5"
@@ -505,54 +598,72 @@ function VoucherCard({ v, index, onView, onEdit, onToggle, onDelete, isDark }) {
 }
 
 // ─── Voucher Row (List View) ──────────────────────────────────────────────
-function VoucherRow({ v, index, onView, onEdit, onToggle, onDelete, isDark }) {
+function VoucherRow({ v, index, onView, onEdit, onToggle, onDelete }) {
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === "dark";
+  
+  const bg = isDark ? DARK_THEME.cardBg : "white";
+  const border = isDark ? DARK_THEME.border : "#f1f5f9";
+  const hoverBg = isDark ? DARK_THEME.hoverBg : "#fffbf7";
+  const textColor = isDark ? DARK_THEME.text : "#0f172a";
+  const subTextColor = isDark ? DARK_THEME.textSecondary : "#64748b";
+  const shadow = isDark ? `0 2px 10px ${DARK_THEME.accentShadow}` : "0 2px 10px rgba(249,115,22,0.1)";
+
   return (
     <Box p="12px 16px" borderRadius="10px"
-      bg={isDark ? "rgba(255,255,255,0.04)" : "white"}
-      border={`1.5px solid ${isDark ? "rgba(255,255,255,0.07)" : "#f1f5f9"}`}
+      bg={bg}
+      border={`1.5px solid ${border}`}
       transition="all 0.2s"
       _hover={{
-        border:"1.5px solid #f97316",
-        boxShadow: isDark ? "0 2px 10px rgba(249,115,22,0.2)" : "0 2px 10px rgba(249,115,22,0.1)",
-        bg: isDark ? "rgba(249,115,22,0.05)" : "#fffbf7"
+        border:`1.5px solid ${isDark ? DARK_THEME.accent : "#f97316"}`,
+        boxShadow: shadow,
+        bg: hoverBg
       }}
       sx={{ animation:`${fadeUp} 0.35s ease ${index * 0.04}s both` }}
     >
       <Flex align="center" gap="0">
         <Box w="32px" flexShrink="0">
-          <Text fontSize="11px" fontWeight="700" color="#cbd5e1">{String(index+1).padStart(2,"0")}</Text>
+          <Text fontSize="11px" fontWeight="700" color={isDark ? DARK_THEME.border : "#cbd5e1"}>{String(index+1).padStart(2,"0")}</Text>
         </Box>
         <Box flex="2" minW="0" pr="12px">
-          <Text fontSize="13px" fontWeight="700" color={isDark ? "#f1f5f9" : "#0f172a"} noOfLines={1} mb="3px">{v.name}</Text>
+          <Text fontSize="13px" fontWeight="700" color={textColor} noOfLines={1} mb="3px">{v.name}</Text>
           <CopyCodeBtn code={v.code} />
         </Box>
         <Box flex="0.7" minW="0" pr="10px">
           <TypeBadge type={v.type} />
-          <Text fontSize="12px" fontWeight="800" color={isDark ? "#f1f5f9" : "#0f172a"} mt="4px">
+          <Text fontSize="12px" fontWeight="800" color={textColor} mt="4px">
             {v.type === "Giảm %" ? `${v.value}%` : v.type === "Giảm tiền" ? `${(v.value/1000).toFixed(0)}.000đ` : "Quà tặng"}
           </Text>
         </Box>
         <Box flex="1" minW="0" pr="10px">
-          <UsageBar used={v.usedCount} max={v.maxUses} />
+          <UsageBar used={v.usedCount} max={v.maxUses} isDark={isDark} />
         </Box>
         <Box flex="0.8" minW="0" pr="10px">
           <StatusBadge status={v.status} />
         </Box>
         <Box flex="0.7" minW="0" pr="10px">
-          <Text fontSize="11px" color={isDark ? "#94a3b8" : "#64748b"}>{v.endDate}</Text>
+          <Text fontSize="11px" color={subTextColor}>{v.endDate}</Text>
         </Box>
         <Flex gap="5px" flexShrink="0">
           <Button size="xs" h="28px" px="9px" borderRadius="7px"
-            bg={isDark ? "rgba(255,255,255,0.08)" : "#f8fafc"}
-            color={isDark ? "#94a3b8" : "#475569"}
-            border={`1px solid ${isDark ? "rgba(255,255,255,0.1)" : "#e2e8f0"}`}
+            bg={isDark ? DARK_THEME.inputBg : "#f8fafc"}
+            color={isDark ? DARK_THEME.textSecondary : "#475569"}
+            border={`1px solid ${isDark ? DARK_THEME.border : "#e2e8f0"}`}
             fontSize="11px" fontWeight="600" leftIcon={<Icon as={MdVisibility} boxSize="11px" />}
-            _hover={{ bg: isDark ? "rgba(255,255,255,0.12)" : "#f1f5f9" }} transition="all 0.15s" onClick={() => onView(v)}
+            _hover={{ bg: isDark ? DARK_THEME.hoverBg : "#f1f5f9" }} transition="all 0.15s" onClick={() => onView(v)}
           >Xem</Button>
           <Button size="xs" h="28px" px="9px" borderRadius="7px"
-            bg="linear-gradient(135deg,#f97316,#fb923c)" color="white"
+            bg={isDark 
+              ? `linear-gradient(135deg, ${DARK_THEME.accent}, ${DARK_THEME.accentLight})`
+              : "linear-gradient(135deg,#f97316,#fb923c)"
+            } 
+            color="white"
             fontSize="11px" fontWeight="600" leftIcon={<Icon as={MdEdit} boxSize="11px" />}
-            _hover={{ opacity:0.88 }} boxShadow="0 2px 6px rgba(249,115,22,0.3)"
+            _hover={{ opacity:0.88 }} 
+            boxShadow={isDark 
+              ? `0 2px 6px ${DARK_THEME.accentShadow}`
+              : "0 2px 6px rgba(249,115,22,0.3)"
+            }
             transition="all 0.15s" onClick={() => onEdit(v)}
           >Sửa</Button>
           <Button size="xs" h="28px" px="8px" borderRadius="7px"
@@ -580,7 +691,10 @@ function VoucherRow({ v, index, onView, onEdit, onToggle, onDelete, isDark }) {
 }
 
 // ─── Add/Edit Form ────────────────────────────────────────────────────────
-function VoucherForm({ voucher, onCancel, onSave, isAdd = false, isDark }) {
+function VoucherForm({ voucher, onCancel, onSave, isAdd = false }) {
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === "dark";
+  
   const [form, setForm] = useState(voucher || {
     code: "", name: "", type: "Giảm %", value: "", minOrder: "",
     startDate: "", endDate: "", maxUses: "", status: "Đang hoạt động",
@@ -596,32 +710,28 @@ function VoucherForm({ voucher, onCancel, onSave, isAdd = false, isDark }) {
     set("code", code);
   };
 
-  const cardBg = isDark ? "rgba(255,255,255,0.05)" : "white";
-  const cardBorder = isDark ? "rgba(255,255,255,0.08)" : "#f1f5f9";
-  const darkInputStyle = isDark ? {
-    bg: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(255,255,255,0.12)", borderRadius: "10px",
-    color: "#f1f5f9", fontSize: "14px", fontWeight: "500", px: "14px",
-    h: { base: "48px", md: "44px" },
-    _placeholder: { color: "rgba(255,255,255,0.3)" },
-    _focus: { border: "1.5px solid #f97316", boxShadow: "0 0 0 3px rgba(249,115,22,0.15)", bg: "rgba(255,255,255,0.1)" },
-    _hover: { border: "1.5px solid #f97316" },
-    transition: "all 0.2s ease",
-  } : inputStyle;
-  const darkLabelStyle = { ...labelStyle, color: isDark ? "#94a3b8" : "#64748b" };
+  const cardBg = isDark ? DARK_THEME.cardBg : "white";
+  const cardBorder = isDark ? DARK_THEME.border : "#f1f5f9";
+  const textColor = isDark ? DARK_THEME.text : "#0f172a";
+  const subTextColor = isDark ? DARK_THEME.textSecondary : "#94a3b8";
+  const inputStyles = getInputStyle(isDark);
+  const labelStyles = getLabelStyle(isDark);
+  const accentColor = isDark ? DARK_THEME.accent : "#f97316";
+  const accentShadow = isDark ? DARK_THEME.accentShadow : "rgba(249,115,22,0.35)";
 
   return (
     <Box sx={{ animation:`${scaleIn} 0.3s ease both` }}>
       <Flex align={{ base:"flex-start", md:"center" }} gap="12px" mb="20px" direction={{ base:"column", sm:"row" }}>
         <Button leftIcon={<Icon as={MdArrowBack} />} variant="ghost"
-          color={isDark ? "#94a3b8" : "#64748b"} borderRadius="10px" h="38px" fontSize="13px" fontWeight="600"
-          border={`1.5px solid ${isDark ? "rgba(255,255,255,0.1)" : "#e2e8f0"}`}
-          _hover={{ bg: isDark ? "rgba(255,255,255,0.06)" : "#f8fafc" }} flexShrink="0" onClick={onCancel}
+          color={isDark ? DARK_THEME.textSecondary : "#64748b"} borderRadius="10px" h="38px" fontSize="13px" fontWeight="600"
+          border={`1.5px solid ${isDark ? DARK_THEME.border : "#e2e8f0"}`}
+          _hover={{ bg: isDark ? DARK_THEME.hoverBg : "#f8fafc" }} flexShrink="0" onClick={onCancel}
         >Quay lại</Button>
         <Box>
-          <Text fontSize={{ base:"17px", md:"20px" }} fontWeight="800" color={isDark ? "#f1f5f9" : "#0f172a"} letterSpacing="-0.4px">
+          <Text fontSize={{ base:"17px", md:"20px" }} fontWeight="800" color={textColor} letterSpacing="-0.4px">
             {isAdd ? "✦ Tạo voucher mới" : `Chỉnh sửa: ${voucher?.name}`}
           </Text>
-          <Text fontSize="12px" color="#94a3b8" mt="2px">
+          <Text fontSize="12px" color={subTextColor} mt="2px">
             {isAdd ? "Thiết lập mã ưu đãi và điều kiện áp dụng" : "Cập nhật thông tin voucher"}
           </Text>
         </Box>
@@ -630,17 +740,18 @@ function VoucherForm({ voucher, onCancel, onSave, isAdd = false, isDark }) {
       <Grid templateColumns={{ base:"1fr", lg:"1fr 320px" }} gap="16px">
         <Flex direction="column" gap="14px">
           <Box bg={cardBg} borderRadius="16px" border={`1px solid ${cardBorder}`}
-            boxShadow="0 1px 4px rgba(0,0,0,0.04)" p={{ base:"16px", md:"20px" }}
+            boxShadow={isDark ? "0 1px 4px rgba(0,0,0,0.3)" : "0 1px 4px rgba(0,0,0,0.04)"} 
+            p={{ base:"16px", md:"20px" }}
           >
             <SectionTitle label="Thông tin cơ bản" isDark={isDark} />
             <Grid templateColumns={{ base:"1fr", sm:"1fr 1fr" }} gap="14px" mb="14px">
               <Box>
-                <Text sx={darkLabelStyle}>Tên chương trình *</Text>
-                <Input {...darkInputStyle} placeholder="VD: Voucher hè 2026" value={form.name} onChange={e=>set("name",e.target.value)} />
+                <Text sx={labelStyles}>Tên chương trình *</Text>
+                <Input {...inputStyles} placeholder="VD: Voucher hè 2026" value={form.name} onChange={e=>set("name",e.target.value)} />
               </Box>
               <Box>
-                <Text sx={darkLabelStyle}>Loại voucher *</Text>
-                <Select {...darkInputStyle} value={form.type} onChange={e=>set("type",e.target.value)}>
+                <Text sx={labelStyles}>Loại voucher *</Text>
+                <Select {...inputStyles} value={form.type} onChange={e=>set("type",e.target.value)}>
                   <option>Giảm %</option>
                   <option>Giảm tiền</option>
                   <option>Quà tặng</option>
@@ -650,27 +761,27 @@ function VoucherForm({ voucher, onCancel, onSave, isAdd = false, isDark }) {
 
             <Box mb="14px">
               <Flex justify="space-between" align="center" mb="7px">
-                <Text sx={{ ...darkLabelStyle, mb:"0" }}>Mã voucher *</Text>
+                <Text sx={{ ...labelStyles, mb:"0" }}>Mã voucher *</Text>
                 <Flex align="center" gap="6px">
-                  <Text fontSize="10.5px" color="#94a3b8">Tự động</Text>
-                  <Switch size="sm" colorScheme="orange" isChecked={autoCode}
+                  <Text fontSize="10.5px" color={isDark ? DARK_THEME.labelColor : "#94a3b8"}>Tự động</Text>
+                  <Switch size="sm" colorScheme={isDark ? "blue" : "orange"} isChecked={autoCode}
                     onChange={e => { setAutoCode(e.target.checked); if(e.target.checked) generateCode(); }}
                   />
                 </Flex>
               </Flex>
               <Flex gap="8px">
-                <Input {...darkInputStyle} flex="1" fontFamily="monospace" letterSpacing="1px"
+                <Input {...inputStyles} flex="1" fontFamily="monospace" letterSpacing="1px"
                   placeholder="VD: SUMMER2026" value={form.code}
                   onChange={e=>set("code",e.target.value.toUpperCase())}
                   isReadOnly={autoCode}
                 />
                 {autoCode && (
                   <Button h="44px" px="14px" borderRadius="10px"
-                    bg={isDark ? "rgba(255,255,255,0.08)" : "#f8fafc"}
-                    border={`1.5px solid ${isDark ? "rgba(255,255,255,0.1)" : "#e2e8f0"}`}
-                    color={isDark ? "#94a3b8" : "#64748b"} fontSize="12px"
+                    bg={isDark ? DARK_THEME.inputBg : "#f8fafc"}
+                    border={`1.5px solid ${isDark ? DARK_THEME.border : "#e2e8f0"}`}
+                    color={isDark ? DARK_THEME.textSecondary : "#64748b"} fontSize="12px"
                     leftIcon={<Icon as={MdAutorenew} boxSize="13px" />}
-                    _hover={{ bg: isDark ? "rgba(255,255,255,0.12)" : "#f1f5f9" }} onClick={generateCode}
+                    _hover={{ bg: isDark ? DARK_THEME.hoverBg : "#f1f5f9" }} onClick={generateCode}
                   >Tạo mới</Button>
                 )}
               </Flex>
@@ -678,38 +789,39 @@ function VoucherForm({ voucher, onCancel, onSave, isAdd = false, isDark }) {
 
             <Grid templateColumns={{ base:"1fr", sm:"1fr 1fr 1fr" }} gap="14px">
               <Box>
-                <Text sx={darkLabelStyle}>{form.type === "Giảm %" ? "Mức giảm (%) *" : form.type === "Giảm tiền" ? "Số tiền giảm (đ) *" : "Giá trị quà"}</Text>
-                <Input {...darkInputStyle} type="number" value={form.value} onChange={e=>set("value",e.target.value)} />
+                <Text sx={labelStyles}>{form.type === "Giảm %" ? "Mức giảm (%) *" : form.type === "Giảm tiền" ? "Số tiền giảm (đ) *" : "Giá trị quà"}</Text>
+                <Input {...inputStyles} type="number" value={form.value} onChange={e=>set("value",e.target.value)} />
               </Box>
               <Box>
-                <Text sx={darkLabelStyle}>Đơn tối thiểu (đ)</Text>
-                <Input {...darkInputStyle} type="number" value={form.minOrder} onChange={e=>set("minOrder",e.target.value)} />
+                <Text sx={labelStyles}>Đơn tối thiểu (đ)</Text>
+                <Input {...inputStyles} type="number" value={form.minOrder} onChange={e=>set("minOrder",e.target.value)} />
               </Box>
               <Box>
-                <Text sx={darkLabelStyle}>Số lượt dùng tối đa *</Text>
-                <Input {...darkInputStyle} type="number" value={form.maxUses} onChange={e=>set("maxUses",e.target.value)} />
+                <Text sx={labelStyles}>Số lượt dùng tối đa *</Text>
+                <Input {...inputStyles} type="number" value={form.maxUses} onChange={e=>set("maxUses",e.target.value)} />
               </Box>
             </Grid>
           </Box>
 
           <Box bg={cardBg} borderRadius="16px" border={`1px solid ${cardBorder}`}
-            boxShadow="0 1px 4px rgba(0,0,0,0.04)" p={{ base:"16px", md:"20px" }}
+            boxShadow={isDark ? "0 1px 4px rgba(0,0,0,0.3)" : "0 1px 4px rgba(0,0,0,0.04)"} 
+            p={{ base:"16px", md:"20px" }}
           >
             <SectionTitle label="Thời gian & Phạm vi áp dụng" isDark={isDark} />
             <Grid templateColumns={{ base:"1fr", sm:"1fr 1fr" }} gap="14px" mb="14px">
               <Box>
-                <Text sx={darkLabelStyle}>Ngày bắt đầu *</Text>
-                <Input {...darkInputStyle} type="date" value={form.startDate} onChange={e=>set("startDate",e.target.value)} />
+                <Text sx={labelStyles}>Ngày bắt đầu *</Text>
+                <Input {...inputStyles} type="date" value={form.startDate} onChange={e=>set("startDate",e.target.value)} />
               </Box>
               <Box>
-                <Text sx={darkLabelStyle}>Ngày kết thúc *</Text>
-                <Input {...darkInputStyle} type="date" value={form.endDate} onChange={e=>set("endDate",e.target.value)} />
+                <Text sx={labelStyles}>Ngày kết thúc *</Text>
+                <Input {...inputStyles} type="date" value={form.endDate} onChange={e=>set("endDate",e.target.value)} />
               </Box>
             </Grid>
             <Grid templateColumns={{ base:"1fr", sm:"1fr 1fr" }} gap="14px">
               <Box>
-                <Text sx={darkLabelStyle}>Áp dụng cho *</Text>
-                <Select {...darkInputStyle} value={form.applyFor} onChange={e=>set("applyFor",e.target.value)}>
+                <Text sx={labelStyles}>Áp dụng cho *</Text>
+                <Select {...inputStyles} value={form.applyFor} onChange={e=>set("applyFor",e.target.value)}>
                   <option>Tất cả</option>
                   <option>Phim cụ thể</option>
                   <option>Combo bắp nước</option>
@@ -717,8 +829,8 @@ function VoucherForm({ voucher, onCancel, onSave, isAdd = false, isDark }) {
                 </Select>
               </Box>
               <Box>
-                <Text sx={darkLabelStyle}>Trạng thái *</Text>
-                <Select {...darkInputStyle} value={form.status} onChange={e=>set("status",e.target.value)}>
+                <Text sx={labelStyles}>Trạng thái *</Text>
+                <Select {...inputStyles} value={form.status} onChange={e=>set("status",e.target.value)}>
                   <option>Đang hoạt động</option>
                   <option>Tạm dừng</option>
                 </Select>
@@ -727,38 +839,45 @@ function VoucherForm({ voucher, onCancel, onSave, isAdd = false, isDark }) {
           </Box>
 
           <Box bg={cardBg} borderRadius="16px" border={`1px solid ${cardBorder}`}
-            boxShadow="0 1px 4px rgba(0,0,0,0.04)" p={{ base:"16px", md:"20px" }}
+            boxShadow={isDark ? "0 1px 4px rgba(0,0,0,0.3)" : "0 1px 4px rgba(0,0,0,0.04)"} 
+            p={{ base:"16px", md:"20px" }}
           >
             <SectionTitle label="Phát hành & Mô tả" isDark={isDark} />
             <Flex align="center" gap="10px" p="12px 14px" borderRadius="10px"
-              bg={isDark ? "rgba(249,115,22,0.1)" : "#fffbeb"}
-              border={`1px solid ${isDark ? "rgba(249,115,22,0.3)" : "#fcd34d"}`} mb="14px"
+              bg={isDark ? `${DARK_THEME.accent}15` : "#fffbeb"}
+              border={`1px solid ${isDark ? DARK_THEME.border : "#fcd34d"}`} mb="14px"
             >
-              <Switch size="md" colorScheme="orange" isChecked={form.isBatch}
+              <Switch size="md" colorScheme={isDark ? "blue" : "orange"} isChecked={form.isBatch}
                 onChange={e=>set("isBatch",e.target.checked)}
               />
               <Box>
-                <Text fontSize="13px" fontWeight="700" color={isDark ? "#fbbf24" : "#b45309"}>Phát hành hàng loạt</Text>
-                <Text fontSize="11px" color={isDark ? "#f59e0b" : "#92400e"}>Tạo nhiều mã voucher duy nhất cùng lúc</Text>
+                <Text fontSize="13px" fontWeight="700" color={isDark ? DARK_THEME.accent : "#b45309"}>Phát hành hàng loạt</Text>
+                <Text fontSize="11px" color={isDark ? DARK_THEME.textSecondary : "#92400e"}>Tạo nhiều mã voucher duy nhất cùng lúc</Text>
               </Box>
             </Flex>
             {form.isBatch && (
               <Box mb="14px">
-                <Text sx={darkLabelStyle}>Số lượng mã cần tạo *</Text>
-                <Input {...darkInputStyle} type="number" placeholder="VD: 1000"
+                <Text sx={labelStyles}>Số lượng mã cần tạo *</Text>
+                <Input {...inputStyles} type="number" placeholder="VD: 1000"
                   value={form.batchCount} onChange={e=>set("batchCount",e.target.value)} />
               </Box>
             )}
             <Box>
-              <Text sx={darkLabelStyle}>Mô tả / Điều kiện áp dụng</Text>
+              <Text sx={labelStyles}>Mô tả / Điều kiện áp dụng</Text>
               <Textarea
-                bg={isDark ? "rgba(255,255,255,0.07)" : "#fafafa"}
-                border={`1.5px solid ${isDark ? "rgba(255,255,255,0.12)" : "#e8edf3"}`}
+                bg={isDark ? DARK_THEME.inputBg : "#fafafa"}
+                border={isDark ? `1.5px solid ${DARK_THEME.border}` : "1.5px solid #e8edf3"}
                 borderRadius="10px"
-                color={isDark ? "#f1f5f9" : "#1a202c"} fontSize="14px" fontWeight="500" px="14px" py="10px"
-                _placeholder={{ color: isDark ? "rgba(255,255,255,0.3)" : "#b0bac8" }}
-                _focus={{ border:"1.5px solid #f97316", boxShadow:"0 0 0 3px rgba(249,115,22,0.10)" }}
-                _hover={{ border:"1.5px solid #f97316" }} transition="all 0.2s"
+                color={isDark ? DARK_THEME.text : "#1a202c"} fontSize="14px" fontWeight="500" px="14px" py="10px"
+                _placeholder={{ color: isDark ? DARK_THEME.labelColor : "#b0bac8" }}
+                _focus={{ 
+                  border: `1.5px solid ${isDark ? DARK_THEME.accent : "#f97316"}`, 
+                  boxShadow: isDark 
+                    ? `0 0 0 3px ${DARK_THEME.accentShadow}`
+                    : "0 0 0 3px rgba(249,115,22,0.10)" 
+                }}
+                _hover={{ border: `1.5px solid ${isDark ? DARK_THEME.accent : "#f97316"}` }} 
+                transition="all 0.2s"
                 rows={3} placeholder="Nhập mô tả điều kiện sử dụng voucher..."
                 value={form.description} onChange={e=>set("description",e.target.value)}
               />
@@ -769,59 +888,73 @@ function VoucherForm({ voucher, onCancel, onSave, isAdd = false, isDark }) {
         {/* Preview */}
         <Flex direction="column" gap="14px">
           <Box bg={cardBg} borderRadius="16px" border={`1px solid ${cardBorder}`}
-            boxShadow="0 1px 4px rgba(0,0,0,0.04)" p="18px"
+            boxShadow={isDark ? "0 1px 4px rgba(0,0,0,0.3)" : "0 1px 4px rgba(0,0,0,0.04)"} p="18px"
           >
             <SectionTitle label="Xem trước voucher" isDark={isDark} />
             <Box position="relative" borderRadius="14px" overflow="hidden"
-              bg="linear-gradient(135deg, #fff7ed 0%, #fffbeb 60%, #fef3c7 100%)"
-              border="2px solid #fed7aa" p="0"
+              bg={isDark 
+                ? `linear-gradient(135deg, ${DARK_THEME.inputBg}, ${DARK_THEME.cardBg})`
+                : "linear-gradient(135deg, #fff7ed 0%, #fffbeb 60%, #fef3c7 100%)"
+              }
+              border={`2px solid ${isDark ? DARK_THEME.border : "#fed7aa"}`} p="0"
               sx={{ animation:`${fadeIn} 0.4s ease both` }}
             >
-              <Box h="3px" bg="linear-gradient(90deg,#f97316,#fbbf24,#f97316)"
+              <Box h="3px" bg={`linear-gradient(90deg, ${isDark ? DARK_THEME.accent : "#f97316"}, ${isDark ? DARK_THEME.accentLight : "#fbbf24"}, ${isDark ? DARK_THEME.accent : "#f97316"})`}
                 bgSize="200% 100%" sx={{ animation:`${shimmer} 3s linear infinite` }}
               />
               <Box p="16px 18px">
                 <Flex justify="space-between" align="center" mb="12px">
                   <Flex align="center" gap="6px">
-                    <Box w="24px" h="24px" borderRadius="full" bg="#f97316"
+                    <Box w="24px" h="24px" borderRadius="full" bg={isDark ? DARK_THEME.accent : "#f97316"}
                       display="flex" alignItems="center" justifyContent="center"
                       sx={{ animation:`${float} 3s ease infinite` }}
                     >
                       <Icon as={FaTicketAlt} boxSize="12px" color="white" />
                     </Box>
-                    <Text fontSize="10px" fontWeight="800" color="#b45309" letterSpacing="1.5px" textTransform="uppercase">
+                    <Text fontSize="10px" fontWeight="800" color={isDark ? DARK_THEME.textSecondary : "#b45309"} 
+                      letterSpacing="1.5px" textTransform="uppercase">
                       Gấu Phim
                     </Text>
                   </Flex>
-                  <Text fontSize="10px" color="#f97316" fontWeight="700" letterSpacing="0.5px">VOUCHER</Text>
+                  <Text fontSize="10px" color={isDark ? DARK_THEME.accent : "#f97316"} fontWeight="700" letterSpacing="0.5px">VOUCHER</Text>
                 </Flex>
                 {form.name && (
-                  <Text fontSize="14px" fontWeight="800" color="#92400e" mb="8px" lineHeight="1.3">{form.name}</Text>
+                  <Text fontSize="14px" fontWeight="800" color={isDark ? DARK_THEME.text : "#92400e"} mb="8px" lineHeight="1.3">
+                    {form.name}
+                  </Text>
                 )}
                 <Box textAlign="center" py="12px">
-                  <Text fontSize="42px" fontWeight="900" color="#f97316" lineHeight="1"
-                    sx={{ textShadow:"0 2px 10px rgba(249,115,22,0.3)" }}
+                  <Text fontSize="42px" fontWeight="900" color={isDark ? DARK_THEME.accent : "#f97316"} lineHeight="1"
+                    sx={{ textShadow: isDark 
+                      ? `0 2px 10px ${DARK_THEME.accentShadow}`
+                      : "0 2px 10px rgba(249,115,22,0.3)"
+                    }}
                   >
                     {form.type === "Giảm %" && form.value ? `${form.value}%` :
                      form.type === "Giảm tiền" && form.value ? `-${(Number(form.value)/1000).toFixed(0)}K` : "🎁"}
                   </Text>
-                  <Text fontSize="11px" color="#b45309" fontWeight="600" mt="2px">
+                  <Text fontSize="11px" color={isDark ? DARK_THEME.textSecondary : "#b45309"} fontWeight="600" mt="2px">
                     {form.type === "Giảm %" ? "giảm giá" : form.type === "Giảm tiền" ? "giảm thẳng" : "quà tặng"}
                   </Text>
                 </Box>
-                <Box borderTop="2px dashed #fed7aa" my="12px" mx="-18px" />
+                <Box borderTop={`2px dashed ${isDark ? DARK_THEME.border : "#fed7aa"}`} my="12px" mx="-18px" />
                 <Flex direction="column" gap="6px">
                   {form.code && (
                     <Flex justify="center">
-                      <Box px="14px" py="6px" borderRadius="8px" bg="white"
-                        border="1.5px solid #f97316" boxShadow="0 2px 8px rgba(249,115,22,0.15)"
+                      <Box px="14px" py="6px" borderRadius="8px" bg={isDark ? DARK_THEME.inputBg : "white"}
+                        border={`1.5px solid ${isDark ? DARK_THEME.accent : "#f97316"}`} 
+                        boxShadow={isDark 
+                          ? `0 2px 8px ${DARK_THEME.accentShadow}`
+                          : "0 2px 8px rgba(249,115,22,0.15)"
+                        }
                       >
-                        <Text fontSize="15px" fontWeight="900" color="#c2410c" letterSpacing="3px" fontFamily="monospace">{form.code}</Text>
+                        <Text fontSize="15px" fontWeight="900" color={isDark ? DARK_THEME.accent : "#c2410c"} 
+                          letterSpacing="3px" fontFamily="monospace">{form.code}</Text>
                       </Box>
                     </Flex>
                   )}
                   {(form.startDate || form.endDate) && (
-                    <Text fontSize="10px" textAlign="center" color="#b45309" fontWeight="500">
+                    <Text fontSize="10px" textAlign="center" color={isDark ? DARK_THEME.textSecondary : "#b45309"} fontWeight="500">
                       {form.startDate && `Từ ${form.startDate}`}{form.endDate && ` → ${form.endDate}`}
                     </Text>
                   )}
@@ -832,27 +965,29 @@ function VoucherForm({ voucher, onCancel, onSave, isAdd = false, isDark }) {
 
           {(form.maxUses || form.applyFor) && (
             <Box bg={cardBg} borderRadius="16px" border={`1px solid ${cardBorder}`}
-              boxShadow="0 1px 4px rgba(0,0,0,0.04)" p="16px"
+              boxShadow={isDark ? "0 1px 4px rgba(0,0,0,0.3)" : "0 1px 4px rgba(0,0,0,0.04)"} p="16px"
               sx={{ animation:`${fadeIn} 0.3s ease both` }}
             >
               <SectionTitle label="Tóm tắt" isDark={isDark} />
               <Flex direction="column" gap="8px">
                 {form.maxUses && (
                   <Flex justify="space-between">
-                    <Text fontSize="12px" color="#64748b">Số lượt tối đa</Text>
-                    <Text fontSize="12px" fontWeight="700" color={isDark ? "#f1f5f9" : "#0f172a"}>{Number(form.maxUses).toLocaleString()} lượt</Text>
+                    <Text fontSize="12px" color={isDark ? DARK_THEME.textSecondary : "#64748b"}>Số lượt tối đa</Text>
+                    <Text fontSize="12px" fontWeight="700" color={textColor}>{Number(form.maxUses).toLocaleString()} lượt</Text>
                   </Flex>
                 )}
                 {form.applyFor && (
                   <Flex justify="space-between">
-                    <Text fontSize="12px" color="#64748b">Áp dụng cho</Text>
-                    <Text fontSize="12px" fontWeight="700" color={isDark ? "#f1f5f9" : "#0f172a"}>{form.applyFor}</Text>
+                    <Text fontSize="12px" color={isDark ? DARK_THEME.textSecondary : "#64748b"}>Áp dụng cho</Text>
+                    <Text fontSize="12px" fontWeight="700" color={textColor}>{form.applyFor}</Text>
                   </Flex>
                 )}
                 {form.isBatch && form.batchCount && (
                   <Flex justify="space-between">
-                    <Text fontSize="12px" color="#64748b">Số mã hàng loạt</Text>
-                    <Text fontSize="12px" fontWeight="700" color="#f97316">{Number(form.batchCount).toLocaleString()} mã</Text>
+                    <Text fontSize="12px" color={isDark ? DARK_THEME.textSecondary : "#64748b"}>Số mã hàng loạt</Text>
+                    <Text fontSize="12px" fontWeight="700" color={isDark ? DARK_THEME.accent : "#f97316"}>
+                      {Number(form.batchCount).toLocaleString()} mã
+                    </Text>
                   </Flex>
                 )}
               </Flex>
@@ -861,23 +996,36 @@ function VoucherForm({ voucher, onCancel, onSave, isAdd = false, isDark }) {
         </Flex>
       </Grid>
 
-      <Box bg={isDark ? "rgba(255,255,255,0.05)" : "white"}
-        borderRadius="14px" border={`1px solid ${isDark ? "rgba(255,255,255,0.08)" : "#f1f5f9"}`}
-        boxShadow="0 1px 4px rgba(0,0,0,0.04)" p={{ base:"14px 16px", md:"16px 20px" }} mt="16px"
+      <Box bg={isDark ? DARK_THEME.cardBg : "white"}
+        borderRadius="14px" border={`1px solid ${isDark ? DARK_THEME.border : "#f1f5f9"}`}
+        boxShadow={isDark ? "0 1px 4px rgba(0,0,0,0.3)" : "0 1px 4px rgba(0,0,0,0.04)"} 
+        p={{ base:"14px 16px", md:"16px 20px" }} mt="16px"
         position={{ base:"sticky", md:"static" }} bottom="0" zIndex="10"
       >
         <Flex justify={{ base:"stretch", md:"flex-end" }} gap="10px">
           <Button flex={{ base:"1", md:"none" }} h={{ base:"46px", md:"42px" }} px="22px"
-            variant="ghost" color={isDark ? "#94a3b8" : "#64748b"} borderRadius="10px" fontWeight="600" fontSize="13px"
-            border={`1.5px solid ${isDark ? "rgba(255,255,255,0.1)" : "#e2e8f0"}`}
-            _hover={{ bg: isDark ? "rgba(255,255,255,0.06)" : "#f8fafc" }} transition="all 0.2s"
+            variant="ghost" color={isDark ? DARK_THEME.textSecondary : "#64748b"} borderRadius="10px" fontWeight="600" fontSize="13px"
+            border={`1.5px solid ${isDark ? DARK_THEME.border : "#e2e8f0"}`}
+            _hover={{ bg: isDark ? DARK_THEME.hoverBg : "#f8fafc" }} transition="all 0.2s"
             leftIcon={<Icon as={MdClose} />} onClick={onCancel}
           >Hủy bỏ</Button>
           <Button flex={{ base:"2", md:"none" }} h={{ base:"46px", md:"42px" }} px="28px"
             borderRadius="10px" fontWeight="700" fontSize="13px"
-            bg="linear-gradient(135deg,#f97316 0%,#fb923c 60%,#fbbf24 100%)"
-            color="#fff" boxShadow="0 4px 16px rgba(249,115,22,0.35)"
-            _hover={{ boxShadow:"0 8px 24px rgba(249,115,22,0.45)", transform:"translateY(-1px)" }}
+            bg={isDark 
+              ? `linear-gradient(135deg, ${DARK_THEME.accent}, ${DARK_THEME.accentLight})`
+              : "linear-gradient(135deg,#f97316 0%,#fb923c 60%,#fbbf24 100%)"
+            }
+            color="#fff" 
+            boxShadow={isDark 
+              ? `0 4px 16px ${DARK_THEME.accentShadow}`
+              : "0 4px 16px rgba(249,115,22,0.35)"
+            }
+            _hover={{ 
+              boxShadow: isDark 
+                ? `0 8px 24px ${DARK_THEME.accentShadow}`
+                : "0 8px 24px rgba(249,115,22,0.45)", 
+              transform:"translateY(-1px)" 
+            }}
             _active={{ transform:"translateY(0)" }} transition="all 0.2s"
             leftIcon={<Icon as={isAdd ? MdAdd : MdCheckCircle} />}
             onClick={() => onSave(form)}
@@ -891,27 +1039,35 @@ function VoucherForm({ voucher, onCancel, onSave, isAdd = false, isDark }) {
 }
 
 // ─── Detail View ──────────────────────────────────────────────────────────
-function VoucherDetail({ v, onBack, onEdit, onDelete, isDark }) {
+function VoucherDetail({ v, onBack, onEdit, onDelete }) {
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === "dark";
+  
   const pct = v.maxUses === 0 ? 0 : Math.round((v.usedCount / v.maxUses) * 100);
   const remaining = v.maxUses - v.usedCount;
   const relatedHistory = USE_HISTORY.filter(h => h.code === v.code);
   const totalSaved = relatedHistory.reduce((s, h) => s + h.amount, 0);
-  const cardBg = isDark ? "rgba(255,255,255,0.05)" : "white";
-  const cardBorder = isDark ? "rgba(255,255,255,0.08)" : "#f1f5f9";
+  
+  const cardBg = isDark ? DARK_THEME.cardBg : "white";
+  const cardBorder = isDark ? DARK_THEME.border : "#f1f5f9";
+  const textColor = isDark ? DARK_THEME.text : "#0f172a";
+  const subTextColor = isDark ? DARK_THEME.textSecondary : "#475569";
+  const shadow = isDark ? "0 2px 12px rgba(0,0,0,0.3)" : "0 2px 12px rgba(0,0,0,0.06)";
+  const accentColor = isDark ? DARK_THEME.accent : "#f97316";
+  const accentShadow = isDark ? DARK_THEME.accentShadow : "rgba(249,115,22,0.4)";
 
   return (
     <Box sx={{ animation:`${fadeIn} 0.3s ease both` }}>
       <Flex align="center" justify="space-between" mb="16px" gap="10px">
         <Button leftIcon={<Icon as={MdArrowBack} />} variant="ghost"
-          color={isDark ? "#94a3b8" : "#64748b"} borderRadius="10px" h="38px" fontSize="13px" fontWeight="600"
-          border={`1.5px solid ${isDark ? "rgba(255,255,255,0.1)" : "#e2e8f0"}`}
-          _hover={{ bg: isDark ? "rgba(255,255,255,0.06)" : "#f8fafc" }} onClick={onBack}
+          color={isDark ? DARK_THEME.textSecondary : "#64748b"} borderRadius="10px" h="38px" fontSize="13px" fontWeight="600"
+          border={`1.5px solid ${isDark ? DARK_THEME.border : "#e2e8f0"}`}
+          _hover={{ bg: isDark ? DARK_THEME.hoverBg : "#f8fafc" }} onClick={onBack}
         >
           <Box as="span" display={{ base:"none", sm:"inline" }}>Quay lại danh sách</Box>
           <Box as="span" display={{ base:"inline", sm:"none" }}>Quay lại</Box>
         </Button>
         <Flex gap="8px">
-          {/* Nút xóa ở detail */}
           <Button h="38px" px={{ base:"12px", md:"16px" }} borderRadius="10px"
             fontWeight="700" fontSize="13px"
             bg="#fef2f2" color="#dc2626" border="1px solid #fca5a5"
@@ -923,9 +1079,21 @@ function VoucherDetail({ v, onBack, onEdit, onDelete, isDark }) {
           </Button>
           <Button h="38px" px={{ base:"14px", md:"20px" }} borderRadius="10px"
             fontWeight="700" fontSize="13px"
-            bg="linear-gradient(135deg,#f97316,#fb923c)" color="white"
-            boxShadow="0 4px 14px rgba(249,115,22,0.3)"
-            _hover={{ boxShadow:"0 6px 20px rgba(249,115,22,0.4)", transform:"translateY(-1px)" }}
+            bg={isDark 
+              ? `linear-gradient(135deg, ${DARK_THEME.accent}, ${DARK_THEME.accentLight})`
+              : "linear-gradient(135deg,#f97316,#fb923c)"
+            } 
+            color="white"
+            boxShadow={isDark 
+              ? `0 4px 14px ${DARK_THEME.accentShadow}`
+              : "0 4px 14px rgba(249,115,22,0.3)"
+            }
+            _hover={{ 
+              boxShadow: isDark 
+                ? `0 6px 20px ${DARK_THEME.accentShadow}`
+                : "0 6px 20px rgba(249,115,22,0.4)", 
+              transform:"translateY(-1px)" 
+            }}
             _active={{ transform:"translateY(0)" }} transition="all 0.2s"
             leftIcon={<Icon as={MdEdit} />} onClick={onEdit}
           >Chỉnh sửa</Button>
@@ -933,32 +1101,38 @@ function VoucherDetail({ v, onBack, onEdit, onDelete, isDark }) {
       </Flex>
 
       <Box bg={cardBg} borderRadius="18px" border={`1px solid ${cardBorder}`}
-        boxShadow={isDark ? "0 2px 12px rgba(0,0,0,0.3)" : "0 2px 12px rgba(0,0,0,0.06)"}
+        boxShadow={shadow}
         overflow="hidden" mb="16px"
       >
-        <Box h="4px" bg="linear-gradient(90deg,#f97316,#fbbf24,#f97316)"
+        <Box h="4px" bg={`linear-gradient(90deg, ${isDark ? DARK_THEME.accent : "#f97316"}, ${isDark ? DARK_THEME.accentLight : "#fbbf24"}, ${isDark ? DARK_THEME.accent : "#f97316"})`}
           bgSize="200% 100%" sx={{ animation:`${shimmer} 3s linear infinite` }}
         />
         <Flex direction={{ base:"column", md:"row" }}>
           <Box w={{ base:"100%", md:"240px" }} flexShrink="0"
-            bg={isDark ? "rgba(249,115,22,0.08)" : "linear-gradient(145deg, #fff7ed, #fffbeb)"}
+            bg={isDark ? `${DARK_THEME.accent}15` : "linear-gradient(145deg, #fff7ed, #fffbeb)"}
             display="flex" alignItems="center" justifyContent="center"
             p="28px 20px" borderRight={{ md:`1px solid ${cardBorder}` }}
           >
             <Flex direction="column" align="center" gap="8px">
               <Box w="64px" h="64px" borderRadius="20px"
-                bg="linear-gradient(135deg,#f97316,#fbbf24)"
+                bg={isDark 
+                  ? `linear-gradient(135deg, ${DARK_THEME.accent}, ${DARK_THEME.accentLight})`
+                  : "linear-gradient(135deg,#f97316,#fbbf24)"
+                }
                 display="flex" alignItems="center" justifyContent="center"
-                boxShadow="0 8px 24px rgba(249,115,22,0.4)"
+                boxShadow={isDark 
+                  ? `0 8px 24px ${DARK_THEME.accentShadow}`
+                  : "0 8px 24px rgba(249,115,22,0.4)"
+                }
                 sx={{ animation:`${float} 3s ease infinite` }}
               >
                 <Icon as={v.type === "Quà tặng" ? FaGift : v.type === "Giảm %" ? FaPercent : MdAttachMoney}
                   boxSize="28px" color="white" />
               </Box>
-              <Text fontSize="34px" fontWeight="900" color="#f97316" lineHeight="1">
+              <Text fontSize="34px" fontWeight="900" color={isDark ? DARK_THEME.accent : "#f97316"} lineHeight="1">
                 {v.type === "Giảm %" ? `${v.value}%` : v.type === "Giảm tiền" ? `-${(v.value/1000).toFixed(0)}K` : "🎁"}
               </Text>
-              <Text fontSize="11px" color="#b45309" fontWeight="600">{v.type}</Text>
+              <Text fontSize="11px" color={isDark ? DARK_THEME.textSecondary : "#b45309"} fontWeight="600">{v.type}</Text>
               <CopyCodeBtn code={v.code} />
             </Flex>
           </Box>
@@ -966,7 +1140,7 @@ function VoucherDetail({ v, onBack, onEdit, onDelete, isDark }) {
           <Box p={{ base:"18px", md:"24px" }} flex="1">
             <Flex justify="space-between" align="flex-start" mb="10px">
               <Box flex="1" minW="0" pr="8px">
-                <Text fontSize={{ base:"18px", md:"22px" }} fontWeight="800" color={isDark ? "#f1f5f9" : "#0f172a"}
+                <Text fontSize={{ base:"18px", md:"22px" }} fontWeight="800" color={textColor}
                   letterSpacing="-0.4px" mb="8px" lineHeight="1.2">{v.name}
                 </Text>
                 <Flex gap="8px" flexWrap="wrap">
@@ -976,20 +1150,21 @@ function VoucherDetail({ v, onBack, onEdit, onDelete, isDark }) {
               </Box>
             </Flex>
 
-            <Box h="1px" bg={isDark ? "rgba(255,255,255,0.06)" : "#f1f5f9"} mb="14px" />
+            <Box h="1px" bg={isDark ? DARK_THEME.border : "#f1f5f9"} mb="14px" />
 
             <SimpleGrid columns={{ base:2, md:4 }} spacing="10px" mb="14px">
               {[
-                { label:"Đã sử dụng", val:`${v.usedCount.toLocaleString()} lượt`, color:"#f97316" },
+                { label:"Đã sử dụng", val:`${v.usedCount.toLocaleString()} lượt`, color: isDark ? DARK_THEME.accent : "#f97316" },
                 { label:"Còn lại",    val:`${remaining.toLocaleString()} lượt`,    color:"#059669" },
-                { label:"Tổng giới hạn",val:`${v.maxUses.toLocaleString()} lượt`, color: isDark ? "#f1f5f9" : "#0f172a" },
+                { label:"Tổng giới hạn",val:`${v.maxUses.toLocaleString()} lượt`, color: textColor },
                 { label:"Đơn tối thiểu",val:`${v.minOrder.toLocaleString()}đ`,     color:"#7c3aed" },
               ].map(({ label, val, color }) => (
                 <Box key={label} p="10px 12px" borderRadius="10px"
-                  bg={isDark ? "rgba(255,255,255,0.06)" : "#f8fafc"}
-                  border={`1px solid ${isDark ? "rgba(255,255,255,0.08)" : "#f1f5f9"}`}
+                  bg={isDark ? DARK_THEME.inputBg : "#f8fafc"}
+                  border={`1px solid ${isDark ? DARK_THEME.border : "#f1f5f9"}`}
                 >
-                  <Text fontSize="9px" fontWeight="700" color="#94a3b8" letterSpacing="0.7px" textTransform="uppercase" mb="3px">{label}</Text>
+                  <Text fontSize="9px" fontWeight="700" color={isDark ? DARK_THEME.labelColor : "#94a3b8"} 
+                    letterSpacing="0.7px" textTransform="uppercase" mb="3px">{label}</Text>
                   <Text fontSize="14px" fontWeight="800" color={color}>{val}</Text>
                 </Box>
               ))}
@@ -997,22 +1172,29 @@ function VoucherDetail({ v, onBack, onEdit, onDelete, isDark }) {
 
             <Box mb="14px">
               <Flex justify="space-between" mb="6px">
-                <Text fontSize="11.5px" fontWeight="700" color={isDark ? "#cbd5e1" : "#374151"}>Tỷ lệ sử dụng</Text>
-                <Text fontSize="11.5px" fontWeight="800" color={pct >= 90 ? "#ef4444" : "#f97316"}>{pct}%</Text>
+                <Text fontSize="11.5px" fontWeight="700" color={isDark ? DARK_THEME.textSecondary : "#374151"}>Tỷ lệ sử dụng</Text>
+                <Text fontSize="11.5px" fontWeight="800" color={pct >= 90 ? "#ef4444" : (isDark ? DARK_THEME.accent : "#f97316")}>
+                  {pct}%
+                </Text>
               </Flex>
-              <Box h="8px" bg={isDark ? "rgba(255,255,255,0.1)" : "#f1f5f9"} borderRadius="full" overflow="hidden">
+              <Box h="8px" bg={isDark ? DARK_THEME.inputBg : "#f1f5f9"} borderRadius="full" overflow="hidden">
                 <Box h="100%" w={`${pct}%`} borderRadius="full"
-                  bg={pct >= 90 ? "linear-gradient(90deg,#f97316,#ef4444)" : "linear-gradient(90deg,#f97316,#fbbf24)"}
-                  transition="width 0.8s ease" />
+                  bg={isDark 
+                    ? `linear-gradient(90deg, ${DARK_THEME.accent}, ${DARK_THEME.accentLight})`
+                    : pct >= 90 ? "linear-gradient(90deg,#f97316,#ef4444)" : "linear-gradient(90deg,#f97316,#fbbf24)"
+                  }
+                  transition="width 0.8s ease" 
+                />
               </Box>
             </Box>
 
             <Box p="12px 14px" borderRadius="12px"
-              bg={isDark ? "rgba(249,115,22,0.08)" : "#fffbf7"}
-              border={`1px solid ${isDark ? "rgba(249,115,22,0.25)" : "#fed7aa"}`}
+              bg={isDark ? `${DARK_THEME.accent}15` : "#fffbf7"}
+              border={`1px solid ${isDark ? DARK_THEME.border : "#fed7aa"}`}
             >
-              <Text fontSize="10px" fontWeight="800" color="#92400e" letterSpacing="1px" textTransform="uppercase" mb="6px">Mô tả & Điều kiện</Text>
-              <Text fontSize="13px" color={isDark ? "#cbd5e1" : "#475569"} lineHeight="1.7">{v.description}</Text>
+              <Text fontSize="10px" fontWeight="800" color={isDark ? DARK_THEME.textSecondary : "#92400e"} 
+                letterSpacing="1px" textTransform="uppercase" mb="6px">Mô tả & Điều kiện</Text>
+              <Text fontSize="13px" color={subTextColor} lineHeight="1.7">{v.description}</Text>
             </Box>
           </Box>
         </Flex>
@@ -1022,43 +1204,48 @@ function VoucherDetail({ v, onBack, onEdit, onDelete, isDark }) {
         {[
           { label:"Ngày bắt đầu",  val:v.startDate,    icon:MdCalendarToday, color:"#059669" },
           { label:"Ngày kết thúc", val:v.endDate,       icon:MdAccessTime,   color:"#dc2626" },
-          { label:"Tiết kiệm tổng",val:`${totalSaved.toLocaleString()}đ`, icon:FaCoins, color:"#f97316" },
+          { label:"Tiết kiệm tổng",val:`${totalSaved.toLocaleString()}đ`, icon:FaCoins, color: isDark ? DARK_THEME.accent : "#f97316" },
         ].map(({ label, val, icon:Ic, color }) => (
           <Box key={label} bg={cardBg} borderRadius="14px" border={`1px solid ${cardBorder}`}
-            boxShadow="0 1px 4px rgba(0,0,0,0.04)" p="14px"
+            boxShadow={isDark ? "0 1px 4px rgba(0,0,0,0.3)" : "0 1px 4px rgba(0,0,0,0.04)"} p="14px"
           >
             <Flex align="center" gap="8px" mb="8px">
-              <Box w="28px" h="28px" borderRadius="8px" bg="#fff7ed"
+              <Box w="28px" h="28px" borderRadius="8px" bg={isDark ? DARK_THEME.inputBg : "#fff7ed"}
                 display="flex" alignItems="center" justifyContent="center"
               >
                 <Icon as={Ic} boxSize="13px" color={color} />
               </Box>
-              <Text fontSize="10px" fontWeight="700" color="#94a3b8" letterSpacing="0.8px" textTransform="uppercase">{label}</Text>
+              <Text fontSize="10px" fontWeight="700" color={isDark ? DARK_THEME.labelColor : "#94a3b8"} 
+                letterSpacing="0.8px" textTransform="uppercase">{label}</Text>
             </Flex>
-            <Text fontSize="15px" fontWeight="800" color={isDark ? "#f1f5f9" : "#0f172a"}>{val}</Text>
+            <Text fontSize="15px" fontWeight="800" color={textColor}>{val}</Text>
           </Box>
         ))}
       </Grid>
 
       <Box bg={cardBg} borderRadius="16px" border={`1px solid ${cardBorder}`}
-        boxShadow="0 1px 4px rgba(0,0,0,0.04)" p={{ base:"16px", md:"20px" }}
+        boxShadow={isDark ? "0 1px 4px rgba(0,0,0,0.3)" : "0 1px 4px rgba(0,0,0,0.04)"} 
+        p={{ base:"16px", md:"20px" }}
       >
         <Flex align="center" justify="space-between" mb="14px">
           <Flex align="center" gap="8px">
-            <Box w="3px" h="14px" borderRadius="full" bg="linear-gradient(180deg,#f97316,#fbbf24)" />
-            <Text fontSize="13px" fontWeight="800" color={isDark ? "#f1f5f9" : "#0f172a"}>Lịch sử sử dụng gần nhất</Text>
+            <Box w="3px" h="14px" borderRadius="full" bg={isDark ? DARK_THEME.accent : "linear-gradient(180deg,#f97316,#fbbf24)"} />
+            <Text fontSize="13px" fontWeight="800" color={textColor}>Lịch sử sử dụng gần nhất</Text>
           </Flex>
           {relatedHistory.length > 0 && (
-            <Box px="8px" py="2px" borderRadius="6px" bg="#fff7ed" border="1px solid #fed7aa">
-              <Text fontSize="11px" fontWeight="700" color="#f97316">{relatedHistory.length} giao dịch</Text>
+            <Box px="8px" py="2px" borderRadius="6px" bg={isDark ? DARK_THEME.inputBg : "#fff7ed"} 
+              border={`1px solid ${isDark ? DARK_THEME.border : "#fed7aa"}`}>
+              <Text fontSize="11px" fontWeight="700" color={isDark ? DARK_THEME.accent : "#f97316"}>
+                {relatedHistory.length} giao dịch
+              </Text>
             </Box>
           )}
         </Flex>
 
         {relatedHistory.length === 0 ? (
-          <Flex direction="column" align="center" py="24px" color="#cbd5e1">
+          <Flex direction="column" align="center" py="24px" color={isDark ? DARK_THEME.border : "#cbd5e1"}>
             <Icon as={FaTicketAlt} boxSize="22px" mb="6px" />
-            <Text fontSize="12px" color="#94a3b8">Chưa có lượt sử dụng nào</Text>
+            <Text fontSize="12px" color={isDark ? DARK_THEME.textSecondary : "#94a3b8"}>Chưa có lượt sử dụng nào</Text>
           </Flex>
         ) : (
           <Box overflowX="auto">
@@ -1066,7 +1253,7 @@ function VoucherDetail({ v, onBack, onEdit, onDelete, isDark }) {
               <Thead>
                 <Tr>
                   {["Khách hàng","Mã đơn","Tiết kiệm","Thời gian"].map(h => (
-                    <Th key={h} fontSize="10px" fontWeight="800" color="#94a3b8"
+                    <Th key={h} fontSize="10px" fontWeight="800" color={isDark ? DARK_THEME.labelColor : "#94a3b8"}
                       letterSpacing="1px" textTransform="uppercase" pb="10px">{h}</Th>
                   ))}
                 </Tr>
@@ -1074,13 +1261,13 @@ function VoucherDetail({ v, onBack, onEdit, onDelete, isDark }) {
               <Tbody>
                 {relatedHistory.map(row => (
                   <Tr key={row.id}
-                    _hover={{ bg: isDark ? "rgba(255,255,255,0.04)" : "#fafafa" }}
+                    _hover={{ bg: isDark ? DARK_THEME.hoverBg : "#fafafa" }}
                     transition="all 0.15s"
                   >
-                    <Td py="10px"><Text fontSize="13px" fontWeight="600" color={isDark ? "#f1f5f9" : "#0f172a"}>{row.user}</Text></Td>
-                    <Td><Text fontSize="12px" fontWeight="700" color="#f97316">{row.orderId}</Text></Td>
+                    <Td py="10px"><Text fontSize="13px" fontWeight="600" color={textColor}>{row.user}</Text></Td>
+                    <Td><Text fontSize="12px" fontWeight="700" color={isDark ? DARK_THEME.accent : "#f97316"}>{row.orderId}</Text></Td>
                     <Td><Text fontSize="13px" fontWeight="700" color="#059669">-{row.amount.toLocaleString()}đ</Text></Td>
-                    <Td><Text fontSize="11px" color="#94a3b8">{row.date}</Text></Td>
+                    <Td><Text fontSize="11px" color={isDark ? DARK_THEME.textSecondary : "#94a3b8"}>{row.date}</Text></Td>
                   </Tr>
                 ))}
               </Tbody>
@@ -1094,6 +1281,9 @@ function VoucherDetail({ v, onBack, onEdit, onDelete, isDark }) {
 
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────
 export default function QuanlyVoucher() {
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === "dark";
+  
   const [view, setView] = useState("list");
   const [selected, setSelected] = useState(null);
   const [vouchers, setVouchers] = useState(VOUCHERS_DATA);
@@ -1103,10 +1293,20 @@ export default function QuanlyVoucher() {
   const [displayMode, setDisplayMode] = useState("grid");
   const [showFilter, setShowFilter] = useState(false);
   const [activeTab, setActiveTab] = useState("vouchers");
-  const [deleteTarget, setDeleteTarget] = useState(null);   // voucher cần xóa
-  const [isDark, setIsDark] = useState(true);               // dark mode state
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
-  const toggleDark = useCallback(() => setIsDark(d => !d), []);
+  const pageBg = isDark ? DARK_THEME.bg : "#f8fafc";
+  const cardBg = isDark ? DARK_THEME.cardBg : "white";
+  const cardBorder = isDark ? DARK_THEME.border : "#f1f5f9";
+  const textPrimary = isDark ? DARK_THEME.text : "#0f172a";
+  const textMuted = isDark ? DARK_THEME.textSecondary : "#94a3b8";
+  const inputBg = isDark ? DARK_THEME.inputBg : "#f8fafc";
+  const inputBorder = isDark ? DARK_THEME.inputBorder : "#e8edf3";
+  const accentColor = isDark ? DARK_THEME.accent : "#f97316";
+  const accentShadow = isDark ? DARK_THEME.accentShadow : "rgba(249,115,22,0.35)";
+  const gradientBg = isDark 
+    ? `linear-gradient(135deg, ${DARK_THEME.accent}, ${DARK_THEME.accentLight})`
+    : "linear-gradient(135deg,#f97316,#fb923c)";
 
   const filtered = vouchers.filter(v => {
     const matchSearch = v.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -1155,26 +1355,15 @@ export default function QuanlyVoucher() {
     setView("list");
   };
 
-  // ── Theme variables ──
-  const pageBg = isDark ? "transparent" : "transparent";
-  const cardBg = isDark ? "rgba(255,255,255,0.04)" : "white";
-  const cardBorder = isDark ? "rgba(255,255,255,0.07)" : "#f1f5f9";
-  const textPrimary = isDark ? "#f1f5f9" : "#0f172a";
-  const textMuted = isDark ? "#94a3b8" : "#94a3b8";
-  const inputBg = isDark ? "rgba(255,255,255,0.07)" : "#f8fafc";
-  const inputBorder = isDark ? "rgba(255,255,255,0.1)" : "#e8edf3";
-
   // ── LIST VIEW ──
   if (view === "list") {
     return (
-      <Box pt={{ base:"100px", md:"80px" }} px="0" position="relative">
-        {/* Delete confirm modal */}
+      <Box pt={{ base:"100px", md:"80px" }} px="0" position="relative" bg={pageBg} minH="100vh">
         {deleteTarget && (
           <DeleteModal
             voucher={deleteTarget}
             onConfirm={handleDeleteConfirm}
             onCancel={() => setDeleteTarget(null)}
-            isDark={isDark}
           />
         )}
 
@@ -1185,9 +1374,12 @@ export default function QuanlyVoucher() {
           <Box sx={{ animation:`${fadeUp} 0.4s ease both` }}>
             <Flex align="center" gap="10px" mb="4px">
               <Box w="42px" h="42px" borderRadius="13px"
-                bg="linear-gradient(135deg,#f97316,#fbbf24)"
+                bg={gradientBg}
                 display="flex" alignItems="center" justifyContent="center"
-                boxShadow="0 6px 16px rgba(249,115,22,0.4)"
+                boxShadow={isDark 
+                  ? `0 6px 16px ${DARK_THEME.accentShadow}`
+                  : "0 6px 16px rgba(249,115,22,0.4)"
+                }
                 sx={{ animation:`${float} 3s ease infinite` }}
               >
                 <Icon as={MdLocalOffer} boxSize="20px" color="white" />
@@ -1202,17 +1394,14 @@ export default function QuanlyVoucher() {
           </Box>
 
           <Flex gap="8px" w={{ base:"100%", md:"auto" }} align="center" sx={{ animation:`${fadeIn} 0.4s ease 0.1s both` }}>
-            {/* Dark mode toggle */}
-            <DarkModeToggle isDark={isDark} onToggle={toggleDark} />
-
-            {/* Grid/List toggle */}
+            <DarkModeToggle />
             <Flex borderRadius="10px"
-              border={`1px solid ${isDark ? "rgba(255,255,255,0.1)" : "#e2e8f0"}`}
+              border={`1px solid ${isDark ? DARK_THEME.border : "#e2e8f0"}`}
               overflow="hidden" flexShrink="0"
             >
               {["grid","list"].map(mode => (
                 <Box key={mode} px="12px" py="8px" cursor="pointer"
-                  bg={displayMode === mode ? "linear-gradient(135deg,#f97316,#fb923c)" : (isDark ? "rgba(255,255,255,0.04)" : "#f8fafc")}
+                  bg={displayMode === mode ? gradientBg : (isDark ? DARK_THEME.inputBg : "#f8fafc")}
                   transition="all 0.2s"
                   onClick={() => setDisplayMode(mode)}
                 >
@@ -1224,9 +1413,17 @@ export default function QuanlyVoucher() {
             </Flex>
             <Button flex={{ base:"1", md:"none" }}
               h="40px" px="20px" borderRadius="10px" fontWeight="700" fontSize="13px"
-              bg="linear-gradient(135deg,#f97316,#fb923c)" color="white"
-              boxShadow="0 4px 14px rgba(249,115,22,0.35)"
-              _hover={{ boxShadow:"0 6px 20px rgba(249,115,22,0.45)", transform:"translateY(-1px)" }}
+              bg={gradientBg} color="white"
+              boxShadow={isDark 
+                ? `0 4px 14px ${DARK_THEME.accentShadow}`
+                : "0 4px 14px rgba(249,115,22,0.35)"
+              }
+              _hover={{ 
+                boxShadow: isDark 
+                  ? `0 6px 20px ${DARK_THEME.accentShadow}`
+                  : "0 6px 20px rgba(249,115,22,0.45)", 
+                transform:"translateY(-1px)" 
+              }}
               _active={{ transform:"translateY(0)" }} transition="all 0.2s"
               leftIcon={<Icon as={MdAdd} />}
               onClick={() => setView("add")}
@@ -1236,17 +1433,17 @@ export default function QuanlyVoucher() {
 
         {/* Stats */}
         <SimpleGrid columns={{ base:2, md:5 }} spacing="10px" mb="18px">
-          <StatCard label="Tổng voucher"  value={counts.total}    icon={MdLocalOffer}   accent="#f97316" delay={0}    isDark={isDark} />
-          <StatCard label="Đang chạy"     value={counts.active}   icon={MdPlayCircle}   accent="#10b981" delay={0.05} isDark={isDark} />
-          <StatCard label="Tạm dừng"      value={counts.paused}   icon={MdPause}        accent="#f59e0b" delay={0.1}  isDark={isDark} />
-          <StatCard label="Hết hạn/Dùng hết" value={counts.expired} icon={MdStop}       accent="#94a3b8" delay={0.15} isDark={isDark} />
+          <StatCard label="Tổng voucher" value={counts.total} icon={MdLocalOffer} accent="#f97316" delay={0} isDark={isDark} />
+          <StatCard label="Đang chạy" value={counts.active} icon={MdPlayCircle} accent="#10b981" delay={0.05} isDark={isDark} />
+          <StatCard label="Tạm dừng" value={counts.paused} icon={MdPause} accent="#f59e0b" delay={0.1} isDark={isDark} />
+          <StatCard label="Hết hạn/Dùng hết" value={counts.expired} icon={MdStop} accent="#94a3b8" delay={0.15} isDark={isDark} />
           <StatCard label="Tổng lượt dùng" value={counts.totalUsed.toLocaleString()} icon={FaFire} accent="#ef4444" delay={0.2} isDark={isDark} />
         </SimpleGrid>
 
         {/* Tabs */}
         <Flex gap="0" mb="16px" borderRadius="12px"
-          border={`1px solid ${isDark ? "rgba(255,255,255,0.1)" : "#e2e8f0"}`}
-          bg={isDark ? "rgba(255,255,255,0.04)" : "#f8fafc"}
+          border={`1px solid ${isDark ? DARK_THEME.border : "#e2e8f0"}`}
+          bg={isDark ? DARK_THEME.inputBg : "#f8fafc"}
           p="4px" w="fit-content"
         >
           {[
@@ -1254,12 +1451,12 @@ export default function QuanlyVoucher() {
             { key:"history",  label:"Lịch sử sử dụng",  icon:MdBarChart },
           ].map(({ key, label, icon:Ic }) => (
             <Box key={key} px="16px" py="7px" borderRadius="9px" cursor="pointer"
-              bg={activeTab === key ? (isDark ? "rgba(255,255,255,0.1)" : "white") : "transparent"}
-              boxShadow={activeTab === key ? (isDark ? "0 1px 4px rgba(0,0,0,0.4)" : "0 1px 4px rgba(0,0,0,0.08)") : "none"}
+              bg={activeTab === key ? (isDark ? DARK_THEME.hoverBg : "white") : "transparent"}
+              boxShadow={activeTab === key ? (isDark ? `0 1px 4px ${DARK_THEME.accentShadow}` : "0 1px 4px rgba(0,0,0,0.08)") : "none"}
               transition="all 0.2s" onClick={() => setActiveTab(key)}
             >
               <Flex align="center" gap="6px">
-                <Icon as={Ic} boxSize="13px" color={activeTab === key ? "#f97316" : "#94a3b8"} />
+                <Icon as={Ic} boxSize="13px" color={activeTab === key ? accentColor : "#94a3b8"} />
                 <Text fontSize="12.5px" fontWeight="700" color={activeTab === key ? textPrimary : "#94a3b8"}>
                   {label}
                 </Text>
@@ -1270,39 +1467,41 @@ export default function QuanlyVoucher() {
 
         {activeTab === "vouchers" ? (
           <Box bg={cardBg} borderRadius="16px" border={`1px solid ${cardBorder}`}
-            boxShadow={isDark ? "0 1px 4px rgba(0,0,0,0.3)" : "0 1px 4px rgba(0,0,0,0.04)"}
+            boxShadow={isDark ? `0 1px 4px ${DARK_THEME.accentShadow}` : "0 1px 4px rgba(0,0,0,0.04)"}
             sx={{ animation:`${fadeUp} 0.4s ease 0.1s both` }}
           >
             <Box p={{ base:"14px 16px", md:"18px 20px 14px" }}
-              borderBottom={`1px solid ${isDark ? "rgba(255,255,255,0.06)" : "#f8fafc"}`}
+              borderBottom={`1px solid ${isDark ? DARK_THEME.border : "#f8fafc"}`}
             >
               <Flex align="center" justify="space-between" mb="12px">
                 <Flex align="center" gap="8px">
                   <Text fontWeight="800" fontSize={{ base:"14px", md:"15px" }} color={textPrimary}>Danh sách voucher</Text>
-                  <Box px="8px" py="2px" borderRadius="6px" bg="#fff7ed" border="1px solid #fed7aa">
-                    <Text fontSize="11px" fontWeight="700" color="#f97316">{filtered.length} mã</Text>
+                  <Box px="8px" py="2px" borderRadius="6px" bg={isDark ? DARK_THEME.inputBg : "#fff7ed"} 
+                    border={`1px solid ${isDark ? DARK_THEME.border : "#fed7aa"}`}>
+                    <Text fontSize="11px" fontWeight="700" color={isDark ? DARK_THEME.accent : "#f97316"}>
+                      {filtered.length} mã
+                    </Text>
                   </Box>
                 </Flex>
                 <Flex gap="8px" align="center">
-                  {/* Export button */}
                   <Tooltip label="Export danh sách voucher ra CSV" placement="bottom">
                     <Button size="sm" h="34px" px="12px" borderRadius="9px"
-                      bg={isDark ? "rgba(16,185,129,0.15)" : "#ecfdf5"}
+                      bg={isDark ? `${DARK_THEME.accent}20` : "#ecfdf5"}
                       color="#059669" border="1px solid #6ee7b7"
                       fontSize="12px" fontWeight="600"
                       leftIcon={<Icon as={MdDownload} boxSize="13px" />}
-                      _hover={{ bg: isDark ? "rgba(16,185,129,0.25)" : "#d1fae5" }} transition="all 0.15s"
+                      _hover={{ bg: isDark ? `${DARK_THEME.accent}30` : "#d1fae5" }} transition="all 0.15s"
                       onClick={() => exportVouchersToCSV(filtered, "danh-sach-voucher.csv")}
                       display={{ base:"none", md:"flex" }}
                     >Export CSV</Button>
                   </Tooltip>
                   <Button display={{ base:"flex", md:"none" }} size="sm" h="34px" px="12px"
                     borderRadius="9px"
-                    bg={isDark ? "rgba(255,255,255,0.07)" : "#f8fafc"}
+                    bg={isDark ? DARK_THEME.inputBg : "#f8fafc"}
                     color={textMuted}
-                    border={`1px solid ${isDark ? "rgba(255,255,255,0.1)" : "#e2e8f0"}`}
+                    border={`1px solid ${isDark ? DARK_THEME.border : "#e2e8f0"}`}
                     fontSize="12px" fontWeight="600" leftIcon={<Icon as={MdFilterList} boxSize="13px" />}
-                    _hover={{ bg: isDark ? "rgba(255,255,255,0.1)" : "#f1f5f9" }}
+                    _hover={{ bg: isDark ? DARK_THEME.hoverBg : "#f1f5f9" }}
                     onClick={() => setShowFilter(v => !v)}
                   >Lọc</Button>
                 </Flex>
@@ -1312,23 +1511,30 @@ export default function QuanlyVoucher() {
                 <Flex gap="10px" direction={{ base:"column", sm:"row" }}>
                   <Box position="relative" flex="1">
                     <Icon as={MdSearch} position="absolute" left="10px" top="50%"
-                      transform="translateY(-50%)" boxSize="14px" color="#94a3b8" zIndex="1"
+                      transform="translateY(-50%)" boxSize="14px" color={isDark ? DARK_THEME.labelColor : "#94a3b8"} zIndex="1"
                     />
                     <Input pl="30px" h={{ base:"40px", md:"34px" }} w="100%" fontSize="12.5px"
                       placeholder="Tìm tên voucher, mã code..."
                       bg={inputBg}
                       border={`1px solid ${inputBorder}`}
                       borderRadius="9px" color={textPrimary}
-                      _placeholder={{ color:"#b0bac8" }}
-                      _focus={{ border:"1.5px solid #f97316", boxShadow:"0 0 0 3px rgba(249,115,22,0.08)" }}
-                      _hover={{ border:"1px solid #f97316" }} transition="all 0.2s"
+                      _placeholder={{ color: isDark ? DARK_THEME.labelColor : "#b0bac8" }}
+                      _focus={{ 
+                        border: `1.5px solid ${isDark ? DARK_THEME.accent : "#f97316"}`, 
+                        boxShadow: isDark 
+                          ? `0 0 0 3px ${DARK_THEME.accentShadow}`
+                          : "0 0 0 3px rgba(249,115,22,0.08)" 
+                      }}
+                      _hover={{ border: `1px solid ${isDark ? DARK_THEME.accent : "#f97316"}` }} 
+                      transition="all 0.2s"
                       value={search} onChange={e => setSearch(e.target.value)}
                     />
                   </Box>
                   <Select h={{ base:"40px", md:"34px" }} fontSize="12.5px" fontWeight="600"
                     color={textPrimary} bg={inputBg} border={`1px solid ${inputBorder}`}
                     borderRadius="9px" w={{ base:"100%", sm:"150px" }}
-                    _focus={{ border:"1.5px solid #f97316" }} _hover={{ border:"1px solid #f97316" }}
+                    _focus={{ border: `1.5px solid ${isDark ? DARK_THEME.accent : "#f97316"}` }} 
+                    _hover={{ border: `1px solid ${isDark ? DARK_THEME.accent : "#f97316"}` }}
                     transition="all 0.2s" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
                   >
                     <option value="Tất cả">Tất cả trạng thái</option>
@@ -1340,7 +1546,8 @@ export default function QuanlyVoucher() {
                   <Select h={{ base:"40px", md:"34px" }} fontSize="12.5px" fontWeight="600"
                     color={textPrimary} bg={inputBg} border={`1px solid ${inputBorder}`}
                     borderRadius="9px" w={{ base:"100%", sm:"140px" }}
-                    _focus={{ border:"1.5px solid #f97316" }} _hover={{ border:"1px solid #f97316" }}
+                    _focus={{ border: `1.5px solid ${isDark ? DARK_THEME.accent : "#f97316"}` }} 
+                    _hover={{ border: `1px solid ${isDark ? DARK_THEME.accent : "#f97316"}` }}
                     transition="all 0.2s" value={filterType} onChange={e => setFilterType(e.target.value)}
                   >
                     <option value="Tất cả">Tất cả loại</option>
@@ -1354,14 +1561,16 @@ export default function QuanlyVoucher() {
 
             <Box p={{ base:"10px", md:"14px" }}>
               {filtered.length === 0 ? (
-                <Flex direction="column" align="center" py="48px" color="#cbd5e1">
+                <Flex direction="column" align="center" py="48px" color={isDark ? DARK_THEME.border : "#cbd5e1"}>
                   <Icon as={MdLocalOffer} boxSize="32px" mb="8px" />
-                  <Text fontSize="13px" fontWeight="600" color="#94a3b8">Không tìm thấy voucher nào</Text>
+                  <Text fontSize="13px" fontWeight="600" color={isDark ? DARK_THEME.textSecondary : "#94a3b8"}>
+                    Không tìm thấy voucher nào
+                  </Text>
                 </Flex>
               ) : displayMode === "grid" ? (
                 <Grid templateColumns={{ base:"1fr", sm:"1fr 1fr", xl:"repeat(3,1fr)" }} gap="10px">
                   {filtered.map((v, i) => (
-                    <VoucherCard key={v.id} v={v} index={i} isDark={isDark}
+                    <VoucherCard key={v.id} v={v} index={i}
                       onView={vv => { setSelected(vv); setView("detail"); }}
                       onEdit={vv => { setSelected(vv); setView("edit"); }}
                       onToggle={handleToggle}
@@ -1372,21 +1581,21 @@ export default function QuanlyVoucher() {
               ) : (
                 <>
                   <Flex px="16px" py="10px"
-                    bg={isDark ? "rgba(255,255,255,0.04)" : "#fafbfc"}
-                    borderBottom={`1px solid ${isDark ? "rgba(255,255,255,0.06)" : "#f1f5f9"}`}
+                    bg={isDark ? DARK_THEME.inputBg : "#fafbfc"}
+                    borderBottom={`1px solid ${isDark ? DARK_THEME.border : "#f1f5f9"}`}
                     borderRadius="8px" mb="6px" display={{ base:"none", md:"flex" }}
                   >
-                    <Box w="32px" flexShrink="0"><Text fontSize="10px" fontWeight="800" color="#cbd5e1" letterSpacing="1px">#</Text></Box>
-                    <Box flex="2"><Text fontSize="10px" fontWeight="800" color="#94a3b8" letterSpacing="1px" textTransform="uppercase">Tên / Mã</Text></Box>
-                    <Box flex="0.7"><Text fontSize="10px" fontWeight="800" color="#94a3b8" letterSpacing="1px" textTransform="uppercase">Loại / Giá trị</Text></Box>
-                    <Box flex="1"><Text fontSize="10px" fontWeight="800" color="#94a3b8" letterSpacing="1px" textTransform="uppercase">Sử dụng</Text></Box>
-                    <Box flex="0.8"><Text fontSize="10px" fontWeight="800" color="#94a3b8" letterSpacing="1px" textTransform="uppercase">Trạng thái</Text></Box>
-                    <Box flex="0.7"><Text fontSize="10px" fontWeight="800" color="#94a3b8" letterSpacing="1px" textTransform="uppercase">Hết hạn</Text></Box>
-                    <Box w="200px" flexShrink="0" textAlign="right"><Text fontSize="10px" fontWeight="800" color="#94a3b8" letterSpacing="1px" textTransform="uppercase">Hành động</Text></Box>
+                    <Box w="32px" flexShrink="0"><Text fontSize="10px" fontWeight="800" color={isDark ? DARK_THEME.border : "#cbd5e1"} letterSpacing="1px">#</Text></Box>
+                    <Box flex="2"><Text fontSize="10px" fontWeight="800" color={isDark ? DARK_THEME.labelColor : "#94a3b8"} letterSpacing="1px" textTransform="uppercase">Tên / Mã</Text></Box>
+                    <Box flex="0.7"><Text fontSize="10px" fontWeight="800" color={isDark ? DARK_THEME.labelColor : "#94a3b8"} letterSpacing="1px" textTransform="uppercase">Loại / Giá trị</Text></Box>
+                    <Box flex="1"><Text fontSize="10px" fontWeight="800" color={isDark ? DARK_THEME.labelColor : "#94a3b8"} letterSpacing="1px" textTransform="uppercase">Sử dụng</Text></Box>
+                    <Box flex="0.8"><Text fontSize="10px" fontWeight="800" color={isDark ? DARK_THEME.labelColor : "#94a3b8"} letterSpacing="1px" textTransform="uppercase">Trạng thái</Text></Box>
+                    <Box flex="0.7"><Text fontSize="10px" fontWeight="800" color={isDark ? DARK_THEME.labelColor : "#94a3b8"} letterSpacing="1px" textTransform="uppercase">Hết hạn</Text></Box>
+                    <Box w="200px" flexShrink="0" textAlign="right"><Text fontSize="10px" fontWeight="800" color={isDark ? DARK_THEME.labelColor : "#94a3b8"} letterSpacing="1px" textTransform="uppercase">Hành động</Text></Box>
                   </Flex>
                   <Flex direction="column" gap="6px">
                     {filtered.map((v, i) => (
-                      <VoucherRow key={v.id} v={v} index={i} isDark={isDark}
+                      <VoucherRow key={v.id} v={v} index={i}
                         onView={vv => { setSelected(vv); setView("detail"); }}
                         onEdit={vv => { setSelected(vv); setView("edit"); }}
                         onToggle={handleToggle}
@@ -1399,23 +1608,22 @@ export default function QuanlyVoucher() {
             </Box>
           </Box>
         ) : (
-          /* ── History tab ── */
           <Box bg={cardBg} borderRadius="16px" border={`1px solid ${cardBorder}`}
-            boxShadow={isDark ? "0 1px 4px rgba(0,0,0,0.3)" : "0 1px 4px rgba(0,0,0,0.04)"}
+            boxShadow={isDark ? `0 1px 4px ${DARK_THEME.accentShadow}` : "0 1px 4px rgba(0,0,0,0.04)"}
             p={{ base:"16px", md:"20px" }}
             sx={{ animation:`${fadeUp} 0.4s ease 0.1s both` }}
           >
             <Flex align="center" justify="space-between" mb="16px">
               <Flex align="center" gap="8px">
-                <Box w="3px" h="14px" borderRadius="full" bg="linear-gradient(180deg,#f97316,#fbbf24)" />
+                <Box w="3px" h="14px" borderRadius="full" bg={isDark ? DARK_THEME.accent : "linear-gradient(180deg,#f97316,#fbbf24)"} />
                 <Text fontSize="14px" fontWeight="800" color={textPrimary}>Lịch sử sử dụng voucher</Text>
               </Flex>
               <Flex gap="8px">
                 <Button size="sm" h="32px" px="12px" borderRadius="8px"
-                  bg={isDark ? "rgba(16,185,129,0.15)" : "#ecfdf5"}
+                  bg={isDark ? `${DARK_THEME.accent}20` : "#ecfdf5"}
                   color="#059669" border="1px solid #6ee7b7"
                   fontSize="12px" fontWeight="600" leftIcon={<Icon as={MdDownload} boxSize="12px" />}
-                  _hover={{ bg: isDark ? "rgba(16,185,129,0.25)" : "#d1fae5" }}
+                  _hover={{ bg: isDark ? `${DARK_THEME.accent}30` : "#d1fae5" }}
                   onClick={() => exportHistoryToCSV(USE_HISTORY)}
                 >Export CSV</Button>
               </Flex>
@@ -1423,9 +1631,9 @@ export default function QuanlyVoucher() {
             <Box overflowX="auto">
               <Table size="sm" variant="unstyled">
                 <Thead>
-                  <Tr bg={isDark ? "rgba(255,255,255,0.04)" : "#f8fafc"}>
+                  <Tr bg={isDark ? DARK_THEME.inputBg : "#f8fafc"}>
                     {["Mã voucher","Khách hàng","Mã đơn hàng","Tiết kiệm","Thời gian"].map(h => (
-                      <Th key={h} fontSize="10px" fontWeight="800" color="#94a3b8"
+                      <Th key={h} fontSize="10px" fontWeight="800" color={isDark ? DARK_THEME.labelColor : "#94a3b8"}
                         letterSpacing="1px" textTransform="uppercase" py="10px" px="12px">{h}</Th>
                     ))}
                   </Tr>
@@ -1433,19 +1641,21 @@ export default function QuanlyVoucher() {
                 <Tbody>
                   {USE_HISTORY.map((row, i) => (
                     <Tr key={row.id}
-                      _hover={{ bg: isDark ? "rgba(249,115,22,0.06)" : "#fffbf7" }}
+                      _hover={{ bg: isDark ? DARK_THEME.hoverBg : "#fffbf7" }}
                       transition="all 0.15s"
                       sx={{ animation:`${fadeUp} 0.3s ease ${i*0.04}s both` }}
                     >
                       <Td py="12px" px="12px">
-                        <Box px="8px" py="4px" borderRadius="7px" bg="#fff7ed" border="1px solid #fed7aa" display="inline-block">
-                          <Text fontSize="12px" fontWeight="800" color="#c2410c" fontFamily="monospace">{row.code}</Text>
+                        <Box px="8px" py="4px" borderRadius="7px" bg={isDark ? DARK_THEME.inputBg : "#fff7ed"} 
+                          border={`1px solid ${isDark ? DARK_THEME.border : "#fed7aa"}`} display="inline-block">
+                          <Text fontSize="12px" fontWeight="800" color={isDark ? DARK_THEME.accent : "#c2410c"} 
+                            fontFamily="monospace">{row.code}</Text>
                         </Box>
                       </Td>
                       <Td px="12px"><Text fontSize="13px" fontWeight="600" color={textPrimary}>{row.user}</Text></Td>
-                      <Td px="12px"><Text fontSize="12px" fontWeight="700" color="#f97316">{row.orderId}</Text></Td>
+                      <Td px="12px"><Text fontSize="12px" fontWeight="700" color={isDark ? DARK_THEME.accent : "#f97316"}>{row.orderId}</Text></Td>
                       <Td px="12px"><Text fontSize="13px" fontWeight="700" color="#059669">-{row.amount.toLocaleString()}đ</Text></Td>
-                      <Td px="12px"><Text fontSize="11px" color="#94a3b8">{row.date}</Text></Td>
+                      <Td px="12px"><Text fontSize="11px" color={isDark ? DARK_THEME.textSecondary : "#94a3b8"}>{row.date}</Text></Td>
                     </Tr>
                   ))}
                 </Tbody>
@@ -1459,13 +1669,12 @@ export default function QuanlyVoucher() {
 
   if (view === "detail" && selected) {
     return (
-      <Box pt={{ base:"100px", md:"80px" }} position="relative">
+      <Box pt={{ base:"100px", md:"80px" }} position="relative" bg={pageBg} minH="100vh">
         {deleteTarget && (
           <DeleteModal
             voucher={deleteTarget}
             onConfirm={handleDeleteConfirm}
             onCancel={() => setDeleteTarget(null)}
-            isDark={isDark}
           />
         )}
         <VoucherDetail
@@ -1473,7 +1682,6 @@ export default function QuanlyVoucher() {
           onBack={() => setView("list")}
           onEdit={() => setView("edit")}
           onDelete={() => setDeleteTarget(vouchers.find(v => v.id === selected.id) || selected)}
-          isDark={isDark}
         />
       </Box>
     );
@@ -1481,20 +1689,19 @@ export default function QuanlyVoucher() {
 
   if (view === "add") {
     return (
-      <Box pt={{ base:"100px", md:"80px" }}>
-        <VoucherForm isAdd onCancel={() => setView("list")} onSave={handleSave} isDark={isDark} />
+      <Box pt={{ base:"100px", md:"80px" }} bg={pageBg} minH="100vh">
+        <VoucherForm isAdd onCancel={() => setView("list")} onSave={handleSave} />
       </Box>
     );
   }
 
   if (view === "edit" && selected) {
     return (
-      <Box pt={{ base:"100px", md:"80px" }}>
+      <Box pt={{ base:"100px", md:"80px" }} bg={pageBg} minH="100vh">
         <VoucherForm
           voucher={vouchers.find(v => v.id === selected.id) || selected}
           onCancel={() => setView("detail")}
           onSave={handleSave}
-          isDark={isDark}
         />
       </Box>
     );

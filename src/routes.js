@@ -17,16 +17,13 @@ import {
   MdTheaters,
   MdSettings,
   MdImage,
-  MdMenu,
   MdCampaign,
   MdArticle,
   MdCardGiftcard,
   MdCategory,
   MdPeopleAlt,
-  MdStar,
   MdBusiness,
   MdRateReview,
-  MdLink,
   MdCalendarMonth,
   MdRepeat,
   MdLocalActivity,
@@ -43,8 +40,68 @@ import {
   MdHeadsetMic,
   MdAccountCircle,
   MdTune,
+  MdDashboard,
+  MdAnalytics,
+  MdMenuBook,
+  MdTheaterComedy,
+  MdVideocam,
+  MdMovieCreation,
+  MdPersonAdd,
+  MdPersonRemove,
+  MdCreditCard,
+  MdReceipt,
+  MdRestaurant,
+  MdFastfood,
+  MdMovieFilter,
+  MdAudiotrack,
+  MdCalendarToday,
+  MdDateRange,
+  MdEventAvailable,
+  MdEventBusy,
+  MdPlaylistAdd,
+  MdPlaylistAddCheck,
+  MdBookmark,
+  MdBookmarkAdded,
+  MdOutlineBookmark,
+  MdStarRate,
+  MdStarBorder,
+  MdStarHalf,
+  MdThumbUp,
+  MdThumbDown,
+  MdComment,
+  MdMessage,
+  MdChat,
+  MdForum,
+  MdContactSupport,
+  MdHelp,
+  MdInfo,
+  MdReport,
+  MdFlag,
+  MdNewReleases,
+  MdUpdate,
+  MdSync,
+  MdCloudUpload,
+  MdCloudDownload,
+  MdCloudDone,
+  MdCloudOff,
+  MdStorage,
+  MdDatabase,
+  MdDevices,
+  MdDesktopMac,
+  MdDesktopWindows,
+  MdLaptop,
+  MdTablet,
+  MdPhone,
+  MdSmartphone,
+  MdWatch,
+  MdHeadphones,
+  MdSpeaker,
+  MdVolumeUp,
+  MdVolumeOff,
+  MdAdd, // ✅ Thêm icon MdAdd
 } from 'react-icons/md';
 import { MdAdminPanelSettings } from "react-icons/md";
+
 // Admin Imports
 import MainDashboard from 'views/admin/default';
 import Profile from 'views/admin/profile';
@@ -70,17 +127,38 @@ import Quanlyphongchieu from 'views/admin/quanlyphongchieu';
 import Quanlyghe from 'views/admin/quanlyghe';
 import Quanlyvoucher from 'views/admin/quanlyvoucher';
 import Quanlyphanquyen from 'views/admin/quanlyphanquyen';
-
+import Quanlytrangthaighe from 'views/admin/quanlytrangthaighe';
+import Quanlythongbao from 'views/admin/quanlythongbao';
+import LogHeThong from 'views/admin/LogHeThong';
 import Quanlysuatchieu from 'views/admin/quanlysuatchieu';
 import Quanlyve from 'views/admin/quanlyve';
 import Thongke from 'views/admin/thongke';
 import Thongkecombo from 'views/admin/thongkecombo';
 
+// ✅ Import trang tạo vé mới
+import TaoVeMoi from 'views/admin/quanlyve/components/TaoVeMoi';
 
 // Auth Imports
 import SignInCentered from 'views/auth/signIn';
 
 const routes = [
+  // ─── AUTH ROUTE ──────────────────────────────────────────────────
+  {
+    name: 'Sign In',
+    layout: '/auth',
+    path: '/sign-in',
+    icon: <Icon as={MdLock} width="20px" height="20px" color="inherit" />,
+    component: <SignInCentered />,
+    hidden: true,
+  },
+  {
+    name: 'Login',
+    layout: '/',
+    path: '/login',
+    component: <SignInCentered />,
+    hidden: true,
+  },
+
   // ─── TỔNG QUAN ───────────────────────────────────────────────────
   {
     name: 'Tổng quan',
@@ -89,12 +167,13 @@ const routes = [
     icon: <Icon as={MdHome} width="20px" height="20px" color="inherit" />,
     component: <MainDashboard />,
   },
+
   // ─── THỐNG KÊ ────────────────────────────────────────────────────
   {
     name: 'Thống kê',
     layout: '/admin',
     path: '/thong-ke',
-    icon: <Icon as={MdBarChart} width="20px" height="20px" color="inherit" />,
+    icon: <Icon as={MdAnalytics} width="20px" height="20px" color="inherit" />,
     component: <Thongke />,
   },
   {
@@ -104,6 +183,7 @@ const routes = [
     icon: <Icon as={MdBarChart} width="20px" height="20px" color="inherit" />,
     component: <Thongkecombo />,
   },
+
   // ─── NỘI DUNG ────────────────────────────────────────────────────
   {
     name: 'Nội dung',
@@ -114,20 +194,13 @@ const routes = [
         layout: '/admin',
         path: '/noi-dung/banner',
         icon: <Icon as={MdImage} width="20px" height="20px" color="inherit" />,
-        component: <Quanlybanner />, // thay bằng component thật
-      },
-      {
-        name: 'Menu điều hướng',
-        layout: '/admin',
-        path: '/noi-dung/menu',
-        icon: <Icon as={MdMenu} width="20px" height="20px" color="inherit" />,
-        component: <MainDashboard />,
+        component: <Quanlybanner />,
       },
       {
         name: 'Khuyến mãi & Sự kiện',
         layout: '/admin',
         path: '/noi-dung/khuyen-mai',
-        icon: <Icon as={MdCampaign} width="20px" height="20px" color="inherit" />,
+        icon: <Icon as={MdNewReleases} width="20px" height="20px" color="inherit" />,
         component: <Quanlykhuyenmai />,
       },
       {
@@ -150,16 +223,15 @@ const routes = [
   // ─── QUẢN LÝ PHIM ────────────────────────────────────────────────
   {
     name: 'Quản lý phim',
-    icon: <Icon as={MdLocalMovies} width="20px" height="20px" color="inherit" />,
+    icon: <Icon as={MdMovie} width="20px" height="20px" color="inherit" />,
     children: [
       {
         name: 'Phim',
         layout: '/admin',
         path: '/quan-ly-phim',
-        icon: <Icon as={MdMovie} width="20px" height="20px" color="inherit" />,
+        icon: <Icon as={MdLocalMovies} width="20px" height="20px" color="inherit" />,
         component: <Quanlyphim />,
       },
-
       {
         name: 'Thể loại phim',
         layout: '/admin',
@@ -188,17 +260,10 @@ const routes = [
         icon: <Icon as={MdRateReview} width="20px" height="20px" color="inherit" />,
         component: <Quanlydanhgia />,
       },
-      {
-        name: 'Phim - Thể loại',
-        layout: '/admin',
-        path: '/quan-ly-phim/phim-the-loai',
-        icon: <Icon as={MdLink} width="20px" height="20px" color="inherit" />,
-        component: <MainDashboard />,
-      },
     ],
   },
 
-  // ─── VẬN HÀNH ────────────────────────────────────────────────────
+  // ─── LỊCH CHIẾU ──────────────────────────────────────────────────
   {
     name: 'Lịch chiếu',
     icon: <Icon as={MdSchedule} width="20px" height="20px" color="inherit" />,
@@ -207,19 +272,20 @@ const routes = [
         name: 'Suất chiếu',
         layout: '/admin',
         path: '/lich-chieu/suat-chieu',
-        icon: <Icon as={MdCalendarMonth} width="20px" height="20px" color="inherit" />,
+        icon: <Icon as={MdCalendarToday} width="20px" height="20px" color="inherit" />,
         component: <Quanlysuatchieu />,
       },
       {
         name: 'Lịch chiếu định kỳ',
         layout: '/admin',
         path: '/lich-chieu/dinh-ky',
-        icon: <Icon as={MdRepeat} width="20px" height="20px" color="inherit" />,
+        icon: <Icon as={MdDateRange} width="20px" height="20px" color="inherit" />,
         component: <Quanlylichchieudinhky />,
       },
     ],
   },
 
+  // ─── VÉ & ĐƠN HÀNG ───────────────────────────────────────────────
   {
     name: 'Vé & Đơn hàng',
     icon: <Icon as={MdConfirmationNumber} width="20px" height="20px" color="inherit" />,
@@ -231,23 +297,33 @@ const routes = [
         icon: <Icon as={MdLocalActivity} width="20px" height="20px" color="inherit" />,
         component: <Quanlyve />,
       },
+      // ✅ Thêm route cho trang tạo vé mới (ẩn khỏi menu sidebar)
+      {
+        name: 'Tạo vé mới',
+        layout: '/admin',
+        path: '/ve-don-hang/ve/tao-moi',
+        icon: <Icon as={MdAdd} width="20px" height="20px" color="inherit" />,
+        component: <TaoVeMoi />,
+        hidden: true, // ✅ Ẩn khỏi menu sidebar
+      },
       {
         name: 'Đơn hàng',
         layout: '/admin',
         path: '/ve-don-hang/don-hang',
-        icon: <Icon as={MdShoppingCart} width="20px" height="20px" color="inherit" />,
+        icon: <Icon as={MdReceipt} width="20px" height="20px" color="inherit" />,
         component: <Quanlydonhang />,
       },
       {
         name: 'Danh sách đặt vé',
         layout: '/admin',
         path: '/ve-don-hang/danh-sach-dat-ve',
-        icon: <Icon as={MdHistory} width="20px" height="20px" color="inherit" />,
+        icon: <Icon as={MdPlaylistAddCheck} width="20px" height="20px" color="inherit" />,
         component: <Quanlydatve />,
       },
     ],
   },
 
+  // ─── THANH TOÁN & COMBO ──────────────────────────────────────────
   {
     name: 'Thanh toán & Combo',
     icon: <Icon as={MdPayment} width="20px" height="20px" color="inherit" />,
@@ -256,7 +332,7 @@ const routes = [
         name: 'Combo bắp nước',
         layout: '/admin',
         path: '/thanh-toan/combo',
-        icon: <Icon as={MdShoppingCart} width="20px" height="20px" color="inherit" />,
+        icon: <Icon as={MdFastfood} width="20px" height="20px" color="inherit" />,
         component: <Quanlycombo />,
       },
       {
@@ -292,14 +368,7 @@ const routes = [
         name: 'Phân quyền',
         layout: '/admin',
         path: '/nguoi-dung/phan-quyen',
-        icon: (
-          <Icon
-            as={MdAdminPanelSettings}
-            width="20px"
-            height="20px"
-            color="inherit"
-          />
-        ),
+        icon: <Icon as={MdAdminPanelSettings} width="20px" height="20px" color="inherit" />,
         component: <Quanlyphanquyen />,
       },
       {
@@ -321,7 +390,7 @@ const routes = [
         layout: '/admin',
         path: '/nguoi-dung/thong-bao',
         icon: <Icon as={MdNotifications} width="20px" height="20px" color="inherit" />,
-        component: <MainDashboard />,
+        component: <Quanlythongbao />,
       },
     ],
   },
@@ -352,6 +421,13 @@ const routes = [
         icon: <Icon as={MdChair} width="20px" height="20px" color="inherit" />,
         component: <Quanlyghe />,
       },
+      {
+        name: 'Trạng thái ghế',
+        layout: '/admin',
+        path: '/rap-chieu/ghe-trang-thai',
+        icon: <Icon as={MdEventSeat} width="20px" height="20px" color="inherit" />,
+        component: <Quanlytrangthaighe />,
+      },
     ],
   },
 
@@ -360,11 +436,9 @@ const routes = [
     name: 'Hỗ trợ khách hàng',
     layout: '/admin',
     path: '/ho-tro-khach-hang',
-    icon: <Icon as={MdHeadsetMic} width="20px" height="20px" color="inherit" />,
+    icon: <Icon as={MdSupportAgent} width="20px" height="20px" color="inherit" />,
     component: <Hotrokhachhang />,
   },
-
-  
 
   // ─── HỆ THỐNG ────────────────────────────────────────────────────
   {
@@ -385,17 +459,14 @@ const routes = [
         icon: <Icon as={MdTune} width="20px" height="20px" color="inherit" />,
         component: <MainDashboard />,
       },
+      {
+        name: 'Nhật ký hệ thống',
+        layout: '/admin',
+        path: '/he-thong/nhat-ky',
+        icon: <Icon as={MdHistory} width="20px" height="20px" color="inherit" />,
+        component: <LogHeThong />,
+      },
     ],
-  },
-
-  // ─── AUTH (ẩn khỏi sidebar) ──────────────────────────────────────
-  {
-    name: 'Sign In',
-    layout: '/auth',
-    path: '/sign-in',
-    icon: <Icon as={MdLock} width="20px" height="20px" color="inherit" />,
-    component: <SignInCentered />,
-    hidden: true, // dùng để ẩn khỏi sidebar nếu Links.js hỗ trợ
   },
 ];
 

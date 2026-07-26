@@ -1,4 +1,4 @@
-// src/views/admin/quanlylichchieudinhky/components/shared/SectionTitle.jsx
+
 
 import React from "react";
 import { BASE } from "../../constants";

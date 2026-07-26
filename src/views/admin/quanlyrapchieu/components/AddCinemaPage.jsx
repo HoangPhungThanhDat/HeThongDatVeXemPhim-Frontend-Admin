@@ -1,4 +1,4 @@
-// src/views/admin/quanlyrapchieu/components/AddCinemaPage.jsx
+
 
 import React, { useState } from "react";
 import {
@@ -14,18 +14,56 @@ import SectionTitle from "./shared/SectionTitle";
 import { DARK } from "../constants";
 import { scaleIn } from "./shared/animations";
 
+// Màu sắc cho chế độ tối - tông xanh
+const DARK_THEME = {
+  bg: "#0a1628",
+  cardBg: "#0f1f3a",
+  border: "#1a3a5c",
+  text: "#e8f4f8",
+  textSecondary: "#88b4d8",
+  labelColor: "#5a8ab5",
+  inputBg: "#0a1f35",
+  inputBorder: "#1a3a5c",
+  hoverBg: "#142d4f",
+  accent: "#4a9eff",
+  accentLight: "#6ab0ff",
+  accentShadow: "rgba(74, 158, 255, 0.25)",
+  gradientFrom: "#4a9eff",
+  gradientTo: "#6ab0ff",
+  noteBg: "#0d2847",
+  noteBorder: "rgba(74, 158, 255, 0.2)",
+  noteText: "#88b4d8",
+  successBg: "rgba(74, 222, 128, 0.12)",
+  successBorder: "rgba(74, 222, 128, 0.3)",
+  successColor: "#4ade80",
+  dangerBg: "rgba(248, 113, 113, 0.12)",
+  dangerBorder: "rgba(248, 113, 113, 0.3)",
+  dangerColor: "#f87171",
+  previewBg: "#0a1f35",
+  previewBorder: "#1a3a5c",
+};
+
 const inputStyle = (isDark) => ({
-  bg: isDark ? "#1e293b" : "#fafafa",
-  border: isDark ? `1.5px solid #334155` : "1.5px solid #e8edf3",
+  bg: isDark ? DARK_THEME.inputBg : "#fafafa",
+  border: isDark ? `1.5px solid ${DARK_THEME.inputBorder}` : "1.5px solid #e8edf3",
   borderRadius: "10px",
-  color: isDark ? "#f1f5f9" : "#1a202c",
+  color: isDark ? DARK_THEME.text : "#1a202c",
   fontSize: "14px",
   fontWeight: "500",
   px: "14px",
   h: "44px",
-  _placeholder: { color: isDark ? "#64748b" : "#b0bac8", fontWeight: "400" },
-  _focus: { border: "1.5px solid #f97316", boxShadow: "0 0 0 3px rgba(249,115,22,0.10)", bg: isDark ? "#1e293b" : "#fff" },
-  _hover: { border: "1.5px solid #f97316", bg: isDark ? "#1e293b" : "#fff" },
+  _placeholder: { color: isDark ? DARK_THEME.labelColor : "#b0bac8", fontWeight: "400" },
+  _focus: { 
+    border: `1.5px solid ${isDark ? DARK_THEME.accent : "#f97316"}`, 
+    boxShadow: isDark 
+      ? `0 0 0 3px ${DARK_THEME.accentShadow}` 
+      : "0 0 0 3px rgba(249,115,22,0.10)", 
+    bg: isDark ? DARK_THEME.inputBg : "#fff" 
+  },
+  _hover: { 
+    border: `1.5px solid ${isDark ? DARK_THEME.accent : "#f97316"}`, 
+    bg: isDark ? DARK_THEME.inputBg : "#fff" 
+  },
   transition: "all 0.2s ease",
 });
 
@@ -34,7 +72,7 @@ const labelStyle = (isDark) => ({
   fontWeight: "800",
   letterSpacing: "0.9px",
   textTransform: "uppercase",
-  color: isDark ? "#94a3b8" : "#64748b",
+  color: isDark ? DARK_THEME.labelColor : "#64748b",
   mb: "7px",
   display: "block",
 });
@@ -58,10 +96,21 @@ const AddCinemaPage = ({ onCancel, onSave, isSubmitting, isDark }) => {
 
   const styles = inputStyle(isDark);
   const label = labelStyle(isDark);
-  const bg = isDark ? "#1e293b" : "white";
-  const border = isDark ? "#334155" : "#f1f5f9";
-  const textColor = isDark ? "#f1f5f9" : "#0f172a";
-  const subColor = isDark ? "#94a3b8" : "#64748b";
+  
+  const bg = isDark ? DARK_THEME.cardBg : "white";
+  const border = isDark ? DARK_THEME.border : "#f1f5f9";
+  const textColor = isDark ? DARK_THEME.text : "#0f172a";
+  const subColor = isDark ? DARK_THEME.textSecondary : "#64748b";
+  const accentColor = isDark ? DARK_THEME.accent : "#f97316";
+  const gradientBg = isDark 
+    ? `linear-gradient(135deg, ${DARK_THEME.gradientFrom}, ${DARK_THEME.gradientTo})`
+    : "linear-gradient(135deg,#f97316 0%,#fb923c 60%,#fbbf24 100%)";
+  const shadowColor = isDark 
+    ? `0 4px 16px ${DARK_THEME.accentShadow}`
+    : "0 4px 16px rgba(249,115,22,0.35)";
+  const shadowHover = isDark 
+    ? `0 8px 24px ${DARK_THEME.accentShadow}`
+    : "0 8px 24px rgba(249,115,22,0.45)";
 
   const handleSubmit = () => {
     if (!form.Name || !form.Address) {
@@ -91,8 +140,8 @@ const AddCinemaPage = ({ onCancel, onSave, isSubmitting, isDark }) => {
       <Flex align="center" gap="12px" mb="20px">
         <Button leftIcon={<Icon as={MdArrowBack} />} variant="ghost"
           color={subColor} borderRadius="10px" h="38px" fontSize="13px" fontWeight="600"
-          border={`1.5px solid ${isDark ? "#334155" : "#e2e8f0"}`} 
-          _hover={{ bg: isDark ? "#2d3748" : "#f8fafc" }} 
+          border={`1.5px solid ${isDark ? DARK_THEME.border : "#e2e8f0"}`} 
+          _hover={{ bg: isDark ? DARK_THEME.hoverBg : "#f8fafc" }} 
           onClick={onCancel}>
           Quay lại
         </Button>
@@ -111,7 +160,7 @@ const AddCinemaPage = ({ onCancel, onSave, isSubmitting, isDark }) => {
           {/* Thông tin cơ bản */}
           <Box bg={bg} borderRadius="16px" border={`1px solid ${border}`}
             boxShadow={isDark ? "0 1px 4px rgba(0,0,0,0.2)" : "0 1px 4px rgba(0,0,0,0.04)"} p="20px">
-            <SectionTitle label="Thông tin cơ bản" />
+            <SectionTitle label="Thông tin cơ bản" isDark={isDark} />
             <Flex direction="column" gap="14px">
               <Box>
                 <Text sx={label}>Tên rạp *</Text>
@@ -151,7 +200,7 @@ const AddCinemaPage = ({ onCancel, onSave, isSubmitting, isDark }) => {
           {/* Trạng thái & Mô tả */}
           <Box bg={bg} borderRadius="16px" border={`1px solid ${border}`}
             boxShadow={isDark ? "0 1px 4px rgba(0,0,0,0.2)" : "0 1px 4px rgba(0,0,0,0.04)"} p="20px">
-            <SectionTitle label="Trạng thái & Mô tả" />
+            <SectionTitle label="Trạng thái & Mô tả" isDark={isDark} />
             <Box mb="14px">
               <Text sx={label}>Trạng thái hoạt động</Text>
               <Select {...styles} value={form.Status} onChange={(e) => set("Status", e.target.value)}>
@@ -167,17 +216,23 @@ const AddCinemaPage = ({ onCancel, onSave, isSubmitting, isDark }) => {
             <Box>
               <Text sx={label}>Mô tả rạp</Text>
               <Textarea
-                bg={isDark ? "#1e293b" : "#fafafa"}
-                border={`1.5px solid ${isDark ? "#334155" : "#e8edf3"}`}
+                bg={isDark ? DARK_THEME.inputBg : "#fafafa"}
+                border={isDark ? `1.5px solid ${DARK_THEME.inputBorder}` : "1.5px solid #e8edf3"}
                 borderRadius="10px"
-                color={isDark ? "#f1f5f9" : "#1a202c"}
+                color={isDark ? DARK_THEME.text : "#1a202c"}
                 fontSize="14px"
                 fontWeight="500"
                 px="14px"
                 py="10px"
-                _placeholder={{ color: isDark ? "#64748b" : "#b0bac8" }}
-                _focus={{ border: "1.5px solid #f97316", boxShadow: "0 0 0 3px rgba(249,115,22,0.10)", bg: isDark ? "#1e293b" : "#fff" }}
-                _hover={{ border: "1.5px solid #f97316" }}
+                _placeholder={{ color: isDark ? DARK_THEME.labelColor : "#b0bac8" }}
+                _focus={{ 
+                  border: `1.5px solid ${isDark ? DARK_THEME.accent : "#f97316"}`, 
+                  boxShadow: isDark 
+                    ? `0 0 0 3px ${DARK_THEME.accentShadow}` 
+                    : "0 0 0 3px rgba(249,115,22,0.10)", 
+                  bg: isDark ? DARK_THEME.inputBg : "#fff" 
+                }}
+                _hover={{ border: `1.5px solid ${isDark ? DARK_THEME.accent : "#f97316"}` }}
                 transition="all 0.2s"
                 rows={4} placeholder="Mô tả về rạp chiếu..."
                 value={form.Description} onChange={(e) => set("Description", e.target.value)} />
@@ -189,18 +244,18 @@ const AddCinemaPage = ({ onCancel, onSave, isSubmitting, isDark }) => {
           {/* Ảnh rạp */}
           <Box bg={bg} borderRadius="16px" border={`1px solid ${border}`}
             boxShadow={isDark ? "0 1px 4px rgba(0,0,0,0.2)" : "0 1px 4px rgba(0,0,0,0.04)"} p="18px">
-            <SectionTitle label="Ảnh rạp" />
+            <SectionTitle label="Ảnh rạp" isDark={isDark} />
             
             {/* Preview ảnh */}
             <Box h="160px" borderRadius="12px" overflow="hidden" mb="10px"
-              bg={isDark ? "#2d3748" : "#f1f5f9"}
+              bg={isDark ? DARK_THEME.previewBg : "#f1f5f9"}
               display="flex" alignItems="center" justifyContent="center"
-              border={`2px dashed ${isDark ? "#4a5568" : "#d1d5db"}`}>
+              border={`2px dashed ${isDark ? DARK_THEME.previewBorder : "#d1d5db"}`}>
               {form.ImageUrl ? (
                 <img src={form.ImageUrl} alt="preview"
                   style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               ) : (
-                <Flex direction="column" align="center" gap="6px" color={isDark ? "#64748b" : "#94a3b8"}>
+                <Flex direction="column" align="center" gap="6px" color={isDark ? DARK_THEME.labelColor : "#94a3b8"}>
                   <Icon as={MdImage} boxSize="32px" />
                   <Text fontSize="12px">Chưa có ảnh</Text>
                 </Flex>
@@ -215,12 +270,15 @@ const AddCinemaPage = ({ onCancel, onSave, isSubmitting, isDark }) => {
               onChange={handleFileChange}
               p="6px"
             />
-            <Text fontSize="10px" color={isDark ? "#64748b" : "#94a3b8"} mt="2px">
+            <Text fontSize="10px" color={isDark ? DARK_THEME.labelColor : "#94a3b8"} mt="2px">
               Hỗ trợ định dạng: JPG, PNG, GIF. Dung lượng tối đa 5MB
             </Text>
 
-            <Box mt="10px" p="10px 12px" borderRadius="10px" bg="#fef2f2" border="1px solid #fca5a5">
-              <Text fontSize="11px" fontWeight="600" color="#dc2626" lineHeight="1.5">
+            <Box mt="10px" p="10px 12px" borderRadius="10px" 
+              bg={isDark ? DARK_THEME.dangerBg : "#fef2f2"} 
+              border={`1px solid ${isDark ? DARK_THEME.dangerBorder : "#fca5a5"}`}>
+              <Text fontSize="11px" fontWeight="600" 
+                color={isDark ? DARK_THEME.dangerColor : "#dc2626"} lineHeight="1.5">
                 Thay đổi ảnh rạp thuộc quyền Admin. Vui lòng liên hệ Admin để cập nhật.
               </Text>
             </Box>
@@ -229,7 +287,7 @@ const AddCinemaPage = ({ onCancel, onSave, isSubmitting, isDark }) => {
           {/* Lưu ý phân quyền */}
           <Box bg={bg} borderRadius="16px" border={`1px solid ${border}`}
             boxShadow={isDark ? "0 1px 4px rgba(0,0,0,0.2)" : "0 1px 4px rgba(0,0,0,0.04)"} p="18px">
-            <SectionTitle label="Lưu ý phân quyền" />
+            <SectionTitle label="Lưu ý phân quyền" isDark={isDark} />
             <Flex direction="column" gap="8px">
               {[
                 { ok: true,  txt: "Cập nhật địa chỉ, SĐT, giờ mở cửa" },
@@ -237,16 +295,35 @@ const AddCinemaPage = ({ onCancel, onSave, isSubmitting, isDark }) => {
                 { ok: false, txt: "Thêm hoặc xóa rạp (chỉ Admin)" },
                 { ok: false, txt: "Chỉnh sửa layout phòng chiếu" },
                 { ok: false, txt: "Quản lý nhân viên rạp" },
-              ].map(({ ok, txt }) => (
-                <Flex key={txt} align="flex-start" gap="7px">
-                  <Box w="16px" h="16px" borderRadius="full"
-                    bg={ok ? "#ecfdf5" : "#fef2f2"} border={ok ? "1px solid #6ee7b7" : "1px solid #fca5a5"}
-                    display="flex" alignItems="center" justifyContent="center" flexShrink="0" mt="1px">
-                    <Text fontSize="8px" fontWeight="900" color={ok ? "#059669" : "#dc2626"}>{ok ? "✓" : "✕"}</Text>
-                  </Box>
-                  <Text fontSize="11.5px" color={ok ? textColor : subColor} fontWeight={ok ? "600" : "500"}>{txt}</Text>
-                </Flex>
-              ))}
+              ].map(({ ok, txt }) => {
+                const isSuccess = ok;
+                const bgColor = isDark 
+                  ? (isSuccess ? DARK_THEME.successBg : DARK_THEME.dangerBg)
+                  : (isSuccess ? "#ecfdf5" : "#fef2f2");
+                const borderColor = isDark 
+                  ? (isSuccess ? DARK_THEME.successBorder : DARK_THEME.dangerBorder)
+                  : (isSuccess ? "#6ee7b7" : "#fca5a5");
+                const textColorItem = isDark 
+                  ? (isSuccess ? DARK_THEME.text : DARK_THEME.textSecondary)
+                  : (isSuccess ? textColor : subColor);
+                const fontWeight = isSuccess ? "600" : "500";
+                const iconColor = isDark 
+                  ? (isSuccess ? DARK_THEME.successColor : DARK_THEME.dangerColor)
+                  : (isSuccess ? "#059669" : "#dc2626");
+                
+                return (
+                  <Flex key={txt} align="flex-start" gap="7px">
+                    <Box w="16px" h="16px" borderRadius="full"
+                      bg={bgColor} border={`1px solid ${borderColor}`}
+                      display="flex" alignItems="center" justifyContent="center" flexShrink="0" mt="1px">
+                      <Text fontSize="8px" fontWeight="900" color={iconColor}>
+                        {ok ? "✓" : "✕"}
+                      </Text>
+                    </Box>
+                    <Text fontSize="11.5px" color={textColorItem} fontWeight={fontWeight}>{txt}</Text>
+                  </Flex>
+                );
+              })}
             </Flex>
           </Box>
         </Flex>
@@ -257,16 +334,16 @@ const AddCinemaPage = ({ onCancel, onSave, isSubmitting, isDark }) => {
         boxShadow={isDark ? "0 1px 4px rgba(0,0,0,0.2)" : "0 1px 4px rgba(0,0,0,0.04)"} p="16px 20px" mt="16px">
         <Flex justify="flex-end" gap="10px">
           <Button h="42px" px="22px" variant="ghost" color={subColor} borderRadius="10px"
-            fontWeight="600" fontSize="13px" border={`1.5px solid ${isDark ? "#334155" : "#e2e8f0"}`}
-            _hover={{ bg: isDark ? "#2d3748" : "#f8fafc" }} transition="all 0.2s"
+            fontWeight="600" fontSize="13px" border={`1.5px solid ${isDark ? DARK_THEME.border : "#e2e8f0"}`}
+            _hover={{ bg: isDark ? DARK_THEME.hoverBg : "#f8fafc" }} transition="all 0.2s"
             leftIcon={<Icon as={MdClose} />} onClick={onCancel}
             isDisabled={isSubmitting}>
             Hủy bỏ
           </Button>
           <Button h="42px" px="28px" borderRadius="10px" fontWeight="700" fontSize="13px"
-            bg="linear-gradient(135deg,#f97316 0%,#fb923c 60%,#fbbf24 100%)"
-            color="white" boxShadow="0 4px 16px rgba(249,115,22,0.35)"
-            _hover={{ boxShadow: "0 8px 24px rgba(249,115,22,0.45)", transform: "translateY(-1px)" }}
+            bg={gradientBg}
+            color="white" boxShadow={shadowColor}
+            _hover={{ boxShadow: shadowHover, transform: "translateY(-1px)" }}
             _active={{ transform: "translateY(0)" }} transition="all 0.2s"
             leftIcon={<Icon as={MdCheckCircle} />} onClick={handleSubmit}
             isLoading={isSubmitting}

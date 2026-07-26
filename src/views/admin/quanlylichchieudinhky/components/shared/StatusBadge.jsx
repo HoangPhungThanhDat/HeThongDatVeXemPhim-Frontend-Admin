@@ -1,4 +1,4 @@
-// src/views/admin/quanlylichchieudinhky/components/shared/StatusBadge.jsx
+
 
 import React from "react";
 import { STATUS_MAP } from "../../constants";

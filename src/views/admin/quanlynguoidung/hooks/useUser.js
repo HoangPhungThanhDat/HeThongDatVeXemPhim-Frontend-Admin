@@ -25,11 +25,43 @@ export const useUser = () => {
   const { data: users, total, totalPages, page, loading, goToPage, reload } =
     useServerPagination(UserApi.getPaged, { limit: PAGE_SIZE, extraParams });
 
-  // Load roles
+  // Load roles - SỬA LẠI
   useEffect(() => {
-    RoleApi.getAll()
-      .then((res) => setRoles(res.data.data || []))
-      .catch(console.error);
+    const loadRoles = async () => {
+      try {
+        const res = await RoleApi.getAll();
+        // ✅ Kiểm tra cấu trúc dữ liệu trả về
+        let rolesData = [];
+        if (res.data?.data) {
+          rolesData = res.data.data;
+        } else if (res.data) {
+          rolesData = res.data;
+        } else {
+          rolesData = res;
+        }
+        
+        // ✅ Đảm bảo roles có đủ các trường cần thiết
+        const formattedRoles = rolesData.map(role => ({
+          RoleId: role.RoleId || role.id,
+          RoleName: role.RoleName || role.name || role.role_name || 'User',
+          Description: role.Description || role.description || '',
+          Status: role.Status || role.status || 'active'
+        }));
+        
+        console.log("✅ Roles loaded:", formattedRoles);
+        setRoles(formattedRoles);
+      } catch (error) {
+        console.error("❌ Lỗi load roles:", error);
+        // ✅ Fallback roles nếu API lỗi
+        setRoles([
+          { RoleId: 1, RoleName: 'Admin', Description: 'Quản trị viên', Status: 'active' },
+          { RoleId: 2, RoleName: 'User', Description: 'Người dùng thông thường', Status: 'active' },
+          { RoleId: 7, RoleName: 'Staff', Description: 'Nhân viên', Status: 'active' },
+        ]);
+      }
+    };
+    
+    loadRoles();
   }, []);
 
   // Debounce search
