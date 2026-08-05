@@ -1,4 +1,5 @@
-// components/SeatMapView.jsx
+// src/views/admin/quanlyghe/components/SeatMapView.jsx
+
 import React from "react";
 import {
   Box, Flex, Text, Button, Icon, useColorMode,
@@ -36,6 +37,18 @@ const DARK_THEME = {
   accentShadow: "rgba(74, 158, 255, 0.25)",
 };
 
+// ✅ Hàm lấy màu chính xác cho từng loại ghế
+const getSeatTypeColor = (type) => {
+  const colors = {
+    regular: { bg: "#fff7ed", border: "#fb923c" },
+    vip: { bg: "#f5f3ff", border: "#a78bfa" },
+    couple: { bg: "#fef3c7", border: "#fcd34d" },
+    sweetbox: { bg: "#fdf2f8", border: "#f9a8d4" },
+    accessible: { bg: "#f0f9ff", border: "#7dd3fc" },
+  };
+  return colors[type] || colors.regular;
+};
+
 export default function SeatMapView({ 
   room, 
   cinemaName, 
@@ -51,6 +64,7 @@ export default function SeatMapView({
   addRowModal,
   addColModal,
   deleteDialog,
+  deleteDialogConfig,
   loading = false,
   handleSeatEdit,
   handleSaveSeat,
@@ -98,9 +112,6 @@ export default function SeatMapView({
   // Hàm xử lý click chỉnh sửa ghế
   const handleSeatEditClick = (seat) => {
     console.log("🔑 Seat clicked for edit:", seat);
-    console.log("🔑 isEditMode:", isEditMode);
-    console.log("🔑 handleSeatEdit:", handleSeatEdit);
-    console.log("🔑 editSeatModal:", editSeatModal);
     
     if (isEditMode && handleSeatEdit) {
       handleSeatEdit(seat);
@@ -110,8 +121,6 @@ export default function SeatMapView({
       } else {
         console.error("❌ editSeatModal.onOpen is not available");
       }
-    } else {
-      console.warn("⚠️ Cannot edit: isEditMode=", isEditMode, "handleSeatEdit=", !!handleSeatEdit);
     }
   };
 
@@ -119,9 +128,29 @@ export default function SeatMapView({
   const handleSeatDeleteClick = (seat) => {
     console.log("🗑️ Seat clicked for delete:", seat);
     if (setDeleteTarget) {
-      setDeleteTarget({ ...seat, type: "seat" });
+      const target = { 
+        ...seat, 
+        type: "seat",
+        SeatId: seat.SeatId || seat.id,
+        Row: seat.Row || seat.row,
+        Number: seat.Number || seat.num,
+        row: seat.row,
+        col: seat.col,
+      };
+      setDeleteTarget(target);
     }
   };
+
+  // ✅ Kiểm tra seatsData có hợp lệ không
+  const safeSeatsData = React.useMemo(() => {
+    if (!seatsData || !Array.isArray(seatsData) || seatsData.length === 0) {
+      return [];
+    }
+    return seatsData.filter(row => row && row.length > 0);
+  }, [seatsData]);
+
+  // ✅ Lấy số cột tối đa
+  const maxCols = safeSeatsData.length > 0 ? safeSeatsData[0]?.length || 0 : 0;
 
   return (
     <Box sx={{ animation: `${fadeIn} 0.3s ease both` }}>
@@ -167,7 +196,6 @@ export default function SeatMapView({
           <StatusDot status={room?.status || "active"} isDark={isDark} />
           <Box w="1px" h="24px" bg={isDark ? DARK_THEME.border : "#e2e8f0"} />
           
-          {/* ✅ THÊM NÚT CHỈNH SỬA PHÒNG */}
           {!isEditMode ? (
             <Button
               leftIcon={<Icon as={MdEdit} />}
@@ -234,15 +262,35 @@ export default function SeatMapView({
 
       {/* Stats row */}
       <SimpleGrid columns={{ base: 2, md: 4 }} spacing="10px" mb="16px">
-        {[
-          { label: "Tổng ghế", value: stats.total || 0, accent: isDark ? DARK_THEME.accent : "#f97316", icon: MdLayers },
-          { label: "Đã đặt", value: stats.booked || 0, accent: "#dc2626", icon: MdLayers },
-          { label: "Còn trống", value: stats.empty || 0, accent: "#059669", icon: MdLayers },
-          { label: "Tỉ lệ đặt", value: stats.total > 0 ? `${Math.round((stats.booked/stats.total)*100)}%` : "0%",
-            accent: "#7c3aed", icon: MdLayers, sub: `${stats.total || 0} ghế tổng cộng` },
-        ].map((p, i) => (
-          <StatCard key={p.label} {...p} delay={i * 0.04} isDark={isDark} />
-        ))}
+        <StatCard 
+          label="Tổng ghế" 
+          value={stats.total || 0} 
+          accent={isDark ? DARK_THEME.accent : "#f97316"} 
+          icon={MdLayers} 
+          isDark={isDark}
+        />
+        <StatCard 
+          label="Đã đặt" 
+          value={stats.booked || 0} 
+          accent="#dc2626" 
+          icon={MdLayers} 
+          isDark={isDark}
+        />
+        <StatCard 
+          label="Còn trống" 
+          value={stats.empty || 0} 
+          accent="#059669" 
+          icon={MdLayers} 
+          isDark={isDark}
+        />
+        <StatCard 
+          label="Tỉ lệ đặt" 
+          value={stats.total > 0 ? `${Math.round((stats.booked/stats.total)*100)}%` : "0%"}
+          accent="#7c3aed" 
+          icon={MdLayers} 
+          sub={`${stats.total || 0} ghế tổng cộng`}
+          isDark={isDark}
+        />
       </SimpleGrid>
 
       {/* Seat map card */}
@@ -261,12 +309,12 @@ export default function SeatMapView({
           <Flex align="center" gap="8px" flexWrap="wrap">
             <Icon as={MdLayers} boxSize="14px" color={accentColor} />
             <Text fontSize="13px" fontWeight="800" color={textColor}>Sơ đồ ghế ngồi</Text>
-            {isValidData && (
+            {safeSeatsData.length > 0 && (
               <Box px="8px" py="2px" borderRadius="5px" 
                 bg={isDark ? DARK_THEME.inputBg : "#fff7ed"} 
                 border={`1px solid ${isDark ? DARK_THEME.border : "#fed7aa"}`}>
                 <Text fontSize="10.5px" fontWeight="700" color={isDark ? DARK_THEME.accent : "#f97316"}>
-                  {seatsData.length} hàng × {seatsData[0]?.length || 0} cột
+                  {safeSeatsData.length} hàng × {maxCols} cột
                 </Text>
               </Box>
             )}
@@ -345,7 +393,7 @@ export default function SeatMapView({
               Chỉnh sửa phòng
             </Button>
           </Flex>
-        ) : !isValidData ? (
+        ) : safeSeatsData.length === 0 ? (
           <Flex direction="column" align="center" justify="center" py="60px" gap="12px">
             <Box w="56px" h="56px" borderRadius="16px" bg={isDark ? DARK_THEME.inputBg : "#f0f9ff"} 
               border={`2px solid ${isDark ? DARK_THEME.border : "#7dd3fc"}`}
@@ -373,77 +421,151 @@ export default function SeatMapView({
             )}
           </Flex>
         ) : (
-          <Box p="20px" overflowX="auto">
-            <Flex direction="column" align="center" mb="24px">
+          <Box p="24px 20px" overflowX="auto">
+            {/* Màn hình chiếu */}
+            <Flex direction="column" align="center" mb="32px">
               <Box
-                w={{ base: "70%", md: "55%" }} h="8px" borderRadius="4px"
+                w={{ base: "60%", md: "45%" }}
+                h="4px"
+                borderRadius="full"
                 bg={gradientScreen}
-                mb="6px" opacity="0.9"
+                mb="4px"
+                opacity="0.6"
               />
               <Box
-                w={{ base: "80%", md: "65%" }} h="3px" borderRadius="full"
+                w={{ base: "70%", md: "55%" }}
+                h="2px"
+                borderRadius="full"
                 bg={isDark 
-                  ? `linear-gradient(90deg, transparent, ${DARK_THEME.accent}25, transparent)`
-                  : "linear-gradient(90deg, transparent, rgba(249,115,22,0.25), transparent)"
+                  ? `linear-gradient(90deg, transparent, ${DARK_THEME.accent}15, transparent)`
+                  : "linear-gradient(90deg, transparent, rgba(249,115,22,0.12), transparent)"
                 }
-                mb="4px"
               />
-              <Text fontSize="10px" fontWeight="700" color={labelColor}
-                letterSpacing="3px" textTransform="uppercase">
-                Màn hình chiếu
+              <Text 
+                fontSize="10px" 
+                fontWeight="700" 
+                color={labelColor}
+                letterSpacing="8px" 
+                textTransform="uppercase"
+                mt="8px"
+                opacity="0.5"
+              >
+                MÀN HÌNH
               </Text>
             </Flex>
 
-            <Flex direction="column" align="center" gap={`${6 * scale}px`}>
-              {seatsData.map((row, ri) => {
+            {/* Sơ đồ ghế */}
+            <Flex direction="column" align="center" gap={`${10 * scale}px`}>
+              {safeSeatsData.map((row, ri) => {
                 if (!row || row.length === 0) {
                   return null;
                 }
                 
-                const filtered = row.map((s) => ({
-                  ...s,
-                  hidden: filter === "booked" ? !s.booked : filter === "empty" ? s.booked : false,
-                }));
-                
                 return (
-                  <Flex key={ri} align="center" gap={`${6 * scale}px`}>
-                    <Box w={`${22 * scale}px`} textAlign="center" flexShrink="0">
-                      <Text fontSize={`${11 * scale}px`} fontWeight="800" color={isDark ? DARK_THEME.border : "#cbd5e1"}>
+                  <Flex key={ri} align="center" gap={`${12 * scale}px`}>
+                    <Box 
+                      w={`${28 * scale}px`} 
+                      textAlign="center" 
+                      flexShrink="0"
+                      py={`${4 * scale}px`}
+                    >
+                      <Text 
+                        fontSize={`${11 * scale}px`} 
+                        fontWeight="800" 
+                        color={isDark ? DARK_THEME.border : "#94a3b8"}
+                        fontFamily="monospace"
+                        letterSpacing="1px"
+                      >
                         {ROW_LABELS[ri] || ri}
                       </Text>
                     </Box>
-                    {filtered.map((seat, ci) => (
-                      <Box 
-                        key={seat?.id || `seat-${ri}-${ci}`} 
-                        opacity={seat?.hidden ? 0.15 : 1} 
-                        transition="opacity 0.2s"
+
+                    <Flex gap={`${6 * scale}px`}>
+                      {row.map((seat, ci) => {
+                        if (!seat) return null;
+                        
+                        let shouldHide = false;
+                        if (filter === "booked") shouldHide = !seat.booked;
+                        if (filter === "empty") shouldHide = seat.booked;
+                        
+                        if (shouldHide) {
+                          return (
+                            <Box 
+                              key={seat?.id || `seat-${ri}-${ci}`} 
+                              w={`${32 * scale}px`} 
+                              h={`${24 * scale}px`}
+                              opacity={0.15} 
+                              transition="opacity 0.2s"
+                              borderRadius={`${4 * scale}px`}
+                              bg={isDark ? DARK_THEME.inputBg : "#f1f5f9"}
+                              border={`1px dashed ${isDark ? DARK_THEME.border : "#e2e8f0"}`}
+                            />
+                          );
+                        }
+                        
+                        return (
+                          <Box 
+                            key={seat?.id || `seat-${ri}-${ci}`}
+                            transition="all 0.2s"
+                          >
+                            <Seat 
+                              seat={seat} 
+                              scale={scale} 
+                              isEditable={isEditMode}
+                              onEdit={handleSeatEditClick}
+                              onDelete={handleSeatDeleteClick}
+                            />
+                          </Box>
+                        );
+                      })}
+                    </Flex>
+
+                    <Box 
+                      w={`${28 * scale}px`} 
+                      textAlign="center" 
+                      flexShrink="0"
+                      py={`${4 * scale}px`}
+                    >
+                      <Text 
+                        fontSize={`${11 * scale}px`} 
+                        fontWeight="800" 
+                        color={isDark ? DARK_THEME.border : "#94a3b8"}
+                        fontFamily="monospace"
+                        letterSpacing="1px"
                       >
-                        <Seat 
-                          seat={seat} 
-                          scale={scale} 
-                          isEditable={isEditMode}
-                          onEdit={handleSeatEditClick}
-                          onDelete={handleSeatDeleteClick}
-                          isDark={isDark}
-                        />
-                      </Box>
-                    ))}
-                    <Box w={`${22 * scale}px`} textAlign="center" flexShrink="0">
-                      <Text fontSize={`${11 * scale}px`} fontWeight="800" color={isDark ? DARK_THEME.border : "#cbd5e1"}>
                         {ROW_LABELS[ri] || ri}
                       </Text>
                     </Box>
                   </Flex>
                 );
               })}
-              {seatsData.length > 0 && seatsData[0]?.length > 0 && (
-                <Flex gap={`${6 * scale}px`} mt="4px">
-                  <Box w={`${22 * scale}px`} />
-                  {Array.from({ length: seatsData[0]?.length || 0 }, (_, i) => (
-                    <Box key={i} w={`${20 * scale}px`} textAlign="center">
-                      <Text fontSize={`${9 * scale}px`} color={isDark ? DARK_THEME.border : "#e2e8f0"} fontWeight="600">{i + 1}</Text>
-                    </Box>
-                  ))}
+              
+              {/* Số cột bên dưới */}
+              {maxCols > 0 && (
+                <Flex gap={`${6 * scale}px`} mt={`${8 * scale}px`}>
+                  <Box w={`${28 * scale}px`} />
+                  {Array.from({ length: maxCols }, (_, i) => {
+                    const hasSeatInCol = safeSeatsData.some(row => row && row[i]);
+                    if (!hasSeatInCol) return null;
+                    
+                    return (
+                      <Box 
+                        key={i} 
+                        w={`${32 * scale}px`} 
+                        textAlign="center"
+                      >
+                        <Text 
+                          fontSize={`${9 * scale}px`} 
+                          fontWeight="600" 
+                          color={isDark ? DARK_THEME.border : "#cbd5e1"}
+                          fontFamily="monospace"
+                          opacity="0.4"
+                        >
+                          {i + 1}
+                        </Text>
+                      </Box>
+                    );
+                  })}
                 </Flex>
               )}
             </Flex>
@@ -451,39 +573,76 @@ export default function SeatMapView({
         )}
       </Box>
 
-      {/* Legend - chỉ hiển thị khi có dữ liệu */}
-      {isValidData && (
-        <Box bg={bgCard} borderRadius="14px" border={`1px solid ${borderCard}`}
-          boxShadow={isDark ? `0 1px 4px ${DARK_THEME.accentShadow}` : "0 1px 4px rgba(0,0,0,0.04)"} p="14px 18px"
+      {/* ✅ Legend */}
+      {safeSeatsData.length > 0 && (
+        <Box 
+          bg={bgCard} 
+          borderRadius="14px" 
+          border={`1px solid ${borderCard}`}
+          boxShadow={isDark ? `0 1px 4px ${DARK_THEME.accentShadow}` : "0 1px 4px rgba(0,0,0,0.04)"} 
+          p="16px 20px"
           sx={{ animation: `${fadeUp} 0.4s ease 0.1s both` }}
         >
-          <Text fontSize="10.5px" fontWeight="800" color={labelColor} letterSpacing="1px"
-            textTransform="uppercase" mb="10px">Chú thích</Text>
-          <Flex flexWrap="wrap" gap="10px 18px">
+          <Text 
+            fontSize="10px" 
+            fontWeight="700" 
+            color={labelColor} 
+            letterSpacing="1.5px"
+            textTransform="uppercase" 
+            mb="12px"
+          >
+            Chú thích
+          </Text>
+          <Flex flexWrap="wrap" gap="12px 20px">
             {[
-              { bg: isDark ? DARK_THEME.inputBg : "#fff7ed", border: isDark ? DARK_THEME.accent : "#fb923c", label: "Ghế trống" },
-              { bg: "#dc2626", border: "#dc2626", label: "Đã đặt", textColor: "white" },
-            ].map(({ bg, border, label, textColor }) => (
-              <Flex key={label} align="center" gap="7px">
-                <Box w="18px" h="14px" borderRadius="3px" bg={bg}
-                  border={`1.5px solid ${border}`} position="relative">
-                  <Box position="absolute" top="-3px" left="50%" transform="translateX(-50%)"
-                    w="6px" h="3px" borderRadius="2px" bg={border} />
-                </Box>
-                <Text fontSize="11.5px" fontWeight="600" color={textColor}>{label}</Text>
+              { bg: isDark ? DARK_THEME.inputBg : "#fff7ed", border: isDark ? DARK_THEME.accent : "#fb923c", label: "Trống" },
+              { bg: "#dc2626", border: "#dc2626", label: "Đã đặt" },
+            ].map(({ bg, border, label }) => (
+              <Flex key={label} align="center" gap="8px">
+                <Box 
+                  w="18px" 
+                  h="16px" 
+                  borderRadius="4px" 
+                  bg={bg}
+                  border={`2px solid ${border}`} 
+                />
+                <Text fontSize="12px" fontWeight="500" color={textColor}>
+                  {label}
+                </Text>
               </Flex>
             ))}
+            
             <Box w="1px" h="20px" bg={isDark ? DARK_THEME.border : "#e2e8f0"} alignSelf="center" />
-            {Object.entries(SEAT_TYPES).map(([key, cfg]) => (
-              <Flex key={key} align="center" gap="7px">
-                <Box w="18px" h="14px" borderRadius="3px" bg={isDark ? DARK_THEME.inputBg : cfg.bg}
-                  border={`1.5px solid ${isDark ? DARK_THEME.border : cfg.border}`} />
-                <Text fontSize="11.5px" fontWeight="600" color={textColor}>{cfg.label}</Text>
-              </Flex>
-            ))}
+            
+            {Object.entries(SEAT_TYPES).map(([key, cfg]) => {
+              const typeColor = getSeatTypeColor(key);
+              let bgColor = typeColor.bg;
+              let borderColor = typeColor.border;
+              
+              if (key === "couple") { bgColor = "#fef3c7"; borderColor = "#fcd34d"; }
+              if (key === "vip") { bgColor = "#f5f3ff"; borderColor = "#a78bfa"; }
+              if (key === "sweetbox") { bgColor = "#fdf2f8"; borderColor = "#f9a8d4"; }
+              if (key === "accessible") { bgColor = "#f0f9ff"; borderColor = "#7dd3fc"; }
+              
+              return (
+                <Flex key={key} align="center" gap="8px">
+                  <Box 
+                    w="18px" 
+                    h="16px" 
+                    borderRadius="4px" 
+                    bg={bgColor}
+                    border={`2px solid ${borderColor}`}
+                  />
+                  <Text fontSize="12px" fontWeight="500" color={textColor}>
+                    {cfg.label}
+                  </Text>
+                </Flex>
+              );
+            })}
+            
             {isEditMode && (
-              <Flex align="center" gap="7px" px="8px" py="3px" borderRadius="6px" bg="#fef2f2" border="1px solid #fca5a5">
-                <Icon as={MdEdit} boxSize="11px" color="#dc2626" />
+              <Flex align="center" gap="8px" px="10px" py="4px" borderRadius="6px" bg="#fef2f2" border="1px solid #fca5a5">
+                <Icon as={MdEdit} boxSize="12px" color="#dc2626" />
                 <Text fontSize="11px" fontWeight="600" color="#dc2626">Click để chỉnh sửa</Text>
               </Flex>
             )}
@@ -515,16 +674,17 @@ export default function SeatMapView({
         onClose={addColModal?.onClose || (() => {})}
         onAdd={handleAddCols}
         roomName={room?.name || ""}
-        currentCols={seatsData[0]?.length || 0}
+        currentCols={maxCols}
         isDark={isDark}
       />
 
+      {/* ✅ DeleteConfirmDialog - sử dụng deleteDialog và deleteDialogConfig */}
       <DeleteConfirmDialog
         isOpen={deleteDialog?.isOpen || false}
         onClose={deleteDialog?.onClose || (() => {})}
-        onConfirm={deleteDialog?.onConfirm || (() => {})}
-        title={deleteDialog?.title || "Xác nhận xóa"}
-        message={deleteDialog?.message || "Bạn có chắc chắn muốn xóa?"}
+        onConfirm={deleteDialogConfig?.onConfirm || (() => {})}
+        title={deleteDialogConfig?.title || "Xác nhận xóa"}
+        message={deleteDialogConfig?.message || "Bạn có chắc chắn muốn xóa?"}
         isDark={isDark}
       />
     </Box>

@@ -1,4 +1,5 @@
 // src/views/admin/quanlyve/components/TicketDetail.jsx
+
 import React from "react";
 import {
   Box,
@@ -30,6 +31,7 @@ import {
   MdContentCopy,
   MdLocalMovies,
 } from "react-icons/md";
+import { QRCodeCanvas } from "qrcode.react";
 
 const STATUS_CFG = {
   "Đã thanh toán": { color: "#059669", bg: "#ecfdf5", border: "#6ee7b7", dot: "#10b981" },
@@ -45,7 +47,6 @@ const STATUS_CFG = {
 const StatusBadge = ({ status, light }) => {
   const cfg = STATUS_CFG[status] || STATUS_CFG["Hết hạn"];
   if (light) {
-    // Phiên bản dùng trên nền tối của sidebar vé
     return (
       <HStack spacing="6px" bg="rgba(255,255,255,0.12)" px="10px" py="4px" borderRadius="full" w="fit-content">
         <Box w="6px" h="6px" borderRadius="full" bg={cfg.dot} />
@@ -65,7 +66,6 @@ const StatusBadge = ({ status, light }) => {
   );
 };
 
-// Một mục trong danh sách chi tiết: icon vuông bo góc + nhãn + giá trị
 const DetailItem = ({ icon, label, value, isDark, children }) => (
   <HStack spacing="12px" align="flex-start" w="100%">
     <Flex
@@ -85,14 +85,13 @@ const DetailItem = ({ icon, label, value, isDark, children }) => (
       </Text>
       {children || (
         <Text fontSize="14px" fontWeight="700" color={isDark ? "#f7fafc" : "#0f172a"} noOfLines={2}>
-          {value}
+          {value || "—"}
         </Text>
       )}
     </Box>
   </HStack>
 );
 
-// Tiêu đề nhỏ chia section, chỉ để tạo cấu trúc rõ ràng — không trang trí thừa
 const SectionLabel = ({ children, isDark }) => (
   <Text
     fontSize="11px"
@@ -128,6 +127,18 @@ export const TicketDetail = ({ ticket, onBack, onEdit, onDelete, onCancel, isDar
   const timePart = timeRest.join(" ");
 
   const canCancel = ticket.status !== "Đã check-in" && ticket.status !== "Cancelled";
+
+  // ✅ Tạo dữ liệu QR
+  const qrData = JSON.stringify({
+    ticketId: ticket.id,
+    code: ticket.code,
+    customer: ticket.customer,
+    movie: ticket.movie,
+    showtime: ticket.showtime,
+    seat: ticket.seat,
+    status: ticket.status,
+    timestamp: new Date().toISOString(),
+  });
 
   const handleCancel = () => {
     if (window.confirm(`Bạn có chắc chắn muốn hủy vé ${ticket.code}?`)) {
@@ -217,7 +228,7 @@ export const TicketDetail = ({ ticket, onBack, onEdit, onDelete, onCancel, isDar
         </Flex>
       </Flex>
 
-      {/* Bố cục 2 cột: chi tiết bên trái, thẻ vé bên phải */}
+      {/* Bố cục 2 cột */}
       <Flex gap={{ base: "16px", lg: "20px" }} align="flex-start" direction={{ base: "column", lg: "row" }}>
         {/* ===== Cột trái: chi tiết đặt vé ===== */}
         <Box
@@ -285,7 +296,12 @@ export const TicketDetail = ({ ticket, onBack, onEdit, onDelete, onCancel, isDar
           <SectionLabel isDark={isDark}>Khác</SectionLabel>
           <HStack spacing="18px" align="flex-start">
             <Box flex={1}>
-              <DetailItem icon={MdLocalOffer} label="Combo" value={ticket.combo || "Không có"} isDark={isDark} />
+              {/* ✅ Hiển thị combo */}
+              <DetailItem icon={MdLocalOffer} label="Combo" isDark={isDark}>
+                <Text fontSize="14px" fontWeight="700" color={isDark ? "#f7fafc" : "#0f172a"}>
+                  {ticket.combo && ticket.combo !== "Không có" ? ticket.combo : "Không có"}
+                </Text>
+              </DetailItem>
             </Box>
             <Box flex={1}>
               <DetailItem icon={MdStickyNote2} label="Ghi chú" value={ticket.note || "Không có"} isDark={isDark} />
@@ -293,7 +309,7 @@ export const TicketDetail = ({ ticket, onBack, onEdit, onDelete, onCancel, isDar
           </HStack>
         </Box>
 
-        {/* ===== Cột phải: thẻ vé (boarding-pass) ===== */}
+        {/* ===== Cột phải: thẻ vé (boarding-pass) với QR ===== */}
         <Box
           w={{ base: "100%", lg: "300px" }}
           minW={{ lg: "300px" }}
@@ -322,7 +338,7 @@ export const TicketDetail = ({ ticket, onBack, onEdit, onDelete, onCancel, isDar
             </Flex>
           </Box>
 
-          {/* Thân thẻ vé — nền navy đậm xuyên suốt bất kể light/dark mode, vì đây là "vật thể vé" chứ không phải panel giao diện */}
+          {/* Thân thẻ vé */}
           <Box bg="#0b1437" px="20px" pt="20px" pb="18px">
             <Text fontSize="10px" fontWeight="700" color="#7787ac" letterSpacing=".8px" textTransform="uppercase" mb="4px" textAlign="center">
               Giá vé
@@ -331,17 +347,21 @@ export const TicketDetail = ({ ticket, onBack, onEdit, onDelete, onCancel, isDar
               {ticket.price}
             </Text>
 
+            {/* ✅ QR Code thực tế */}
             <Flex justify="center" mb="14px">
               <Box p="10px" borderRadius="12px" bg="white">
-                <Flex w="132px" h="132px" align="center" justify="center" fontSize="11px" color="#94a3b8" textAlign="center" px="8px">
-                  {/* Placeholder hiển thị mã — thay bằng <QRCodeCanvas value={...} size={132} /> nếu cần render QR thật tại đây */}
-                  QR: {ticket.qr}
-                </Flex>
+                <QRCodeCanvas
+                  value={qrData}
+                  size={132}
+                  level="H"
+                  bgColor="#ffffff"
+                  fgColor="#0f172a"
+                />
               </Box>
             </Flex>
 
             <Text fontFamily="mono" fontSize="13px" fontWeight="800" color="white" letterSpacing="2px" textAlign="center" mb="2px">
-              {ticket.qr}
+              {ticket.code}
             </Text>
             <Text fontSize="10.5px" color="#7787ac" textAlign="center" mb="16px">
               Quét mã QR để check-in tại rạp

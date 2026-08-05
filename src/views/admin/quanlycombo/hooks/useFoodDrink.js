@@ -1,24 +1,8 @@
-
+// src/views/admin/quanlycombo/hooks/useFoodDrink.js
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import FoodAndDrinkApi from "../../../../api/FoodAndDrinkApi";
 import Swal from "sweetalert2";
-
-// Helper: Tải ảnh từ URL và chuyển thành File
-const fetchImageAsFile = async (imageUrl, fileName = "image.jpg") => {
-  try {
-    const response = await fetch(imageUrl);
-    const blob = await response.blob();
-    // Xác định loại file từ blob
-    const fileType = blob.type || "image/jpeg";
-    const extension = fileType.split("/")[1] || "jpg";
-    const fullFileName = fileName.includes(".") ? fileName : `${fileName}.${extension}`;
-    return new File([blob], fullFileName, { type: fileType });
-  } catch (error) {
-    console.error("❌ Lỗi tải ảnh:", error);
-    return null;
-  }
-};
 
 export const useCombo = () => {
   const [combos, setCombos] = useState([]);
@@ -97,14 +81,14 @@ export const useCombo = () => {
     seasonal: combos.filter((c) => c.isSeasonal).length,
   }), [combos]);
 
-  // Toggle trạng thái
+  // ✅ Toggle trạng thái - KHÔNG GỬI ImageUrl để tránh lỗi 422
   const handleToggle = useCallback(async (id) => {
     try {
       const combo = combos.find(c => c.id === id);
       if (!combo) return;
       
-      const newIsAvailable = combo.isActive ? 0 : 1;
       const newStatus = combo.isActive ? "Inactive" : "Active";
+      const newIsAvailable = combo.isActive ? 0 : 1;
       
       const formData = new FormData();
       formData.append("_method", "PUT");
@@ -114,26 +98,16 @@ export const useCombo = () => {
       formData.append("IsAvailable", newIsAvailable);
       formData.append("Status", newStatus);
       
-      // ✅ Khi toggle, vẫn cần gửi file ảnh
-      if (combo.image) {
-        // Tải ảnh cũ về và gửi lại dưới dạng file
-        const imageFile = await fetchImageAsFile(combo.image, `combo_${combo.id}.jpg`);
-        if (imageFile) {
-          formData.append("ImageUrl", imageFile);
-        } else {
-          // Fallback: dùng ảnh mặc định nếu không tải được
-          const defaultImage = await fetchImageAsFile("https://via.placeholder.com/300x300?text=No+Image", "default.jpg");
-          if (defaultImage) {
-            formData.append("ImageUrl", defaultImage);
-          }
-        }
-      } else {
-        // Không có ảnh, dùng ảnh mặc định
-        const defaultImage = await fetchImageAsFile("https://via.placeholder.com/300x300?text=No+Image", "default.jpg");
-        if (defaultImage) {
-          formData.append("ImageUrl", defaultImage);
-        }
-      }
+      // ✅ KHÔNG GỬI ImageUrl - Backend sẽ giữ nguyên ảnh cũ
+      // Nếu backend yêu cầu bắt buộc, sẽ gửi URL cũ
+      // formData.append("ImageUrl", combo.image || "");
+      
+      console.log("📤 Toggle status:", {
+        id,
+        newStatus,
+        newIsAvailable,
+        name: combo.name
+      });
       
       await FoodAndDrinkApi.update(id, formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -153,13 +127,26 @@ export const useCombo = () => {
       });
     } catch (error) {
       console.error("❌ Lỗi toggle status:", error);
+      
+      // ✅ Hiển thị lỗi chi tiết
+      const errorMessage = error.response?.data?.message || "❌ Không thể cập nhật trạng thái!";
+      const errors = error.response?.data?.errors;
+      
+      let detailMessage = errorMessage;
+      if (errors) {
+        const errorList = Object.entries(errors)
+          .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(", ") : messages}`)
+          .join("\n");
+        detailMessage = `${errorMessage}\n\n${errorList}`;
+      }
+      
       Swal.fire({
         toast: true,
         position: "top-end",
         icon: "error",
-        title: error.response?.data?.message || "❌ Không thể cập nhật trạng thái!",
+        title: detailMessage,
         showConfirmButton: false,
-        timer: 3000,
+        timer: 5000,
       });
     }
   }, [combos]);
@@ -192,7 +179,7 @@ export const useCombo = () => {
     }
   }, []);
 
-  // Lưu combo (thêm hoặc sửa)
+  // ✅ Lưu combo (thêm hoặc sửa)
   const handleSave = useCallback(async (form, view, selected) => {
     try {
       const items = form.items?.filter((i) => i.trim() !== "") || [];
@@ -211,43 +198,22 @@ export const useCombo = () => {
       formData.append("IsAvailable", form.isActive ? 1 : 0);
       formData.append("Status", form.isActive ? "Active" : "Inactive");
       
-      // ✅ XỬ LÝ ẢNH: Luôn gửi file ảnh
+      // ✅ XỬ LÝ ẢNH:
       if (form.imageFile) {
         // Có file ảnh mới từ người dùng
         formData.append("ImageUrl", form.imageFile);
         console.log("📤 Gửi file ảnh mới:", form.imageFile.name);
       } else if (view === "edit" && selected?.image) {
-        // Khi sửa và không có ảnh mới: Tải ảnh cũ về và gửi lại dưới dạng file
-        console.log("📤 Tải ảnh cũ về và gửi lại:", selected.image);
-        const imageFile = await fetchImageAsFile(selected.image, `combo_${selected.id}.jpg`);
-        if (imageFile) {
-          formData.append("ImageUrl", imageFile);
-          console.log("📤 Đã tải ảnh cũ thành công:", imageFile.name);
-        } else {
-          // Nếu không tải được ảnh cũ, dùng ảnh mặc định
-          console.log("⚠️ Không tải được ảnh cũ, dùng ảnh mặc định");
-          const defaultImage = await fetchImageAsFile("https://via.placeholder.com/300x300?text=No+Image", "default.jpg");
-          if (defaultImage) {
-            formData.append("ImageUrl", defaultImage);
-          }
-        }
+        // Khi sửa và không có ảnh mới: giữ nguyên URL ảnh cũ
+        formData.append("ImageUrl", selected.image);
+        console.log("📤 Giữ nguyên ảnh cũ:", selected.image);
       } else if (view === "add" && !form.imageFile) {
-        // Thêm mới mà không có ảnh: dùng ảnh mặc định
-        console.log("📤 Dùng ảnh mặc định");
-        const defaultImage = await fetchImageAsFile("https://via.placeholder.com/300x300?text=No+Image", "default.jpg");
-        if (defaultImage) {
-          formData.append("ImageUrl", defaultImage);
-        }
-      } else {
-        // Fallback: dùng ảnh mặc định
-        console.log("📤 Fallback: dùng ảnh mặc định");
-        const defaultImage = await fetchImageAsFile("https://via.placeholder.com/300x300?text=No+Image", "default.jpg");
-        if (defaultImage) {
-          formData.append("ImageUrl", defaultImage);
-        }
+        // Thêm mới mà không có ảnh: không gửi ảnh
+        console.log("📤 Không có ảnh, để trống");
+        // Nếu backend yêu cầu bắt buộc, có thể gửi ảnh mặc định
+        // formData.append("ImageUrl", "https://via.placeholder.com/300x300?text=No+Image");
       }
       
-      // Log để debug
       console.log("📤 FormData gửi lên:");
       for (let pair of formData.entries()) {
         console.log(pair[0] + ": " + (pair[1] instanceof File ? pair[1].name : pair[1]));
@@ -319,7 +285,6 @@ export const useCombo = () => {
       return response;
     } catch (error) {
       console.error("❌ Lỗi save combo:", error);
-      console.error("Chi tiết lỗi:", error.response?.data);
       
       const errorData = error.response?.data;
       let errorMessage = "❌ Lưu thất bại!";

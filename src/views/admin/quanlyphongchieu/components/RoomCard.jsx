@@ -1,18 +1,17 @@
-// components/RoomCard.jsx
-import React, { useState, useEffect } from "react";
+// src/views/admin/quanlyphongchieu/components/RoomCard.jsx
+
+import React from "react";
 import {
   Box, Flex, Text, Badge, Button, Icon, useColorMode,
   Tooltip
 } from "@chakra-ui/react";
 import {
   MdVisibility, MdEdit, MdDelete, MdCheckCircle, MdBuild,
-  MdMeetingRoom, MdChair, MdMovie
+  MdMeetingRoom
 } from "react-icons/md";
 import { fadeUp } from "./shared/animations";
-import SeatApi from "../../../../api/SeatApi";
-import StatCard, { getSeatColors } from "./shared/StatCard";
 
-// Màu sắc cho chế độ tối - tông xanh
+// Màu sắc cho chế độ tối
 const DARK_THEME = {
   bg: "#0a1628",
   cardBg: "#0f1f3a",
@@ -28,17 +27,19 @@ const DARK_THEME = {
 };
 
 export default function RoomCard({ room, index, onView, onToggle, onEdit, onDelete, isDark }) {
-  // Nếu isDark không được truyền, lấy từ colorMode
   const { colorMode } = useColorMode();
   const darkMode = isDark !== undefined ? isDark : (colorMode === "dark");
   
-  const colors = getSeatColors(darkMode);
-  
-  const [seatCount, setSeatCount] = useState(0);
-  const [bookedCount, setBookedCount] = useState(0);
-  const [loadingSeats, setLoadingSeats] = useState(true);
+  // ✅ SỬ DỤNG DỮ LIỆU CÓ SẴN - KHÔNG GỌI API
+  const totalSeats = room.TotalSeats || room.SeatCount || 0;
+  const bookedSeats = room.BookedSeats || 0;
+  const availableSeats = room.AvailableSeats || 0;
+  const filledPercent = totalSeats > 0 ? Math.round((bookedSeats / totalSeats) * 100) : 0;
 
-  // Dark mode colors
+  const isActive = room.Status === "Active";
+  const isMaintenance = room.Status === "Maintenance";
+
+  // Màu sắc
   const accentColor = darkMode ? DARK_THEME.accent : "#f97316";
   const accentShadow = darkMode ? DARK_THEME.accentShadow : "rgba(249,115,22,0.25)";
   const gradientBg = darkMode 
@@ -50,49 +51,14 @@ export default function RoomCard({ room, index, onView, onToggle, onEdit, onDele
   const subColor = darkMode ? DARK_THEME.textSecondary : "#94a3b8";
   const statBg = darkMode ? DARK_THEME.inputBg : "#f8fafc";
   const statBorder = darkMode ? DARK_THEME.border : "#f1f5f9";
-  const btnBg = darkMode ? DARK_THEME.inputBg : "#f8fafc";
-  const btnBorder = darkMode ? DARK_THEME.border : "#e2e8f0";
-  const btnColor = darkMode ? DARK_THEME.textSecondary : "#475569";
-  const btnHoverBg = darkMode ? DARK_THEME.hoverBg : "#f1f5f9";
 
-  // Load số ghế của phòng
-  useEffect(() => {
-    loadSeatCount();
-  }, [room.RoomId]);
-
-  const loadSeatCount = async () => {
-    try {
-      const res = await SeatApi.getAll();
-      const allSeats = res.data.data || res.data || [];
-      const roomSeats = allSeats.filter(s => s.RoomId === room.RoomId);
-      const total = roomSeats.length;
-      const booked = roomSeats.filter(s => s.Status !== "Available").length;
-      setSeatCount(total);
-      setBookedCount(booked);
-    } catch (err) {
-      console.error("Lỗi load ghế:", err);
-    } finally {
-      setLoadingSeats(false);
-    }
-  };
-
-  const isActive = room.Status === "Active";
-  const isMaintenance = room.Status === "Maintenance";
-  const filledPercent = seatCount > 0 ? Math.round((bookedCount / seatCount) * 100) : 0;
-
-  // Xác định màu sắc theo trạng thái
+  // Trạng thái màu sắc
   const statusColors = {
     Active: { bg: darkMode ? "#064e3b" : "#ecfdf5", color: darkMode ? "#34d399" : "#059669", dot: "#10b981" },
     Inactive: { bg: darkMode ? "#451a03" : "#fffbeb", color: darkMode ? "#fbbf24" : "#b45309", dot: "#f59e0b" },
     Maintenance: { bg: darkMode ? "#7f1d1d" : "#fef2f2", color: darkMode ? "#f87171" : "#dc2626", dot: "#ef4444" },
   };
-
   const statusStyle = statusColors[room.Status] || statusColors.Inactive;
-
-  // Tính tổng số ghế
-  const totalSeats = room.Capacity || seatCount || 0;
-  const bookedSeats = bookedCount || 0;
-  const availableSeats = totalSeats - bookedSeats;
 
   return (
     <Box
@@ -110,7 +76,7 @@ export default function RoomCard({ room, index, onView, onToggle, onEdit, onDele
       }}
       transition="all 0.2s"
     >
-      {/* Header với màu sắc theo trạng thái */}
+      {/* Header color bar */}
       <Box
         h="4px"
         bg={isActive ? "linear-gradient(90deg, #10b981, #34d399)" :
@@ -154,7 +120,7 @@ export default function RoomCard({ room, index, onView, onToggle, onEdit, onDele
           </Box>
           <Box textAlign="right" flexShrink="0" ml="8px">
             <Text fontSize="20px" fontWeight="900" color={textColor}>
-              {loadingSeats ? "..." : seatCount}
+              {totalSeats}
             </Text>
             <Text fontSize="10px" color={subColor} fontWeight="600">
               ghế
@@ -170,27 +136,27 @@ export default function RoomCard({ room, index, onView, onToggle, onEdit, onDele
               Tổng ghế
             </Text>
             <Text fontSize="16px" fontWeight="800" color={textColor}>
-              {loadingSeats ? "..." : totalSeats}
+              {totalSeats}
             </Text>
           </Box>
           <Box flex="1" p="8px 10px" borderRadius="8px" bg={statBg}
             border={`1px solid ${statBorder}`} textAlign="center">
             <Text fontSize="10px" fontWeight="700" color="#059669">Trống</Text>
             <Text fontSize="16px" fontWeight="800" color="#059669">
-              {loadingSeats ? "..." : availableSeats}
+              {availableSeats}
             </Text>
           </Box>
           <Box flex="1" p="8px 10px" borderRadius="8px" bg={statBg}
             border={`1px solid ${statBorder}`} textAlign="center">
             <Text fontSize="10px" fontWeight="700" color="#dc2626">Đã đặt</Text>
             <Text fontSize="16px" fontWeight="800" color="#dc2626">
-              {loadingSeats ? "..." : bookedSeats}
+              {bookedSeats}
             </Text>
           </Box>
         </Flex>
 
         {/* Progress bar */}
-        {seatCount > 0 && (
+        {totalSeats > 0 && (
           <Box mb="14px">
             <Flex justify="space-between" mb="4px">
               <Text fontSize="10px" fontWeight="600" color={subColor}>
@@ -236,10 +202,10 @@ export default function RoomCard({ room, index, onView, onToggle, onEdit, onDele
             w="34px"
             p="0"
             borderRadius="9px"
-            bg={btnBg}
-            color={btnColor}
-            border={`1px solid ${btnBorder}`}
-            _hover={{ bg: btnHoverBg }}
+            bg={darkMode ? DARK_THEME.inputBg : "#f8fafc"}
+            color={darkMode ? DARK_THEME.textSecondary : "#475569"}
+            border={`1px solid ${darkMode ? DARK_THEME.border : "#e2e8f0"}`}
+            _hover={{ bg: darkMode ? DARK_THEME.hoverBg : "#f1f5f9" }}
             transition="all 0.15s"
             onClick={() => onToggle(room.RoomId)}
           >
@@ -252,10 +218,10 @@ export default function RoomCard({ room, index, onView, onToggle, onEdit, onDele
             w="34px"
             p="0"
             borderRadius="9px"
-            bg={btnBg}
-            color={btnColor}
-            border={`1px solid ${btnBorder}`}
-            _hover={{ bg: btnHoverBg }}
+            bg={darkMode ? DARK_THEME.inputBg : "#f8fafc"}
+            color={darkMode ? DARK_THEME.textSecondary : "#475569"}
+            border={`1px solid ${darkMode ? DARK_THEME.border : "#e2e8f0"}`}
+            _hover={{ bg: darkMode ? DARK_THEME.hoverBg : "#f1f5f9" }}
             transition="all 0.15s"
             onClick={() => onEdit(room)}
           >
@@ -266,9 +232,9 @@ export default function RoomCard({ room, index, onView, onToggle, onEdit, onDele
             w="34px"
             p="0"
             borderRadius="9px"
-            bg={btnBg}
-            color={btnColor}
-            border={`1px solid ${btnBorder}`}
+            bg={darkMode ? DARK_THEME.inputBg : "#f8fafc"}
+            color={darkMode ? DARK_THEME.textSecondary : "#475569"}
+            border={`1px solid ${darkMode ? DARK_THEME.border : "#e2e8f0"}`}
             _hover={{ bg: "#fef2f2", color: "#dc2626", border: "1px solid #fca5a5" }}
             transition="all 0.15s"
             onClick={() => onDelete(room)}

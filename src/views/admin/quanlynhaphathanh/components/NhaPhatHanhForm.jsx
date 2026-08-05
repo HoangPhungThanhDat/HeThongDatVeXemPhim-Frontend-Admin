@@ -1,10 +1,8 @@
-
-
 import { useState } from "react";
 import {
   Box, Grid, Text, Button, Flex, SimpleGrid, FormControl,
   Input, Select, Textarea, Icon, useColorModeValue,
-  useBreakpointValue
+  useBreakpointValue, Spinner
 } from "@chakra-ui/react";
 import {
   MdArrowBack, MdClose, MdCheckCircle, MdCalendarToday,
@@ -21,6 +19,7 @@ import { STATUS_OPTS, REGION_OPTS, COUNTRY_OPTS, FLAG_MAP } from "../constants";
 export function NhaPhatHanhForm({ distributor, movies = [], onCancel, onSave, isAdd = false }) {
   const isDark = useColorModeValue(false, true);
   const isMobile = useBreakpointValue({ base: true, lg: false });
+  const [isSubmitting, setIsSubmitting] = useState(false); //  Thêm state loading
 
   const empty = {
     name: "",
@@ -106,6 +105,7 @@ export function NhaPhatHanhForm({ distributor, movies = [], onCancel, onSave, is
     },
     _hover: { border: "1.5px solid #f97316", bg: useColorModeValue("#ffffff", "#111C44") },
     transition: "all 0.2s ease",
+    isDisabled: isSubmitting, //  Disable khi đang submit
   };
 
   const labelStyle = {
@@ -121,6 +121,9 @@ export function NhaPhatHanhForm({ distributor, movies = [], onCancel, onSave, is
     bg: cardBg,
     border: `1px solid ${cardBorder}`,
     boxShadow: isDark ? "0 2px 10px rgba(0,0,0,0.3)" : "0 2px 10px rgba(0,0,0,0.04)",
+    opacity: isSubmitting ? 0.7 : 1, //  Mờ khi loading
+    transition: "opacity 0.3s ease",
+    pointerEvents: isSubmitting ? "none" : "auto", //  Không cho tương tác khi loading
   };
 
   // Kiểm tra hợp đồng sắp hết hạn
@@ -130,7 +133,8 @@ export function NhaPhatHanhForm({ distributor, movies = [], onCancel, onSave, is
   })();
   const contractExpired = form.contractEnd && new Date(form.contractEnd) < new Date();
 
-  const handleSubmit = () => {
+  //  Xử lý submit với loading
+  const handleSubmit = async () => {
     // Kiểm tra các trường bắt buộc
     if (!form.name.trim()) {
       alert("Vui lòng nhập tên nhà phát hành");
@@ -142,28 +146,41 @@ export function NhaPhatHanhForm({ distributor, movies = [], onCancel, onSave, is
       return;
     }
 
-    const submitData = {
-      Name: form.name.trim(),
-      ShortName: form.shortName || form.name.substring(0, 2).toUpperCase(),
-      Type: form.type,
-      Country: form.country,
-      Status: form.status,
-      ContactPerson: form.contactPerson || "",
-      Email: form.email || "",
-      Phone: form.phone || "",
-      Website: form.website || "",
-      Address: form.address || "",
-      Description: form.description || "",
-      FoundedYear: form.foundedYear || "",
-      ContractStart: form.contractStart || "",
-      ContractEnd: form.contractEnd || "",
-      Notes: form.notes || "",
-      LogoColor: form.logoColor || "#f97316",
-      MovieId: form.movieId || null,
-    };
+    // Bật loading
+    setIsSubmitting(true);
 
-    console.log("📤 Dữ liệu gửi đi:", submitData);
-    onSave(submitData);
+    try {
+      const submitData = {
+        Name: form.name.trim(),
+        ShortName: form.shortName || form.name.substring(0, 2).toUpperCase(),
+        Type: form.type,
+        Country: form.country,
+        Status: form.status,
+        ContactPerson: form.contactPerson || "",
+        Email: form.email || "",
+        Phone: form.phone || "",
+        Website: form.website || "",
+        Address: form.address || "",
+        Description: form.description || "",
+        FoundedYear: form.foundedYear || "",
+        ContractStart: form.contractStart || "",
+        ContractEnd: form.contractEnd || "",
+        Notes: form.notes || "",
+        LogoColor: form.logoColor || "#f97316",
+        MovieId: form.movieId || null,
+      };
+
+      console.log("📤 Dữ liệu gửi đi:", submitData);
+      
+      // Gọi hàm onSave và đợi nó hoàn thành
+      await onSave(submitData);
+      
+    } catch (error) {
+      console.error("Lỗi khi lưu nhà phát hành:", error);
+    } finally {
+      // Tắt loading sau khi hoàn thành (cả thành công và thất bại)
+      setIsSubmitting(false);
+    }
   };
 
   // Lấy tên phim theo MovieId
@@ -185,6 +202,7 @@ export function NhaPhatHanhForm({ distributor, movies = [], onCancel, onSave, is
           color={secondaryBtnColor} borderRadius="10px" h="40px" fontSize="13px" fontWeight="600"
           border={`1.5px solid ${secondaryBtnBorder}`} _hover={{ bg: secondaryBtnHoverBg }} flexShrink="0"
           onClick={onCancel}
+          isDisabled={isSubmitting} //  Disable khi đang submit
         >
           Quay lại
         </Button>
@@ -219,18 +237,24 @@ export function NhaPhatHanhForm({ distributor, movies = [], onCancel, onSave, is
               <Box>
                 <Text sx={{ ...labelStyle, color: textMuted }}>Tên nhà phát hành *</Text>
                 <Input {...inputStyle} placeholder="VD: Marvel Studios"
-                  value={form.name} onChange={e => set("name", e.target.value)} />
+                  value={form.name} onChange={e => set("name", e.target.value)} 
+                  isDisabled={isSubmitting} //  Disable khi đang submit
+                />
               </Box>
               <Box>
                 <Text sx={{ ...labelStyle, color: textMuted }}>Tên viết tắt</Text>
                 <Input {...inputStyle} placeholder="VD: Marvel"
-                  value={form.shortName} onChange={e => set("shortName", e.target.value)} />
+                  value={form.shortName} onChange={e => set("shortName", e.target.value)}
+                  isDisabled={isSubmitting} //  Disable khi đang submit
+                />
               </Box>
             </Grid>
             <Grid templateColumns={{ base: "1fr", sm: "1fr 1fr 1fr" }} gap="14px" mb="14px">
               <Box>
                 <Text sx={{ ...labelStyle, color: textMuted }}>Loại *</Text>
-                <Select {...inputStyle} value={form.type} onChange={e => set("type", e.target.value)}>
+                <Select {...inputStyle} value={form.type} onChange={e => set("type", e.target.value)}
+                  isDisabled={isSubmitting} //  Disable khi đang submit
+                >
                   {REGION_OPTS.map(opt => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
@@ -238,7 +262,9 @@ export function NhaPhatHanhForm({ distributor, movies = [], onCancel, onSave, is
               </Box>
               <Box>
                 <Text sx={{ ...labelStyle, color: textMuted }}>Quốc gia *</Text>
-                <Select {...inputStyle} value={form.country} onChange={e => set("country", e.target.value)}>
+                <Select {...inputStyle} value={form.country} onChange={e => set("country", e.target.value)}
+                  isDisabled={isSubmitting} //  Disable khi đang submit
+                >
                   {COUNTRY_OPTS.map(c => (
                     <option key={c} value={c}>{FLAG_MAP[c] || "🌍"} {c}</option>
                   ))}
@@ -247,13 +273,17 @@ export function NhaPhatHanhForm({ distributor, movies = [], onCancel, onSave, is
               <Box>
                 <Text sx={{ ...labelStyle, color: textMuted }}>Năm thành lập</Text>
                 <Input {...inputStyle} type="number" placeholder="VD: 1994"
-                  value={form.foundedYear} onChange={e => set("foundedYear", e.target.value)} />
+                  value={form.foundedYear} onChange={e => set("foundedYear", e.target.value)}
+                  isDisabled={isSubmitting} //  Disable khi đang submit
+                />
               </Box>
             </Grid>
             <Box>
               <Text sx={{ ...labelStyle, color: textMuted }}>Trụ sở / Địa chỉ</Text>
               <Input {...inputStyle} placeholder="Địa chỉ đầy đủ..."
-                value={form.address} onChange={e => set("address", e.target.value)} />
+                value={form.address} onChange={e => set("address", e.target.value)}
+                isDisabled={isSubmitting} //  Disable khi đang submit
+              />
             </Box>
           </Box>
 
@@ -264,24 +294,32 @@ export function NhaPhatHanhForm({ distributor, movies = [], onCancel, onSave, is
               <Box>
                 <Text sx={{ ...labelStyle, color: textMuted }}>Người đại diện</Text>
                 <Input {...inputStyle} placeholder="Họ và tên"
-                  value={form.contactPerson} onChange={e => set("contactPerson", e.target.value)} />
+                  value={form.contactPerson} onChange={e => set("contactPerson", e.target.value)}
+                  isDisabled={isSubmitting} //  Disable khi đang submit
+                />
               </Box>
               <Box>
                 <Text sx={{ ...labelStyle, color: textMuted }}>Email liên hệ</Text>
                 <Input {...inputStyle} type="email" placeholder="email@example.com"
-                  value={form.email} onChange={e => set("email", e.target.value)} />
+                  value={form.email} onChange={e => set("email", e.target.value)}
+                  isDisabled={isSubmitting} //  Disable khi đang submit
+                />
               </Box>
             </Grid>
             <Grid templateColumns={{ base: "1fr", sm: "1fr 1fr" }} gap="14px">
               <Box>
                 <Text sx={{ ...labelStyle, color: textMuted }}>Số điện thoại</Text>
                 <Input {...inputStyle} placeholder="+84 xxx xxx xxx"
-                  value={form.phone} onChange={e => set("phone", e.target.value)} />
+                  value={form.phone} onChange={e => set("phone", e.target.value)}
+                  isDisabled={isSubmitting} //  Disable khi đang submit
+                />
               </Box>
               <Box>
                 <Text sx={{ ...labelStyle, color: textMuted }}>Website</Text>
                 <Input {...inputStyle} placeholder="https://..."
-                  value={form.website} onChange={e => set("website", e.target.value)} />
+                  value={form.website} onChange={e => set("website", e.target.value)}
+                  isDisabled={isSubmitting} //  Disable khi đang submit
+                />
               </Box>
             </Grid>
           </Box>
@@ -292,7 +330,9 @@ export function NhaPhatHanhForm({ distributor, movies = [], onCancel, onSave, is
             <Grid templateColumns={{ base: "1fr", sm: "1fr 1fr 1fr" }} gap="14px" mb="14px">
               <Box>
                 <Text sx={{ ...labelStyle, color: textMuted }}>Trạng thái *</Text>
-                <Select {...inputStyle} value={form.status} onChange={e => set("status", e.target.value)}>
+                <Select {...inputStyle} value={form.status} onChange={e => set("status", e.target.value)}
+                  isDisabled={isSubmitting} //  Disable khi đang submit
+                >
                   {STATUS_OPTS.map(opt => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
@@ -301,12 +341,16 @@ export function NhaPhatHanhForm({ distributor, movies = [], onCancel, onSave, is
               <Box>
                 <Text sx={{ ...labelStyle, color: textMuted }}>Ngày bắt đầu HĐ</Text>
                 <Input {...inputStyle} type="date"
-                  value={form.contractStart} onChange={e => set("contractStart", e.target.value)} />
+                  value={form.contractStart} onChange={e => set("contractStart", e.target.value)}
+                  isDisabled={isSubmitting} //  Disable khi đang submit
+                />
               </Box>
               <Box>
                 <Text sx={{ ...labelStyle, color: textMuted }}>Ngày kết thúc HĐ</Text>
                 <Input {...inputStyle} type="date"
-                  value={form.contractEnd} onChange={e => set("contractEnd", e.target.value)} />
+                  value={form.contractEnd} onChange={e => set("contractEnd", e.target.value)}
+                  isDisabled={isSubmitting} //  Disable khi đang submit
+                />
               </Box>
             </Grid>
 
@@ -340,6 +384,7 @@ export function NhaPhatHanhForm({ distributor, movies = [], onCancel, onSave, is
                 transition="all 0.2s" rows={2}
                 placeholder="Ghi chú nội bộ về hợp đồng, điều kiện đặc biệt..."
                 value={form.notes} onChange={e => set("notes", e.target.value)}
+                isDisabled={isSubmitting} //  Disable khi đang submit
               />
             </Box>
           </Box>
@@ -358,12 +403,14 @@ export function NhaPhatHanhForm({ distributor, movies = [], onCancel, onSave, is
                 transition="all 0.2s" rows={3}
                 placeholder="Mô tả ngắn về nhà phát hành..."
                 value={form.description} onChange={e => set("description", e.target.value)}
+                isDisabled={isSubmitting} //  Disable khi đang submit
               />
             </Box>
             <Box>
               <Text sx={{ ...labelStyle, color: textMuted }}>Phim liên quan</Text>
               <Select {...inputStyle} value={form.movieId} 
                 onChange={e => set("movieId", e.target.value)}
+                isDisabled={isSubmitting} //  Disable khi đang submit
               >
                 <option value="">-- Chọn phim (tùy chọn) --</option>
                 {movies.map((m) => (
@@ -401,7 +448,8 @@ export function NhaPhatHanhForm({ distributor, movies = [], onCancel, onSave, is
                   border={form.logoColor === c ? "2.5px solid #f97316" : "2px solid transparent"}
                   boxShadow={form.logoColor === c ? "0 0 0 3px rgba(249,115,22,0.3)" : "none"}
                   transition="all 0.15s" _hover={{ transform: "scale(1.15)" }}
-                  onClick={() => set("logoColor", c)}
+                  onClick={() => !isSubmitting && set("logoColor", c)} //  Kiểm tra loading
+                  opacity={isSubmitting ? 0.5 : 1} //  Mờ khi loading
                 />
               ))}
             </Flex>
@@ -411,6 +459,7 @@ export function NhaPhatHanhForm({ distributor, movies = [], onCancel, onSave, is
               <Box p="16px" borderRadius="12px"
                 bg={filterBg} border={`1px solid ${cardBorder}`}
                 sx={{ animation: `${fadeIn} 0.3s ease both` }}
+                opacity={isSubmitting ? 0.6 : 1} //  Mờ khi loading
               >
                 <Text fontSize="10px" fontWeight="700" color={textMuted} letterSpacing="0.8px"
                   textTransform="uppercase" mb="10px">Xem trước</Text>
@@ -480,7 +529,7 @@ export function NhaPhatHanhForm({ distributor, movies = [], onCancel, onSave, is
         </Flex>
       </Grid>
 
-      {/* Save bar */}
+      {/* Save bar -  Đã có loading */}
       <Box bg={cardBg} borderRadius="14px" border={`1px solid ${cardBorder}`}
         boxShadow="0 2px 10px rgba(0,0,0,0.04)" p={{ base: "14px 16px", md: "16px 20px" }} mt="16px"
         position={{ base: "sticky", md: "static" }} bottom="0" zIndex="10"
@@ -491,20 +540,41 @@ export function NhaPhatHanhForm({ distributor, movies = [], onCancel, onSave, is
             color={secondaryBtnColor} borderRadius="10px" fontWeight="600" fontSize="13px"
             border={`1.5px solid ${secondaryBtnBorder}`} _hover={{ bg: secondaryBtnHoverBg }}
             leftIcon={<Icon as={MdClose} />} onClick={onCancel}
+            isDisabled={isSubmitting} //  Disable khi đang submit
           >
             Hủy bỏ
           </Button>
           <Button flex={{ base: "2", md: "none" }}
             h={{ base: "46px", md: "42px" }} px="28px" borderRadius="10px"
             fontWeight="700" fontSize="13px"
-            bg="linear-gradient(135deg, #f97316 0%, #fb923c 60%, #fbbf24 100%)"
-            color="white" boxShadow="0 4px 16px rgba(249,115,22,0.35)"
-            _hover={{ boxShadow: "0 8px 24px rgba(249,115,22,0.45)", transform: "translateY(-1px)" }}
-            _active={{ transform: "translateY(0)" }} transition="all 0.2s"
-            leftIcon={<Icon as={MdCheckCircle} />}
+            bg={isSubmitting 
+              ? "linear-gradient(135deg, #94a3b8, #64748b)" //  Màu xám khi loading
+              : "linear-gradient(135deg, #f97316 0%, #fb923c 60%, #fbbf24 100%)"
+            }
+            color="white" 
+            boxShadow={isSubmitting 
+              ? "none" 
+              : "0 4px 16px rgba(249,115,22,0.35)"
+            }
+            _hover={!isSubmitting && { 
+              boxShadow: "0 8px 24px rgba(249,115,22,0.45)", 
+              transform: "translateY(-1px)" 
+            }}
+            _active={!isSubmitting && { transform: "translateY(0)" }}
+            transition="all 0.2s"
+            leftIcon={!isSubmitting && <Icon as={MdCheckCircle} />} //  Ẩn icon khi loading
             onClick={handleSubmit}
+            isDisabled={isSubmitting} //  Disable khi đang submit
+            cursor={isSubmitting ? "not-allowed" : "pointer"}
           >
-            {isAdd ? "Thêm nhà phát hành" : "Lưu thay đổi"}
+            {isSubmitting ? (
+              <Flex align="center" gap="8px">
+                <Spinner size="sm" color="white" />
+                <Text>Đang lưu...</Text>
+              </Flex>
+            ) : (
+              isAdd ? "Thêm nhà phát hành" : "Lưu thay đổi"
+            )}
           </Button>
         </Flex>
       </Box>

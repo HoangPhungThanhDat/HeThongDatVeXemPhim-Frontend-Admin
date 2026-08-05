@@ -1,4 +1,4 @@
-// views/admin/quanlytintuc/hooks/useTinTuc.js
+// src/views/admin/quanlytintuc/hooks/useTinTuc.js
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useToast } from "@chakra-ui/react";
@@ -11,6 +11,22 @@ export function useTinTuc() {
   const [filterStatus, setFilterStatus] = useState("Tất cả");
   const [filterCategory, setFilterCategory] = useState("Tất cả");
   const toast = useToast();
+
+  // Hàm sắp xếp: Mới nhất lên đầu
+  const sortArticles = useCallback((items) => {
+    return [...items].sort((a, b) => {
+      const timeA = a.createdAt || a.CreatedAt || 0;
+      const timeB = b.createdAt || b.CreatedAt || 0;
+      
+      if (timeA && timeB) {
+        return new Date(timeB) - new Date(timeA);
+      }
+      
+      const idA = a.NewsId || a.id || 0;
+      const idB = b.NewsId || b.id || 0;
+      return idB - idA;
+    });
+  }, []);
 
   // Lấy dữ liệu từ API
   const fetchArticles = useCallback(async () => {
@@ -38,11 +54,13 @@ export function useTinTuc() {
         views: item.Views || item.views || 0,
         likes: item.Likes || item.likes || 0,
         comments: item.Comments || item.comments || 0,
-        createdAt: item.CreatedAt || item.createdAt || "",
+        createdAt: item.CreatedAt || item.createdAt || new Date().toISOString(),
         updatedAt: item.UpdatedAt || item.updatedAt || "",
         userId: item.UserId || item.userId || "",
       }));
-      setArticles(transformed);
+      
+      const sorted = sortArticles(transformed);
+      setArticles(sorted);
     } catch (error) {
       console.error("Lỗi khi tải danh sách tin tức:", error);
       toast({
@@ -55,7 +73,7 @@ export function useTinTuc() {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, sortArticles]);
 
   useEffect(() => {
     fetchArticles();
@@ -63,17 +81,15 @@ export function useTinTuc() {
 
   // Filter
   const filtered = useMemo(() => {
-    return articles
-      .filter((a) => {
-        const q = search.toLowerCase();
-        const matchSearch = (a.title || "").toLowerCase().includes(q) ||
-          (a.author || "").toLowerCase().includes(q) ||
-          (a.linkedMovie || "").toLowerCase().includes(q);
-        const matchStatus = filterStatus === "Tất cả" || a.status === filterStatus;
-        const matchCategory = filterCategory === "Tất cả" || a.category === filterCategory;
-        return matchSearch && matchStatus && matchCategory;
-      })
-      .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    return articles.filter((a) => {
+      const q = search.toLowerCase();
+      const matchSearch = (a.title || "").toLowerCase().includes(q) ||
+        (a.author || "").toLowerCase().includes(q) ||
+        (a.linkedMovie || "").toLowerCase().includes(q);
+      const matchStatus = filterStatus === "Tất cả" || a.status === filterStatus;
+      const matchCategory = filterCategory === "Tất cả" || a.category === filterCategory;
+      return matchSearch && matchStatus && matchCategory;
+    });
   }, [articles, search, filterStatus, filterCategory]);
 
   // Stats
@@ -95,41 +111,42 @@ export function useTinTuc() {
     const newStatus = article.status === "Published" ? "Hidden" : "Published";
     
     try {
-      const formData = new FormData();
-      formData.append("_method", "PUT");
+      const data = new FormData();
+      data.append("_method", "PUT");
+      data.append("Status", newStatus);
       
-      const userId = localStorage.getItem("UserId") || "";
-      formData.append("UserId", userId || article.userId || "");
-      formData.append("Status", newStatus);
-      formData.append("Title", article.title || "");
-      formData.append("Slug", article.slug || "");
-      formData.append("Content", article.content || "");
-      formData.append("Category", article.category || "Tin tức");
-      formData.append("Author", article.author || "");
-      formData.append("Excerpt", article.excerpt || "");
-      formData.append("LinkedMovie", article.linkedMovie || "");
-      formData.append("Featured", article.featured ? "1" : "0");
-      formData.append("Tags", JSON.stringify(article.tags || []));
+      // Thêm các field cần thiết khác
+      data.append("Title", article.title || "");
+      data.append("Slug", article.slug || "");
+      data.append("Content", article.content || "");
+      data.append("Category", article.category || "Tin tức");
+      data.append("Author", article.author || "");
+      data.append("Excerpt", article.excerpt || "");
+      data.append("LinkedMovie", article.linkedMovie || "");
+      data.append("Featured", article.featured ? "1" : "0");
+      data.append("Tags", JSON.stringify(article.tags || []));
       
       if (article.imageUrl && article.imageUrl.startsWith("http")) {
-        formData.append("ImageUrl", article.imageUrl);
+        data.append("ImageUrl", article.imageUrl);
       }
       
-      await NewsApi.update(id, formData, {
+      await NewsApi.update(id, data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      setArticles((prev) =>
-        prev.map((a) =>
+      setArticles((prev) => {
+        const updated = prev.map((a) =>
           (a.NewsId || a.id) === id 
             ? { 
                 ...a, 
                 status: newStatus, 
-                publishDate: newStatus === "Published" ? new Date().toISOString().slice(0, 10) : a.publishDate 
+                publishDate: newStatus === "Published" ? new Date().toISOString().slice(0, 10) : a.publishDate,
+                updatedAt: new Date().toISOString(),
               } 
             : a
-        )
-      );
+        );
+        return sortArticles(updated);
+      });
       
       toast({
         title: "Thành công",
@@ -148,7 +165,7 @@ export function useTinTuc() {
         isClosable: true,
       });
     }
-  }, [toast]);
+  }, [toast, sortArticles]);
 
   // Delete
   const deleteArticle = useCallback(async (id) => {
@@ -174,7 +191,7 @@ export function useTinTuc() {
     }
   }, [toast]);
 
-  // Create
+  // CREATE - Nhận FormData và upload ảnh
   const createArticle = useCallback(async (formData) => {
     try {
       const data = new FormData();
@@ -211,20 +228,9 @@ export function useTinTuc() {
         data.append("ScheduledDate", formData.ScheduledDate);
       }
       
-      // ⚠️ CHỈ GỬI FILE ẢNH, KHÔNG GỬI URL
+      // Xử lý ảnh - gửi file nếu có
       if (formData.ImageFile instanceof File) {
         data.append("ImageUrl", formData.ImageFile);
-      } else if (formData.ImageUrl instanceof File) {
-        data.append("ImageUrl", formData.ImageUrl);
-      }
-
-      console.log("=== 📤 TẠO MỚI ===");
-      for (let pair of data.entries()) {
-        if (pair[1] instanceof File) {
-          console.log(`  ${pair[0]}: [FILE] ${pair[1].name}`);
-        } else {
-          console.log(`  ${pair[0]}: ${pair[1]}`);
-        }
       }
 
       const response = await NewsApi.create(data, {
@@ -233,53 +239,55 @@ export function useTinTuc() {
       
       const newArticle = response.data.data || response.data;
       
-      setArticles((prev) => [
-        {
-          ...newArticle,
-          id: newArticle.NewsId || newArticle.id,
-          title: newArticle.Title || newArticle.title,
-          status: newArticle.Status || newArticle.status,
-          views: 0,
-          likes: 0,
-          comments: 0,
-        },
-        ...prev
-      ]);
+      const articleItem = {
+        ...newArticle,
+        id: newArticle.NewsId || newArticle.id,
+        title: newArticle.Title || newArticle.title || "",
+        slug: newArticle.Slug || newArticle.slug || "",
+        category: newArticle.Category || newArticle.category || "Tin tức",
+        tags: newArticle.Tags || newArticle.tags || [],
+        status: newArticle.Status || newArticle.status || "Draft",
+        author: newArticle.Author || newArticle.author || "",
+        publishDate: newArticle.PublishDate || newArticle.publishDate || "",
+        scheduledDate: newArticle.ScheduledDate || newArticle.scheduledDate || "",
+        imageUrl: newArticle.ImageUrl || newArticle.imageUrl || "",
+        excerpt: newArticle.Excerpt || newArticle.excerpt || "",
+        content: newArticle.Content || newArticle.content || "",
+        linkedMovie: newArticle.LinkedMovie || newArticle.linkedMovie || "",
+        featured: newArticle.Featured || newArticle.featured || false,
+        views: 0,
+        likes: 0,
+        comments: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        userId: userId,
+      };
+      
+      setArticles((prev) => sortArticles([articleItem, ...prev]));
       
       toast({
-        title: "Thành công",
-        description: "Thêm bài viết mới thành công",
+        title: "Thành công 🎉",
+        description: `Đã tạo bài viết "${articleItem.title}" thành công`,
         status: "success",
-        duration: 2000,
+        duration: 3000,
         isClosable: true,
       });
       return true;
     } catch (error) {
       console.error("❌ Lỗi khi thêm bài viết:", error);
       
-      const errorMessage = error.response?.data?.message || "Không thể thêm bài viết mới";
-      const errors = error.response?.data?.errors;
-      
-      let errorDetail = errorMessage;
-      if (errors) {
-        const errorList = Object.entries(errors)
-          .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(", ") : messages}`)
-          .join("\n");
-        errorDetail = `${errorMessage}\n\n${errorList}`;
-      }
-      
       toast({
         title: "Lỗi",
-        description: errorDetail,
+        description: error.response?.data?.message || "Không thể thêm bài viết mới",
         status: "error",
         duration: 5000,
         isClosable: true,
       });
       return false;
     }
-  }, [toast]);
+  }, [toast, sortArticles]);
 
-  // Update - SỬA HOÀN CHỈNH
+  // UPDATE - Nhận FormData và upload ảnh mới
   const updateArticle = useCallback(async (id, formData) => {
     try {
       const currentArticle = articles.find(a => (a.NewsId || a.id) === id);
@@ -317,7 +325,6 @@ export function useTinTuc() {
       
       const userId = localStorage.getItem("UserId") || "";
       
-      // Gửi TẤT CẢ các trường
       data.append("UserId", userId || currentArticle.userId || "");
       data.append("Title", formData.Title || currentArticle.title || "");
       data.append("Slug", slug);
@@ -344,35 +351,19 @@ export function useTinTuc() {
         data.append("ScheduledDate", currentArticle.scheduledDate || "");
       }
       
-      // ⚠️ QUAN TRỌNG: Xử lý ImageUrl - CHỈ GỬI FILE, KHÔNG GỬI URL
+      // Xử lý ảnh - gửi file nếu có
       if (formData.ImageFile instanceof File) {
-        // Nếu có file mới
         data.append("ImageUrl", formData.ImageFile);
-      } else if (formData.ImageUrl instanceof File) {
-        // Nếu có file mới
-        data.append("ImageUrl", formData.ImageUrl);
-      }
-      // ❌ KHÔNG gửi ImageUrl nếu là string (URL)
-      // Server sẽ giữ nguyên ảnh cũ
-
-      console.log("=== 📤 CẬP NHẬT ===");
-      for (let pair of data.entries()) {
-        if (pair[1] instanceof File) {
-          console.log(`  ${pair[0]}: [FILE] ${pair[1].name} (${pair[1].size} bytes)`);
-        } else {
-          console.log(`  ${pair[0]}: ${pair[1]}`);
-        }
       }
 
       const response = await NewsApi.update(id, data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       
-      console.log("✅ Update response:", response.data);
-      
       const updatedData = response.data.data || response.data;
-      setArticles((prev) =>
-        prev.map((a) =>
+      
+      setArticles((prev) => {
+        const updated = prev.map((a) =>
           (a.NewsId || a.id) === id ? { 
             ...a, 
             ...updatedData,
@@ -389,9 +380,11 @@ export function useTinTuc() {
             imageUrl: updatedData.ImageUrl || updatedData.imageUrl || formData.ImageUrl || a.imageUrl,
             publishDate: updatedData.PublishDate || updatedData.publishDate || formData.PublishDate || a.publishDate,
             scheduledDate: updatedData.ScheduledDate || updatedData.scheduledDate || formData.ScheduledDate || a.scheduledDate,
+            updatedAt: new Date().toISOString(),
           } : a
-        )
-      );
+        );
+        return sortArticles(updated);
+      });
       
       toast({
         title: "Thành công",
@@ -402,36 +395,34 @@ export function useTinTuc() {
       });
       return true;
     } catch (error) {
-      console.error("❌ LỖI KHI CẬP NHẬT:", error);
-      console.error("❌ Response status:", error.response?.status);
-      console.error("❌ Response data:", error.response?.data);
-      
-      let errorMessage = "Không thể cập nhật bài viết";
-      let errorDetail = "";
-      
-      if (error.response?.data) {
-        const errData = error.response.data;
-        if (errData.message) {
-          errorMessage = errData.message;
-        }
-        if (errData.errors) {
-          const errorList = Object.entries(errData.errors)
-            .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(", ") : messages}`)
-            .join("\n");
-          errorDetail = errorList;
-        }
-      }
+      console.error("❌ Lỗi khi cập nhật:", error);
       
       toast({
         title: "Lỗi",
-        description: errorDetail ? `${errorMessage}\n\n${errorDetail}` : errorMessage,
+        description: error.response?.data?.message || "Không thể cập nhật bài viết",
         status: "error",
         duration: 5000,
         isClosable: true,
       });
       return false;
     }
-  }, [articles, toast]);
+  }, [articles, toast, sortArticles]);
+
+  // Đưa bài viết lên đầu
+  const moveToTop = useCallback((id) => {
+    setArticles((prev) => {
+      const item = prev.find(a => (a.NewsId || a.id) === id);
+      if (!item) return prev;
+      
+      const remaining = prev.filter(a => (a.NewsId || a.id) !== id);
+      return sortArticles([item, ...remaining]);
+    });
+  }, [sortArticles]);
+
+  // Refresh danh sách
+  const refreshArticles = useCallback(async () => {
+    await fetchArticles();
+  }, [fetchArticles]);
 
   return {
     articles,
@@ -450,5 +441,7 @@ export function useTinTuc() {
     deleteArticle,
     createArticle,
     updateArticle,
+    moveToTop,
+    refreshArticles,
   };
 }

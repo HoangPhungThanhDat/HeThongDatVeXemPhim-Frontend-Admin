@@ -5,18 +5,30 @@ import { Box, Flex, Icon, Text, Badge } from "@chakra-ui/react";
 import { fadeUp } from "./animations";
 
 export function StatCard({ label, value, icon, accent, delay = 0, theme, trend, trendLabel }) {
+  // Fallback cho theme
+  const safeTheme = theme || {
+    isDark: false,
+    bgCard: "#ffffff",
+    text: "#0f172a",
+    textMuted: "#94a3b8",
+    shadow: "0 1px 4px rgba(0,0,0,0.04)",
+    shadowHover: "0 4px 20px rgba(0,0,0,0.08)",
+  };
+
+  const isDark = safeTheme.isDark || false;
+
   return (
     <Box
       p={{ base: "12px 14px", md: "16px 20px" }}
       borderRadius="14px"
-      bg={theme.bgCard}
+      bg={safeTheme.bgCard}
       border={`1.5px solid ${accent}40`}
-      boxShadow={theme.shadow}
+      boxShadow={safeTheme.shadow}
       sx={{ animation: `${fadeUp} .4s ease ${delay}s both` }}
       transition="all 0.25s cubic-bezier(0.4, 0, 0.2, 1)"
       _hover={{
         transform: "translateY(-3px)",
-        boxShadow: theme.shadowHover,
+        boxShadow: safeTheme.shadowHover,
         borderColor: accent,
       }}
       position="relative"
@@ -38,16 +50,16 @@ export function StatCard({ label, value, icon, accent, delay = 0, theme, trend, 
           <Text
             fontSize={{ base: "9px", md: "10px" }}
             fontWeight="700"
-            color={theme.textMuted}
+            color={safeTheme.textMuted}
             letterSpacing="0.8px"
             textTransform="uppercase"
             mb="6px"
           >
             {label}
           </Text>
-          <Flex align="baseline" gap="6px">
-            <Text fontSize={{ base: "24px", md: "30px" }} fontWeight="800" color={theme.text} lineHeight="1">
-              {value}
+          <Flex align="baseline" gap="6px" flexWrap="wrap">
+            <Text fontSize={{ base: "24px", md: "30px" }} fontWeight="800" color={safeTheme.text} lineHeight="1">
+              {value !== undefined && value !== null ? value : 0}
             </Text>
             {trend !== undefined && (
               <Badge
@@ -62,7 +74,7 @@ export function StatCard({ label, value, icon, accent, delay = 0, theme, trend, 
             )}
           </Flex>
           {trendLabel && (
-            <Text fontSize="10px" color={theme.textMuted} mt="2px">
+            <Text fontSize="10px" color={safeTheme.textMuted} mt="2px">
               {trendLabel}
             </Text>
           )}

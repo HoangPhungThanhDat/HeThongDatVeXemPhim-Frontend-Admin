@@ -1,14 +1,14 @@
-// components/RoomCard.jsx
+// src/views/admin/quanlyghe/components/RoomCard.jsx
+
 import React, { useState, useEffect } from "react";
 import { Box, Flex, Text, Grid, Button, Icon, useColorMode } from "@chakra-ui/react";
 import { MdLayers, MdEdit } from "react-icons/md";
 import { getSeatColors } from "./shared/StatCard";
 import { fadeUp, shimmer } from "./shared/animations";
-import { generateSeats } from "../hooks/useSeatManagement";
 import RoomTypeBadge from "./RoomTypeBadge";
 import StatusDot from "./StatusDot";
-import { SEAT_TYPES } from "../constants";
-import SeatApi from "../../../../api/SeatApi";
+import { SEAT_TYPES, ROW_LABELS } from "../constants";
+import RoomSeatApi from "../../../../api/RoomSeatApi";
 
 // Màu sắc cho chế độ tối - tông xanh
 const DARK_THEME = {
@@ -23,6 +23,32 @@ const DARK_THEME = {
   accent: "#4a9eff",
   accentLight: "#6ab0ff",
   accentShadow: "rgba(74, 158, 255, 0.25)",
+};
+
+// ✅ Tạo preview seats (không cần import từ hook)
+const generatePreviewSeats = (room) => {
+  if (!room) return [];
+  
+  const rows = room.rows || 8;
+  const cols = room.cols || 12;
+  const previewRows = [];
+  
+  for (let r = 0; r < Math.min(rows, 6); r++) {
+    const row = [];
+    const rowLabel = ROW_LABELS[r] || 'A';
+    for (let c = 0; c < Math.min(cols, 10); c++) {
+      // Random trạng thái cho preview
+      const isBooked = (r * 7 + c * 13) % 7 === 0;
+      const type = (r + c) % 3 === 0 ? 'vip' : (r + c) % 5 === 0 ? 'sweetbox' : 'regular';
+      row.push({
+        id: `${rowLabel}${c + 1}`,
+        booked: isBooked,
+        type: type,
+      });
+    }
+    previewRows.push(row);
+  }
+  return previewRows;
 };
 
 export default function RoomCard({ room, index, onView, onEditMode, isDark }) {
@@ -50,21 +76,27 @@ export default function RoomCard({ room, index, onView, onEditMode, isDark }) {
   const textColor = darkMode ? DARK_THEME.text : "#0f172a";
   const subColor = darkMode ? DARK_THEME.textSecondary : "#94a3b8";
 
+  // ✅ Load ghế từ API mới RoomSeatApi
   useEffect(() => {
     loadSeatCount();
   }, [room.id]);
 
   const loadSeatCount = async () => {
     try {
-      const res = await SeatApi.getAll();
-      const seats = res.data.data || res.data || [];
-      const roomSeats = seats.filter(s => s.RoomId === room.id);
-      const total = roomSeats.length;
-      const booked = roomSeats.filter(s => s.Status !== "Available").length;
+      const res = await RoomSeatApi.getSeats(room.id);
+      const data = res?.data?.data || res?.data || {};
+      const seats = data.seats || [];
+      
+      const total = seats.length;
+      const booked = seats.filter(s => s.status === 'Booked' || s.status === 'booked').length;
       setSeatCount(total);
       setBookedCount(booked);
     } catch (err) {
-      console.error("Lỗi load ghế:", err);
+      console.error("❌ Lỗi load ghế:", err);
+      // Fallback: dùng seat_count từ room nếu có
+      if (room.capacity || room.seat_count) {
+        setSeatCount(room.capacity || room.seat_count || 0);
+      }
     } finally {
       setLoading(false);
     }
@@ -75,8 +107,8 @@ export default function RoomCard({ room, index, onView, onEditMode, isDark }) {
   const empty = total - booked;
   const pct = total > 0 ? Math.round((booked / total) * 100) : 0;
 
-  // Generate preview seats
-  const previewSeats = generateSeats(room);
+  // ✅ Generate preview seats
+  const previewSeats = generatePreviewSeats(room);
 
   return (
     <Box 
@@ -125,43 +157,46 @@ export default function RoomCard({ room, index, onView, onEditMode, isDark }) {
         </Flex>
 
         {/* Preview seats */}
-        <Box bg={previewBg} borderRadius="10px" p="10px" mb="12px" overflow="hidden">
-          <Flex direction="column" gap="4px" align="center">
-            <Box 
-              w="80%" 
-              h="4px" 
-              borderRadius="2px"
-              bg={darkMode 
-                ? `linear-gradient(90deg, transparent, ${DARK_THEME.accent}, transparent)` 
-                : "linear-gradient(90deg, transparent, #f97316, transparent)"
-              } 
-              mb="4px" 
-            />
-            {previewSeats.slice(0, 4).map((row, ri) => (
-              <Flex key={ri} gap="3px" justify="center">
-                {row.slice(0, 8).map((seat) => (
-                  <Box 
-                    key={seat.id}
-                    w="9px" 
-                    h="7px" 
-                    borderRadius="2px"
-                    bg={seat.booked
-                      ? SEAT_TYPES[seat.type]?.bookedBg || "#dc2626"
-                      : (darkMode ? DARK_THEME.accent : "#fb923c")}
-                  />
-                ))}
-                {row.length > 8 && (
-                  <Text fontSize="7px" color={subColor}>...</Text>
-                )}
-              </Flex>
-            ))}
-            {previewSeats.length > 4 && (
-              <Text fontSize="9px" color={subColor} mt="2px">
-                +{previewSeats.length - 4} hàng nữa
-              </Text>
-            )}
-          </Flex>
-        </Box>
+        {previewSeats.length > 0 && (
+          <Box bg={previewBg} borderRadius="10px" p="10px" mb="12px" overflow="hidden">
+            <Flex direction="column" gap="4px" align="center">
+              <Box 
+                w="80%" 
+                h="4px" 
+                borderRadius="2px"
+                bg={darkMode 
+                  ? `linear-gradient(90deg, transparent, ${DARK_THEME.accent}, transparent)` 
+                  : "linear-gradient(90deg, transparent, #f97316, transparent)"
+                } 
+                mb="4px" 
+              />
+              {previewSeats.slice(0, 5).map((row, ri) => (
+                <Flex key={ri} gap="3px" justify="center">
+                  {row.slice(0, 10).map((seat) => (
+                    <Box 
+                      key={seat.id}
+                      w="9px" 
+                      h="7px" 
+                      borderRadius="2px"
+                      bg={seat.booked
+                        ? "#dc2626"
+                        : (darkMode ? DARK_THEME.accent : "#fb923c")}
+                      opacity={seat.booked ? 1 : 0.7}
+                    />
+                  ))}
+                  {row.length > 10 && (
+                    <Text fontSize="7px" color={subColor}>...</Text>
+                  )}
+                </Flex>
+              ))}
+              {previewSeats.length > 5 && (
+                <Text fontSize="9px" color={subColor} mt="2px">
+                  +{previewSeats.length - 5} hàng nữa
+                </Text>
+              )}
+            </Flex>
+          </Box>
+        )}
 
         <Grid templateColumns="1fr 1fr 1fr" gap="8px" mb="12px">
           {[

@@ -22,7 +22,7 @@ import { DeleteModal } from "./components/DeleteModal";
 import { ComboCard } from "./components/FoodItemCard";
 import { ComboRow } from "./components/FoodItemRow";
 import { ComboForm } from "./components/FoodItemForm";
-import Loader from "../../../layouts/Loader"; // ✅ Import Loader từ layouts
+import Loader from "../../../layouts/Loader";
 
 export default function QuanLyCombo() {
   const { colorMode, toggleColorMode } = useColorMode();
@@ -54,19 +54,21 @@ export default function QuanLyCombo() {
   const { isOpen: isDetailOpen, onOpen: onDetailOpen, onClose: onDetailClose } = useDisclosure();
   const [detailCombo, setDetailCombo] = useState(null);
 
-  const bg = useColorModeValue("#f5f5f2", DARK.bg);
-  const ink = useColorModeValue("#0f172a", DARK.ink);
-  const ink3 = useColorModeValue("#64748b", DARK.ink3);
-  const ink4 = useColorModeValue("#94a3b8", DARK.ink4);
-  const ink5 = useColorModeValue("#e2e8f0", DARK.ink5);
-  const ink6 = useColorModeValue("#f1f5f9", DARK.ink6);
+  // ✅ Sử dụng useColorModeValue thay vì DARK trực tiếp
+  const bg = useColorModeValue("#f5f5f2", "#0a1628");
+  const cardBg = useColorModeValue("white", "#0f1f3a");
+  const ink = useColorModeValue("#0f172a", "#e8f4f8");
+  const ink3 = useColorModeValue("#64748b", "#88b4d8");
+  const ink4 = useColorModeValue("#94a3b8", "#5a8ab5");
+  const ink5 = useColorModeValue("#e2e8f0", "#1a3a5c");
+  const ink6 = useColorModeValue("#f1f5f9", "#0a1f35");
 
   const handleView = (combo) => {
     setDetailCombo(combo);
     onDetailOpen();
   };
 
-  // ✅ Hiển thị Loader từ layouts/Loader khi đang loading
+  // ✅ Hiển thị Loader
   if (loading) {
     return <Loader />;
   }
@@ -111,8 +113,8 @@ export default function QuanLyCombo() {
         <ModalOverlay backdropFilter="blur(8px)" bg="rgba(15,23,42,.65)" />
         <ModalContent
           borderRadius="20px"
-          border={isDark ? `1px solid ${DARK.ink5}` : "1px solid #e2e8f0"}
-          bg={isDark ? DARK.bgCard : "#ffffff"}
+          border={isDark ? `1px solid ${ink5}` : "1px solid #e2e8f0"}
+          bg={isDark ? cardBg : "#ffffff"}
           boxShadow="0 32px 80px rgba(0,0,0,.25)"
           sx={{ animation: `${fadeIn} 0.3s ease both` }}
           maxW="550px"
@@ -131,15 +133,15 @@ export default function QuanLyCombo() {
                 <Icon as={FaCoffee} boxSize="18px" color="white" />
               </Box>
               <Box>
-                <Text fontSize="18px" fontWeight="800" color={isDark ? DARK.ink : "#0f172a"}>
+                <Text fontSize="18px" fontWeight="800" color={isDark ? ink : "#0f172a"}>
                   Chi tiết combo
                 </Text>
-                <Text fontSize="12px" color={isDark ? DARK.ink4 : "#94a3b8"}>
+                <Text fontSize="12px" color={isDark ? ink4 : "#94a3b8"}>
                   {detailCombo?.name}
                 </Text>
               </Box>
             </Flex>
-            <ModalCloseButton color={isDark ? DARK.ink4 : "#94a3b8"} />
+            <ModalCloseButton color={isDark ? ink4 : "#94a3b8"} />
           </ModalHeader>
 
           <ModalBody pb="6">
@@ -168,34 +170,34 @@ export default function QuanLyCombo() {
 
                 <Grid templateColumns="1fr 1fr" gap="12px" mb="12px">
                   <Box>
-                    <Text fontSize="10px" fontWeight="700" color={isDark ? DARK.ink4 : "#94a3b8"} textTransform="uppercase" letterSpacing="0.5px">
+                    <Text fontSize="10px" fontWeight="700" color={isDark ? ink4 : "#94a3b8"} textTransform="uppercase" letterSpacing="0.5px">
                       Tên combo
                     </Text>
-                    <Text fontSize="14px" fontWeight="700" color={isDark ? DARK.ink : "#0f172a"}>
+                    <Text fontSize="14px" fontWeight="700" color={isDark ? ink : "#0f172a"}>
                       {detailCombo.name}
                     </Text>
                   </Box>
                   <Box>
-                    <Text fontSize="10px" fontWeight="700" color={isDark ? DARK.ink4 : "#94a3b8"} textTransform="uppercase" letterSpacing="0.5px">
+                    <Text fontSize="10px" fontWeight="700" color={isDark ? ink4 : "#94a3b8"} textTransform="uppercase" letterSpacing="0.5px">
                       Danh mục
                     </Text>
-                    <Text fontSize="14px" fontWeight="700" color={isDark ? DARK.ink : "#0f172a"}>
+                    <Text fontSize="14px" fontWeight="700" color={isDark ? ink : "#0f172a"}>
                       {detailCombo.category}
                     </Text>
                   </Box>
                 </Grid>
 
                 <Box mb="12px">
-                  <Text fontSize="10px" fontWeight="700" color={isDark ? DARK.ink4 : "#94a3b8"} textTransform="uppercase" letterSpacing="0.5px">
+                  <Text fontSize="10px" fontWeight="700" color={isDark ? ink4 : "#94a3b8"} textTransform="uppercase" letterSpacing="0.5px">
                     Mô tả
                   </Text>
-                  <Text fontSize="13px" color={isDark ? DARK.ink3 : "#64748b"} lineHeight="1.6">
+                  <Text fontSize="13px" color={isDark ? ink3 : "#64748b"} lineHeight="1.6">
                     {detailCombo.description || "Không có mô tả"}
                   </Text>
                 </Box>
 
                 <Box mb="12px">
-                  <Text fontSize="10px" fontWeight="700" color={isDark ? DARK.ink4 : "#94a3b8"} textTransform="uppercase" letterSpacing="0.5px">
+                  <Text fontSize="10px" fontWeight="700" color={isDark ? ink4 : "#94a3b8"} textTransform="uppercase" letterSpacing="0.5px">
                     Thành phần
                   </Text>
                   <Flex gap="6px" flexWrap="wrap" mt="4px">
@@ -208,29 +210,29 @@ export default function QuanLyCombo() {
                 </Box>
 
                 <Grid templateColumns="1fr 1fr 1fr" gap="12px">
-                  <Box p="10px" borderRadius="8px" bg={isDark ? DARK.ink6 : "#f9fafb"}>
-                    <Text fontSize="9px" fontWeight="700" color={isDark ? DARK.ink4 : "#94a3b8"} textTransform="uppercase">
+                  <Box p="10px" borderRadius="8px" bg={isDark ? ink6 : "#f9fafb"}>
+                    <Text fontSize="9px" fontWeight="700" color={isDark ? ink4 : "#94a3b8"} textTransform="uppercase">
                       Giá bán
                     </Text>
                     <Text fontSize="16px" fontWeight="800" color="#f97316">
                       {detailCombo.price?.toLocaleString("vi-VN")}đ
                     </Text>
                     {detailCombo.originalPrice > detailCombo.price && (
-                      <Text fontSize="11px" color={isDark ? DARK.ink4 : "#94a3b8"} textDecoration="line-through">
+                      <Text fontSize="11px" color={isDark ? ink4 : "#94a3b8"} textDecoration="line-through">
                         {detailCombo.originalPrice.toLocaleString("vi-VN")}đ
                       </Text>
                     )}
                   </Box>
-                  <Box p="10px" borderRadius="8px" bg={isDark ? DARK.ink6 : "#f9fafb"}>
-                    <Text fontSize="9px" fontWeight="700" color={isDark ? DARK.ink4 : "#94a3b8"} textTransform="uppercase">
+                  <Box p="10px" borderRadius="8px" bg={isDark ? ink6 : "#f9fafb"}>
+                    <Text fontSize="9px" fontWeight="700" color={isDark ? ink4 : "#94a3b8"} textTransform="uppercase">
                       Đã bán
                     </Text>
-                    <Text fontSize="16px" fontWeight="800" color={isDark ? DARK.ink : "#0f172a"}>
+                    <Text fontSize="16px" fontWeight="800" color={isDark ? ink : "#0f172a"}>
                       {detailCombo.soldCount?.toLocaleString() || 0}
                     </Text>
                   </Box>
-                  <Box p="10px" borderRadius="8px" bg={isDark ? DARK.ink6 : "#f9fafb"}>
-                    <Text fontSize="9px" fontWeight="700" color={isDark ? DARK.ink4 : "#94a3b8"} textTransform="uppercase">
+                  <Box p="10px" borderRadius="8px" bg={isDark ? ink6 : "#f9fafb"}>
+                    <Text fontSize="9px" fontWeight="700" color={isDark ? ink4 : "#94a3b8"} textTransform="uppercase">
                       Trạng thái
                     </Text>
                     <Text fontSize="14px" fontWeight="700" color={detailCombo.isActive ? "#10b981" : "#6b7280"}>
@@ -241,7 +243,7 @@ export default function QuanLyCombo() {
 
                 {detailCombo.tag && (
                   <Box mt="12px">
-                    <Text fontSize="10px" fontWeight="700" color={isDark ? DARK.ink4 : "#94a3b8"} textTransform="uppercase" letterSpacing="0.5px">
+                    <Text fontSize="10px" fontWeight="700" color={isDark ? ink4 : "#94a3b8"} textTransform="uppercase" letterSpacing="0.5px">
                       Nhãn
                     </Text>
                     <Box px="10px" py="4px" borderRadius="6px" bg="#f5f3ff" border="1px solid #c4b5fd" display="inline-block">
@@ -253,7 +255,7 @@ export default function QuanLyCombo() {
             )}
           </ModalBody>
 
-          <ModalFooter gap="10px" borderTop={isDark ? `1px solid ${DARK.ink5}` : "1px solid #f1f5f9"}>
+          <ModalFooter gap="10px" borderTop={isDark ? `1px solid ${ink5}` : "1px solid #f1f5f9"}>
             <Button
               flex="1"
               h="42px"
@@ -261,9 +263,9 @@ export default function QuanLyCombo() {
               fontWeight="600"
               fontSize="13px"
               variant="ghost"
-              color={isDark ? DARK.ink3 : "#64748b"}
-              border={isDark ? `1.5px solid ${DARK.ink5}` : "1.5px solid #e2e8f0"}
-              _hover={{ bg: isDark ? DARK.ink6 : "#f8fafc" }}
+              color={isDark ? ink3 : "#64748b"}
+              border={isDark ? `1.5px solid ${ink5}` : "1.5px solid #e2e8f0"}
+              _hover={{ bg: isDark ? ink6 : "#f8fafc" }}
               onClick={onDetailClose}
             >
               Đóng
@@ -320,7 +322,7 @@ export default function QuanLyCombo() {
               Combo Bắp Nước
             </Text>
           </Flex>
-          <Text color={isDark ? DARK.ink4 : "#94a3b8"} fontSize="13px" pl="48px">
+          <Text color={isDark ? ink4 : "#94a3b8"} fontSize="13px" pl="48px">
             Tạo và quản lý các gói combo bắp nước cho hệ thống đặt vé
           </Text>
         </Box>
@@ -333,9 +335,9 @@ export default function QuanLyCombo() {
             w="40px"
             p="0"
             borderRadius="10px"
-            bg={isDark ? DARK.ink6 : "#f8fafc"}
-            color={isDark ? DARK.ink2 : "#475569"}
-            border={isDark ? `1.5px solid ${DARK.ink5}` : "1.5px solid #e2e8f0"}
+            bg={isDark ? ink6 : "#f8fafc"}
+            color={isDark ? ink3 : "#475569"}
+            border={isDark ? `1.5px solid ${ink5}` : "1.5px solid #e2e8f0"}
             onClick={toggleColorMode}
             flexShrink="0"
           >
@@ -344,7 +346,7 @@ export default function QuanLyCombo() {
 
           <Flex
             borderRadius="10px"
-            border={isDark ? `1px solid ${DARK.ink5}` : "1px solid #e2e8f0"}
+            border={isDark ? `1px solid ${ink5}` : "1px solid #e2e8f0"}
             overflow="hidden"
             flexShrink="0"
           >
@@ -354,8 +356,8 @@ export default function QuanLyCombo() {
                 h="40px"
                 px="14px"
                 borderRadius="0"
-                bg={displayMode === mode ? "linear-gradient(135deg,#f97316,#fb923c)" : (isDark ? DARK.ink6 : "#f8fafc")}
-                color={displayMode === mode ? "white" : (isDark ? DARK.ink3 : "#64748b")}
+                bg={displayMode === mode ? "linear-gradient(135deg,#f97316,#fb923c)" : (isDark ? ink6 : "#f8fafc")}
+                color={displayMode === mode ? "white" : (isDark ? ink3 : "#64748b")}
                 fontSize="12px"
                 fontWeight="700"
                 _hover={{ opacity: 0.9 }}
@@ -409,16 +411,16 @@ export default function QuanLyCombo() {
 
       {/* Table / Grid card */}
       <Box
-        bg={isDark ? DARK.bgCard : "white"}
+        bg={isDark ? cardBg : "white"}
         borderRadius="16px"
-        border={isDark ? `1px solid ${DARK.ink5}` : "1px solid #f1f5f9"}
+        border={isDark ? `1px solid ${ink5}` : "1px solid #f1f5f9"}
         boxShadow={isDark ? "0 1px 4px rgba(0,0,0,.3)" : "0 1px 4px rgba(0,0,0,0.04)"}
         sx={{ animation: `${fadeUp} 0.4s ease 0.1s both` }}
       >
         {/* Card header */}
         <Box
           p={{ base: "14px 16px", md: "16px 20px 14px" }}
-          borderBottom={isDark ? `1px solid ${DARK.ink5}` : "1px solid #f8fafc"}
+          borderBottom={isDark ? `1px solid ${ink5}` : "1px solid #f8fafc"}
         >
           <Flex align="center" justify="space-between" mb="12px">
             <Flex align="center" gap="8px">
@@ -435,13 +437,13 @@ export default function QuanLyCombo() {
               h="34px"
               px="12px"
               borderRadius="9px"
-              bg={isDark ? DARK.ink6 : "#f8fafc"}
-              color={isDark ? DARK.ink3 : "#64748b"}
-              border={isDark ? `1px solid ${DARK.ink5}` : "1px solid #e2e8f0"}
+              bg={isDark ? ink6 : "#f8fafc"}
+              color={isDark ? ink3 : "#64748b"}
+              border={isDark ? `1px solid ${ink5}` : "1px solid #e2e8f0"}
               fontSize="12px"
               fontWeight="600"
               leftIcon={<Icon as={MdFilterList} boxSize="13px" />}
-              _hover={{ bg: isDark ? DARK.ink6 : "#f1f5f9" }}
+              _hover={{ bg: isDark ? ink6 : "#f1f5f9" }}
               onClick={() => setShowFilter((v) => !v)}
             >
               Lọc
@@ -459,7 +461,7 @@ export default function QuanLyCombo() {
                   top="50%"
                   transform="translateY(-50%)"
                   boxSize="13px"
-                  color={isDark ? DARK.ink4 : "#94a3b8"}
+                  color={isDark ? ink4 : "#94a3b8"}
                   zIndex="1"
                 />
                 <Input
@@ -469,15 +471,15 @@ export default function QuanLyCombo() {
                   fontSize="12.5px"
                   fontWeight="500"
                   placeholder="Tìm tên combo, mô tả, thành phần..."
-                  bg={isDark ? DARK.ink6 : "#f8fafc"}
-                  border={isDark ? `1px solid ${DARK.ink5}` : "1px solid #e8edf3"}
+                  bg={isDark ? ink6 : "#f8fafc"}
+                  border={isDark ? `1px solid ${ink5}` : "1px solid #e8edf3"}
                   borderRadius="9px"
-                  color={isDark ? DARK.ink : "#374151"}
-                  _placeholder={{ color: isDark ? DARK.ink4 : "#b0bac8" }}
+                  color={isDark ? ink : "#374151"}
+                  _placeholder={{ color: isDark ? ink4 : "#b0bac8" }}
                   _focus={{
                     border: "1.5px solid #f97316",
                     boxShadow: "0 0 0 3px rgba(249,115,22,0.08)",
-                    bg: isDark ? DARK.bgCard : "#fff"
+                    bg: isDark ? cardBg : "#fff"
                   }}
                   _hover={{ border: "1px solid #f97316" }}
                   transition="all 0.2s"
@@ -489,9 +491,9 @@ export default function QuanLyCombo() {
                 h={{ base: "40px", md: "34px" }}
                 fontSize="12.5px"
                 fontWeight="600"
-                color={isDark ? DARK.ink : "#374151"}
-                bg={isDark ? DARK.ink6 : "#f8fafc"}
-                border={isDark ? `1px solid ${DARK.ink5}` : "1px solid #e8edf3"}
+                color={isDark ? ink : "#374151"}
+                bg={isDark ? ink6 : "#f8fafc"}
+                border={isDark ? `1px solid ${ink5}` : "1px solid #e8edf3"}
                 borderRadius="9px"
                 _focus={{ border: "1.5px solid #f97316" }}
                 _hover={{ border: "1px solid #f97316" }}
@@ -505,9 +507,9 @@ export default function QuanLyCombo() {
                 h={{ base: "40px", md: "34px" }}
                 fontSize="12.5px"
                 fontWeight="600"
-                color={isDark ? DARK.ink : "#374151"}
-                bg={isDark ? DARK.ink6 : "#f8fafc"}
-                border={isDark ? `1px solid ${DARK.ink5}` : "1px solid #e8edf3"}
+                color={isDark ? ink : "#374151"}
+                bg={isDark ? ink6 : "#f8fafc"}
+                border={isDark ? `1px solid ${ink5}` : "1px solid #e8edf3"}
                 borderRadius="9px"
                 _focus={{ border: "1.5px solid #f97316" }}
                 _hover={{ border: "1px solid #f97316" }}
@@ -526,12 +528,12 @@ export default function QuanLyCombo() {
         {/* Content */}
         <Box p="14px">
           {filtered.length === 0 ? (
-            <Flex direction="column" align="center" justify="center" py="52px" color={isDark ? DARK.ink4 : "#cbd5e1"}>
+            <Flex direction="column" align="center" justify="center" py="52px" color={isDark ? ink4 : "#cbd5e1"}>
               <Icon as={FaBoxOpen} boxSize="32px" mb="10px" />
-              <Text fontSize="13px" fontWeight="600" color={isDark ? DARK.ink3 : "#94a3b8"}>
+              <Text fontSize="13px" fontWeight="600" color={isDark ? ink3 : "#94a3b8"}>
                 Không tìm thấy combo nào
               </Text>
-              <Text fontSize="11.5px" color={isDark ? DARK.ink4 : "#cbd5e1"} mt="4px">
+              <Text fontSize="11.5px" color={isDark ? ink4 : "#cbd5e1"} mt="4px">
                 Thử thay đổi bộ lọc hoặc thêm combo mới
               </Text>
             </Flex>
@@ -555,7 +557,7 @@ export default function QuanLyCombo() {
               <Flex
                 px="16px"
                 py="9px"
-                bg={isDark ? DARK.ink6 : "#fafbfc"}
+                bg={isDark ? ink6 : "#fafbfc"}
                 borderRadius="10px"
                 mb="8px"
                 display={{ base: "none", md: "flex" }}
@@ -573,7 +575,7 @@ export default function QuanLyCombo() {
                     <Text
                       fontSize="10px"
                       fontWeight="800"
-                      color={isDark ? DARK.ink4 : "#94a3b8"}
+                      color={isDark ? ink4 : "#94a3b8"}
                       letterSpacing="1px"
                       textTransform="uppercase"
                     >
@@ -585,7 +587,7 @@ export default function QuanLyCombo() {
                   <Text
                     fontSize="10px"
                     fontWeight="800"
-                    color={isDark ? DARK.ink4 : "#94a3b8"}
+                    color={isDark ? ink4 : "#94a3b8"}
                     letterSpacing="1px"
                     textTransform="uppercase"
                   >
@@ -616,9 +618,9 @@ export default function QuanLyCombo() {
           <Box
             px={{ base: "14px", md: "20px" }}
             py="12px"
-            borderTop={isDark ? `1px solid ${DARK.ink5}` : "1px solid #f8fafc"}
+            borderTop={isDark ? `1px solid ${ink5}` : "1px solid #f8fafc"}
           >
-            <Text fontSize="12px" color={isDark ? DARK.ink4 : "#94a3b8"}>
+            <Text fontSize="12px" color={isDark ? ink4 : "#94a3b8"}>
               Hiển thị <strong color={ink}>{filtered.length}</strong> / {combos.length} combo ·{" "}
               <Text as="span" color="#10b981" fontWeight="700">{stats.active} đang bán</Text>,{" "}
               <Text as="span" color="#6b7280" fontWeight="700">{stats.hidden} đã tắt</Text>

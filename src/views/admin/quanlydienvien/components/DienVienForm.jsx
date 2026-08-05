@@ -1,10 +1,8 @@
-
-
 import { useState, useRef } from "react";
 import {
   Box, Grid, Text, Button, Flex, SimpleGrid, FormControl,
   Input, Select, Textarea, Icon, useColorModeValue,
-  useBreakpointValue
+  useBreakpointValue, Spinner
 } from "@chakra-ui/react";
 import {
   MdArrowBack, MdClose, MdCheckCircle, MdPerson,
@@ -23,6 +21,7 @@ export function DienVienForm({ artist, movies = [], onCancel, onSave, isAdd = fa
   const isMobile = useBreakpointValue({ base: true, lg: false });
   const fileInputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false); // ✅ Thêm state loading submit
 
   const empty = {
     MovieId: "",
@@ -96,6 +95,7 @@ export function DienVienForm({ artist, movies = [], onCancel, onSave, isAdd = fa
     },
     _hover: { border: "1.5px solid #f97316", bg: useColorModeValue("#ffffff", "#111C44") },
     transition: "all 0.2s ease",
+    isDisabled: isSubmitting, // ✅ Disable khi đang submit
   };
 
   const labelStyle = {
@@ -111,10 +111,15 @@ export function DienVienForm({ artist, movies = [], onCancel, onSave, isAdd = fa
     bg: cardBg,
     border: `1px solid ${cardBorder}`,
     boxShadow: isDark ? "0 2px 10px rgba(0,0,0,0.3)" : "0 2px 10px rgba(0,0,0,0.04)",
+    opacity: isSubmitting ? 0.7 : 1, // ✅ Mờ khi loading
+    transition: "opacity 0.3s ease",
+    pointerEvents: isSubmitting ? "none" : "auto", // ✅ Không cho tương tác khi loading
   };
 
   // Xử lý chọn file ảnh
   const handleFileSelect = (e) => {
+    if (isSubmitting) return; // ✅ Không cho chọn file khi đang submit
+    
     const file = e.target.files[0];
     if (!file) return;
     
@@ -143,7 +148,8 @@ export function DienVienForm({ artist, movies = [], onCancel, onSave, isAdd = fa
     e.target.value = "";
   };
 
-  const handleSubmit = () => {
+  // ✅ Xử lý submit với loading
+  const handleSubmit = async () => {
     // Kiểm tra các trường bắt buộc
     if (!form.Name.trim()) {
       alert("Vui lòng nhập tên nghệ sĩ");
@@ -160,29 +166,41 @@ export function DienVienForm({ artist, movies = [], onCancel, onSave, isAdd = fa
       return;
     }
 
-    const submitData = {
-      MovieId: form.MovieId,
-      Name: form.Name.trim(),
-      Role: form.Role,
-      Nationality: form.Nationality || "",
-      Status: form.Status || "Active",
-      Bio: form.Bio || "",
-      Awards: form.Awards || "",
-      movies: form.movies || [],
-    };
+    // Bật loading
+    setIsSubmitting(true);
 
-    if (form.PhotoFile instanceof File) {
-      submitData.PhotoFile = form.PhotoFile;
-    } else if (form.Photo && typeof form.Photo === "string") {
-      submitData.Photo = form.Photo;
+    try {
+      const submitData = {
+        MovieId: form.MovieId,
+        Name: form.Name.trim(),
+        Role: form.Role,
+        Nationality: form.Nationality || "",
+        Status: form.Status || "Active",
+        Bio: form.Bio || "",
+        Awards: form.Awards || "",
+        movies: form.movies || [],
+      };
+
+      if (form.PhotoFile instanceof File) {
+        submitData.PhotoFile = form.PhotoFile;
+      } else if (form.Photo && typeof form.Photo === "string") {
+        submitData.Photo = form.Photo;
+      }
+
+      console.log("📤 Dữ liệu gửi đi:", {
+        ...submitData,
+        PhotoFile: submitData.PhotoFile ? `[FILE] ${submitData.PhotoFile.name}` : "Không có ảnh mới"
+      });
+
+      // Gọi hàm onSave và đợi nó hoàn thành
+      await onSave(submitData);
+      
+    } catch (error) {
+      console.error("Lỗi khi lưu nghệ sĩ:", error);
+    } finally {
+      // Tắt loading sau khi hoàn thành (cả thành công và thất bại)
+      setIsSubmitting(false);
     }
-
-    console.log("📤 Dữ liệu gửi đi:", {
-      ...submitData,
-      PhotoFile: submitData.PhotoFile ? `[FILE] ${submitData.PhotoFile.name}` : "Không có ảnh mới"
-    });
-
-    onSave(submitData);
   };
 
   // Lấy tên phim theo MovieId
@@ -201,6 +219,7 @@ export function DienVienForm({ artist, movies = [], onCancel, onSave, isAdd = fa
           color={secondaryBtnColor} borderRadius="10px" h="38px" fontSize="13px" fontWeight="600"
           border={`1.5px solid ${secondaryBtnBorder}`} _hover={{ bg: secondaryBtnHoverBg }} flexShrink="0"
           onClick={onCancel}
+          isDisabled={isSubmitting} // ✅ Disable khi đang submit
         >
           Quay lại
         </Button>
@@ -224,7 +243,9 @@ export function DienVienForm({ artist, movies = [], onCancel, onSave, isAdd = fa
               <Box>
                 <Text sx={labelStyle}>Họ tên nghệ sĩ *</Text>
                 <Input {...inputStyle} placeholder="VD: Tom Hanks"
-                  value={form.Name} onChange={e => set("Name", e.target.value)} />
+                  value={form.Name} onChange={e => set("Name", e.target.value)} 
+                  isDisabled={isSubmitting} // ✅ Disable khi đang submit
+                />
               </Box>
             </Grid>
             <Grid templateColumns={{ base: "1fr", sm: "1fr 1fr" }} gap="14px" mb="14px">
@@ -233,6 +254,7 @@ export function DienVienForm({ artist, movies = [], onCancel, onSave, isAdd = fa
                 <Select {...inputStyle} value={form.MovieId} 
                   onChange={e => set("MovieId", e.target.value)}
                   placeholder="-- Chọn phim --"
+                  isDisabled={isSubmitting} // ✅ Disable khi đang submit
                 >
                   {movies.map((m) => (
                     <option key={m.MovieId || m.id} value={m.MovieId || m.id}>
@@ -245,6 +267,7 @@ export function DienVienForm({ artist, movies = [], onCancel, onSave, isAdd = fa
                 <Text sx={labelStyle}>Vai trò *</Text>
                 <Select {...inputStyle} value={form.Role} 
                   onChange={e => set("Role", e.target.value)}
+                  isDisabled={isSubmitting} // ✅ Disable khi đang submit
                 >
                   {ROLE_OPTS.map(opt => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -256,11 +279,15 @@ export function DienVienForm({ artist, movies = [], onCancel, onSave, isAdd = fa
               <Box>
                 <Text sx={labelStyle}>Quốc tịch</Text>
                 <Input {...inputStyle} placeholder="VD: Mỹ, Anh, Hàn Quốc..."
-                  value={form.Nationality} onChange={e => set("Nationality", e.target.value)} />
+                  value={form.Nationality} onChange={e => set("Nationality", e.target.value)}
+                  isDisabled={isSubmitting} // ✅ Disable khi đang submit
+                />
               </Box>
               <Box>
                 <Text sx={labelStyle}>Trạng thái</Text>
-                <Select {...inputStyle} value={form.Status} onChange={e => set("Status", e.target.value)}>
+                <Select {...inputStyle} value={form.Status} onChange={e => set("Status", e.target.value)}
+                  isDisabled={isSubmitting} // ✅ Disable khi đang submit
+                >
                   {STATUS_OPTS.map(opt => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
@@ -283,12 +310,15 @@ export function DienVienForm({ artist, movies = [], onCancel, onSave, isAdd = fa
                 transition="all 0.2s" rows={4}
                 placeholder="Nhập tiểu sử, sự nghiệp, thông tin nổi bật..."
                 value={form.Bio} onChange={e => set("Bio", e.target.value)}
+                isDisabled={isSubmitting} // ✅ Disable khi đang submit
               />
             </Box>
             <Box>
               <Text sx={labelStyle}>Giải thưởng nổi bật</Text>
               <Input {...inputStyle} placeholder="VD: Oscar, Golden Globe, BAFTA..."
-                value={form.Awards} onChange={e => set("Awards", e.target.value)} />
+                value={form.Awards} onChange={e => set("Awards", e.target.value)}
+                isDisabled={isSubmitting} // ✅ Disable khi đang submit
+              />
             </Box>
           </Box>
 
@@ -351,7 +381,9 @@ export function DienVienForm({ artist, movies = [], onCancel, onSave, isAdd = fa
             <Text sx={labelStyle} mb="7px">URL ảnh</Text>
             <FormControl mb="10px">
               <Input {...inputStyle} placeholder="https://..."
-                value={form.Photo} onChange={e => set("Photo", e.target.value)} />
+                value={form.Photo} onChange={e => set("Photo", e.target.value)}
+                isDisabled={isSubmitting} // ✅ Disable khi đang submit
+              />
             </FormControl>
 
             <input
@@ -360,6 +392,7 @@ export function DienVienForm({ artist, movies = [], onCancel, onSave, isAdd = fa
               accept="image/*"
               style={{ display: "none" }}
               onChange={handleFileSelect}
+              disabled={isSubmitting} // ✅ Disable khi đang submit
             />
             <Button
               w="100%" h="40px" borderRadius="9px"
@@ -369,7 +402,8 @@ export function DienVienForm({ artist, movies = [], onCancel, onSave, isAdd = fa
               transition="all 0.2s"
               leftIcon={<Icon as={uploading ? MdSchedule : MdCloudUpload} boxSize="16px" />}
               isLoading={uploading} loadingText="Đang tải..."
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => !isSubmitting && fileInputRef.current?.click()} // ✅ Kiểm tra loading
+              isDisabled={isSubmitting} // ✅ Disable khi đang submit
               mb="12px"
             >
               Tải ảnh lên từ máy tính
@@ -406,6 +440,7 @@ export function DienVienForm({ artist, movies = [], onCancel, onSave, isAdd = fa
           {form.Name && (
             <Box {...cardStyle} borderRadius="16px" p={{ base: "16px", md: "18px" }}
               sx={{ animation: `${fadeIn} 0.3s ease both` }}
+              opacity={isSubmitting ? 0.6 : 1} // ✅ Mờ khi loading
             >
               <SectionTitle label="Xem trước" />
               <Flex direction="column" gap="10px">
@@ -448,7 +483,7 @@ export function DienVienForm({ artist, movies = [], onCancel, onSave, isAdd = fa
         </Flex>
       </Grid>
 
-      {/* Save bar */}
+      {/* Save bar - ✅ Đã có loading */}
       <Box {...cardStyle} borderRadius="14px" p={{ base: "14px 16px", md: "16px 20px" }} mt="16px"
         position={{ base: "sticky", md: "static" }} bottom={{ base: "0" }} zIndex="10"
       >
@@ -459,20 +494,41 @@ export function DienVienForm({ artist, movies = [], onCancel, onSave, isAdd = fa
             border={`1.5px solid ${secondaryBtnBorder}`} _hover={{ bg: secondaryBtnHoverBg }} transition="all 0.2s"
             leftIcon={<Icon as={MdClose} />}
             onClick={onCancel}
+            isDisabled={isSubmitting} // ✅ Disable khi đang submit
           >
             Hủy bỏ
           </Button>
           <Button flex={{ base: "2", md: "none" }}
             h={{ base: "46px", md: "42px" }} px="28px" borderRadius="10px"
             fontWeight="700" fontSize="13px"
-            bg="linear-gradient(135deg, #f97316 0%, #fb923c 60%, #fbbf24 100%)"
-            color="#ffffff" boxShadow="0 4px 16px rgba(249,115,22,0.35)"
-            _hover={{ boxShadow: "0 8px 24px rgba(249,115,22,0.45)", transform: "translateY(-1px)" }}
-            _active={{ transform: "translateY(0)" }} transition="all 0.2s"
-            leftIcon={<Icon as={MdCheckCircle} />}
+            bg={isSubmitting 
+              ? "linear-gradient(135deg, #94a3b8, #64748b)" // ✅ Màu xám khi loading
+              : "linear-gradient(135deg, #f97316 0%, #fb923c 60%, #fbbf24 100%)"
+            }
+            color="#ffffff" 
+            boxShadow={isSubmitting 
+              ? "none" 
+              : "0 4px 16px rgba(249,115,22,0.35)"
+            }
+            _hover={!isSubmitting && { 
+              boxShadow: "0 8px 24px rgba(249,115,22,0.45)", 
+              transform: "translateY(-1px)" 
+            }}
+            _active={!isSubmitting && { transform: "translateY(0)" }}
+            transition="all 0.2s"
+            leftIcon={!isSubmitting && <Icon as={MdCheckCircle} />} // ✅ Ẩn icon khi loading
             onClick={handleSubmit}
+            isDisabled={isSubmitting} // ✅ Disable khi đang submit
+            cursor={isSubmitting ? "not-allowed" : "pointer"}
           >
-            {isAdd ? "Thêm nghệ sĩ" : "Lưu thay đổi"}
+            {isSubmitting ? (
+              <Flex align="center" gap="8px">
+                <Spinner size="sm" color="white" />
+                <Text>Đang lưu...</Text>
+              </Flex>
+            ) : (
+              isAdd ? "Thêm nghệ sĩ" : "Lưu thay đổi"
+            )}
           </Button>
         </Flex>
       </Box>

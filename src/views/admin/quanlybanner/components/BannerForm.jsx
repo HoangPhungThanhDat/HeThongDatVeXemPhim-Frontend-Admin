@@ -17,7 +17,7 @@ import { ImageUploadButton } from "./ImageUploadButton";
 import { scaleIn, fadeIn } from "./shared/animations";
 import { STATUS_MAP, POSITION_MAP } from "../constants";
 
-export function BannerForm({ banner, onCancel, onSave, isAdd = false }) {
+export function BannerForm({ banner, onCancel, onSave, isAdd = false, isSubmitting = false }) {
   const emptyForm = {
     title: "", 
     image: "", 
@@ -51,7 +51,11 @@ export function BannerForm({ banner, onCancel, onSave, isAdd = false }) {
     return emptyForm;
   });
   
+  // State để kiểm tra validate
+  const [touched, setTouched] = useState({});
+  
   const set = (key, val) => setForm((f) => ({ ...f, [key]: val }));
+  const setTouchedField = (field) => setTouched((prev) => ({ ...prev, [field]: true }));
 
   // Dark mode tokens
   const cardBg = useColorModeValue("white", "#0b1437");
@@ -114,6 +118,78 @@ export function BannerForm({ banner, onCancel, onSave, isAdd = false }) {
     { value: "PromotionPage", label: "Trang khuyến mãi" },
   ];
 
+  // Validation
+  const validate = () => {
+    const errors = {};
+    if (!form.title?.trim()) errors.title = "Tiêu đề banner là bắt buộc";
+    // ✅ CHỈ VALIDATE ẢNH KHI THÊM MỚI
+    if (isAdd && !form.image?.trim()) errors.image = "URL ảnh banner là bắt buộc";
+    if (!form.position) errors.position = "Vị trí hiển thị là bắt buộc";
+    if (form.linkType !== "None" && !form.linkTarget?.trim()) {
+      errors.linkTarget = "URL liên kết là bắt buộc";
+    }
+    if (form.scheduledOn) {
+      if (!form.scheduleStart) errors.scheduleStart = "Thời gian bật là bắt buộc";
+      if (!form.scheduleEnd) errors.scheduleEnd = "Thời gian tắt là bắt buộc";
+      if (form.scheduleStart && form.scheduleEnd && form.scheduleStart >= form.scheduleEnd) {
+        errors.scheduleEnd = "Thời gian tắt phải sau thời gian bật";
+      }
+    }
+    return errors;
+  };
+
+  const errors = validate();
+  const isValid = Object.keys(errors).length === 0;
+
+  const showError = (field) => touched[field] && errors[field];
+
+  // ✅ HÀM XỬ LÝ SUBMIT - KHÔNG GỬI ẢNH KHI SỬA NẾU KHÔNG CÓ FILE MỚI
+  const handleSubmit = () => {
+    // Đánh dấu tất cả fields đã touched
+    const allFields = ["title", "image", "position", "linkTarget", "scheduleStart", "scheduleEnd"];
+    allFields.forEach(field => setTouchedField(field));
+    
+    if (!isValid || isSubmitting) return;
+
+    // Tạo FormData để gửi file
+    const formData = new FormData();
+    
+    // Thêm các trường dữ liệu
+    formData.append('Title', form.title || '');
+    formData.append('Position', form.position || 'Home');
+    formData.append('Status', form.status || 'Active');
+    formData.append('LinkUrl', form.linkTarget || '');
+    formData.append('Note', form.note || '');
+    formData.append('ScheduledOn', form.scheduledOn ? '1' : '0');
+    
+    // Nếu có lịch hẹn giờ
+    if (form.scheduledOn) {
+      formData.append('ScheduleStart', form.scheduleStart || '');
+      formData.append('ScheduleEnd', form.scheduleEnd || '');
+    }
+    
+    // ✅ XỬ LÝ ẢNH - CHỈ GỬI KHI CÓ FILE MỚI HOẶC THÊM MỚI
+    if (form.imageFile) {
+      // Nếu có file mới (upload từ máy tính)
+      formData.append('ImageUrl', form.imageFile);
+    } else if (isAdd && form.image && form.image.startsWith('http')) {
+      // Nếu là thêm mới và có URL ảnh
+      formData.append('ImageUrl', form.image);
+    }
+    // ❌ KHI SỬA: KHÔNG GỬI ImageUrl NẾU KHÔNG CÓ FILE MỚI
+    
+    // Gọi callback với FormData
+    onSave(formData);
+  };
+
+  // Xử lý khi nhấn Enter
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !isSubmitting) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
+
   const PreviewBlock = ({ maxH = "180px" }) => (
     <Box 
       bg={cardBg} 
@@ -148,6 +224,7 @@ export function BannerForm({ banner, onCancel, onSave, isAdd = false }) {
       <ImageUploadButton 
         onImageLoaded={handleImageLoaded}
         onFileSelected={handleFileSelected}
+        isDisabled={isSubmitting}
       />
     </Box>
   );
@@ -209,6 +286,7 @@ export function BannerForm({ banner, onCancel, onSave, isAdd = false }) {
           flexShrink="0" 
           px={{ base: "10px", md: "16px" }} 
           onClick={onCancel}
+          isDisabled={isSubmitting}
         >
           <Box display={{ base: "none", sm: "block" }}>Quay lại</Box>
         </Button>
@@ -226,7 +304,6 @@ export function BannerForm({ banner, onCancel, onSave, isAdd = false }) {
 
       <Grid templateColumns={{ base: "1fr", lg: "1fr 300px" }} gap="14px">
         <Flex direction="column" gap="12px">
-          {/* Thông tin cơ bản */}
           <BasicInfoSection 
             form={form} 
             set={set} 
@@ -234,30 +311,38 @@ export function BannerForm({ banner, onCancel, onSave, isAdd = false }) {
             labelStyle={labelStyle} 
             hintColor={hintColor}
             positionOptions={positionOptions}
+            errors={errors}
+            showError={showError}
+            setTouchedField={setTouchedField}
+            handleKeyDown={handleKeyDown}
+            isSubmitting={isSubmitting}
+            isAdd={isAdd}
           />
           
-          {/* Preview mobile */}
           <Box display={{ base: "block", lg: "none" }}>
             <PreviewBlock maxH="160px" />
           </Box>
 
-          {/* Trạng thái */}
           <StatusSection 
             form={form} 
             set={set} 
             cardBg={cardBg} 
             cardBorder={cardBorder} 
+            isSubmitting={isSubmitting}
           />
 
-          {/* Liên kết */}
           <LinkSection 
             form={form} 
             set={set} 
             inputStyle={inputStyle} 
-            labelStyle={labelStyle} 
+            labelStyle={labelStyle}
+            errors={errors}
+            showError={showError}
+            setTouchedField={setTouchedField}
+            handleKeyDown={handleKeyDown}
+            isSubmitting={isSubmitting}
           />
 
-          {/* Hẹn giờ */}
           <ScheduleSection 
             form={form} 
             set={set} 
@@ -269,28 +354,36 @@ export function BannerForm({ banner, onCancel, onSave, isAdd = false }) {
             schedBg={schedBg} 
             schedBorder={schedBorder} 
             schedColor2={schedColor2}
+            errors={errors}
+            showError={showError}
+            setTouchedField={setTouchedField}
+            isSubmitting={isSubmitting}
           />
         </Flex>
 
-        {/* Right sidebar – desktop */}
         <Flex direction="column" gap="14px" display={{ base: "none", lg: "flex" }}>
           <PreviewBlock maxH="200px" />
           <SummaryBlock />
         </Flex>
       </Grid>
 
-      {/* Save bar */}
+      {/* ✅ Save bar với handleSubmit và loader */}
       <SaveBar 
         onCancel={onCancel} 
-        onSave={() => onSave(form)} 
-        isAdd={isAdd} 
+        onSave={handleSubmit} 
+        isAdd={isAdd}
+        isSubmitting={isSubmitting}
+        isValid={isValid}
       />
     </Box>
   );
 }
 
-// Sub-components (giữ nguyên như cũ nhưng cập nhật các field name)
-function BasicInfoSection({ form, set, inputStyle, labelStyle, hintColor, positionOptions }) {
+// Sub-components (có thêm isDisabled và validation)
+function BasicInfoSection({ 
+  form, set, inputStyle, labelStyle, hintColor, positionOptions,
+  errors, showError, setTouchedField, handleKeyDown, isSubmitting, isAdd 
+}) {
   return (
     <Box bg={useColorModeValue("white", "#0b1437")} borderRadius="16px" 
       border={`1px solid ${useColorModeValue("#f1f5f9", "#1a2744")}`}
@@ -300,24 +393,68 @@ function BasicInfoSection({ form, set, inputStyle, labelStyle, hintColor, positi
       <Flex direction="column" gap="12px">
         <Box>
           <Text sx={labelStyle}>Tiêu đề banner *</Text>
-          <Input {...inputStyle} placeholder="VD: Banner Mùa Hè 2026"
-            value={form.title} onChange={(e) => set("title", e.target.value)} />
+          <Input 
+            {...inputStyle} 
+            placeholder="VD: Banner Mùa Hè 2026"
+            value={form.title} 
+            onChange={(e) => set("title", e.target.value)}
+            onBlur={() => setTouchedField("title")}
+            onKeyDown={handleKeyDown}
+            isInvalid={showError("title")}
+            errorBorderColor="#ef4444"
+            isDisabled={isSubmitting}
+          />
+          {showError("title") && (
+            <Text fontSize="11px" color="#ef4444" mt="4px" fontWeight="600">
+              {errors.title}
+            </Text>
+          )}
         </Box>
         <Box>
-          <Text sx={labelStyle}>URL ảnh banner *</Text>
-          <Input {...inputStyle} placeholder="https://... (tỉ lệ 16:5 khuyến nghị)"
-            value={form.image} onChange={(e) => set("image", e.target.value)} />
+          <Text sx={labelStyle}>
+            URL ảnh banner {isAdd && "*"}
+            {!isAdd && <Text as="span" fontSize="10px" color={hintColor} fontWeight="400"> (Để trống nếu không muốn thay đổi)</Text>}
+          </Text>
+          <Input 
+            {...inputStyle} 
+            placeholder={isAdd ? "https://... (tỉ lệ 16:5 khuyến nghị)" : "Để trống nếu không đổi ảnh"}
+            value={form.image} 
+            onChange={(e) => set("image", e.target.value)}
+            onBlur={() => setTouchedField("image")}
+            onKeyDown={handleKeyDown}
+            isInvalid={showError("image")}
+            errorBorderColor="#ef4444"
+            isDisabled={isSubmitting}
+          />
+          {showError("image") && (
+            <Text fontSize="11px" color="#ef4444" mt="4px" fontWeight="600">
+              {errors.image}
+            </Text>
+          )}
           <Text fontSize="10.5px" color={hintColor} mt="5px">
             Hoặc tải ảnh lên từ máy tính bên dưới (JPG, PNG, WebP – tối đa 5MB)
           </Text>
         </Box>
         <Box>
           <Text sx={labelStyle}>Vị trí hiển thị *</Text>
-          <Select {...inputStyle} value={form.position} onChange={(e) => set("position", e.target.value)}>
+          <Select 
+            {...inputStyle} 
+            value={form.position} 
+            onChange={(e) => set("position", e.target.value)}
+            onBlur={() => setTouchedField("position")}
+            isInvalid={showError("position")}
+            errorBorderColor="#ef4444"
+            isDisabled={isSubmitting}
+          >
             {positionOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </Select>
+          {showError("position") && (
+            <Text fontSize="11px" color="#ef4444" mt="4px" fontWeight="600">
+              {errors.position}
+            </Text>
+          )}
         </Box>
         <Box>
           <Text sx={labelStyle}>Ghi chú nội bộ</Text>
@@ -342,6 +479,8 @@ function BasicInfoSection({ form, set, inputStyle, labelStyle, hintColor, positi
             placeholder="Ghi chú cho nhóm nội dung..."
             value={form.note} 
             onChange={(e) => set("note", e.target.value)}
+            onKeyDown={handleKeyDown}
+            isDisabled={isSubmitting}
           />
         </Box>
       </Flex>
@@ -349,8 +488,7 @@ function BasicInfoSection({ form, set, inputStyle, labelStyle, hintColor, positi
   );
 }
 
-// Các sub-component khác giữ nguyên nhưng cập nhật field name
-function StatusSection({ form, set, cardBg, cardBorder }) {
+function StatusSection({ form, set, cardBg, cardBorder, isSubmitting }) {
   return (
     <Box bg={cardBg} borderRadius="16px" border={`1px solid ${cardBorder}`}
       boxShadow="0 1px 4px rgba(0,0,0,0.08)" p={{ base: "14px", md: "20px" }}
@@ -373,10 +511,12 @@ function StatusSection({ form, set, cardBg, cardBorder }) {
             : useColorModeValue("#374151", "#9ca3af");
           return (
             <Box key={s} p={{ base: "10px", md: "12px 14px" }} borderRadius="10px"
-              cursor="pointer"
+              cursor={isSubmitting ? "not-allowed" : "pointer"}
               bg={isSelected ? selBg : idleBg}
               border={`2px solid ${isSelected ? selBorder : idleBorder}`}
-              transition="all 0.2s" onClick={() => set("status", s)}
+              transition="all 0.2s" 
+              onClick={() => !isSubmitting && set("status", s)}
+              opacity={isSubmitting ? 0.6 : 1}
             >
               <Flex align="center" gap="8px">
                 <Box w="8px" h="8px" borderRadius="full" flexShrink="0"
@@ -395,7 +535,10 @@ function StatusSection({ form, set, cardBg, cardBorder }) {
   );
 }
 
-function LinkSection({ form, set, inputStyle, labelStyle }) {
+function LinkSection({ 
+  form, set, inputStyle, labelStyle,
+  errors, showError, setTouchedField, handleKeyDown, isSubmitting 
+}) {
   return (
     <Box bg={useColorModeValue("white", "#0b1437")} borderRadius="16px" 
       border={`1px solid ${useColorModeValue("#f1f5f9", "#1a2744")}`}
@@ -405,8 +548,11 @@ function LinkSection({ form, set, inputStyle, labelStyle }) {
       <Flex direction="column" gap="12px">
         <Box>
           <Text sx={labelStyle}>Liên kết đến *</Text>
-          <Select {...inputStyle} value={form.linkType}
+          <Select 
+            {...inputStyle} 
+            value={form.linkType}
             onChange={(e) => { set("linkType", e.target.value); set("linkTarget", ""); }}
+            isDisabled={isSubmitting}
           >
             <option value="None">Không có</option>
             <option value="Movie">Phim</option>
@@ -419,19 +565,33 @@ function LinkSection({ form, set, inputStyle, labelStyle }) {
           <Text sx={labelStyle}>
             {form.linkType === "None" ? "Chọn đối tượng —" : `URL liên kết`}
           </Text>
-          <Input {...inputStyle} 
+          <Input 
+            {...inputStyle} 
             placeholder={form.linkType === "None" ? "Không áp dụng" : "https://example.com/phim/1"}
             value={form.linkTarget} 
             onChange={(e) => set("linkTarget", e.target.value)}
-            isDisabled={form.linkType === "None"}
+            onBlur={() => setTouchedField("linkTarget")}
+            onKeyDown={handleKeyDown}
+            isDisabled={form.linkType === "None" || isSubmitting}
+            isInvalid={showError("linkTarget")}
+            errorBorderColor="#ef4444"
           />
+          {showError("linkTarget") && (
+            <Text fontSize="11px" color="#ef4444" mt="4px" fontWeight="600">
+              {errors.linkTarget}
+            </Text>
+          )}
         </Box>
       </Flex>
     </Box>
   );
 }
 
-function ScheduleSection({ form, set, inputStyle, labelStyle, cardBg, cardBorder, subColor, schedBg, schedBorder, schedColor2 }) {
+function ScheduleSection({ 
+  form, set, inputStyle, labelStyle, cardBg, cardBorder, subColor, 
+  schedBg, schedBorder, schedColor2,
+  errors, showError, setTouchedField, isSubmitting 
+}) {
   return (
     <Box bg={cardBg} borderRadius="16px" border={`1px solid ${cardBorder}`}
       boxShadow="0 1px 4px rgba(0,0,0,0.08)" p={{ base: "14px", md: "20px" }}
@@ -447,8 +607,13 @@ function ScheduleSection({ form, set, inputStyle, labelStyle, cardBg, cardBorder
           <Text fontSize="12px" fontWeight="600" color={form.scheduledOn ? "#f97316" : subColor}>
             {form.scheduledOn ? "Đã bật" : "Tắt"}
           </Text>
-          <Switch isChecked={form.scheduledOn} colorScheme="orange" size="md"
-            onChange={(e) => set("scheduledOn", e.target.checked)} />
+          <Switch 
+            isChecked={form.scheduledOn} 
+            colorScheme="orange" 
+            size="md"
+            onChange={(e) => set("scheduledOn", e.target.checked)}
+            isDisabled={isSubmitting}
+          />
         </Flex>
       </Flex>
       <Box h="1px" bg={useColorModeValue(
@@ -462,10 +627,23 @@ function ScheduleSection({ form, set, inputStyle, labelStyle, cardBg, cardBorder
           {["scheduleStart", "scheduleEnd"].map((key, i) => (
             <Box key={key}>
               <Text sx={labelStyle}>{i === 0 ? "Thời gian bật" : "Thời gian tắt"}</Text>
-              <Input {...inputStyle} type="datetime-local"
-                fontSize={{ base: "13px", md: "14px" }} px={{ base: "10px", md: "14px" }}
-                value={form[key]} onChange={(e) => set(key, e.target.value)}
+              <Input 
+                {...inputStyle} 
+                type="datetime-local"
+                fontSize={{ base: "13px", md: "14px" }} 
+                px={{ base: "10px", md: "14px" }}
+                value={form[key]} 
+                onChange={(e) => set(key, e.target.value)}
+                onBlur={() => setTouchedField(key)}
+                isInvalid={showError(key)}
+                errorBorderColor="#ef4444"
+                isDisabled={!form.scheduledOn || isSubmitting}
               />
+              {showError(key) && (
+                <Text fontSize="11px" color="#ef4444" mt="4px" fontWeight="600">
+                  {errors[key]}
+                </Text>
+              )}
             </Box>
           ))}
         </SimpleGrid>
@@ -483,7 +661,7 @@ function ScheduleSection({ form, set, inputStyle, labelStyle, cardBg, cardBorder
   );
 }
 
-function SaveBar({ onCancel, onSave, isAdd }) {
+function SaveBar({ onCancel, onSave, isAdd, isSubmitting, isValid }) {
   const btnColor = useColorModeValue("#64748b", "#6b7fa3");
   const btnBorder = useColorModeValue("#e2e8f0", "#1e3a5f");
   const cardBg = useColorModeValue("white", "#0b1437");
@@ -497,26 +675,65 @@ function SaveBar({ onCancel, onSave, isAdd }) {
       boxShadow="0 1px 4px rgba(0,0,0,0.08)"
       p={{ base: "12px 14px", md: "16px 20px" }} 
       mt="14px"
+      opacity={isSubmitting ? 0.7 : 1}
+      transition="opacity 0.3s"
+      pointerEvents={isSubmitting ? "none" : "auto"}
     >
       <Flex gap="10px" direction={{ base: "column-reverse", sm: "row" }}
         justify={{ base: "stretch", sm: "flex-end" }}
       >
-        <Button h={{ base: "44px", md: "42px" }} px="22px" variant="ghost" color={btnColor}
-          borderRadius="10px" fontWeight="600" fontSize="13px"
-          border={`1.5px solid ${btnBorder}`} _hover={{ bg: useColorModeValue("#f8fafc", "#1a2744") }}
-          transition="all 0.2s" leftIcon={<Icon as={MdClose} />}
-          w={{ base: "100%", sm: "auto" }} onClick={onCancel}
+        <Button 
+          h={{ base: "44px", md: "42px" }} 
+          px="22px" 
+          variant="ghost" 
+          color={btnColor}
+          borderRadius="10px" 
+          fontWeight="600" 
+          fontSize="13px"
+          border={`1.5px solid ${btnBorder}`} 
+          _hover={{ bg: useColorModeValue("#f8fafc", "#1a2744") }}
+          transition="all 0.2s" 
+          leftIcon={<Icon as={MdClose} />}
+          w={{ base: "100%", sm: "auto" }} 
+          onClick={onCancel}
+          isDisabled={isSubmitting}
+          opacity={isSubmitting ? 0.5 : 1}
+          cursor={isSubmitting ? "not-allowed" : "pointer"}
         >
           Hủy bỏ
         </Button>
-        <Button h={{ base: "44px", md: "42px" }} px="28px" borderRadius="10px"
-          fontWeight="700" fontSize="13px"
-          bg="linear-gradient(135deg, #f97316 0%, #fb923c 60%, #fbbf24 100%)"
-          color="#ffffff" boxShadow="0 4px 16px rgba(249,115,22,0.35)"
-          _hover={{ boxShadow: "0 8px 24px rgba(249,115,22,0.45)", transform: "translateY(-1px)" }}
-          _active={{ transform: "translateY(0)" }} transition="all 0.2s"
-          leftIcon={<Icon as={MdCheckCircle} />}
-          w={{ base: "100%", sm: "auto" }} onClick={onSave}
+        <Button 
+          h={{ base: "44px", md: "42px" }} 
+          px="28px" 
+          borderRadius="10px"
+          fontWeight="700" 
+          fontSize="13px"
+          bg={isValid && !isSubmitting 
+            ? "linear-gradient(135deg, #f97316 0%, #fb923c 60%, #fbbf24 100%)"
+            : useColorModeValue("#e2e8f0", "#1a2744")
+          }
+          color={isValid && !isSubmitting ? "#ffffff" : useColorModeValue("#94a3b8", "#4a6080")}
+          boxShadow={isValid && !isSubmitting ? "0 4px 16px rgba(249,115,22,0.35)" : "none"}
+          _hover={isValid && !isSubmitting ? { 
+            boxShadow: "0 8px 24px rgba(249,115,22,0.45)", 
+            transform: "translateY(-1px)" 
+          } : {}}
+          _active={isValid && !isSubmitting ? { transform: "translateY(0)" } : {}}
+          transition="all 0.2s"
+          leftIcon={!isSubmitting && <Icon as={MdCheckCircle} />}
+          w={{ base: "100%", sm: "auto" }} 
+          onClick={onSave}
+          isLoading={isSubmitting}
+          loadingText={isAdd ? "Đang thêm..." : "Đang lưu..."}
+          isDisabled={!isValid || isSubmitting}
+          cursor={!isValid || isSubmitting ? "not-allowed" : "pointer"}
+          opacity={!isValid || isSubmitting ? 0.6 : 1}
+          _disabled={{
+            opacity: 0.6,
+            cursor: "not-allowed",
+            _hover: {},
+            _active: {}
+          }}
         >
           {isAdd ? "Thêm banner" : "Lưu thay đổi"}
         </Button>

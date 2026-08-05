@@ -1,30 +1,56 @@
-// utils/exportExcel.js
-export function exportToExcel(orders, G) {
-    const data = orders.map((o, i) => ({
-      "STT": i + 1,
-      "Mã đơn hàng": o.id,
-      "Khách hàng": o.customer,
-      "SĐT": o.phone,
-      "Email": o.email,
-      "Phim": o.movie,
-      "Rạp": o.cinema,
-      "Phòng": o.room,
-      "Suất chiếu": o.showtime,
-      "Ghế": o.seats.join(", "),
-      "Combo": o.combo,
-      "Tổng tiền": o.total,
-      "Phương thức": o.payMethod,
-      "Trạng thái": o.status,
-      "Ngày đặt": o.createdAt,
-    }));
-  
-    const headers = Object.keys(data[0] || {});
-    const rows = [headers, ...data.map(row => headers.map(h => row[h] || ""))];
-    const csv = rows.map(row => row.join(",")).join("\n");
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = `DonHang_GauPhim_${new Date().toISOString().slice(0,10)}.csv`;
-    link.click();
-    URL.revokeObjectURL(link.href);
+// src/views/admin/quanlydonhang/utils/exportExcel.js
+
+export const exportOrdersToCSV = (orders) => {
+  if (!orders || orders.length === 0) {
+    alert("Không có dữ liệu để xuất");
+    return;
   }
+
+  const headers = [
+    "Mã đơn",
+    "Khách hàng",
+    "SĐT",
+    "Email",
+    "Phim",
+    "Rạp",
+    "Phòng",
+    "Suất chiếu",
+    "Ghế",
+    "Tổng tiền",
+    "Phương thức TT",
+    "Trạng thái TT",
+    "Trạng thái đơn",
+    "Thời gian đặt",
+  ];
+
+  const rows = orders.map((o) => [
+    o.code,
+    o.customerName,
+    o.customerPhone,
+    o.customerEmail,
+    o.movieTitle,
+    o.cinema,
+    o.room,
+    o.showtime,
+    (o.seats || []).join(", "),
+    o.total,
+    o.paymentMethod,
+    o.paymentStatus,
+    o.orderStatus,
+    o.createdAt,
+  ]);
+
+  const csv = [headers, ...rows]
+    .map((r) => r.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+    .join("\n");
+
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `don-hang_${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};

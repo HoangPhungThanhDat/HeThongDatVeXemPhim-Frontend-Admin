@@ -1,5 +1,6 @@
-// components/shared/animations.js
-import { keyframes } from "@chakra-ui/react";
+// src/views/admin/quanlyghe/components/shared/animations.js
+
+import { keyframes } from "@emotion/react"; // ✅ Sửa import từ @emotion/react
 
 export const fadeUp = keyframes`
   from { opacity: 0; transform: translateY(14px) }

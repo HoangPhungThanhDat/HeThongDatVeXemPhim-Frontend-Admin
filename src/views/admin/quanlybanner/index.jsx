@@ -1,5 +1,3 @@
-// views/admin/quanlybanner/index.jsx
-
 import React, { useState, useEffect, useCallback } from "react";
 import { Box, useToast } from "@chakra-ui/react";
 import { BannerList } from "./components/BannerList";
@@ -16,6 +14,7 @@ export default function QuanLyBanner() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("Tất cả");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const toast = useToast();
 
   // Lấy dữ liệu từ API
@@ -24,7 +23,6 @@ export default function QuanLyBanner() {
     try {
       const response = await BannerApi.getAll();
       const data = response.data.data || response.data || [];
-      // Transform dữ liệu từ API sang format phù hợp
       const transformed = data.map((item, index) => ({
         ...item,
         id: item.BannerId || item.id,
@@ -33,7 +31,7 @@ export default function QuanLyBanner() {
         image: item.ImageUrl || item.image || "",
         status: item.Status || item.status || "Inactive",
         linkType: item.LinkType || item.linkType || "None",
-        linkTarget: item.LinkTarget || item.linkTarget || "",
+        linkTarget: item.LinkUrl || item.linkUrl || "",
         scheduleStart: item.ScheduleStart || item.scheduleStart || "",
         scheduleEnd: item.ScheduleEnd || item.scheduleEnd || "",
         scheduledOn: item.ScheduledOn !== undefined ? item.ScheduledOn : (item.scheduledOn || false),
@@ -87,12 +85,13 @@ export default function QuanLyBanner() {
       if (!banner) return;
       
       const newStatus = banner.status === "Active" ? "Inactive" : "Active";
-      await BannerApi.update(bannerId, {
-        UserId: banner.userId || banner.UserId || localStorage.getItem("UserId"),
-        Title: banner.title || banner.Title,
-        LinkUrl: banner.linkTarget || banner.LinkUrl || "",
-        Position: banner.position || banner.Position || "Home",
-        Status: newStatus,
+      
+      const formData = new FormData();
+      formData.append("_method", "PUT");
+      formData.append("Status", newStatus);
+      
+      await BannerApi.update(bannerId, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
       
       setBanners((prev) =>
@@ -112,7 +111,7 @@ export default function QuanLyBanner() {
       console.error("Lỗi khi cập nhật trạng thái:", error);
       toast({
         title: "Lỗi",
-        description: "Không thể cập nhật trạng thái banner",
+        description: error.response?.data?.message || "Không thể cập nhật trạng thái banner",
         status: "error",
         duration: 3000,
         isClosable: true,
@@ -120,7 +119,7 @@ export default function QuanLyBanner() {
     }
   };
 
-  // Xử lý xóa banner
+  // ✅ SỬA: Xử lý xóa banner - trả về Promise để modal biết
   const handleDelete = async (bannerId) => {
     try {
       await BannerApi.delete(bannerId);
@@ -139,32 +138,31 @@ export default function QuanLyBanner() {
       console.error("Lỗi khi xóa banner:", error);
       toast({
         title: "Lỗi",
-        description: "Không thể xóa banner",
+        description: error.response?.data?.message || "Không thể xóa banner",
         status: "error",
         duration: 3000,
         isClosable: true,
       });
+      throw error; // ✅ Ném lỗi để modal biết xóa thất bại
     }
   };
 
   // Xử lý thêm banner
   const handleAdd = async (formData) => {
+    setIsSubmitting(true);
     try {
-      const data = new FormData();
-      data.append("UserId", localStorage.getItem("UserId") || "");
-      data.append("Title", formData.title || "");
-      data.append("LinkUrl", formData.linkTarget || "");
-      data.append("Position", formData.position || "Home");
-      data.append("Status", formData.status || "Active");
-      if (formData.imageFile) {
-        data.append("ImageUrl", formData.imageFile);
+      const data = formData instanceof FormData ? formData : new FormData();
+      
+      if (!data.has('UserId')) {
+        data.append("UserId", localStorage.getItem("UserId") || "");
       }
-
+      
       const response = await BannerApi.create(data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       
       const newBanner = response.data.data || response.data;
+      
       setBanners((prev) => [
         ...prev,
         {
@@ -175,7 +173,7 @@ export default function QuanLyBanner() {
           image: newBanner.ImageUrl || newBanner.image,
           status: newBanner.Status || newBanner.status,
           linkType: newBanner.LinkType || newBanner.linkType,
-          linkTarget: newBanner.LinkUrl || newBanner.linkUrl,
+          linkTarget: newBanner.LinkUrl || newBanner.linkUrl || "",
         }
       ]);
       
@@ -191,37 +189,47 @@ export default function QuanLyBanner() {
       console.error("Lỗi khi thêm banner:", error);
       toast({
         title: "Lỗi",
-        description: "Không thể thêm banner mới",
+        description: error.response?.data?.message || "Không thể thêm banner mới",
         status: "error",
         duration: 3000,
         isClosable: true,
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   // Xử lý cập nhật banner
   const handleUpdate = async (formData) => {
+    setIsSubmitting(true);
     try {
       const bannerId = selectedBanner.BannerId || selectedBanner.id;
-      const data = new FormData();
-      data.append("_method", "PUT");
-      data.append("UserId", localStorage.getItem("UserId") || "");
-      data.append("Title", formData.title || "");
-      data.append("LinkUrl", formData.linkTarget || "");
-      data.append("Position", formData.position || "Home");
-      data.append("Status", formData.status || "Active");
-      if (formData.imageFile) {
-        data.append("ImageUrl", formData.imageFile);
+      
+      const data = formData instanceof FormData ? formData : new FormData();
+      
+      if (!data.has('_method')) {
+        data.append("_method", "PUT");
       }
-
-      await BannerApi.update(bannerId, data, {
+      
+      if (!data.has('UserId')) {
+        data.append("UserId", localStorage.getItem("UserId") || "");
+      }
+      
+      const response = await BannerApi.update(bannerId, data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+      
+      const updatedBanner = response.data.data || response.data;
       
       setBanners((prev) =>
         prev.map((b) =>
           (b.BannerId || b.id) === bannerId
-            ? { ...b, ...formData, image: formData.image || b.image }
+            ? { 
+                ...b, 
+                ...updatedBanner,
+                image: updatedBanner.ImageUrl || updatedBanner.image || b.image,
+                linkTarget: updatedBanner.LinkUrl || updatedBanner.linkUrl || b.linkTarget,
+              }
             : b
         )
       );
@@ -238,11 +246,13 @@ export default function QuanLyBanner() {
       console.error("Lỗi khi cập nhật banner:", error);
       toast({
         title: "Lỗi",
-        description: "Không thể cập nhật banner",
+        description: error.response?.data?.message || "Không thể cập nhật banner",
         status: "error",
         duration: 3000,
         isClosable: true,
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -297,6 +307,7 @@ export default function QuanLyBanner() {
           isAdd 
           onCancel={() => setView("list")} 
           onSave={handleSave}
+          isSubmitting={isSubmitting}
         />
       </Box>
     );
@@ -309,6 +320,7 @@ export default function QuanLyBanner() {
           banner={selectedBanner}
           onCancel={() => setView("detail")}
           onSave={handleSave}
+          isSubmitting={isSubmitting}
         />
       </Box>
     );

@@ -1,3 +1,5 @@
+// src/views/admin/quanlyphongchieu/index.jsx
+
 import React, { useState } from "react";
 import {
   Box, Flex, Text, Button, Icon, SimpleGrid, Grid,
@@ -14,7 +16,6 @@ import { useRoom } from "./hooks/useRoom";
 import { DARK, STATUS_OPTIONS, ROOM_TYPES } from "./constants";
 import { fadeUp, fadeIn } from "./components/shared/animations";
 import StatCard from "./components/shared/StatCard";
-import SeatApi from "../../../api/SeatApi";
 import RoomCard from "./components/RoomCard";
 import RoomListRow from "./components/RoomListRow";
 import RoomDetail from "./components/RoomDetail";
@@ -57,6 +58,10 @@ export default function QuanLyPhongChieu() {
     handleToggleRoomStatus,
     getCinemaRooms,
     getStats,
+    loadRoomDetail,     // 🆕 Thêm vào
+    roomDetail,         // 🆕 Thêm vào
+    loadingDetail,      // 🆕 Thêm vào
+    refreshData,        // 🆕 Thêm vào
   } = useRoom();
 
   const [view, setView] = useState("list");
@@ -106,6 +111,8 @@ export default function QuanLyPhongChieu() {
   const handleView = (room) => {
     setSelectedRoom(room);
     setView("detail");
+    // 🆕 Gọi API lấy chi tiết phòng + sơ đồ ghế
+    loadRoomDetail(room.RoomId);
   };
 
   const handleEdit = (room) => {
@@ -133,22 +140,36 @@ export default function QuanLyPhongChieu() {
 
   const onAddRoom = async (roomData) => {
     const success = await handleAddRoom(roomData);
-    if (success) addRoomModal.onClose();
+    if (success) {
+      addRoomModal.onClose();
+      // 🆕 Refresh lại dữ liệu sau khi thêm
+      await refreshData();
+    }
   };
 
   const onEditRoom = async (roomData) => {
     const success = await handleUpdateRoom(selectedRoom.RoomId, roomData);
     if (success) {
       editRoomModal.onClose();
+      // 🆕 Refresh lại dữ liệu sau khi sửa
+      await refreshData();
       if (view === "detail") {
-        setSelectedRoom(roomData);
+        // 🆕 Load lại chi tiết phòng
+        await loadRoomDetail(selectedRoom.RoomId);
       }
     }
   };
 
-  const onToggleRoom = (roomId) => {
+  const onToggleRoom = async (roomId) => {
     const room = allRooms.find((r) => r.RoomId === roomId);
-    if (room) handleToggleRoomStatus(roomId, room.Status);
+    if (room) {
+      await handleToggleRoomStatus(roomId, room.Status);
+      // 🆕 Refresh lại dữ liệu sau khi toggle
+      await refreshData();
+      if (view === "detail") {
+        await loadRoomDetail(roomId);
+      }
+    }
   };
 
   const resetFilters = () => {
@@ -172,10 +193,17 @@ export default function QuanLyPhongChieu() {
         <RoomDetail
           room={liveRoom}
           cinemaName={currentCinema?.Name || ""}
-          onBack={() => setView("list")}
+          onBack={() => {
+            setView("list");
+            setSelectedRoom(null);
+          }}
           onToggle={onToggleRoom}
           onEdit={handleEdit}
           isDark={isDark}
+          // 🆕 Truyền thêm props cho RoomDetail
+          loadRoomDetail={loadRoomDetail}
+          roomDetail={roomDetail}
+          loadingDetail={loadingDetail}
         />
         <EditRoomModal
           isOpen={editRoomModal.isOpen}
@@ -307,7 +335,12 @@ export default function QuanLyPhongChieu() {
                 fontWeight="700" fontSize="13px"
                 _hover={isActive ? {} : { bg: isDark ? DARK_THEME.hoverBg : "#f1f5f9", color: isDark ? DARK_THEME.text : "#0f172a" }}
                 transition="all 0.2s"
-                onClick={() => { setSelectedCinemaId(c.CinemaId); setSearch(""); setFilterStatus("Tất cả"); setFilterType("Tất cả"); }}>
+                onClick={() => { 
+                  setSelectedCinemaId(c.CinemaId); 
+                  setSearch(""); 
+                  setFilterStatus("Tất cả"); 
+                  setFilterType("Tất cả");
+                }}>
                 <Flex direction="column" align="flex-start" gap="1px">
                   <Text fontSize="13px" fontWeight="700">{c.Name}</Text>
                   <Flex align="center" gap="6px">

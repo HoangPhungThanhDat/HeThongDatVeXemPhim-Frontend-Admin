@@ -1,190 +1,109 @@
-// components/OrderCard.jsx
-import React, { useState } from "react";
-import { C, fmt, fmtDate } from "../constants";
-import StatusChip from "./shared/StatusChip";
-import PayChip from "./shared/PayChip";
-import Tag from "./shared/Tag";
+// src/views/admin/quanlydonhang/components/OrderCard.jsx
 
-export default function OrderCard({ order, idx, onView, G }) {
-  const [hover, setHover] = useState(false);
-  const isNew = order?.isNew || false;
-  const isDark = G && G.ink === C.ink;
-  const bg = isDark ? G.bgCard : C.bgCard;
-  const ink = isDark ? G.ink : C.ink;
-  const ink2 = isDark ? G.ink2 : C.ink2;
-  const ink3 = isDark ? G.ink3 : C.ink3;
-  const ink4 = isDark ? G.ink4 : C.ink4;
-  const ink6 = isDark ? G.ink6 : C.ink6;
-  const border = hover ? C.or1 : (isNew ? C.or4 : ink6);
-  const bgColor = isNew ? C.or3 : bg;
+import React from "react";
+import { Box, Flex, Text, Button, Icon, SimpleGrid } from "@chakra-ui/react";
+import { MdVisibility, MdDelete, MdLocalMovies, MdLocationOn, MdAccessTime, MdEventSeat } from "react-icons/md";
+import { StatusBadge } from "./shared/StatusBadge";
+import { fmtVND, OR, ORBD, ORPL } from "../constants";
+import { fadeUp, popIn } from "./shared/animations";
 
-  // ─── Safe data access ──────────────────────────────────────────
-  const orderId = order?.OrderId || order?.id || "N/A";
-  const customer = order?.customer || order?.FullName || "N/A";
-  const phone = order?.phone || order?.Phone || "N/A";
-  const movie = order?.movie || order?.Movie || "N/A";
-  const cinema = order?.cinema || order?.Cinema || "N/A";
-  const room = order?.room || order?.Room || "N/A";
-  const showtime = order?.showtime || order?.Showtime || order?.OrderDate || order?.CreatedAt || new Date().toISOString();
-  const seats = order?.seats || order?.Seats || ["N/A"];
-  const total = order?.total || order?.TotalAmount || order?.Total || 0;
-  const combo = order?.combo || order?.Combo || "Không có";
-  const status = order?.status || order?.Status || "Chờ thanh toán";
-  const payMethod = order?.payMethod || order?.PayMethod || "Chưa cập nhật";
-  const notes = order?.notes || order?.Notes || [];
-
+export const OrderCard = ({ order, index, onView, onDelete, isAdmin, isDark }) => {
   return (
-    <div
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      onClick={() => onView(order)}
-      style={{
-        background: bgColor,
-        borderRadius: 14,
-        border: `1.5px solid ${border}`,
-        boxShadow: hover
-          ? "0 4px 20px rgba(249,115,22,.12)"
-          : isNew
-          ? "0 2px 8px rgba(249,115,22,.08)"
-          : (isDark ? "0 1px 4px rgba(0,0,0,.3)" : "0 1px 4px rgba(0,0,0,.04)"),
-        transition: "all 0.18s",
-        cursor: "pointer",
-        overflow: "hidden",
-        animation: `slideup 0.35s ease ${idx * .04}s both`,
-        position: "relative"
-      }}
+    <Box
+      p="14px"
+      borderRadius="12px"
+      bg={isDark ? "#1B254B" : "white"}
+      border={isDark ? "1.5px solid #2D3A6B" : "1.5px solid #f1f5f9"}
+      transition="all .2s"
+      _active={{ bg: isDark ? "#1B254B" : "#fffaf7", border: `1.5px solid ${ORBD}` }}
+      boxShadow="0 1px 4px rgba(0,0,0,.04)"
+      sx={{ animation: `${fadeUp} .35s ease ${index * .04}s both` }}
     >
-      {isNew && (
-        <div style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: 3,
-          bottom: 0,
-          background: `linear-gradient(180deg,${C.or1},#fbbf24)`,
-          borderRadius: "2px 0 0 2px"
-        }} />
-      )}
-      <div style={{ padding: "14px 14px 14px 18px" }}>
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: 10,
-          gap: 8
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-            {isNew && (
-              <span style={{
-                padding: "1px 6px",
-                borderRadius: 5,
-                fontSize: 9.5,
-                fontWeight: 800,
-                background: C.or1,
-                color: "#fff"
-              }}>NEW</span>
-            )}
-            <span style={{
-              fontFamily: "monospace",
-              fontSize: 12.5,
-              fontWeight: 800,
-              color: C.or1
-            }}>{orderId}</span>
-          </div>
-          <StatusChip status={status} />
-        </div>
+      <Flex justify="space-between" align="flex-start" mb="8px">
+        <Flex align="center" gap="8px">
+          <Box px="7px" py="3px" borderRadius="6px" bg={ORPL} border={`1px solid ${ORBD}`}>
+            <Text fontSize="10.5px" fontWeight="800" color={OR}>{order.code}</Text>
+          </Box>
+          {order.isNew && (
+            <Box px="6px" py="2px" borderRadius="5px" bg="#fef2f2" sx={{ animation: `${popIn} .4s ease both` }}>
+              <Text fontSize="9.5px" fontWeight="800" color="#dc2626">MỚI</Text>
+            </Box>
+          )}
+        </Flex>
+        <StatusBadge status={order.orderStatus} type="order" />
+      </Flex>
 
-        <div style={{ marginBottom: 10 }}>
-          <div style={{
-            fontSize: 14,
-            fontWeight: 800,
-            color: ink,
-            marginBottom: 3,
-            lineHeight: 1.3
-          }}>{movie}</div>
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 12, color: ink3 }}>👤 {customer}</span>
-            <span style={{ fontSize: 12, color: ink4 }}>📱 {phone}</span>
-          </div>
-        </div>
+      <Text fontSize="14px" fontWeight="700" color={isDark ? "#f7fafc" : "#0f172a"} mb="2px" noOfLines={1}>
+        {order.customerName}
+      </Text>
+      <Flex align="center" gap="6px" mb="8px">
+        <Icon as={MdLocalMovies} boxSize="12px" color={isDark ? "#718096" : "#94a3b8"} />
+        <Text fontSize="11.5px" color={isDark ? "#a0aec0" : "#64748b"} noOfLines={1}>{order.movieTitle}</Text>
+      </Flex>
 
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 8,
-          marginBottom: 10
-        }}>
-          <div style={{
-            padding: "8px 10px",
-            borderRadius: 9,
-            background: isDark ? G.ink6 : C.ink6
-          }}>
-            <div style={{
-              fontSize: 9.5,
-              color: ink4,
-              fontWeight: 700,
-              textTransform: "uppercase",
-              letterSpacing: 0.6,
-              marginBottom: 2
-            }}>Rạp / Phòng</div>
-            <div style={{ fontSize: 11.5, color: ink2, fontWeight: 700 }}>{cinema}</div>
-            <div style={{ fontSize: 11, color: ink4 }}>{room}</div>
-          </div>
-          <div style={{
-            padding: "8px 10px",
-            borderRadius: 9,
-            background: isDark ? G.ink6 : C.ink6
-          }}>
-            <div style={{
-              fontSize: 9.5,
-              color: ink4,
-              fontWeight: 700,
-              textTransform: "uppercase",
-              letterSpacing: 0.6,
-              marginBottom: 2
-            }}>Suất chiếu</div>
-            <div style={{
-              fontSize: 11.5,
-              color: C.blue,
-              fontWeight: 700
-            }}>{fmtDate(showtime)}</div>
-          </div>
-        </div>
+      <SimpleGrid columns={2} spacing="8px" mb="10px">
+        <Flex align="center" gap="6px">
+          <Icon as={MdLocationOn} boxSize="12px" color={isDark ? "#718096" : "#94a3b8"} />
+          <Text fontSize="11px" color={isDark ? "#a0aec0" : "#64748b"} noOfLines={1}>{order.cinema}</Text>
+        </Flex>
+        <Flex align="center" gap="6px">
+          <Icon as={MdAccessTime} boxSize="12px" color={isDark ? "#718096" : "#94a3b8"} />
+          <Text fontSize="11px" color={isDark ? "#a0aec0" : "#64748b"}>{order.showtime}</Text>
+        </Flex>
+      </SimpleGrid>
 
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-          gap: 8
-        }}>
-          <div style={{
-            display: "flex",
-            gap: 6,
-            flexWrap: "wrap",
-            alignItems: "center"
-          }}>
-            {Array.isArray(seats) && seats.slice(0, 3).map(s => (
-              <Tag key={s} color={C.blue} bg={C.blueBg} border={C.blueBdr}>{s}</Tag>
-            ))}
-            {Array.isArray(seats) && seats.length > 3 && (
-              <Tag color={ink3} bg={isDark ? G.ink6 : C.ink6} border={isDark ? G.ink5 : C.ink5}>
-                +{seats.length - 3}
-              </Tag>
-            )}
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <PayChip method={payMethod} />
-            <span style={{ fontSize: 16, fontWeight: 900, color: C.or1 }}>{fmt(total)}</span>
-          </div>
-        </div>
-
-        {Array.isArray(notes) && notes.length > 0 && (
-          <div style={{ fontSize: 11, color: ink4, marginTop: 8 }}>
-            📝 {notes.length} ghi chú nội bộ
-          </div>
+      <Flex align="center" gap="6px" flexWrap="wrap" mb="8px">
+        {order.seats?.slice(0, 3).map((s) => (
+          <Flex key={s} align="center" gap="4px" px="8px" py="3px" borderRadius="6px" bg={ORPL} border={`1px solid ${ORBD}`}>
+            <Icon as={MdEventSeat} boxSize="10px" color={OR} />
+            <Text fontSize="11px" fontWeight="700" color={OR}>{s}</Text>
+          </Flex>
+        ))}
+        {order.seats?.length > 3 && (
+          <Text fontSize="10px" color={isDark ? "#718096" : "#94a3b8"}>+{order.seats.length - 3}</Text>
         )}
-      </div>
-    </div>
+      </Flex>
+
+      <Flex align="center" justify="space-between" mb="12px">
+        <StatusBadge status={order.paymentStatus} type="payment" />
+        <Text fontSize="15px" fontWeight="800" color={isDark ? "#f7fafc" : "#0f172a"}>{fmtVND(order.total)}</Text>
+      </Flex>
+
+      <Flex gap="8px">
+        <Button
+          flex="1"
+          h="36px"
+          borderRadius="8px"
+          fontSize="12px"
+          fontWeight="600"
+          bg={isDark ? "#2D3A6B" : "#f8fafc"}
+          color={isDark ? "#e2e8f0" : "#475569"}
+          border={isDark ? "1px solid #2D3A6B" : "1px solid #e2e8f0"}
+          leftIcon={<Icon as={MdVisibility} boxSize="12px" />}
+          _hover={{ bg: isDark ? "#2D3A6B" : "#f1f5f9" }}
+          _active={{ transform: "scale(.97)" }}
+          transition="all .15s"
+          onClick={() => onView(order)}
+        >
+          Xem chi tiết
+        </Button>
+        {isAdmin && (
+          <Button
+            h="36px"
+            w="44px"
+            borderRadius="8px"
+            bg="#fef2f2"
+            color="#dc2626"
+            border="1px solid #fecaca"
+            _hover={{ bg: "#fee2e2" }}
+            _active={{ transform: "scale(.95)" }}
+            transition="all .15s"
+            onClick={() => onDelete(order)}
+          >
+            <Icon as={MdDelete} boxSize="14px" />
+          </Button>
+        )}
+      </Flex>
+    </Box>
   );
-}
+};

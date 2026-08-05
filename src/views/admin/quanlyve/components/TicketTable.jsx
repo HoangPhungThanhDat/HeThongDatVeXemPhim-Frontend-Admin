@@ -1,4 +1,5 @@
 // src/views/admin/quanlyve/components/TicketTable.jsx
+
 import React from "react";
 import {
   Box,
@@ -64,7 +65,7 @@ const StatusBadge = ({ status, isDark }) => {
   );
 };
 
-// ✅ Thêm cột Combo
+// ✅ Cột width
 const COL = {
   idx: "36px",
   code: "76px",
@@ -72,18 +73,18 @@ const COL = {
   movie: "1",
   seat: "56px",
   price: "90px",
-  combo: "120px", // ✅ Thêm cột Combo
+  combo: "120px",
   status: "138px",
   actions: "158px",
 };
 
+// ✅ Đổi tên export thành TicketTable (không phải default)
 export const TicketTable = ({ tickets, onView, onEdit, onQR, isDark, loading }) => {
   const OR = "#ea580c";
   const ORBD = "#fed7aa";
   const ORPL = "#fff7ed";
   const ORSW = "rgba(234,88,12,0.25)";
   
-  // Dark mode colors
   const DARK_ACCENT = "#4a9eff";
   const DARK_ACCENT_BD = "rgba(74, 158, 255, 0.3)";
   const DARK_ACCENT_PL = "rgba(74, 158, 255, 0.08)";
@@ -140,9 +141,6 @@ export const TicketTable = ({ tickets, onView, onEdit, onQR, isDark, loading }) 
 
       {/* Rows */}
       {tickets.map((ticket, index) => {
-        // Check if status should use dark mode colors
-        const isStatusPaid = ticket.status === "Đã thanh toán" || ticket.status === "Paid";
-        
         return (
           <Flex
             key={ticket.id || index}
@@ -290,3 +288,6 @@ export const TicketTable = ({ tickets, onView, onEdit, onQR, isDark, loading }) 
     </Box>
   );
 };
+
+
+export default TicketTable;

@@ -1,25 +1,42 @@
-// components/shared/StatCard.jsx
+// src/views/admin/quanlyghe/components/shared/StatCard.jsx
+
 import React from "react";
 import { Box, Flex, Text, Icon, useColorMode } from "@chakra-ui/react";
 import { fadeUp } from "./animations";
 
 export function getSeatColors(isDark) {
+  // ✅ Thêm fallback cho isDark
+  const darkMode = isDark === true;
+  
   return {
-    seatBg: isDark ? "#1e293b" : "white",
-    seatBorder: isDark ? "#334155" : "#f1f5f9",
-    textColor: isDark ? "#f1f5f9" : "#0f172a",
-    subColor: isDark ? "#94a3b8" : "#64748b",
-    bgCard: isDark ? "#1e293b" : "white",
-    borderCard: isDark ? "#334155" : "#f1f5f9",
-    bgInput: isDark ? "#2d3748" : "#f8fafc",
-    borderInput: isDark ? "#374151" : "#e8edf3",
+    seatBg: darkMode ? "#1e293b" : "white",
+    seatBorder: darkMode ? "#334155" : "#f1f5f9",
+    textColor: darkMode ? "#f1f5f9" : "#0f172a",
+    subColor: darkMode ? "#94a3b8" : "#64748b",
+    bgCard: darkMode ? "#1e293b" : "white",
+    borderCard: darkMode ? "#334155" : "#f1f5f9",
+    bgInput: darkMode ? "#2d3748" : "#f8fafc",
+    borderInput: darkMode ? "#374151" : "#e8edf3",
   };
 }
 
-export default function StatCard({ label, value, icon, accent, sub, delay = 0 }) {
+// ✅ Export default với fallback an toàn
+export default function StatCard({ 
+  label, 
+  value, 
+  icon, 
+  accent, 
+  sub, 
+  delay = 0,
+  isDark: propIsDark // ✅ Cho phép truyền isDark từ bên ngoài
+}) {
   const { colorMode } = useColorMode();
-  const isDark = colorMode === "dark";
+  // ✅ Sử dụng propIsDark nếu có, fallback sang colorMode
+  const isDark = propIsDark !== undefined ? propIsDark : (colorMode === "dark");
   const colors = getSeatColors(isDark);
+
+  // ✅ Đảm bảo value luôn là số hoặc chuỗi
+  const displayValue = value !== undefined && value !== null ? value : 0;
 
   return (
     <Box 
@@ -47,8 +64,14 @@ export default function StatCard({ label, value, icon, accent, sub, delay = 0 })
           >
             {label}
           </Text>
-          <Text fontSize="26px" fontWeight="900" color={colors.textColor} lineHeight="1">
-            {value}
+          <Text 
+            fontSize="26px" 
+            fontWeight="900" 
+            color={colors.textColor} 
+            lineHeight="1"
+            as="span"  // ✅ Thêm as="span" để tránh lỗi
+          >
+            {displayValue}
           </Text>
           {sub && (
             <Text fontSize="11px" color={isDark ? "#64748b" : "#94a3b8"} mt="3px">

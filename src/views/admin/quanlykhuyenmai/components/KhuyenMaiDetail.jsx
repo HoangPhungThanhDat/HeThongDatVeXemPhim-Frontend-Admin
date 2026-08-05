@@ -1,12 +1,12 @@
-// views/admin/quanlykhuyenmai/components/KhuyenMaiDetail.jsx
-
 import {
-  Box, Text, Button, Flex, SimpleGrid, Icon, useColorModeValue
+  Box, Text, Button, Flex, SimpleGrid, Icon, useColorModeValue,
+  Avatar, HStack, VStack, Badge
 } from "@chakra-ui/react";
 import { 
   MdArrowBack, MdEdit, MdDelete, MdCalendarToday, 
   MdLocalOffer, MdBarChart, MdAttachMoney, MdDescription,
-  MdPerson, MdAccessTime, MdImage
+  MdPerson, MdAccessTime, MdImage, MdLink, MdCheckCircle,
+  MdCancel, MdInfo, MdPersonOutline, MdPersonAdd
 } from "react-icons/md";
 import { FaTag, FaPercent } from "react-icons/fa";
 import { StatusBadge } from "./shared/StatusBadge";
@@ -28,36 +28,136 @@ export function KhuyenMaiDetail({ promo, onBack, onEdit, onDelete }) {
   const descTitleColor = useColorModeValue("#92400e", "#fdba74");
 
   // Lấy dữ liệu từ promo
-  const id = promo.PromotionId || promo.id;
-  const title = promo.Title || promo.title || "";
+  const id = promo.PromotionId || promo.id || "N/A";
+  const title = promo.Title || promo.title || "Không có tiêu đề";
   const code = promo.Code || promo.code || "";
   const description = promo.Description || promo.description || "";
   const imageUrl = promo.ImageUrl || promo.imageUrl || "";
-  const type = promo.DiscountType || promo.discountType || "Percentage";
+  const discountType = promo.DiscountType || promo.discountType || "Percentage";
   const discountValue = promo.DiscountValue || promo.discountValue || 0;
   const startDate = promo.StartDate || promo.startDate || "";
   const endDate = promo.EndDate || promo.endDate || "";
+  const isActive = promo.IsActive !== undefined ? promo.IsActive : (promo.isActive || false);
   const status = promo.Status || promo.status || "Inactive";
-  const applyFor = promo.ApplyFor || promo.applyFor || "Tất cả phim";
-  const applyTarget = promo.ApplyTarget || promo.applyTarget || "";
-  const minOrder = promo.MinOrder || promo.minOrder || 0;
-  const maxDiscount = promo.MaxDiscount || promo.maxDiscount || 0;
-  const usageCount = promo.UsageCount || promo.usageCount || 0;
-  const usageLimit = promo.UsageLimit || promo.usageLimit || 0;
+  const createdBy = promo.CreatedBy || promo.createdBy || "N/A";
+  const updatedBy = promo.UpdatedBy || promo.updatedBy || "N/A";
   const createdAt = promo.CreatedAt || promo.createdAt || "";
   const updatedAt = promo.UpdatedAt || promo.updatedAt || "";
+  
+  // Lấy thông tin người tạo và cập nhật
+  const creator = promo.Creator || promo.creator || null;
+  const updater = promo.Updater || promo.updater || null;
 
-  const typeCfg = TYPE_CONFIG[type] || TYPE_CONFIG["Percentage"];
-  const typeLabel = TYPE_MAP[type] || type;
-  const isActive = status === "Active";
+  const typeCfg = TYPE_CONFIG[discountType] || TYPE_CONFIG["Percentage"];
+  const typeLabel = TYPE_MAP[discountType] || discountType;
+  const isActiveStatus = status === "Active";
 
-  const formatValue = () => {
-    if (type === "Percentage") return `${discountValue}%`;
-    if (type === "FixedAmount") return `${Number(discountValue).toLocaleString()}đ`;
+  // Format giá trị giảm
+  const formatDiscountValue = () => {
+    if (discountType === "Percentage") return `${discountValue}%`;
+    if (discountType === "FixedAmount") return `${Number(discountValue).toLocaleString('vi-VN')}đ`;
     return "1+1";
   };
 
-  const pct = usageLimit > 0 ? Math.min(100, Math.round((usageCount / usageLimit) * 100)) : null;
+  // Format ngày tháng
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "N/A";
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return dateStr;
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `${hours}:${minutes} ${day}/${month}/${year}`;
+    } catch {
+      return dateStr;
+    }
+  };
+
+  // ✅ SỬA: Component hiển thị thông tin người dùng - an toàn với mọi kiểu dữ liệu
+  const UserInfoCard = ({ label, icon, user, userId, date, dateLabel }) => {
+    // ✅ Đảm bảo displayName là string
+    const getDisplayName = () => {
+      if (!user) return userId || 'N/A';
+      
+      // Nếu user là object
+      if (typeof user === 'object') {
+        return user.fullname || user.FullName || user.name || user.userName || userId || 'N/A';
+      }
+      
+      // Nếu user là string
+      if (typeof user === 'string') {
+        return user;
+      }
+      
+      return userId || 'N/A';
+    };
+    
+    const displayName = getDisplayName();
+    const displayId = (typeof user === 'object' && (user?.id || user?.UserId)) || userId || 'N/A';
+    const displayEmail = (typeof user === 'object' && (user?.email || user?.Email)) || '';
+    const avatarColor = useColorModeValue('#f97316', '#fb923c');
+    
+    return (
+      <Box bg={cardBg} borderRadius="14px" border={`1px solid ${cardBorder}`}
+        p="16px" sx={{ animation: `${fadeUp} 0.4s ease both` }}
+      >
+        <Flex align="center" gap="8px" mb="10px">
+          <Box w="28px" h="28px" borderRadius="8px"
+            bg={useColorModeValue("#fff7ed", "#0f172a")}
+            display="flex" alignItems="center" justifyContent="center"
+          >
+            <Icon as={icon} boxSize="13px" color="#f97316" />
+          </Box>
+          <Text fontSize="10px" fontWeight="700" color={textSecondary} 
+            letterSpacing="0.8px" textTransform="uppercase"
+          >
+            {label}
+          </Text>
+        </Flex>
+        
+        <HStack spacing="10px">
+          <Avatar 
+            size="sm" 
+            name={String(displayName)} // ✅ Ép thành string
+            bg={avatarColor} 
+            color="white"
+            fontSize="12px"
+            fontWeight="700"
+          />
+          <VStack align="start" spacing="0" flex="1">
+            <Text fontSize="14px" fontWeight="700" color={textPrimary}>
+              {String(displayName)}
+            </Text>
+            <Text fontSize="11px" color={textMuted} fontFamily="monospace">
+              ID: #{String(displayId)}
+            </Text>
+            {displayEmail && (
+              <Text fontSize="11px" color={textMuted}>
+                {String(displayEmail)}
+              </Text>
+            )}
+          </VStack>
+        </HStack>
+        
+        <Box mt="8px" p="8px 12px" borderRadius="8px"
+          bg={useColorModeValue("#f8fafc", "#0f172a")}
+          border={useColorModeValue("1px solid #f1f5f9", "1px solid #2d3a6b")}
+        >
+          <Text fontSize="9px" fontWeight="700" color={textMuted} 
+            textTransform="uppercase" letterSpacing="0.6px"
+          >
+            {dateLabel}
+          </Text>
+          <Text fontSize="13px" fontWeight="600" color={textPrimary}>
+            {formatDate(date)}
+          </Text>
+        </Box>
+      </Box>
+    );
+  };
 
   return (
     <Box sx={{ animation: `${fadeIn} 0.3s ease both` }}>
@@ -133,7 +233,7 @@ export function KhuyenMaiDetail({ promo, onBack, onEdit, onDelete }) {
             </Box>
             <Box textAlign={{ base: "left", md: "center" }}>
               <Text fontSize={{ base: "32px", md: "40px" }} fontWeight="900" color="#f97316" lineHeight="1">
-                {formatValue()}
+                {formatDiscountValue()}
               </Text>
               <Text fontSize="11px" fontWeight="800" color={useColorModeValue("#b45309", "#94a3b8")} mt="4px"
                 letterSpacing="1px" textTransform="uppercase"
@@ -154,11 +254,21 @@ export function KhuyenMaiDetail({ promo, onBack, onEdit, onDelete }) {
                 </Text>
                 <Flex gap="6px" flexWrap="wrap" mb="6px">
                   <StatusBadge status={status} />
-                  <TypeBadge type={type} />
+                  <TypeBadge type={discountType} />
+                  <Badge 
+                    bg={isActive ? "#10b981" : "#ef4444"} 
+                    color="white"
+                    fontSize="10px"
+                    px="8px"
+                    py="2px"
+                    borderRadius="6px"
+                  >
+                    {isActive ? "Đang hiệu lực" : "Không hiệu lực"}
+                  </Badge>
                 </Flex>
                 {code && (
                   <Text fontSize="13px" color={textMuted} fontWeight="500">
-                    Mã: <Text as="span" fontWeight="700" color="#f97316">{code}</Text>
+                    Mã: <Text as="span" fontWeight="700" color="#f97316" fontFamily="monospace">{code}</Text>
                   </Text>
                 )}
               </Box>
@@ -169,10 +279,10 @@ export function KhuyenMaiDetail({ promo, onBack, onEdit, onDelete }) {
             {/* Quick Stats */}
             <SimpleGrid columns={{ base: 2, md: 4 }} spacing="10px" mb="14px">
               {[
-                { icon: MdCalendarToday, label: "Bắt đầu", val: startDate || "N/A" },
-                { icon: MdCalendarToday, label: "Kết thúc", val: endDate || "N/A" },
-                { icon: MdLocalOffer, label: "Áp dụng", val: applyFor + (applyTarget ? `: ${applyTarget}` : "") },
-                { icon: MdBarChart, label: "Đã dùng", val: `${usageCount.toLocaleString()} lượt` },
+                { icon: MdCalendarToday, label: "Bắt đầu", val: startDate ? formatDate(startDate) : "N/A" },
+                { icon: MdCalendarToday, label: "Kết thúc", val: endDate ? formatDate(endDate) : "N/A" },
+                { icon: FaTag, label: "Loại giảm", val: typeLabel },
+                { icon: MdAttachMoney, label: "Giá trị", val: formatDiscountValue() },
               ].map(({ icon: Ic, label, val }) => (
                 <Box key={label} p="10px 12px" borderRadius="10px"
                   bg={useColorModeValue("#f8fafc", "#0f172a")}
@@ -190,27 +300,6 @@ export function KhuyenMaiDetail({ promo, onBack, onEdit, onDelete }) {
                 </Box>
               ))}
             </SimpleGrid>
-
-            {/* Usage Progress */}
-            {usageLimit > 0 && pct !== null && (
-              <Box mb="14px" p="12px 14px" borderRadius="10px"
-                bg={useColorModeValue("#f8fafc", "#0f172a")}
-                border={useColorModeValue("1px solid #f1f5f9", "1px solid #2d3a6b")}
-              >
-                <Flex justify="space-between" mb="6px">
-                  <Text fontSize="11px" fontWeight="700" color={textMuted}>Lượt sử dụng</Text>
-                  <Text fontSize="11px" fontWeight="800" color={pct >= 90 ? "#ef4444" : textPrimary}>
-                    {usageCount.toLocaleString()} / {usageLimit.toLocaleString()} ({pct}%)
-                  </Text>
-                </Flex>
-                <Box h="6px" borderRadius="full" bg={useColorModeValue("#e2e8f0", "#2d3a6b")} overflow="hidden">
-                  <Box h="100%" borderRadius="full" w={`${pct}%`}
-                    bg={pct >= 90 ? "#ef4444" : pct >= 70 ? "#f59e0b" : "#10b981"}
-                    transition="width 0.4s ease"
-                  />
-                </Box>
-              </Box>
-            )}
 
             {/* Description */}
             {description && (
@@ -232,88 +321,27 @@ export function KhuyenMaiDetail({ promo, onBack, onEdit, onDelete }) {
         </Flex>
       </Box>
 
-      {/* Additional Info - 3 columns */}
-      <SimpleGrid columns={{ base: 1, sm: 3 }} spacing="12px" mb="16px">
-        {[
-          {
-            icon: MdLocalOffer,
-            label: "Đối tượng áp dụng",
-            val: applyFor + (applyTarget ? `: ${applyTarget}` : ""),
-          },
-          {
-            icon: MdAttachMoney,
-            label: "Đơn hàng tối thiểu",
-            val: minOrder > 0 ? `${Number(minOrder).toLocaleString()}đ` : "Không giới hạn",
-          },
-          {
-            icon: MdBarChart,
-            label: "Giới hạn lượt dùng",
-            val: usageLimit > 0 ? `${usageLimit.toLocaleString()} lượt` : "Không giới hạn",
-          },
-        ].map(({ icon: Ic, label, val }) => (
-          <Box key={label} bg={cardBg} border={`1px solid ${cardBorder}`} 
-            borderRadius="14px" p="16px"
-            sx={{ animation: `${fadeUp} 0.4s ease both` }}
-          >
-            <Flex align="center" gap="8px" mb="8px">
-              <Box w="28px" h="28px" borderRadius="8px"
-                bg={useColorModeValue("#fff7ed", "#0f172a")}
-                display="flex" alignItems="center" justifyContent="center"
-              >
-                <Icon as={Ic} boxSize="13px" color="#f97316" />
-              </Box>
-              <Text fontSize="10px" fontWeight="700" color={textSecondary} 
-                letterSpacing="0.8px" textTransform="uppercase"
-              >
-                {label}
-              </Text>
-            </Flex>
-            <Text fontSize="13px" fontWeight="600" color={textPrimary} lineHeight="1.5">
-              {val}
-            </Text>
-          </Box>
-        ))}
+      {/* Additional Info - 2 columns: Tạo bởi và Cập nhật bởi */}
+      <SimpleGrid columns={{ base: 1, md: 2 }} spacing="14px" mb="16px">
+        <UserInfoCard
+          label="Người tạo"
+          icon={MdPersonAdd}
+          user={creator}
+          userId={createdBy}
+          date={createdAt}
+          dateLabel="Ngày tạo"
+        />
+        <UserInfoCard
+          label="Người cập nhật"
+          icon={MdPersonOutline}
+          user={updater}
+          userId={updatedBy}
+          date={updatedAt}
+          dateLabel="Ngày cập nhật"
+        />
       </SimpleGrid>
 
-      {/* System Info - 2 columns */}
-      <SimpleGrid columns={{ base: 1, sm: 2 }} spacing="12px" mb="16px">
-        {[
-          {
-            icon: MdPerson,
-            label: "Người tạo",
-            val: promo.CreatedBy || promo.createdBy || "N/A",
-          },
-          {
-            icon: MdAccessTime,
-            label: "Ngày tạo",
-            val: createdAt ? new Date(createdAt).toLocaleString("vi-VN") : "N/A",
-          },
-        ].map(({ icon: Ic, label, val }) => (
-          <Box key={label} bg={cardBg} border={`1px solid ${cardBorder}`} 
-            borderRadius="14px" p="16px"
-            sx={{ animation: `${fadeUp} 0.45s ease both` }}
-          >
-            <Flex align="center" gap="8px" mb="8px">
-              <Box w="28px" h="28px" borderRadius="8px"
-                bg={useColorModeValue("#fff7ed", "#0f172a")}
-                display="flex" alignItems="center" justifyContent="center"
-              >
-                <Icon as={Ic} boxSize="13px" color="#f97316" />
-              </Box>
-              <Text fontSize="10px" fontWeight="700" color={textSecondary} 
-                letterSpacing="0.8px" textTransform="uppercase"
-              >
-                {label}
-              </Text>
-            </Flex>
-            <Text fontSize="13px" fontWeight="600" color={textPrimary} lineHeight="1.5">
-              {val}
-            </Text>
-          </Box>
-        ))}
-      </SimpleGrid>
-
-      {/* ID & Update Info - Bottom */}
+      {/* ID & Status - Bottom */}
       <Box bg={cardBg} borderRadius="14px" border={`1px solid ${cardBorder}`}
         boxShadow="0 1px 4px rgba(0,0,0,0.04)" p={{ base: "14px 16px", md: "16px 20px" }}
         sx={{ animation: `${fadeUp} 0.5s ease both` }}
@@ -333,7 +361,38 @@ export function KhuyenMaiDetail({ promo, onBack, onEdit, onDelete }) {
             #{id}
           </Text>
         </Flex>
+        
         <Box h="1px" bg={cardBorder} my="10px" />
+        
+        <Flex align="center" justify="space-between" flexWrap="wrap" gap="10px">
+          <Flex align="center" gap="8px">
+            <Box w="28px" h="28px" borderRadius="8px" bg={cardBg2}
+              display="flex" alignItems="center" justifyContent="center"
+            >
+              <Icon as={isActive ? MdCheckCircle : MdCancel} boxSize="13px" color={isActive ? "#10b981" : "#ef4444"} />
+            </Box>
+            <Text fontSize="10px" fontWeight="700" color={textMuted} letterSpacing="0.8px" textTransform="uppercase">
+              Trạng thái
+            </Text>
+          </Flex>
+          <Flex gap="8px" align="center">
+            <StatusBadge status={status} />
+            <Badge 
+              bg={isActive ? "#10b981" : "#ef4444"} 
+              color="white"
+              fontSize="11px"
+              px="10px"
+              py="3px"
+              borderRadius="6px"
+              fontWeight="700"
+            >
+              {isActive ? "Hiệu lực" : "Không hiệu lực"}
+            </Badge>
+          </Flex>
+        </Flex>
+        
+        <Box h="1px" bg={cardBorder} my="10px" />
+        
         <Flex align="center" justify="space-between" flexWrap="wrap" gap="10px">
           <Flex align="center" gap="8px">
             <Box w="28px" h="28px" borderRadius="8px" bg={cardBg2}
@@ -346,55 +405,55 @@ export function KhuyenMaiDetail({ promo, onBack, onEdit, onDelete }) {
             </Text>
           </Flex>
           <Text fontSize="13px" fontWeight="600" color={textPrimary}>
-            {updatedAt ? new Date(updatedAt).toLocaleString("vi-VN") : "N/A"}
+            {formatDate(updatedAt)}
           </Text>
         </Flex>
       </Box>
 
       {/* Image (nếu có) */}
       {imageUrl && (
-  <Box mt="14px" bg={cardBg} borderRadius="14px" border={`1px solid ${cardBorder}`}
-    boxShadow="0 1px 4px rgba(0,0,0,0.04)" p={{ base: "14px 16px", md: "16px 20px" }}
-    sx={{ animation: `${fadeUp} 0.55s ease both` }}
-  >
-    <Flex align="center" gap="8px" mb="10px">
-      <Box w="28px" h="28px" borderRadius="8px" bg={tagBg}
-        display="flex" alignItems="center" justifyContent="center"
-      >
-        <Icon as={MdImage} boxSize="13px" color="#f97316" />
-      </Box>
-      <Text fontSize="10px" fontWeight="700" color={textMuted} letterSpacing="0.8px" textTransform="uppercase">
-        Hình ảnh khuyến mãi
-      </Text>
-    </Flex>
-    <Box 
-  borderRadius="10px" 
-  overflow="hidden" 
-  border={`1px solid ${cardBorder}`}
-  bg={cardBg2}
-  position="relative"
-  w="100%"
-  pt="56.25%"  // Tỷ lệ 16:9 (hoặc có thể dùng 75% cho 4:3)
->
-  <img 
-    src={imageUrl} 
-    alt={title}
-    style={{ 
-      position: "absolute",
-      top: 0,
-      left: 0,
-      width: "100%",
-      height: "100%",
-      objectFit: "contain",  // ✅ Hiển thị toàn bộ ảnh
-      objectPosition: "center",
-      backgroundColor: "#f8fafc"
-    }}
-    onError={(e) => { 
-      e.target.style.display = "none"; 
-    }}
-  />
-</Box>
-  </Box>
+        <Box mt="14px" bg={cardBg} borderRadius="14px" border={`1px solid ${cardBorder}`}
+          boxShadow="0 1px 4px rgba(0,0,0,0.04)" p={{ base: "14px 16px", md: "16px 20px" }}
+          sx={{ animation: `${fadeUp} 0.55s ease both` }}
+        >
+          <Flex align="center" gap="8px" mb="10px">
+            <Box w="28px" h="28px" borderRadius="8px" bg={tagBg}
+              display="flex" alignItems="center" justifyContent="center"
+            >
+              <Icon as={MdImage} boxSize="13px" color="#f97316" />
+            </Box>
+            <Text fontSize="10px" fontWeight="700" color={textMuted} letterSpacing="0.8px" textTransform="uppercase">
+              Hình ảnh khuyến mãi
+            </Text>
+          </Flex>
+          <Box 
+            borderRadius="10px" 
+            overflow="hidden" 
+            border={`1px solid ${cardBorder}`}
+            bg={cardBg2}
+            position="relative"
+            w="100%"
+            pt="56.25%"
+          >
+            <img 
+              src={imageUrl} 
+              alt={title}
+              style={{ 
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+                objectPosition: "center",
+                backgroundColor: "#f8fafc"
+              }}
+              onError={(e) => { 
+                e.target.style.display = "none"; 
+              }}
+            />
+          </Box>
+        </Box>
       )}
     </Box>
   );

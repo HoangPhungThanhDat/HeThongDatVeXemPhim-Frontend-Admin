@@ -1,13 +1,12 @@
-
-
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Box, Flex, Text, Button, Icon, Grid, Input, Select,
-  Textarea, useColorMode, useToast,
+  Textarea, useColorMode, useToast, Image, Spinner
 } from "@chakra-ui/react";
 import {
   MdArrowBack, MdClose, MdCheckCircle, MdLocationOn,
-  MdPhone, MdAccessTime, MdInfo, MdImage,
+  MdPhone, MdAccessTime, MdInfo, MdImage, MdCloudUpload,
+  MdDelete
 } from "react-icons/md";
 import { FaBuilding, FaUser, FaEnvelope } from "react-icons/fa";
 import SectionTitle from "./shared/SectionTitle";
@@ -79,6 +78,11 @@ const labelStyle = (isDark) => ({
 
 const AddCinemaPage = ({ onCancel, onSave, isSubmitting, isDark }) => {
   const toast = useToast();
+  const fileInputRef = useRef(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+
   const [form, setForm] = useState({
     Name: "",
     Address: "",
@@ -89,7 +93,6 @@ const AddCinemaPage = ({ onCancel, onSave, isSubmitting, isDark }) => {
     Status: "Active",
     Description: "",
     Manager: "",
-    ImageUrl: "",
   });
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
@@ -112,10 +115,14 @@ const AddCinemaPage = ({ onCancel, onSave, isSubmitting, isDark }) => {
     ? `0 8px 24px ${DARK_THEME.accentShadow}`
     : "0 8px 24px rgba(249,115,22,0.45)";
 
-  const handleSubmit = () => {
-    if (!form.Name || !form.Address) {
+  // Xử lý chọn file ảnh
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (!file.type.startsWith("image/")) {
       toast({
-        title: "Vui lòng nhập đầy đủ thông tin",
+        title: "Vui lòng chọn file ảnh (JPG, PNG, WEBP)",
         status: "warning",
         duration: 3000,
         isClosable: true,
@@ -123,15 +130,56 @@ const AddCinemaPage = ({ onCancel, onSave, isSubmitting, isDark }) => {
       });
       return;
     }
-    onSave(form);
+    
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Ảnh phải nhỏ hơn 5MB",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+        position: "top-right",
+      });
+      return;
+    }
+    
+    setIsUploading(true);
+    setImageFile(file);
+    
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setImagePreview(ev.target.result);
+      setIsUploading(false);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      set("ImageUrl", URL.createObjectURL(file));
-      set("ImageFile", file);
+  // Xóa ảnh
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
+  };
+
+  const handleSubmit = () => {
+    if (!form.Name || !form.Address) {
+      toast({
+        title: "Vui lòng nhập tên rạp và địa chỉ",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+        position: "top-right",
+      });
+      return;
+    }
+    
+    const submitData = {
+      ...form,
+      ImageFile: imageFile,
+    };
+    onSave(submitData);
   };
 
   return (
@@ -142,7 +190,8 @@ const AddCinemaPage = ({ onCancel, onSave, isSubmitting, isDark }) => {
           color={subColor} borderRadius="10px" h="38px" fontSize="13px" fontWeight="600"
           border={`1.5px solid ${isDark ? DARK_THEME.border : "#e2e8f0"}`} 
           _hover={{ bg: isDark ? DARK_THEME.hoverBg : "#f8fafc" }} 
-          onClick={onCancel}>
+          onClick={onCancel}
+          isDisabled={isSubmitting}>
           Quay lại
         </Button>
         <Box>
@@ -165,34 +214,40 @@ const AddCinemaPage = ({ onCancel, onSave, isSubmitting, isDark }) => {
               <Box>
                 <Text sx={label}>Tên rạp *</Text>
                 <Input {...styles} placeholder="VD: Gấu Phim - Buôn Ma Thuột"
-                  value={form.Name} onChange={(e) => set("Name", e.target.value)} />
+                  value={form.Name} onChange={(e) => set("Name", e.target.value)}
+                  isDisabled={isSubmitting} />
               </Box>
               <Box>
                 <Text sx={label}>Địa chỉ *</Text>
                 <Input {...styles} placeholder="Địa chỉ đầy đủ"
-                  value={form.Address} onChange={(e) => set("Address", e.target.value)} />
+                  value={form.Address} onChange={(e) => set("Address", e.target.value)}
+                  isDisabled={isSubmitting} />
               </Box>
               <Grid templateColumns={{ base: "1fr", sm: "1fr 1fr" }} gap="14px">
                 <Box>
                   <Text sx={label}>Thành phố</Text>
                   <Input {...styles} placeholder="VD: Buôn Ma Thuột"
-                    value={form.City} onChange={(e) => set("City", e.target.value)} />
+                    value={form.City} onChange={(e) => set("City", e.target.value)}
+                    isDisabled={isSubmitting} />
                 </Box>
                 <Box>
                   <Text sx={label}>Hotline</Text>
                   <Input {...styles} placeholder="028 xxxx xxxx"
-                    value={form.Phone} onChange={(e) => set("Phone", e.target.value)} />
+                    value={form.Phone} onChange={(e) => set("Phone", e.target.value)}
+                    isDisabled={isSubmitting} />
                 </Box>
               </Grid>
               <Box>
                 <Text sx={label}>Email liên hệ</Text>
                 <Input {...styles} type="email" placeholder="gauphim@gmail.com"
-                  value={form.Email} onChange={(e) => set("Email", e.target.value)} />
+                  value={form.Email} onChange={(e) => set("Email", e.target.value)}
+                  isDisabled={isSubmitting} />
               </Box>
               <Box>
                 <Text sx={label}>Giờ mở cửa</Text>
                 <Input {...styles} placeholder="08:00 – 23:00"
-                  value={form.OpenTime} onChange={(e) => set("OpenTime", e.target.value)} />
+                  value={form.OpenTime} onChange={(e) => set("OpenTime", e.target.value)}
+                  isDisabled={isSubmitting} />
               </Box>
             </Flex>
           </Box>
@@ -203,7 +258,8 @@ const AddCinemaPage = ({ onCancel, onSave, isSubmitting, isDark }) => {
             <SectionTitle label="Trạng thái & Mô tả" isDark={isDark} />
             <Box mb="14px">
               <Text sx={label}>Trạng thái hoạt động</Text>
-              <Select {...styles} value={form.Status} onChange={(e) => set("Status", e.target.value)}>
+              <Select {...styles} value={form.Status} onChange={(e) => set("Status", e.target.value)}
+                isDisabled={isSubmitting}>
                 <option value="Active">✅ Hoạt động</option>
                 <option value="Inactive">❌ Khóa</option>
               </Select>
@@ -211,7 +267,8 @@ const AddCinemaPage = ({ onCancel, onSave, isSubmitting, isDark }) => {
             <Box mb="14px">
               <Text sx={label}>Quản lý rạp</Text>
               <Input {...styles} placeholder="Họ tên người quản lý"
-                value={form.Manager} onChange={(e) => set("Manager", e.target.value)} />
+                value={form.Manager} onChange={(e) => set("Manager", e.target.value)}
+                isDisabled={isSubmitting} />
             </Box>
             <Box>
               <Text sx={label}>Mô tả rạp</Text>
@@ -235,53 +292,85 @@ const AddCinemaPage = ({ onCancel, onSave, isSubmitting, isDark }) => {
                 _hover={{ border: `1.5px solid ${isDark ? DARK_THEME.accent : "#f97316"}` }}
                 transition="all 0.2s"
                 rows={4} placeholder="Mô tả về rạp chiếu..."
-                value={form.Description} onChange={(e) => set("Description", e.target.value)} />
+                value={form.Description} onChange={(e) => set("Description", e.target.value)}
+                isDisabled={isSubmitting} />
             </Box>
           </Box>
         </Flex>
 
         <Flex direction="column" gap="14px">
-          {/* Ảnh rạp */}
+          {/* Ảnh rạp - Có upload */}
           <Box bg={bg} borderRadius="16px" border={`1px solid ${border}`}
             boxShadow={isDark ? "0 1px 4px rgba(0,0,0,0.2)" : "0 1px 4px rgba(0,0,0,0.04)"} p="18px">
             <SectionTitle label="Ảnh rạp" isDark={isDark} />
             
             {/* Preview ảnh */}
-            <Box h="160px" borderRadius="12px" overflow="hidden" mb="10px"
-              bg={isDark ? DARK_THEME.previewBg : "#f1f5f9"}
-              display="flex" alignItems="center" justifyContent="center"
-              border={`2px dashed ${isDark ? DARK_THEME.previewBorder : "#d1d5db"}`}>
-              {form.ImageUrl ? (
-                <img src={form.ImageUrl} alt="preview"
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              ) : (
+            {imagePreview ? (
+              <Box position="relative" mb="12px" borderRadius="10px" overflow="hidden" border={`1px solid ${border}`}>
+                <Image 
+                  src={imagePreview} 
+                  alt="Cinema preview"
+                  objectFit="cover"
+                  w="100%"
+                  h="160px"
+                  fallbackSrc="https://via.placeholder.com/800x400?text=Không+có+ảnh"
+                />
+                <Button
+                  position="absolute"
+                  top="8px"
+                  right="8px"
+                  size="sm"
+                  colorScheme="red"
+                  borderRadius="full"
+                  onClick={handleRemoveImage}
+                  isDisabled={isSubmitting || isUploading}
+                >
+                  <Icon as={MdDelete} />
+                </Button>
+              </Box>
+            ) : (
+              <Box 
+                h="160px" borderRadius="12px" overflow="hidden" mb="10px"
+                bg={isDark ? DARK_THEME.previewBg : "#f1f5f9"}
+                display="flex" alignItems="center" justifyContent="center"
+                border={`2px dashed ${isDark ? DARK_THEME.previewBorder : "#d1d5db"}`}>
                 <Flex direction="column" align="center" gap="6px" color={isDark ? DARK_THEME.labelColor : "#94a3b8"}>
                   <Icon as={MdImage} boxSize="32px" />
                   <Text fontSize="12px">Chưa có ảnh</Text>
                 </Flex>
-              )}
-            </Box>
+              </Box>
+            )}
 
-            {/* Upload ảnh */}
-            <Input
-              {...styles}
+            {/* Upload button */}
+            <input
+              ref={fileInputRef}
               type="file"
               accept="image/*"
-              onChange={handleFileChange}
-              p="6px"
+              style={{ display: "none" }}
+              onChange={handleFileSelect}
+              disabled={isSubmitting}
             />
-            <Text fontSize="10px" color={isDark ? DARK_THEME.labelColor : "#94a3b8"} mt="2px">
-              Hỗ trợ định dạng: JPG, PNG, GIF. Dung lượng tối đa 5MB
-            </Text>
+            <Button
+              w="100%" h="40px" borderRadius="9px"
+              bg={isDark ? DARK_THEME.hoverBg : "#f8fafc"}
+              color={subColor}
+              border={`1.5px solid ${isDark ? DARK_THEME.border : "#e2e8f0"}`}
+              fontSize="12.5px" fontWeight="600"
+              _hover={{ bg: isDark ? DARK_THEME.accent : "#fff7ed", color: isDark ? DARK_THEME.text : "#f97316", border: `1.5px solid ${isDark ? DARK_THEME.accent : "#fed7aa"}` }}
+              transition="all 0.2s"
+              leftIcon={<Icon as={isUploading ? MdCheckCircle : MdCloudUpload} boxSize="16px" />}
+              isLoading={isUploading}
+              loadingText="Đang tải..."
+              onClick={() => fileInputRef.current?.click()}
+              isDisabled={isSubmitting}
+              mb="8px"
+            >
+              {imagePreview ? 'Thay đổi ảnh' : 'Tải ảnh lên từ máy tính'}
+            </Button>
 
-            <Box mt="10px" p="10px 12px" borderRadius="10px" 
-              bg={isDark ? DARK_THEME.dangerBg : "#fef2f2"} 
-              border={`1px solid ${isDark ? DARK_THEME.dangerBorder : "#fca5a5"}`}>
-              <Text fontSize="11px" fontWeight="600" 
-                color={isDark ? DARK_THEME.dangerColor : "#dc2626"} lineHeight="1.5">
-                Thay đổi ảnh rạp thuộc quyền Admin. Vui lòng liên hệ Admin để cập nhật.
-              </Text>
-            </Box>
+            <Text fontSize="10px" color={isDark ? DARK_THEME.labelColor : "#94a3b8"} mt="2px">
+              Hỗ trợ định dạng: JPG, PNG, WEBP. Dung lượng tối đa 5MB
+            </Text>
           </Box>
 
           {/* Lưu ý phân quyền */}
@@ -345,10 +434,11 @@ const AddCinemaPage = ({ onCancel, onSave, isSubmitting, isDark }) => {
             color="white" boxShadow={shadowColor}
             _hover={{ boxShadow: shadowHover, transform: "translateY(-1px)" }}
             _active={{ transform: "translateY(0)" }} transition="all 0.2s"
-            leftIcon={<Icon as={MdCheckCircle} />} onClick={handleSubmit}
-            isLoading={isSubmitting}
-            loadingText="Đang thêm...">
-            Thêm rạp
+            leftIcon={isSubmitting ? <Spinner size="sm" color="white" /> : <Icon as={MdCheckCircle} />}
+            onClick={handleSubmit}
+            isDisabled={isSubmitting}
+            opacity={isSubmitting ? 0.8 : 1}>
+            {isSubmitting ? "Đang xử lý..." : "Thêm rạp"}
           </Button>
         </Flex>
       </Box>

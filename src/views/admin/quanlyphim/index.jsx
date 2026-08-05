@@ -1,7 +1,5 @@
-
-
 import { useState } from "react";
-import { Box } from "@chakra-ui/react";
+import { Box, useToast } from "@chakra-ui/react";
 import { PhimList } from "./components/PhimList";
 import { PhimForm } from "./components/PhimForm";
 import { PhimDetail } from "./components/PhimDetail";
@@ -10,6 +8,7 @@ import { usePhim } from "./hooks/usePhim";
 export default function QuanLyPhim() {
   const [view, setView] = useState("list");
   const [selected, setSelected] = useState(null);
+  const toast = useToast();
   
   const {
     movies,
@@ -33,16 +32,63 @@ export default function QuanLyPhim() {
   } = usePhim();
 
   const handleSave = async (formData) => {
-    let success = false;
-    if (view === "add") {
-      success = await createMovie(formData);
-    } else {
-      const id = selected.MovieId || selected.id;
-      success = await updateMovie(id, formData);
+    try {
+      let success = false;
+      if (view === "add") {
+        success = await createMovie(formData);
+      } else {
+        const id = selected?.MovieId || selected?.id;
+        if (!id) {
+          toast({
+            title: "Lỗi",
+            description: "Không tìm thấy ID phim",
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+          });
+          return;
+        }
+        success = await updateMovie(id, formData);
+      }
+      if (success) {
+        setView("list");
+      }
+    } catch (error) {
+      console.error("Lỗi khi lưu phim:", error);
+      toast({
+        title: "Lỗi",
+        description: error.response?.data?.message || "Có lỗi xảy ra khi lưu",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
     }
-    if (success) {
+  };
+
+  // ✅ Xử lý xóa với xác nhận
+  const handleDelete = (id) => {
+    if (window.confirm("Bạn có chắc muốn xóa phim này?")) {
+      deleteMovie(id);
       setView("list");
     }
+  };
+
+  // ✅ Xử lý khi chọn xem chi tiết
+  const handleView = (movie) => {
+    setSelected(movie);
+    setView("detail");
+  };
+
+  // ✅ Xử lý khi chọn sửa
+  const handleEdit = (movie) => {
+    setSelected(movie);
+    setView("edit");
+  };
+
+  // ✅ Xử lý khi thêm mới
+  const handleAdd = () => {
+    setSelected(null);
+    setView("add");
   };
 
   if (view === "list") {
@@ -63,11 +109,11 @@ export default function QuanLyPhim() {
           filterGenre={filterGenre}
           setFilterGenre={setFilterGenre}
           counts={counts}
-          onAdd={() => setView("add")}
-          onView={(m) => { setSelected(m); setView("detail"); }}
-          onEdit={(m) => { setSelected(m); setView("edit"); }}
+          onAdd={handleAdd}
+          onView={handleView}
+          onEdit={handleEdit}
           onHide={toggleHide}
-          onDelete={deleteMovie}
+          onDelete={handleDelete}
         />
       </Box>
     );
@@ -81,10 +127,7 @@ export default function QuanLyPhim() {
           movie={movie}
           onBack={() => setView("list")}
           onEdit={() => setView("edit")}
-          onDelete={() => {
-            deleteMovie(movie.MovieId || movie.id);
-            setView("list");
-          }}
+          onDelete={() => handleDelete(movie.MovieId || movie.id)}
         />
       </Box>
     );

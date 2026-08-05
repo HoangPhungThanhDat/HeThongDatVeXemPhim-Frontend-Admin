@@ -2,542 +2,405 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useToast } from "@chakra-ui/react";
-import { 
-  fetchShowtimeSeats, 
-  fetchShowtimes, 
-  fetchCinemas, 
-  fetchRooms,
-  generateSeatsForShowtime,
-  updateSeatStatus,
-  deleteShowtimeSeat
-} from "../services/showtimeSeatService";
-import { STATUS_MAP, STATUS_MAP_REVERSE } from "../constants";
-
-// Map status từ API sang local format
-const mapStatusToLocal = (apiStatus) => {
-  return STATUS_MAP[apiStatus] || 'trong';
-};
-
-// Map status từ local sang API format
-const mapStatusToApi = (localStatus) => {
-  return STATUS_MAP_REVERSE[localStatus] || 'Available';
-};
+import SeatManagementApi from "../../../../api/SeatManagementApi";
 
 export function useSeatData() {
-  const toast = useToast();
-  
-  // Data states
-  const [showtimeSeats, setShowtimeSeats] = useState([]);
-  const [showtimes, setShowtimes] = useState([]);
-  const [cinemas, setCinemas] = useState([]);
-  const [rooms, setRooms] = useState([]);
-  const [selectedShowtimeId, setSelectedShowtimeId] = useState(null);
-  
-  // Loading states
-  const [loading, setLoading] = useState(true);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
-  
-  // Cache for seats data
-  const [seatCache, setSeatCache] = useState({});
-
-  // Load dữ liệu ban đầu
-  useEffect(() => {
-    const loadInitialData = async () => {
-      setLoading(true);
-      try {
-        const [showtimesData, cinemasData, roomsData] = await Promise.all([
-          fetchShowtimes(),
-          fetchCinemas(),
-          fetchRooms()
-        ]);
-        
-        setShowtimes(showtimesData);
-        setCinemas(cinemasData);
-        setRooms(roomsData);
-        
-        if (showtimesData.length > 0) {
-          const firstShowtime = showtimesData[0];
-          const showtimeId = firstShowtime.ShowtimeId || firstShowtime.id;
-          setSelectedShowtimeId(showtimeId);
-          
-          try {
-            const seats = await fetchShowtimeSeats(showtimeId);
-            setShowtimeSeats(seats);
-            setSeatCache(prev => ({ ...prev, [showtimeId]: seats }));
-          } catch (error) {
-            console.error("❌ Lỗi load ghế ban đầu:", error);
-            setShowtimeSeats([]);
-          }
-        }
-        
-        setIsInitialLoad(false);
-      } catch (error) {
-        console.error("❌ Lỗi tải dữ liệu ban đầu:", error);
-        toast({
-          title: "Lỗi tải dữ liệu",
-          description: "Không thể tải dữ liệu ban đầu. Vui lòng thử lại.",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
-        setIsInitialLoad(false);
-      } finally {
-        setLoading(false);
-      }
-    };
+    const toast = useToast();
     
-    loadInitialData();
-  }, [toast]);
-
-  // Load ghế theo showtime - CÓ CACHE
-  const loadSeatsForShowtime = useCallback(async (showtimeId) => {
-    if (!showtimeId) {
-      setShowtimeSeats([]);
-      return;
-    }
-    
-    // Kiểm tra cache
-    if (seatCache[showtimeId]) {
-      console.log(`✅ Using cached seats for showtime ${showtimeId}`);
-      setShowtimeSeats(seatCache[showtimeId]);
-      setSelectedShowtimeId(showtimeId);
-      return;
-    }
-    
-    setLoading(true);
-    try {
-      const seats = await fetchShowtimeSeats(showtimeId);
-      console.log(`✅ Loaded ${seats.length} seats for showtime ${showtimeId}`);
-      setSeatCache(prev => ({ ...prev, [showtimeId]: seats }));
-      setShowtimeSeats(seats);
-      setSelectedShowtimeId(showtimeId);
-    } catch (error) {
-      console.error("❌ Lỗi tải ghế:", error);
-      toast({
-        title: "Lỗi tải ghế",
-        description: "Không thể tải danh sách ghế cho suất chiếu này",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-      setShowtimeSeats([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [toast, seatCache]);
-
-  // Tạo ghế tự động
-  const handleGenerateSeats = useCallback(async (showtimeId) => {
-    if (!showtimeId) {
-      toast({
-        title: "Lỗi",
-        description: "Vui lòng chọn suất chiếu",
-        status: "warning",
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
-    
-    setIsGenerating(true);
-    try {
-      // Xóa cache cũ
-      setSeatCache(prev => {
-        const newCache = { ...prev };
-        delete newCache[showtimeId];
-        return newCache;
-      });
-      setShowtimeSeats([]);
-      
-      await generateSeatsForShowtime(showtimeId);
-      
-      toast({
-        title: "Thành công",
-        description: `Đã tạo ghế tự động cho suất chiếu`,
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      });
-      
-      await loadSeatsForShowtime(showtimeId);
-    } catch (error) {
-      console.error("❌ Lỗi tạo ghế:", error);
-      
-      let errorMessage = "Không thể tạo ghế tự động. Vui lòng kiểm tra lại";
-      if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
-      toast({
-        title: "Lỗi tạo ghế",
-        description: errorMessage,
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
-    } finally {
-      setIsGenerating(false);
-    }
-  }, [loadSeatsForShowtime, toast]);
-
-  // Cập nhật trạng thái ghế - ĐÚNG CẤU TRÚC BẢNG
-  const handleUpdateSeatStatus = useCallback(async (showtimeSeatId, data) => {
-    try {
-      // Kiểm tra dữ liệu đầu vào
-      if (!showtimeSeatId) {
-        throw new Error("Missing showtimeSeatId");
-      }
-      
-      if (!data || !data.Status) {
-        throw new Error("Missing status");
-      }
-
-      // Đảm bảo dữ liệu có đầy đủ các trường
-      const updateData = {
-        ShowtimeId: data.ShowtimeId || selectedShowtimeId,
-        SeatId: data.SeatId,
-        Status: data.Status,
-        UpdatedAt: data.UpdatedAt || new Date().toISOString(),
-        UpdatedBy: data.UpdatedBy || "admin"
-      };
-
-      console.log("📤 Updating seat status:", updateData);
-      
-      const response = await updateSeatStatus(showtimeSeatId, updateData);
-      console.log("✅ Update response:", response);
-      
-      // Cập nhật local state
-      setShowtimeSeats(prev => 
-        prev.map(seat => 
-          String(seat.ShowtimeSeatId) === String(showtimeSeatId)
-            ? { ...seat, Status: data.Status }
-            : seat
-        )
-      );
-      
-      // Cập nhật cache
-      setSeatCache(prev => {
-        const showtimeId = selectedShowtimeId;
-        if (showtimeId && prev[showtimeId]) {
-          const updatedSeats = prev[showtimeId].map(seat =>
-            String(seat.ShowtimeSeatId) === String(showtimeSeatId)
-              ? { ...seat, Status: data.Status }
-              : seat
-          );
-          return { ...prev, [showtimeId]: updatedSeats };
-        }
-        return prev;
-      });
-      
-      return { success: true, data: response };
-    } catch (error) {
-      console.error("❌ Lỗi cập nhật trạng thái:", error);
-      
-      let errorMessage = "Không thể cập nhật trạng thái ghế";
-      if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
-      throw new Error(errorMessage);
-    }
-  }, [selectedShowtimeId]);
-
-  // Reset ghế về trạng thái trống
-  const handleResetSeat = useCallback(async (showtimeSeatId, note) => {
-    try {
-      // Tìm ghế để lấy ShowtimeId và SeatId
-      const seat = showtimeSeats.find(s => String(s.ShowtimeSeatId) === String(showtimeSeatId));
-      if (!seat) {
-        throw new Error("Không tìm thấy ghế");
-      }
-      
-      const data = {
-        ShowtimeId: seat.ShowtimeId,
-        SeatId: seat.SeatId,
-        Status: 'Available',
-        UpdatedAt: new Date().toISOString(),
-        UpdatedBy: "admin"
-      };
-      
-      await handleUpdateSeatStatus(showtimeSeatId, data);
-      
-      toast({
-        title: "Đặt lại thành công",
-        description: "Ghế đã được chuyển về trạng thái Trống",
-        status: "success",
-        duration: 2000,
-        isClosable: true,
-      });
-    } catch (error) {
-      console.error("❌ Lỗi đặt lại:", error);
-      toast({
-        title: "Lỗi đặt lại",
-        description: error.message || "Không thể đặt lại trạng thái ghế",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  }, [showtimeSeats, handleUpdateSeatStatus, toast]);
-
-  // Xóa trạng thái ghế
-  const handleDeleteSeat = useCallback(async (showtimeSeatId) => {
-    try {
-      await deleteShowtimeSeat(showtimeSeatId);
-      
-      setShowtimeSeats(prev => 
-        prev.filter(seat => String(seat.ShowtimeSeatId) !== String(showtimeSeatId))
-      );
-      
-      setSeatCache(prev => {
-        const showtimeId = selectedShowtimeId;
-        if (showtimeId && prev[showtimeId]) {
-          const updatedSeats = prev[showtimeId].filter(
-            seat => String(seat.ShowtimeSeatId) !== String(showtimeSeatId)
-          );
-          return { ...prev, [showtimeId]: updatedSeats };
-        }
-        return prev;
-      });
-      
-      toast({
-        title: "Xóa thành công",
-        description: "Đã xóa trạng thái ghế",
-        status: "success",
-        duration: 2000,
-        isClosable: true,
-      });
-    } catch (error) {
-      console.error("❌ Lỗi xóa:", error);
-      toast({
-        title: "Lỗi xóa",
-        description: "Không thể xóa trạng thái ghế",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  }, [toast, selectedShowtimeId]);
-
-  // Chuyển đổi dữ liệu sang format cho SeatMap
-  const seatMapData = useMemo(() => {
-    if (!showtimeSeats || showtimeSeats.length === 0) {
-      return [];
-    }
-    
-    const seatMap = {};
-    const rows = [];
-    
-    showtimeSeats.forEach((seat, index) => {
-      let seatDetail = seat.Seat || {};
-      let row = 'A';
-      let number = index + 1;
-      let seatId = seat.SeatId;
-      
-      if (seat.SeatId && typeof seat.SeatId === 'object' && seat.SeatId !== null) {
-        seatDetail = seat.SeatId;
-        row = seatDetail.Row || 'A';
-        number = seatDetail.Number || (index + 1);
-        seatId = seatDetail.SeatId || `${row}${number}`;
-      } else if (seat.Seat && typeof seat.Seat === 'object') {
-        seatDetail = seat.Seat;
-        row = seatDetail.Row || 'A';
-        number = seatDetail.Number || (index + 1);
-        seatId = seatDetail.SeatId || `${row}${number}`;
-      } else if (seat.SeatId && typeof seat.SeatId === 'string') {
-        seatId = seat.SeatId;
-        const match = String(seatId).match(/^([A-Z])(\d+)$/);
-        if (match) {
-          row = match[1];
-          number = parseInt(match[2]);
-        } else {
-          const rowIndex = Math.floor(index / 10);
-          const colIndex = index % 10;
-          const rowLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
-          row = rowLetters[rowIndex % rowLetters.length] || 'A';
-          number = colIndex + 1;
-        }
-      } else {
-        const rowIndex = Math.floor(index / 10);
-        const colIndex = index % 10;
-        const rowLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
-        row = rowLetters[rowIndex % rowLetters.length] || 'A';
-        number = colIndex + 1;
-        seatId = `${row}${number}`;
-      }
-      
-      const seatKey = `${row}${number}`;
-      
-      if (!seatMap[row]) {
-        seatMap[row] = [];
-        if (!rows.includes(row)) {
-          rows.push(row);
-        }
-      }
-      
-      seatMap[row].push({
-        id: seatKey,
-        row: row,
-        num: number,
-        status: mapStatusToLocal(seat.Status),
-        ticketCode: seat.TicketCode || null,
-        customer: seat.CustomerName || null,
-        heldSince: seat.HeldSince || null,
-        note: seat.Note || "",
-        showtimeSeatId: seat.ShowtimeSeatId || seat.id || index,
-        showtimeId: seat.ShowtimeId,
-        originalData: seat
-      });
+    // Data states
+    const [data, setData] = useState({
+        cinemas: [],
+        rooms: [],
+        showtimes: [],
+        seats: [],
+        stats: { total: 0, trong: 0, dat: 0, giu: 0, loi: 0, baoTri: 0, room_total: 0 }
     });
     
-    rows.sort();
-    
-    const result = [];
-    rows.forEach(row => {
-      if (seatMap[row]) {
-        seatMap[row].sort((a, b) => a.num - b.num);
-        result.push(...seatMap[row]);
-      }
+    // Filter states
+    const [filters, setFilters] = useState({
+        cinema_id: null,
+        room_id: null,
+        showtime_id: null
     });
-    
-    return result;
-  }, [showtimeSeats]);
-
-  // Lấy danh sách showtimes theo room và cinema
-  const getShowtimesForRoom = useCallback((cinemaId, roomId) => {
-    if (!cinemaId || !roomId) {
-      return [];
-    }
-    
-    const filtered = showtimes.filter(st => {
-      const room = st.Room || st.RoomId;
-      if (!room) return false;
-      
-      let roomCinemaId = null;
-      if (room.CinemaId) roomCinemaId = room.CinemaId;
-      else if (room.Cinema?.CinemaId) roomCinemaId = room.Cinema.CinemaId;
-      
-      let roomIdMatch = false;
-      if (room.RoomId) roomIdMatch = String(room.RoomId) === String(roomId);
-      else if (room.id) roomIdMatch = String(room.id) === String(roomId);
-      
-      const cinemaIdMatch = String(roomCinemaId) === String(cinemaId);
-      return cinemaIdMatch && roomIdMatch;
-    });
-    
-    return filtered.map(st => {
-      const movie = st.Movie || st.MovieId || {};
-      const room = st.Room || st.RoomId || {};
-      
-      return {
-        id: st.ShowtimeId || st.id,
-        ShowtimeId: st.ShowtimeId || st.id,
-        movie: movie.Title || movie.title || 'Unknown Movie',
-        time: st.StartTime || st.startTime || st.time,
-        date: st.Date || st.date,
-        price: st.Price || st.price || st.TicketPrice || 0,
-        roomName: room.Name || room.name || 'Unknown Room',
-        StartTime: st.StartTime || st.startTime,
-        Movie: movie,
-        Room: room,
-        originalData: st
-      };
-    });
-  }, [showtimes]);
-
-  // Lấy danh sách rooms theo cinema
-  const getRoomsByCinema = useCallback((cinemaId) => {
-    if (!cinemaId) {
-      return [];
-    }
-    
-    const filtered = rooms.filter(room => {
-      let roomCinemaId = null;
-      if (room.CinemaId) roomCinemaId = room.CinemaId;
-      else if (room.Cinema?.CinemaId) roomCinemaId = room.Cinema.CinemaId;
-      return String(roomCinemaId) === String(cinemaId);
-    });
-    
-    return filtered.map(room => {
-      const roomId = room.RoomId || room.id;
-      const seatCount = room.SeatCount || room.seatCount || room.capacity || room.Capacity || 0;
-      
-      return {
-        id: roomId,
-        RoomId: roomId,
-        Name: room.Name || room.name || 'Unknown Room',
-        name: room.Name || room.name || 'Unknown Room',
-        SeatCount: seatCount,
-        seatCount: seatCount,
-        capacity: seatCount,
-        RoomType: room.RoomType || room.roomType || 'Standard',
-        Status: room.Status || room.status || 'Active',
-        originalData: room
-      };
-    });
-  }, [rooms]);
-
-  // Thống kê số lượng ghế theo trạng thái
-  const seatStats = useMemo(() => {
-    const stats = {
-      trong: 0,
-      dat: 0,
-      giu: 0,
-      loi: 0,
-      baoTri: 0
-    };
-    
-    seatMapData.forEach(seat => {
-      if (stats[seat.status] !== undefined) {
-        stats[seat.status]++;
-      }
-    });
-    
-    return stats;
-  }, [seatMapData]);
-
-  // Clear cache
-  const clearCache = useCallback(() => {
-    setSeatCache({});
-    setShowtimeSeats([]);
-  }, []);
-
-  return {
-    // Data
-    showtimeSeats,
-    showtimes,
-    cinemas,
-    rooms,
-    selectedShowtimeId,
-    seatMapData,
-    seatStats,
     
     // Loading states
-    loading,
-    isGenerating,
-    isInitialLoad,
-    
-    // Actions
-    loadSeatsForShowtime,
-    handleGenerateSeats,
-    handleUpdateSeatStatus,
-    handleResetSeat,
-    handleDeleteSeat,
-    getShowtimesForRoom,
-    getRoomsByCinema,
-    clearCache,
-    
-    // Utilities
-    mapStatusToLocal,
-    mapStatusToApi,
-    
-    // Setters
-    setSelectedShowtimeId,
-    setShowtimeSeats
-  };
+    const [loading, setLoading] = useState(false);
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [isInitialLoad, setIsInitialLoad] = useState(true);
+    const [isLoadingSeats, setIsLoadingSeats] = useState(false);
+
+    // Load dữ liệu ban đầu
+    useEffect(() => {
+        const loadInitialData = async () => {
+            setLoading(true);
+            try {
+                const response = await SeatManagementApi.getData();
+                const result = response?.data?.data || response?.data || {};
+                
+                console.log("📦 Initial data loaded:", result);
+                
+                setData({
+                    cinemas: result.cinemas || [],
+                    rooms: result.rooms || [],
+                    showtimes: result.showtimes || [],
+                    seats: result.seats || [],
+                    stats: result.stats || { total: 0, trong: 0, dat: 0, giu: 0, loi: 0, baoTri: 0, room_total: 0 }
+                });
+                
+                if (result.filters) {
+                    setFilters({
+                        cinema_id: result.filters.cinema_id || null,
+                        room_id: result.filters.room_id || null,
+                        showtime_id: result.filters.showtime_id || null
+                    });
+                }
+                
+                setIsInitialLoad(false);
+            } catch (error) {
+                console.error("❌ Lỗi tải dữ liệu:", error);
+                setIsInitialLoad(false);
+            } finally {
+                setLoading(false);
+            }
+        };
+        
+        loadInitialData();
+    }, []);
+
+    // ✅ HÀM LOAD GHẾ - GỌI KHI BẤM NÚT "XEM GHẾ"
+    const loadSeats = useCallback(async (showtimeId) => {
+        if (!showtimeId) {
+            toast({
+                title: "Vui lòng chọn suất chiếu",
+                status: "warning",
+                duration: 3000,
+                isClosable: true,
+            });
+            return null;
+        }
+
+        setIsLoadingSeats(true);
+        try {
+            const response = await SeatManagementApi.getData({ showtime_id: showtimeId });
+            const result = response?.data?.data || response?.data || {};
+            
+            console.log("📦 Seats loaded:", result);
+            
+            // ✅ Xử lý dữ liệu ghế
+            const processedSeats = (result.seats || []).map(seat => ({
+                ...seat,
+                seat_type: seat.seat_type || seat.originalData?.seat_type || 'normal',
+                status: seat.status || 'trong',
+            }));
+            
+            // ✅ Lấy thông tin stats và room_total
+            const stats = {
+                total: processedSeats.length,
+                trong: result.stats?.trong || 0,
+                dat: result.stats?.dat || 0,
+                giu: result.stats?.giu || 0,
+                loi: result.stats?.loi || 0,
+                baoTri: result.stats?.baoTri || 0,
+                room_total: result.stats?.room_total || result.room?.seat_count || 0,
+            };
+            
+            setData(prev => ({
+                ...prev,
+                seats: processedSeats,
+                stats: stats,
+                room: result.room || prev.room,
+            }));
+            
+            // ✅ Hiển thị thông báo với số ghế đã load
+            const roomTotal = stats.room_total || processedSeats.length;
+            toast({
+                title: "Đã tải dữ liệu ghế",
+                description: `Có ${processedSeats.length}/${roomTotal} ghế`,
+                status: "success",
+                duration: 2000,
+                isClosable: true,
+            });
+            
+            return { ...result, seats: processedSeats };
+        } catch (error) {
+            console.error("❌ Lỗi tải ghế:", error);
+            toast({
+                title: "Lỗi tải ghế",
+                description: error.response?.data?.message || "Không thể tải dữ liệu ghế",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
+            return null;
+        } finally {
+            setIsLoadingSeats(false);
+        }
+    }, [toast]);
+
+    // Load dữ liệu với filter
+    const loadDataWithFilters = useCallback(async (newFilters) => {
+        const mergedFilters = { ...filters, ...newFilters };
+        setFilters(mergedFilters);
+        
+        const params = {};
+        Object.keys(mergedFilters).forEach(key => {
+            if (mergedFilters[key]) {
+                params[key] = mergedFilters[key];
+            }
+        });
+        
+        setLoading(true);
+        try {
+            const response = await SeatManagementApi.getData(params);
+            const result = response?.data?.data || response?.data || {};
+            
+            const processedSeats = (result.seats || []).map(seat => ({
+                ...seat,
+                seat_type: seat.seat_type || seat.originalData?.seat_type || 'normal',
+                status: seat.status || 'trong',
+            }));
+            
+            const stats = {
+                total: processedSeats.length,
+                trong: result.stats?.trong || 0,
+                dat: result.stats?.dat || 0,
+                giu: result.stats?.giu || 0,
+                loi: result.stats?.loi || 0,
+                baoTri: result.stats?.baoTri || 0,
+                room_total: result.stats?.room_total || result.room?.seat_count || 0,
+            };
+            
+            setData(prev => ({
+                cinemas: result.cinemas || prev.cinemas,
+                rooms: result.rooms || prev.rooms,
+                showtimes: result.showtimes || prev.showtimes,
+                seats: processedSeats,
+                stats: stats,
+                room: result.room || prev.room,
+            }));
+            
+            return { ...result, seats: processedSeats };
+        } catch (error) {
+            console.error("❌ Lỗi tải dữ liệu:", error);
+            return null;
+        } finally {
+            setLoading(false);
+        }
+    }, [filters]);
+
+    // Tạo ghế tự động
+    const handleGenerateSeats = useCallback(async (showtimeId) => {
+        if (!showtimeId) {
+            toast({
+                title: "Lỗi",
+                description: "Vui lòng chọn suất chiếu",
+                status: "warning",
+                duration: 3000,
+                isClosable: true,
+            });
+            return false;
+        }
+        
+        setIsGenerating(true);
+        try {
+            await SeatManagementApi.generateSeats(showtimeId);
+            
+            toast({
+                title: "Thành công",
+                description: "Đã tạo ghế tự động cho suất chiếu",
+                status: "success",
+                duration: 3000,
+                isClosable: true,
+            });
+            
+            await loadSeats(showtimeId);
+            return true;
+        } catch (error) {
+            console.error("❌ Lỗi tạo ghế:", error);
+            toast({
+                title: "Lỗi tạo ghế",
+                description: error.response?.data?.message || "Không thể tạo ghế",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
+            return false;
+        } finally {
+            setIsGenerating(false);
+        }
+    }, [loadSeats, toast]);
+
+    // Cập nhật trạng thái ghế
+    const handleUpdateSeatStatus = useCallback(async (showtimeSeatId, status) => {
+        try {
+            await SeatManagementApi.updateSeat(showtimeSeatId, status);
+            
+            setData(prev => ({
+                ...prev,
+                seats: prev.seats.map(seat => 
+                    seat.id === showtimeSeatId ? { ...seat, status: status.toLowerCase() } : seat
+                )
+            }));
+            
+            return true;
+        } catch (error) {
+            console.error("❌ Lỗi cập nhật trạng thái:", error);
+            toast({
+                title: "Lỗi cập nhật trạng thái",
+                description: error.response?.data?.message || "Không thể cập nhật trạng thái ghế",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
+            return false;
+        }
+    }, [toast]);
+
+    // Reset ghế
+    const handleResetSeat = useCallback(async (showtimeSeatId) => {
+        try {
+            await SeatManagementApi.resetSeat(showtimeSeatId);
+            
+            setData(prev => ({
+                ...prev,
+                seats: prev.seats.map(seat => 
+                    seat.id === showtimeSeatId ? { ...seat, status: 'trong' } : seat
+                )
+            }));
+            
+            toast({
+                title: "Thành công",
+                description: "Đã reset ghế về trạng thái trống",
+                status: "success",
+                duration: 2000,
+                isClosable: true,
+            });
+            return true;
+        } catch (error) {
+            console.error("❌ Lỗi reset ghế:", error);
+            toast({
+                title: "Lỗi reset ghế",
+                description: error.response?.data?.message || "Không thể reset ghế",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
+            return false;
+        }
+    }, [toast]);
+
+    // Xóa ghế
+    const handleDeleteSeat = useCallback(async (showtimeSeatId) => {
+        try {
+            await SeatManagementApi.deleteSeat(showtimeSeatId);
+            
+            setData(prev => ({
+                ...prev,
+                seats: prev.seats.filter(seat => seat.id !== showtimeSeatId)
+            }));
+            
+            toast({
+                title: "Thành công",
+                description: "Đã xóa ghế",
+                status: "success",
+                duration: 2000,
+                isClosable: true,
+            });
+            return true;
+        } catch (error) {
+            console.error("❌ Lỗi xóa ghế:", error);
+            toast({
+                title: "Lỗi xóa ghế",
+                description: error.response?.data?.message || "Không thể xóa ghế",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
+            return false;
+        }
+    }, [toast]);
+
+    // Lấy danh sách rooms theo cinema
+    const getRoomsByCinema = useCallback((cinemaId) => {
+        if (!cinemaId) return data.rooms;
+        return data.rooms.filter(room => {
+            const roomCinemaId = room.CinemaId || room.cinema_id;
+            return String(roomCinemaId) === String(cinemaId);
+        });
+    }, [data.rooms]);
+
+    // Lấy danh sách showtimes theo room
+    const getShowtimesByRoom = useCallback((roomId) => {
+        if (!roomId) return data.showtimes;
+        return data.showtimes.filter(st => {
+            const stRoomId = st.room_id || st.RoomId;
+            return String(stRoomId) === String(roomId);
+        });
+    }, [data.showtimes]);
+
+    // Seat Map Data
+    const seatMapData = useMemo(() => {
+        return data.seats.map(seat => {
+            let seatType = 'normal';
+            if (seat.seat_type) {
+                seatType = seat.seat_type.toLowerCase();
+            } else if (seat.originalData?.seat_type) {
+                seatType = seat.originalData.seat_type.toLowerCase();
+            }
+            
+            const typeMap = {
+                'vip': 'vip',
+                'couple': 'couple',
+                'sweetbox': 'sweetbox',
+                'accessible': 'accessible',
+                'normal': 'normal',
+                'regular': 'normal',
+                'standard': 'normal',
+            };
+            
+            const mappedType = typeMap[seatType] || 'normal';
+            
+            return {
+                id: seat.id,
+                row: seat.row || 'A',
+                num: seat.number || 0,
+                status: seat.status || 'trong',
+                seat_type: mappedType,
+                ticket_code: seat.ticket_code || null,
+                customer_name: seat.customer_name || null,
+                showtime_seat_id: seat.id,
+                showtime_id: seat.showtime_id,
+                originalData: seat
+            };
+        });
+    }, [data.seats]);
+
+    return {
+        // Data
+        cinemas: data.cinemas,
+        rooms: data.rooms,
+        showtimes: data.showtimes,
+        seats: data.seats,
+        seatMapData,
+        seatStats: data.stats,
+        room: data.room,
+        filters,
+        
+        // Loading
+        loading,
+        isGenerating,
+        isInitialLoad,
+        isLoadingSeats,
+        
+        // Actions
+        loadDataWithFilters,
+        loadSeats,
+        handleGenerateSeats,
+        handleUpdateSeatStatus,
+        handleResetSeat,
+        handleDeleteSeat,
+        getRoomsByCinema,
+        getShowtimesByRoom,
+        setFilters,
+    };
 }

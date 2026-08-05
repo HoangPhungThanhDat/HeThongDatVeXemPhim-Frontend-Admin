@@ -1,5 +1,3 @@
-// views/admin/quanlybanner/components/BannerDetail.jsx
-
 import {
   Box, Text, Button, Flex, SimpleGrid, Icon, useColorModeValue
 } from "@chakra-ui/react";
@@ -32,28 +30,83 @@ export function BannerDetail({ banner, onBack, onEdit }) {
   const infoBg = useColorModeValue("#f8fafc", "#091530");
   const infoBorder = useColorModeValue("#f1f5f9", "#1a2744");
 
-  // Lấy dữ liệu từ banner
-  const id = banner.BannerId || banner.id;
-  const title = banner.Title || banner.title || "";
+  // Lấy dữ liệu từ banner với nhiều fallback
+  const id = banner.BannerId || banner.id || banner.ID || "N/A";
+  const title = banner.Title || banner.title || "Không có tiêu đề";
   const image = banner.ImageUrl || banner.image || "";
   const status = banner.Status || banner.status || "Inactive";
   const linkType = banner.LinkType || banner.linkType || "None";
-  const linkTarget = banner.LinkTarget || banner.linkTarget || "";
+  const linkTarget = banner.linkTarget || banner.LinkUrl || banner.linkUrl || "";
   const scheduleStart = banner.ScheduleStart || banner.scheduleStart || "";
   const scheduleEnd = banner.ScheduleEnd || banner.scheduleEnd || "";
   const scheduledOn = banner.ScheduledOn !== undefined ? banner.ScheduledOn : (banner.scheduledOn || false);
   const order = banner.order || banner.Order || 0;
   const note = banner.Note || banner.note || "";
   const position = banner.Position || banner.position || "";
-  const userId = banner.UserId || banner.userId || "";
-  const userName = banner.UserName || banner.userName || "N/A";
-  const createdAt = banner.CreatedAt || banner.createdAt || "";
-  const updatedAt = banner.UpdatedAt || banner.updatedAt || "";
-  const updatedBy = banner.UpdatedBy || banner.updatedBy || "N/A";
+  
+  const userId = banner.UserId || banner.userId || banner.user_id || "N/A";
+  const updatedBy = banner.UpdatedBy || banner.updatedBy || banner.updated_by || "N/A";
+  
+  const createdAt = banner.CreatedAt || banner.createdAt || banner.created_at || "";
+  const updatedAt = banner.UpdatedAt || banner.updatedAt || banner.updated_at || "";
   
   const displayStatus = STATUS_MAP[status] || status;
   const displayPosition = POSITION_MAP[position] || position;
-  const isActive = status === "Active";
+
+  // ✅ SỬA: Format date - LẤY ĐÚNG GIỜ PHÚT GIÂY
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "N/A";
+    
+    try {
+      // Tạo Date object từ string
+      const date = new Date(dateStr);
+      
+      // Kiểm tra valid
+      if (isNaN(date.getTime())) {
+        return "N/A";
+      }
+      
+      // Lấy các thành phần
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const seconds = String(date.getSeconds()).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      
+      // Format: HH:mm:ss dd/MM/yyyy
+      return `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
+    } catch (error) {
+      console.error("Lỗi format date:", error);
+      return dateStr;
+    }
+  };
+
+  // ✅ Format cho schedule (có giờ phút giây)
+  const formatScheduleDate = (dateStr) => {
+    if (!dateStr) return "N/A";
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return dateStr;
+      
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const seconds = String(date.getSeconds()).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      
+      return `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
+    } catch {
+      return dateStr;
+    }
+  };
+
+  // Log để debug
+  console.log("📅 CreatedAt raw:", createdAt);
+  console.log("📅 UpdatedAt raw:", updatedAt);
+  console.log("📅 CreatedAt formatted:", formatDate(createdAt));
+  console.log("📅 UpdatedAt formatted:", formatDate(updatedAt));
 
   return (
     <Box sx={{ animation: `${fadeIn} 0.3s ease both` }}>
@@ -143,13 +196,13 @@ export function BannerDetail({ banner, onBack, onEdit }) {
               <Flex align="center" gap="8px" flexWrap="wrap">
                 <Box px="10px" py="4px" borderRadius="7px" bg="#fff7ed" border="1px solid #fcd34d">
                   <Text fontSize={{ base: "11px", md: "12px" }} fontWeight="700" color="#b45309">
-                    Bắt đầu: {scheduleStart.replace("T", " ").slice(0, 16)}
+                    Bắt đầu: {formatScheduleDate(scheduleStart)}
                   </Text>
                 </Box>
                 <Text color={subColor} fontWeight="700">→</Text>
                 <Box px="10px" py="4px" borderRadius="7px" bg="#fef2f2" border="1px solid #fca5a5">
                   <Text fontSize={{ base: "11px", md: "12px" }} fontWeight="700" color="#dc2626">
-                    Kết thúc: {scheduleEnd.replace("T", " ").slice(0, 16)}
+                    Kết thúc: {formatScheduleDate(scheduleEnd)}
                   </Text>
                 </Box>
               </Flex>
@@ -189,16 +242,18 @@ export function BannerDetail({ banner, onBack, onEdit }) {
           <Flex direction="column" gap="10px">
             <Box p="10px 12px" borderRadius="8px" bg={infoBg} border={`1px solid ${infoBorder}`}>
               <Text fontSize="9px" fontWeight="700" color={labelColor} textTransform="uppercase" letterSpacing="0.6px" mb="2px">
-                Người tạo
+                Người tạo (ID)
               </Text>
-              <Text fontSize="13px" fontWeight="600" color={valColor}>{userName}</Text>
+              <Text fontSize="13px" fontWeight="600" color={valColor} fontFamily="monospace">
+                #{userId}
+              </Text>
             </Box>
             <Box p="10px 12px" borderRadius="8px" bg={infoBg} border={`1px solid ${infoBorder}`}>
               <Text fontSize="9px" fontWeight="700" color={labelColor} textTransform="uppercase" letterSpacing="0.6px" mb="2px">
                 Ngày tạo
               </Text>
               <Text fontSize="13px" fontWeight="600" color={valColor}>
-                {createdAt ? new Date(createdAt).toLocaleString('vi-VN') : "N/A"}
+                {formatDate(createdAt)}
               </Text>
             </Box>
           </Flex>
@@ -223,16 +278,18 @@ export function BannerDetail({ banner, onBack, onEdit }) {
           <Flex direction="column" gap="10px">
             <Box p="10px 12px" borderRadius="8px" bg={infoBg} border={`1px solid ${infoBorder}`}>
               <Text fontSize="9px" fontWeight="700" color={labelColor} textTransform="uppercase" letterSpacing="0.6px" mb="2px">
-                Người cập nhật
+                Người cập nhật (ID)
               </Text>
-              <Text fontSize="13px" fontWeight="600" color={valColor}>{updatedBy}</Text>
+              <Text fontSize="13px" fontWeight="600" color={valColor} fontFamily="monospace">
+                #{updatedBy}
+              </Text>
             </Box>
             <Box p="10px 12px" borderRadius="8px" bg={infoBg} border={`1px solid ${infoBorder}`}>
               <Text fontSize="9px" fontWeight="700" color={labelColor} textTransform="uppercase" letterSpacing="0.6px" mb="2px">
                 Ngày cập nhật
               </Text>
               <Text fontSize="13px" fontWeight="600" color={valColor}>
-                {updatedAt ? new Date(updatedAt).toLocaleString('vi-VN') : "N/A"}
+                {formatDate(updatedAt)}
               </Text>
             </Box>
           </Flex>

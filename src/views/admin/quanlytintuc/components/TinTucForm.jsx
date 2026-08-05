@@ -1,15 +1,15 @@
-
+// views/admin/quanlytintuc/components/TinTucForm.jsx
 
 import { useState, useRef } from "react";
 import {
   Box, Grid, Text, Button, Flex, SimpleGrid, FormControl,
   Input, Select, Textarea, Icon, Switch, useColorModeValue,
-  useBreakpointValue
+  useBreakpointValue, Spinner, Image
 } from "@chakra-ui/react";
 import {
   MdArrowBack, MdClose, MdCheckCircle, MdCalendarToday,
   MdPerson, MdLink, MdImageSearch, MdLocalOffer, MdCloudUpload,
-  MdSchedule
+  MdSchedule, MdDelete
 } from "react-icons/md";
 import { FaNewspaper } from "react-icons/fa";
 import { SectionTitle } from "./shared/SectionTitle";
@@ -22,7 +22,8 @@ export function TinTucForm({ article, onCancel, onSave, isAdd = false }) {
   const isDark = useColorModeValue(false, true);
   const isMobile = useBreakpointValue({ base: true, xl: false });
   const fileInputRef = useRef(null);
-  const [uploading, setUploading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
 
   const generateSlug = (title) => {
     return title
@@ -97,7 +98,6 @@ export function TinTucForm({ article, onCancel, onSave, isAdd = false }) {
   const secondaryBtnBg = useColorModeValue("#f8fafc", "rgba(255,255,255,0.05)");
   const secondaryBtnBorder = useColorModeValue("#e2e8f0", "rgba(255,255,255,0.14)");
   const secondaryBtnColor = useColorModeValue("#475569", "#cbd5e1");
-  const secondaryBtnHoverBg = useColorModeValue("#f1f5f9", "rgba(255,255,255,0.1)");
 
   const inputStyle = {
     bg: inputBg,
@@ -148,69 +148,66 @@ export function TinTucForm({ article, onCancel, onSave, isAdd = false }) {
       return;
     }
     
-    setUploading(true);
-    
-    // ✅ Lưu file vào state để gửi lên server
     set("thumbnailFile", file);
     
-    // ✅ Đọc file để hiển thị preview
+    // Tạo preview
     const reader = new FileReader();
     reader.onload = (ev) => {
+      setImagePreview(ev.target.result);
       set("thumbnail", ev.target.result);
-      setUploading(false);
-    };
-    reader.onerror = () => {
-      alert("Lỗi đọc file");
-      setUploading(false);
     };
     reader.readAsDataURL(file);
     e.target.value = "";
   };
 
-  const handleSubmit = () => {
-    // Kiểm tra tiêu đề
+  // Xóa ảnh
+  const handleRemoveImage = () => {
+    set("thumbnailFile", null);
+    set("thumbnail", null);
+    setImagePreview(null);
+  };
+
+  //  HÀM XỬ LÝ SUBMIT VỚI LOADING
+  const handleSubmit = async () => {
+    // Kiểm tra validate
     if (!form.title.trim()) {
       alert("Vui lòng nhập tiêu đề bài viết");
       return;
     }
     
-    // Chuẩn bị dữ liệu gửi đi
-    const submitData = {
-      Title: form.title.trim(),
-      Slug: form.slug || generateSlug(form.title),
-      Category: form.category || "Tin tức",
-      Tags: form.tags.split(",").map(t => t.trim()).filter(Boolean),
-      Status: form.status || "Draft",
-      Author: form.author.trim() || "Unknown",
-      Excerpt: form.excerpt || "",
-      Content: form.content || "",
-      LinkedMovie: form.linkedMovie || "",
-      Featured: form.featured || false,
-    };
-    
-    // ⚠️ QUAN TRỌNG: Xử lý ảnh - CHỈ GỬI FILE
-    if (form.thumbnailFile instanceof File) {
-      // ✅ Nếu có file mới được chọn
-      submitData.ImageFile = form.thumbnailFile;
+    setIsSubmitting(true);
+
+    try {
+      // Chuẩn bị dữ liệu gửi đi
+      const submitData = {
+        Title: form.title.trim(),
+        Slug: form.slug || generateSlug(form.title),
+        Category: form.category || "Tin tức",
+        Tags: form.tags.split(",").map(t => t.trim()).filter(Boolean),
+        Status: form.status || "Draft",
+        Author: form.author.trim() || "Unknown",
+        Excerpt: form.excerpt || "",
+        Content: form.content || "",
+        LinkedMovie: form.linkedMovie || "",
+        Featured: form.featured || false,
+        ImageFile: form.thumbnailFile || null,
+      };
+      
+      // Xử lý ngày tháng
+      if (form.status === "Published") {
+        submitData.PublishDate = form.publishDate || new Date().toISOString().slice(0, 10);
+      }
+      
+      if (form.status === "Scheduled" && form.scheduledDate) {
+        submitData.ScheduledDate = form.scheduledDate;
+      }
+      
+      await onSave(submitData);
+    } catch (error) {
+      console.error("Lỗi khi submit form:", error);
+    } finally {
+      setIsSubmitting(false);
     }
-    // ❌ KHÔNG gửi ImageUrl nếu là URL string
-    // Server chỉ chấp nhận file ảnh, không chấp nhận URL
-    
-    // Xử lý ngày tháng
-    if (form.status === "Published") {
-      submitData.PublishDate = form.publishDate || new Date().toISOString().slice(0, 10);
-    }
-    
-    if (form.status === "Scheduled" && form.scheduledDate) {
-      submitData.ScheduledDate = form.scheduledDate;
-    }
-    
-    console.log("📤 DỮ LIỆU GỬI ĐI:", {
-      ...submitData,
-      ImageFile: submitData.ImageFile ? `[FILE] ${submitData.ImageFile.name}` : "Không có ảnh mới"
-    });
-    
-    onSave(submitData);
   };
 
   return (
@@ -223,6 +220,7 @@ export function TinTucForm({ article, onCancel, onSave, isAdd = false }) {
           color={secondaryBtnColor} borderRadius="10px" h="38px" fontSize="13px" fontWeight="600"
           border={`1.5px solid ${secondaryBtnBorder}`} _hover={{ bg: secondaryBtnBg }} flexShrink="0"
           onClick={onCancel}
+          isDisabled={isSubmitting}
         >
           Quay lại
         </Button>
@@ -247,6 +245,7 @@ export function TinTucForm({ article, onCancel, onSave, isAdd = false }) {
               <FormControl>
                 <Input {...inputStyle} placeholder="Nhập tiêu đề bài viết..."
                   value={form.title}
+                  isDisabled={isSubmitting}
                   onChange={(e) => {
                     set("title", e.target.value);
                     if (isAdd) set("slug", generateSlug(e.target.value));
@@ -258,6 +257,7 @@ export function TinTucForm({ article, onCancel, onSave, isAdd = false }) {
               <FormControl>
                 <Input {...inputStyle} placeholder="ten-bai-viet-slug"
                   value={form.slug}
+                  isDisabled={isSubmitting}
                   onChange={(e) => set("slug", e.target.value)} />
               </FormControl>
             </Box>
@@ -266,6 +266,7 @@ export function TinTucForm({ article, onCancel, onSave, isAdd = false }) {
                 <Text sx={labelStyle}>Danh mục *</Text>
                 <FormControl>
                   <Select {...inputStyle} value={form.category}
+                    isDisabled={isSubmitting}
                     onChange={(e) => set("category", e.target.value)}>
                     {CATEGORY_OPTS.map(opt => (
                       <option key={opt} value={opt}>{opt}</option>
@@ -277,7 +278,9 @@ export function TinTucForm({ article, onCancel, onSave, isAdd = false }) {
                 <Text sx={labelStyle}>Tác giả</Text>
                 <FormControl>
                   <Input {...inputStyle} placeholder="Tên tác giả"
-                    value={form.author} onChange={(e) => set("author", e.target.value)} />
+                    value={form.author} 
+                    isDisabled={isSubmitting}
+                    onChange={(e) => set("author", e.target.value)} />
                 </FormControl>
               </Box>
             </Grid>
@@ -285,14 +288,18 @@ export function TinTucForm({ article, onCancel, onSave, isAdd = false }) {
               <Text sx={labelStyle}>Tags (phân cách bằng dấu phẩy)</Text>
               <FormControl>
                 <Input {...inputStyle} placeholder="VD: Marvel, Avengers, Phòng vé"
-                  value={form.tags} onChange={(e) => set("tags", e.target.value)} />
+                  value={form.tags} 
+                  isDisabled={isSubmitting}
+                  onChange={(e) => set("tags", e.target.value)} />
               </FormControl>
             </Box>
             <Box mb="14px">
               <Text sx={labelStyle}>Phim liên quan</Text>
               <FormControl>
                 <Input {...inputStyle} placeholder="Tên phim (nếu có)"
-                  value={form.linkedMovie} onChange={(e) => set("linkedMovie", e.target.value)} />
+                  value={form.linkedMovie} 
+                  isDisabled={isSubmitting}
+                  onChange={(e) => set("linkedMovie", e.target.value)} />
               </FormControl>
             </Box>
             {form.status === "Scheduled" && (
@@ -300,11 +307,10 @@ export function TinTucForm({ article, onCancel, onSave, isAdd = false }) {
                 <Text sx={labelStyle}>Thời gian đăng bài *</Text>
                 <FormControl>
                   <Input {...inputStyle} type="datetime-local"
-                    value={form.scheduledDate} onChange={(e) => set("scheduledDate", e.target.value)} />
+                    value={form.scheduledDate} 
+                    isDisabled={isSubmitting}
+                    onChange={(e) => set("scheduledDate", e.target.value)} />
                 </FormControl>
-                <Text fontSize="11px" color={textMuted} mt="6px">
-                  Bài viết sẽ tự động chuyển sang "Đã đăng" khi đến đúng thời gian này.
-                </Text>
               </Box>
             )}
             {form.status === "Published" && (
@@ -312,7 +318,9 @@ export function TinTucForm({ article, onCancel, onSave, isAdd = false }) {
                 <Text sx={labelStyle}>Ngày đăng</Text>
                 <FormControl>
                   <Input {...inputStyle} type="date"
-                    value={form.publishDate} onChange={(e) => set("publishDate", e.target.value)} />
+                    value={form.publishDate} 
+                    isDisabled={isSubmitting}
+                    onChange={(e) => set("publishDate", e.target.value)} />
                 </FormControl>
               </Box>
             )}
@@ -332,7 +340,9 @@ export function TinTucForm({ article, onCancel, onSave, isAdd = false }) {
                   _hover={{ border: "1.5px solid #f97316" }}
                   transition="all 0.2s" rows={3}
                   placeholder="Viết mô tả ngắn hiển thị trên trang danh sách..."
-                  value={form.excerpt} onChange={(e) => set("excerpt", e.target.value)}
+                  value={form.excerpt} 
+                  isDisabled={isSubmitting}
+                  onChange={(e) => set("excerpt", e.target.value)}
                 />
               </FormControl>
             </Box>
@@ -347,7 +357,9 @@ export function TinTucForm({ article, onCancel, onSave, isAdd = false }) {
                   _hover={{ border: "1.5px solid #f97316" }}
                   transition="all 0.2s" rows={10}
                   placeholder="Nhập nội dung đầy đủ của bài viết..."
-                  value={form.content} onChange={(e) => set("content", e.target.value)}
+                  value={form.content} 
+                  isDisabled={isSubmitting}
+                  onChange={(e) => set("content", e.target.value)}
                 />
               </FormControl>
             </Box>
@@ -356,22 +368,44 @@ export function TinTucForm({ article, onCancel, onSave, isAdd = false }) {
 
         {/* Right */}
         <Flex direction="column" gap="14px">
-          {/* Thumbnail - Có chọn ảnh từ máy */}
+          {/* Thumbnail */}
           <Box {...cardStyle} borderRadius="16px" p={{ base: "16px", md: "18px" }}>
             <SectionTitle label="Ảnh đại diện" />
-            <Text sx={labelStyle} mb="7px">URL ảnh thumbnail</Text>
-            <FormControl mb="10px">
-              <Input {...inputStyle} placeholder="https://..."
-                value={form.thumbnail} onChange={(e) => set("thumbnail", e.target.value)} />
-            </FormControl>
+            
+            {/* Hiển thị ảnh hiện tại */}
+            {(form.thumbnail || imagePreview) && (
+              <Box position="relative" mb="12px" borderRadius="10px" overflow="hidden" border={`1px solid ${cardBorder}`}>
+                <Image 
+                  src={imagePreview || form.thumbnail} 
+                  alt="Thumbnail"
+                  objectFit="cover"
+                  w="100%"
+                  h="160px"
+                  fallbackSrc="https://via.placeholder.com/800x450?text=Không+có+ảnh"
+                />
+                <Button
+                  position="absolute"
+                  top="8px"
+                  right="8px"
+                  size="sm"
+                  colorScheme="red"
+                  borderRadius="full"
+                  onClick={handleRemoveImage}
+                  isDisabled={isSubmitting}
+                >
+                  <Icon as={MdDelete} />
+                </Button>
+              </Box>
+            )}
 
-            {/* Upload file từ máy */}
+            {/* Upload button */}
             <input
               ref={fileInputRef}
               type="file"
               accept="image/*"
               style={{ display: "none" }}
               onChange={handleFileSelect}
+              disabled={isSubmitting}
             />
             <Button
               w="100%" h="40px" borderRadius="9px"
@@ -379,39 +413,24 @@ export function TinTucForm({ article, onCancel, onSave, isAdd = false }) {
               fontSize="12.5px" fontWeight="600"
               _hover={{ bg: "#fff7ed", color: "#f97316", border: "1.5px solid #fed7aa" }}
               transition="all 0.2s"
-              leftIcon={<Icon as={uploading ? MdSchedule : MdCloudUpload} boxSize="16px" />}
-              isLoading={uploading} loadingText="Đang tải..."
+              leftIcon={<Icon as={MdCloudUpload} boxSize="16px" />}
               onClick={() => fileInputRef.current?.click()}
+              isDisabled={isSubmitting}
               mb="12px"
             >
-              Tải ảnh lên từ máy tính
+              {form.thumbnailFile ? 'Thay đổi ảnh' : 'Tải ảnh lên từ máy tính'}
             </Button>
 
-            {/* Preview ảnh */}
-            {form.thumbnail ? (
-              <Box borderRadius="10px" overflow="hidden" border={`1px solid ${cardBorder}`}>
-                <img src={form.thumbnail} alt="thumbnail"
-                  style={{ width: "100%", display: "block", maxHeight: "180px", objectFit: "cover" }}
-                  onError={(e) => { e.target.style.display = "none"; }} />
-                {form.thumbnailFile && (
-                  <Box p="6px 10px" bg="rgba(16,185,129,0.15)" borderTop={`1px solid ${cardBorder}`}>
-                    <Flex align="center" gap="6px">
-                      <Icon as={MdCheckCircle} boxSize="12px" color="#10b981" />
-                      <Text fontSize="11px" color="#10b981" fontWeight="600">
-                        Đã tải lên: {form.thumbnailFile.name}
-                      </Text>
-                    </Flex>
-                  </Box>
-                )}
-              </Box>
-            ) : (
-              <Flex direction="column" align="center" justify="center"
-                h="100px" borderRadius="10px" bg={dashedBg} border={`2px dashed ${dashedBorder}`}
-              >
-                <Icon as={MdImageSearch} boxSize="26px" color={textFaint} mb="6px" />
-                <Text fontSize="11.5px" color={textMuted}>Chưa có ảnh đại diện</Text>
-              </Flex>
-            )}
+            <Text sx={labelStyle}>Hoặc nhập URL ảnh</Text>
+            <FormControl>
+              <Input {...inputStyle} placeholder="https://..."
+                value={form.thumbnail} 
+                isDisabled={isSubmitting}
+                onChange={(e) => set("thumbnail", e.target.value)} />
+            </FormControl>
+            <Text fontSize="11px" color={textMuted} mt="6px">
+              JPG, PNG, WebP (tối đa 5MB)
+            </Text>
           </Box>
 
           {/* Status */}
@@ -419,6 +438,7 @@ export function TinTucForm({ article, onCancel, onSave, isAdd = false }) {
             <SectionTitle label="Trạng thái" />
             <FormControl>
               <Select {...inputStyle} value={form.status}
+                isDisabled={isSubmitting}
                 onChange={(e) => set("status", e.target.value)}>
                 {STATUS_OPTS.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -437,6 +457,7 @@ export function TinTucForm({ article, onCancel, onSave, isAdd = false }) {
               </Box>
               <Switch colorScheme="orange" size="md"
                 isChecked={form.featured}
+                isDisabled={isSubmitting}
                 onChange={(e) => set("featured", e.target.checked)}
               />
             </Flex>
@@ -473,7 +494,7 @@ export function TinTucForm({ article, onCancel, onSave, isAdd = false }) {
         </Flex>
       </Grid>
 
-      {/* Save bar */}
+      {/* Save bar với loading state */}
       <Box {...cardStyle} borderRadius="14px" p={{ base: "14px 16px", md: "16px 20px" }} mt="16px"
         position={{ base: "sticky", md: "static" }} bottom={{ base: "0" }} zIndex="10"
       >
@@ -482,7 +503,8 @@ export function TinTucForm({ article, onCancel, onSave, isAdd = false }) {
             h={{ base: "46px", md: "42px" }} px="22px" variant="ghost"
             color={secondaryBtnColor} borderRadius="10px" fontWeight="600" fontSize="13px"
             border={`1.5px solid ${secondaryBtnBorder}`} _hover={{ bg: secondaryBtnBg }} transition="all 0.2s"
-            leftIcon={<Icon as={MdClose} />} onClick={onCancel}>
+            leftIcon={<Icon as={MdClose} />} onClick={onCancel}
+            isDisabled={isSubmitting}>
             Hủy bỏ
           </Button>
           <Button flex={{ base: "2", md: "none" }}
@@ -490,11 +512,14 @@ export function TinTucForm({ article, onCancel, onSave, isAdd = false }) {
             fontWeight="700" fontSize="13px"
             bg="linear-gradient(135deg, #f97316 0%, #fb923c 60%, #f97316 100%)"
             color="#ffffff" boxShadow="0 4px 16px rgba(249,115,22,0.35)"
-            _hover={{ boxShadow: "0 8px 24px rgba(249,115,22,0.45)", transform: "translateY(-1px)" }}
+            _hover={{ boxShadow: isSubmitting ? "0 4px 16px rgba(249,115,22,0.35)" : "0 8px 24px rgba(249,115,22,0.45)", transform: isSubmitting ? "none" : "translateY(-1px)" }}
             _active={{ transform: "translateY(0)" }} transition="all 0.2s"
-            leftIcon={<Icon as={MdCheckCircle} />}
-            onClick={handleSubmit}>
-            {isAdd ? "Đăng bài" : "Lưu thay đổi"}
+            leftIcon={isSubmitting ? <Spinner size="sm" color="white" /> : <Icon as={MdCheckCircle} />}
+            onClick={handleSubmit}
+            isDisabled={isSubmitting}
+            opacity={isSubmitting ? 0.8 : 1}
+          >
+            {isSubmitting ? "Đang xử lý..." : (isAdd ? "Đăng bài" : "Lưu thay đổi")}
           </Button>
         </Flex>
       </Box>

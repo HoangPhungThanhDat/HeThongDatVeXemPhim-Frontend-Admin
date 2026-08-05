@@ -1,5 +1,6 @@
-// components/RoomListRow.jsx
-import React, { useState, useEffect } from "react";
+// src/views/admin/quanlyphongchieu/components/RoomListRow.jsx
+
+import React from "react";
 import {
   Box, Flex, Text, Badge, Button, Icon, useColorMode,
   Tooltip
@@ -9,42 +10,19 @@ import {
   MdMovie
 } from "react-icons/md";
 import { fadeUp } from "./shared/animations";
-import SeatApi from "../../../../api/SeatApi";
-// Import getSeatColors từ StatCard
-import { getSeatColors } from "./shared/StatCard";
 
 export default function RoomListRow({ room, index, onView, onToggle, onEdit, onDelete }) {
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
-  const colors = getSeatColors(isDark);
   
-  const [seatCount, setSeatCount] = useState(0);
-  const [bookedCount, setBookedCount] = useState(0);
-  const [loadingSeats, setLoadingSeats] = useState(true);
-
-  useEffect(() => {
-    loadSeatCount();
-  }, [room.RoomId]);
-
-  const loadSeatCount = async () => {
-    try {
-      const res = await SeatApi.getAll();
-      const allSeats = res.data.data || res.data || [];
-      const roomSeats = allSeats.filter(s => s.RoomId === room.RoomId);
-      const total = roomSeats.length;
-      const booked = roomSeats.filter(s => s.Status !== "Available").length;
-      setSeatCount(total);
-      setBookedCount(booked);
-    } catch (err) {
-      console.error("Lỗi load ghế:", err);
-    } finally {
-      setLoadingSeats(false);
-    }
-  };
+  // ✅ SỬ DỤNG DỮ LIỆU CÓ SẴN - KHÔNG GỌI API
+  const totalSeats = room.TotalSeats || room.SeatCount || 0;
+  const bookedSeats = room.BookedSeats || 0;
+  const availableSeats = room.AvailableSeats || 0;
+  const filledPercent = totalSeats > 0 ? Math.round((bookedSeats / totalSeats) * 100) : 0;
 
   const isActive = room.Status === "Active";
   const isMaintenance = room.Status === "Maintenance";
-  const filledPercent = seatCount > 0 ? Math.round((bookedCount / seatCount) * 100) : 0;
 
   const statusColors = {
     Active: { bg: isDark ? "#064e3b" : "#ecfdf5", color: isDark ? "#34d399" : "#059669", dot: "#10b981" },
@@ -54,15 +32,11 @@ export default function RoomListRow({ room, index, onView, onToggle, onEdit, onD
 
   const statusStyle = statusColors[room.Status] || statusColors.Inactive;
 
-  const totalSeats = room.Capacity || seatCount || 0;
-  const bookedSeats = bookedCount || 0;
-  const availableSeats = totalSeats - bookedSeats;
-
   return (
     <Box
-      bg={colors.bgCard}
+      bg={isDark ? "#0f1f3a" : "white"}
       borderRadius="12px"
-      border={`1px solid ${colors.borderCard}`}
+      border={`1px solid ${isDark ? "#1a3a5c" : "#f1f5f9"}`}
       boxShadow={isDark ? "0 1px 4px rgba(0,0,0,0.2)" : "0 1px 4px rgba(0,0,0,0.04)"}
       sx={{ animation: `${fadeUp} 0.4s ease ${index * 0.05}s both` }}
       _hover={{ border: "1px solid #f97316", boxShadow: "0 4px 16px rgba(249,115,22,0.08)" }}
@@ -89,7 +63,7 @@ export default function RoomListRow({ room, index, onView, onToggle, onEdit, onD
         {/* Thông tin phòng */}
         <Box flex="1.8" minW="0">
           <Flex align="center" gap="8px" flexWrap="wrap">
-            <Text fontSize="14px" fontWeight="800" color={colors.textColor} noOfLines={1}>
+            <Text fontSize="14px" fontWeight="800" color={isDark ? "#e8f4f8" : "#0f172a"} noOfLines={1}>
               {room.Name}
             </Text>
             <Badge
@@ -125,8 +99,8 @@ export default function RoomListRow({ room, index, onView, onToggle, onEdit, onD
 
         {/* Số ghế */}
         <Box flex="0.7" textAlign="center">
-          <Text fontSize="16px" fontWeight="800" color={colors.textColor}>
-            {loadingSeats ? "..." : totalSeats}
+          <Text fontSize="16px" fontWeight="800" color={isDark ? "#e8f4f8" : "#0f172a"}>
+            {totalSeats}
           </Text>
           <Text fontSize="9px" fontWeight="600" color={isDark ? "#64748b" : "#94a3b8"}>
             ghế
@@ -135,8 +109,8 @@ export default function RoomListRow({ room, index, onView, onToggle, onEdit, onD
 
         {/* Số ghế đã đặt / trống */}
         <Box flex="0.7" textAlign="center">
-          <Text fontSize="14px" fontWeight="700" color={colors.textColor}>
-            {loadingSeats ? "..." : `${bookedSeats}/${availableSeats}`}
+          <Text fontSize="14px" fontWeight="700" color={isDark ? "#e8f4f8" : "#0f172a"}>
+            {bookedSeats}/{availableSeats}
           </Text>
           <Text fontSize="9px" fontWeight="600" color={isDark ? "#64748b" : "#94a3b8"}>
             đã đặt / trống
@@ -155,7 +129,7 @@ export default function RoomListRow({ room, index, onView, onToggle, onEdit, onD
 
         {/* Progress bar */}
         <Box flex="1.2">
-          {seatCount > 0 ? (
+          {totalSeats > 0 ? (
             <>
               <Flex justify="space-between" mb="2px">
                 <Text fontSize="9px" fontWeight="600" color={isDark ? "#64748b" : "#94a3b8"}>

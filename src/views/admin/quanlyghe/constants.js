@@ -1,4 +1,5 @@
-// constants.js
+// src/views/admin/quanlyghe/constants.js
+
 import { MdChair } from "react-icons/md";
 
 export const CINEMAS = [
@@ -36,11 +37,12 @@ export const ROOM_SEAT_CONFIG = {
 
 export const ROW_LABELS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
+// ✅ SỬA: Thêm màu vàng cho Couple
 export const SEAT_TYPES = {
   regular:    { label: "Thường",     color: "#f97316", bg: "#fff7ed", border: "#fb923c", bookedBg: "#dc2626", bookedColor: "#fff" },
   vip:        { label: "VIP",        color: "#7c3aed", bg: "#f5f3ff", border: "#a78bfa", bookedBg: "#5b21b6", bookedColor: "#fff" },
   sweetbox:   { label: "Sweetbox",   color: "#db2777", bg: "#fdf2f8", border: "#f9a8d4", bookedBg: "#9d174d", bookedColor: "#fff" },
-  couple:     { label: "Đôi",        color: "#dc2626", bg: "#fef2f2", border: "#fca5a5", bookedBg: "#991b1b", bookedColor: "#fff" },
+  couple:     { label: "Đôi",        color: "#92400e", bg: "#fef3c7", border: "#fcd34d", bookedBg: "#f59e0b", bookedColor: "#fff" }, // ✅ Vàng
   accessible: { label: "Tiếp cận",   color: "#0284c7", bg: "#f0f9ff", border: "#7dd3fc", bookedBg: "#0369a1", bookedColor: "#fff" },
 };
 

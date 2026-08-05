@@ -1,5 +1,3 @@
-// views/admin/quanlyphim/hooks/usePhim.js
-
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useToast } from "@chakra-ui/react";
 import MovieApi from "../../../../api/MovieApi";
@@ -27,32 +25,41 @@ export function usePhim() {
     }
   }, []);
 
-  // ✅ Lấy thống kê từ API getAll
+  // ✅ SỬA: Lấy thống kê từ API getAll - xử lý đúng genre object
   const fetchStats = useCallback(async () => {
     try {
       const response = await MovieApi.getAll();
       const data = response.data.data || response.data || [];
       
+      // ✅ Đảm bảo mỗi movie có genre object và genreName
+      const processedData = data.map(movie => ({
+        ...movie,
+        genre: movie.genre || null,
+        genreName: movie.genre?.Name || movie.GenreName || movie.genreName || "",
+        genreId: movie.genre?.GenreId || movie.GenreId || movie.genreId || "",
+      }));
+      
       setStats({
-        total: data.length,
-        playing: data.filter((m) => m.Status === "NowShowing" || m.status === "NowShowing").length,
-        upcoming: data.filter((m) => m.Status === "ComingSoon" || m.status === "ComingSoon").length,
-        ended: data.filter((m) => m.Status === "Ended" || m.status === "Ended").length,
+        total: processedData.length,
+        playing: processedData.filter((m) => m.Status === "NowShowing" || m.status === "NowShowing").length,
+        upcoming: processedData.filter((m) => m.Status === "ComingSoon" || m.status === "ComingSoon").length,
+        ended: processedData.filter((m) => m.Status === "Ended" || m.status === "Ended").length,
       });
     } catch (error) {
       console.error("Lỗi khi tải thống kê:", error);
     }
   }, []);
 
-  // ✅ Tạo params gửi lên server
+  // Tạo params gửi lên server
   const extraParams = useMemo(() => {
     const params = {};
     if (search) params.search = search;
     if (filterStatus && filterStatus !== "Tất cả") params.status = filterStatus;
+    if (filterGenre && filterGenre !== "Tất cả") params.genre = filterGenre;
     return params;
-  }, [search, filterStatus]);
+  }, [search, filterStatus, filterGenre]);
 
-  // ✅ Sử dụng useServerPagination
+  // Sử dụng useServerPagination
   const {
     data: movies,
     total,
@@ -61,7 +68,35 @@ export function usePhim() {
     loading,
     goToPage,
     reload,
+    prependData,
   } = useServerPagination(MovieApi.getPaged, { limit: PAGE_SIZE, extraParams });
+
+  // ✅ SỬA: Xử lý movies khi có dữ liệu mới - đảm bảo genre object
+  const processedMovies = useMemo(() => {
+    if (!movies || movies.length === 0) return [];
+    
+    return movies.map(movie => ({
+      ...movie,
+      genre: movie.genre || null,
+      genreName: movie.genre?.Name || movie.GenreName || movie.genreName || "",
+      genreId: movie.genre?.GenreId || movie.GenreId || movie.genreId || "",
+      // Đảm bảo các trường cần thiết
+      MovieId: movie.MovieId || movie.id,
+      Title: movie.Title || movie.title,
+      Status: movie.Status || movie.status,
+      PosterUrl: movie.PosterUrl || movie.posterUrl,
+      Duration: movie.Duration || movie.duration,
+      ReleaseDate: movie.ReleaseDate || movie.releaseDate,
+      Rated: movie.Rated || movie.rated,
+      Language: movie.Language || movie.language,
+      Description: movie.Description || movie.description,
+      TrailerUrl: movie.TrailerUrl || movie.trailerUrl,
+      CreatedAt: movie.CreatedAt || movie.createdAt,
+      UpdatedAt: movie.UpdatedAt || movie.updatedAt,
+      CreatedBy: movie.CreatedBy || movie.createdBy,
+      UpdatedBy: movie.UpdatedBy || movie.updatedBy,
+    }));
+  }, [movies]);
 
   // Lấy dữ liệu khi component mount
   useEffect(() => {
@@ -69,13 +104,13 @@ export function usePhim() {
     fetchStats();
   }, [fetchGenres, fetchStats]);
 
-  // ✅ Reload lại stats khi có thay đổi
+  // Reload lại stats khi có thay đổi
   const reloadAll = useCallback(() => {
     reload();
     fetchStats();
   }, [reload, fetchStats]);
 
-  // ✅ Sử dụng stats từ server
+  // Stats
   const counts = useMemo(() => ({
     total: stats.total,
     playing: stats.playing,
@@ -86,30 +121,32 @@ export function usePhim() {
   // Toggle hide
   const toggleHide = useCallback(async (movie) => {
     const id = movie.MovieId || movie.id;
-    const newStatus = movie.status === "NowShowing" ? "Ended" : "NowShowing";
+    const currentStatus = movie.Status || movie.status || "NowShowing";
+    const newStatus = currentStatus === "NowShowing" ? "Ended" : "NowShowing";
     
     try {
       const formData = new FormData();
       formData.append("_method", "PUT");
       
+      // Lấy dữ liệu đầy đủ của movie
       const movieData = await MovieApi.getById(id);
       const fullMovie = movieData.data.data || movieData.data;
       
       formData.append("UserId", fullMovie.UserId || localStorage.getItem("UserId") || "");
-      formData.append("Title", fullMovie.Title || movie.title || "");
-      formData.append("GenreId", fullMovie.GenreId || movie.genreId || "");
-      formData.append("Duration", fullMovie.Duration || movie.duration || "");
-      formData.append("ReleaseDate", fullMovie.ReleaseDate || movie.releaseDate || "");
+      formData.append("Title", fullMovie.Title || movie.Title || movie.title || "");
+      formData.append("GenreId", fullMovie.GenreId || movie.GenreId || movie.genreId || "");
+      formData.append("Duration", fullMovie.Duration || movie.Duration || movie.duration || "");
+      formData.append("ReleaseDate", fullMovie.ReleaseDate || movie.ReleaseDate || movie.releaseDate || "");
       formData.append("Status", newStatus);
-      formData.append("Rated", fullMovie.Rated || movie.rated || "P");
-      formData.append("Format", fullMovie.Format || movie.format || "2D");
-      formData.append("Language", fullMovie.Language || movie.language || "Vietsub");
+      formData.append("Rated", fullMovie.Rated || movie.Rated || movie.rated || "P");
+      formData.append("Format", fullMovie.Format || movie.Format || movie.format || "2D");
+      formData.append("Language", fullMovie.Language || movie.Language || movie.language || "Vietsub");
       
       await MovieApi.update(id, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      reloadAll(); // ✅ Reload cả dữ liệu và stats
+      reloadAll();
       
       toast({
         title: "Thành công",
@@ -134,7 +171,7 @@ export function usePhim() {
   const deleteMovie = useCallback(async (id) => {
     try {
       await MovieApi.delete(id);
-      reloadAll(); // ✅ Reload cả dữ liệu và stats
+      reloadAll();
       toast({
         title: "Thành công",
         description: "Phim đã được xóa",
@@ -154,7 +191,7 @@ export function usePhim() {
     }
   }, [reloadAll, toast]);
 
-  // Create
+  // ✅ CREATE - Nhận FormData và upload ảnh
   const createMovie = useCallback(async (formData) => {
     try {
       const data = new FormData();
@@ -195,21 +232,68 @@ export function usePhim() {
       }
       data.append("Language", languageValue);
       
+      // Xử lý ảnh - gửi file nếu có
       if (formData.PosterFile instanceof File) {
         data.append("PosterUrl", formData.PosterFile);
       }
 
-      await MovieApi.create(data, {
+      const response = await MovieApi.create(data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       
-      reloadAll(); // ✅ Reload cả dữ liệu và stats
+      const newMovie = response.data.data || response.data;
+      
+      // ✅ Tạo movie item với đầy đủ thông tin, bao gồm genre
+      const movieItem = {
+        ...newMovie,
+        id: newMovie.MovieId || newMovie.id,
+        MovieId: newMovie.MovieId || newMovie.id,
+        title: newMovie.Title || newMovie.title || "",
+        Title: newMovie.Title || newMovie.title || "",
+        status: newMovie.Status || newMovie.status || "NowShowing",
+        Status: newMovie.Status || newMovie.status || "NowShowing",
+        genre: newMovie.genre || null,
+        genreName: newMovie.genre?.Name || newMovie.GenreName || newMovie.genreName || "",
+        genreId: newMovie.genre?.GenreId || newMovie.GenreId || newMovie.genreId || "",
+        GenreId: newMovie.genre?.GenreId || newMovie.GenreId || newMovie.genreId || "",
+        duration: newMovie.Duration || newMovie.duration || "",
+        Duration: newMovie.Duration || newMovie.duration || "",
+        releaseDate: newMovie.ReleaseDate || newMovie.releaseDate || "",
+        ReleaseDate: newMovie.ReleaseDate || newMovie.releaseDate || "",
+        posterUrl: newMovie.PosterUrl || newMovie.posterUrl || "",
+        PosterUrl: newMovie.PosterUrl || newMovie.posterUrl || "",
+        description: newMovie.Description || newMovie.description || "",
+        Description: newMovie.Description || newMovie.description || "",
+        language: newMovie.Language || newMovie.language || "",
+        Language: newMovie.Language || newMovie.language || "",
+        rated: newMovie.Rated || newMovie.rated || "P",
+        Rated: newMovie.Rated || newMovie.rated || "P",
+        format: newMovie.Format || newMovie.format || "2D",
+        Format: newMovie.Format || newMovie.format || "2D",
+        director: newMovie.Director || newMovie.director || "",
+        Director: newMovie.Director || newMovie.director || "",
+        cast: newMovie.Cast || newMovie.cast || "",
+        Cast: newMovie.Cast || newMovie.cast || "",
+        country: newMovie.Country || newMovie.country || "",
+        Country: newMovie.Country || newMovie.country || "",
+        distributor: newMovie.Distributor || newMovie.distributor || "",
+        Distributor: newMovie.Distributor || newMovie.distributor || "",
+        trailerUrl: newMovie.TrailerUrl || newMovie.trailerUrl || "",
+        TrailerUrl: newMovie.TrailerUrl || newMovie.trailerUrl || "",
+        createdAt: new Date().toISOString(),
+        CreatedAt: new Date().toISOString(),
+        createdBy: userId,
+        CreatedBy: userId,
+      };
+      
+      prependData(movieItem);
+      await fetchStats();
       
       toast({
-        title: "Thành công",
-        description: "Thêm phim mới thành công",
+        title: "Thành công 🎉",
+        description: `Đã tạo phim "${movieItem.title}" thành công`,
         status: "success",
-        duration: 2000,
+        duration: 3000,
         isClosable: true,
       });
       return true;
@@ -224,9 +308,9 @@ export function usePhim() {
       });
       return false;
     }
-  }, [reloadAll, toast]);
+  }, [prependData, fetchStats, toast]);
 
-  // Update
+  // ✅ UPDATE - Nhận FormData và upload ảnh mới
   const updateMovie = useCallback(async (id, formData) => {
     try {
       const data = new FormData();
@@ -258,6 +342,7 @@ export function usePhim() {
       }
       data.append("Language", languageValue);
       
+      // Xử lý ảnh - gửi file nếu có
       if (formData.PosterFile instanceof File) {
         data.append("PosterUrl", formData.PosterFile);
       }
@@ -266,7 +351,7 @@ export function usePhim() {
         headers: { "Content-Type": "multipart/form-data" },
       });
       
-      reloadAll(); // ✅ Reload cả dữ liệu và stats
+      await reloadAll();
       
       toast({
         title: "Thành công",
@@ -290,7 +375,7 @@ export function usePhim() {
   }, [reloadAll, toast]);
 
   return {
-    movies,
+    movies: processedMovies, // ✅ Trả về movies đã xử lý
     genres,
     loading,
     total,
@@ -303,7 +388,7 @@ export function usePhim() {
     setFilterStatus,
     filterGenre,
     setFilterGenre,
-    counts, // ✅ Thống kê chính xác từ server
+    counts,
     fetchGenres,
     toggleHide,
     deleteMovie,

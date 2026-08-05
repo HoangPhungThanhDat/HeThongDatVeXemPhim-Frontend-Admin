@@ -2,12 +2,12 @@ import { useState, useRef } from "react";
 import {
   Box, Grid, Text, Button, Flex, SimpleGrid, FormControl,
   Input, Select, Textarea, Icon, useColorModeValue,
-  useBreakpointValue
+  useBreakpointValue, Spinner, Image
 } from "@chakra-ui/react";
 import {
   MdArrowBack, MdClose, MdCheckCircle, MdCalendarToday,
   MdAccessTime, MdCategory, MdPerson, MdPublic, MdImageSearch,
-  MdCloudUpload, MdSchedule
+  MdCloudUpload, MdSchedule, MdDelete
 } from "react-icons/md";
 import { FaFilm } from "react-icons/fa";
 import { SectionTitle } from "./shared/SectionTitle";
@@ -20,7 +20,8 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
   const isDark = useColorModeValue(false, true);
   const isMobile = useBreakpointValue({ base: true, lg: false });
   const fileInputRef = useRef(null);
-  const [uploading, setUploading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
 
   const empty = {
     title: "",
@@ -38,12 +39,11 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
     posterFile: null,
     trailer: "",
     description: "",
-    language: [], // Luôn là array
+    language: [],
   };
 
   const [form, setForm] = useState(() => {
     if (movie) {
-      // ✅ Đảm bảo language luôn là array
       let language = movie.Language || movie.language || [];
       if (!Array.isArray(language)) {
         language = language.split(",").filter(Boolean);
@@ -65,7 +65,7 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
         posterFile: null,
         trailer: movie.TrailerUrl || movie.trailerUrl || movie.trailer || "",
         description: movie.Description || movie.description || "",
-        language: language, // Luôn là array
+        language: language,
       };
     }
     return empty;
@@ -73,7 +73,6 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-  // ✅ SỬA LỖI: Đảm bảo current là array
   const handleLanguageChange = (lang) => {
     const current = Array.isArray(form.language) ? form.language : [];
     const newLangs = current.includes(lang)
@@ -82,6 +81,7 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
     set("language", newLangs);
   };
 
+  // Xử lý chọn file ảnh
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -96,27 +96,26 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
       return;
     }
     
-    setUploading(true);
-    
-    // ✅ Lưu file để gửi lên server
     set("posterFile", file);
     
-    // ✅ Đọc file để hiển thị preview
     const reader = new FileReader();
     reader.onload = (ev) => {
+      setImagePreview(ev.target.result);
       set("poster", ev.target.result);
-      setUploading(false);
-    };
-    reader.onerror = () => {
-      alert("Lỗi đọc file");
-      setUploading(false);
     };
     reader.readAsDataURL(file);
     e.target.value = "";
   };
 
-  const handleSubmit = () => {
-    // Kiểm tra các trường bắt buộc
+  // Xóa ảnh
+  const handleRemoveImage = () => {
+    set("posterFile", null);
+    set("poster", null);
+    setImagePreview(null);
+  };
+
+  // ✅ HÀM XỬ LÝ SUBMIT VỚI LOADING
+  const handleSubmit = async () => {
     if (!form.title.trim()) {
       alert("Vui lòng nhập tên phim");
       return;
@@ -137,46 +136,42 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
       return;
     }
 
-    // ✅ Đảm bảo language là array và có ít nhất 1 giá trị
-    let language = Array.isArray(form.language) ? form.language : [];
-    
-    // ✅ Nếu language rỗng, thêm giá trị mặc định
-    if (language.length === 0) {
-      language = ["Vietsub"];
+    setIsSubmitting(true);
+
+    try {
+      let language = Array.isArray(form.language) ? form.language : [];
+      if (language.length === 0) {
+        language = ["Vietsub"];
+      }
+      const languageString = language.join(",");
+      
+      const submitData = {
+        Title: form.title.trim(),
+        GenreId: form.genre,
+        Duration: parseInt(form.duration),
+        ReleaseDate: form.releaseDate,
+        Status: form.status || "NowShowing",
+        Rated: form.rated || "P",
+        Format: form.format || "2D",
+        Director: form.director || "",
+        Cast: form.cast || "",
+        Country: form.country || "",
+        Distributor: form.distributor || "",
+        TrailerUrl: form.trailer || "",
+        Description: form.description || "",
+        Language: languageString,
+      };
+
+      if (form.posterFile instanceof File) {
+        submitData.PosterFile = form.posterFile;
+      }
+
+      await onSave(submitData);
+    } catch (error) {
+      console.error("Lỗi khi submit form:", error);
+    } finally {
+      setIsSubmitting(false);
     }
-    
-    // ✅ Chuyển language thành string để gửi lên server
-    const languageString = language.join(",");
-    
-    const submitData = {
-      Title: form.title.trim(),
-      GenreId: form.genre,
-      Duration: parseInt(form.duration),
-      ReleaseDate: form.releaseDate,
-      Status: form.status || "NowShowing",
-      Rated: form.rated || "P",
-      Format: form.format || "2D",
-      Director: form.director || "",
-      Cast: form.cast || "",
-      Country: form.country || "",
-      Distributor: form.distributor || "",
-      TrailerUrl: form.trailer || "",
-      Description: form.description || "",
-      Language: languageString, // ✅ Luôn có giá trị
-    };
-
-    // ✅ Nếu có file poster mới
-    if (form.posterFile instanceof File) {
-      submitData.PosterFile = form.posterFile;
-    }
-
-    console.log("📤 DỮ LIỆU GỬI ĐI:");
-    console.log({
-      ...submitData,
-      PosterFile: submitData.PosterFile ? `[FILE] ${submitData.PosterFile.name}` : "Không có ảnh mới"
-    });
-
-    onSave(submitData);
   };
 
   const inputBg = useColorModeValue("#fafafa", "#0B1437");
@@ -196,7 +191,6 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
   const secondaryBtnBg = useColorModeValue("#f8fafc", "rgba(255,255,255,0.05)");
   const secondaryBtnBorder = useColorModeValue("#e2e8f0", "rgba(255,255,255,0.14)");
   const secondaryBtnColor = useColorModeValue("#475569", "#cbd5e1");
-  const secondaryBtnHoverBg = useColorModeValue("#f1f5f9", "rgba(255,255,255,0.1)");
 
   const inputStyle = {
     bg: inputBg,
@@ -242,6 +236,7 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
           color={secondaryBtnColor} borderRadius="10px" h="38px" fontSize="13px" fontWeight="600"
           border={`1.5px solid ${secondaryBtnBorder}`} _hover={{ bg: secondaryBtnBg }} flexShrink="0"
           onClick={onCancel}
+          isDisabled={isSubmitting}
         >
           Quay lại
         </Button>
@@ -268,7 +263,9 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
                 <Text sx={labelStyle}>Tên phim *</Text>
                 <FormControl>
                   <Input {...inputStyle} placeholder="VD: Avengers: Endgame"
-                    value={form.title} onChange={(e) => set("title", e.target.value)} />
+                    value={form.title} 
+                    isDisabled={isSubmitting}
+                    onChange={(e) => set("title", e.target.value)} />
                 </FormControl>
               </Box>
             </Grid>
@@ -277,6 +274,7 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
                 <Text sx={labelStyle}>Thể loại *</Text>
                 <FormControl>
                   <Select {...inputStyle} value={form.genre}
+                    isDisabled={isSubmitting}
                     onChange={(e) => set("genre", e.target.value)}>
                     <option value="">-- Chọn thể loại --</option>
                     {genres.map((g) => (
@@ -291,6 +289,7 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
                 <Text sx={labelStyle}>Phân loại tuổi *</Text>
                 <FormControl>
                   <Select {...inputStyle} value={form.rated}
+                    isDisabled={isSubmitting}
                     onChange={(e) => set("rated", e.target.value)}>
                     {Object.entries(AGE_MAP).map(([key, label]) => (
                       <option key={key} value={key}>{label}</option>
@@ -304,13 +303,16 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
                 <Text sx={labelStyle}>Thời lượng (phút) *</Text>
                 <FormControl>
                   <Input {...inputStyle} type="number" placeholder="VD: 120"
-                    value={form.duration} onChange={(e) => set("duration", e.target.value)} />
+                    value={form.duration} 
+                    isDisabled={isSubmitting}
+                    onChange={(e) => set("duration", e.target.value)} />
                 </FormControl>
               </Box>
               <Box>
                 <Text sx={labelStyle}>Ngày khởi chiếu *</Text>
                 <FormControl>
                   <Input {...inputStyle} type="date" value={form.releaseDate}
+                    isDisabled={isSubmitting}
                     onChange={(e) => set("releaseDate", e.target.value)} />
                 </FormControl>
               </Box>
@@ -318,6 +320,7 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
                 <Text sx={labelStyle}>Định dạng</Text>
                 <FormControl>
                   <Select {...inputStyle} value={form.format}
+                    isDisabled={isSubmitting}
                     onChange={(e) => set("format", e.target.value)}>
                     {FORMAT_OPTS.map(opt => (
                       <option key={opt} value={opt}>{opt}</option>
@@ -338,14 +341,18 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
                 <Text sx={labelStyle}>Đạo diễn</Text>
                 <FormControl>
                   <Input {...inputStyle} placeholder="VD: Christopher Nolan"
-                    value={form.director} onChange={(e) => set("director", e.target.value)} />
+                    value={form.director} 
+                    isDisabled={isSubmitting}
+                    onChange={(e) => set("director", e.target.value)} />
                 </FormControl>
               </Box>
               <Box>
                 <Text sx={labelStyle}>Quốc gia sản xuất</Text>
                 <FormControl>
                   <Input {...inputStyle} placeholder="VD: Mỹ"
-                    value={form.country} onChange={(e) => set("country", e.target.value)} />
+                    value={form.country} 
+                    isDisabled={isSubmitting}
+                    onChange={(e) => set("country", e.target.value)} />
                 </FormControl>
               </Box>
             </Grid>
@@ -353,14 +360,18 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
               <Text sx={labelStyle}>Diễn viên chính</Text>
               <FormControl>
                 <Input {...inputStyle} placeholder="VD: Tom Hanks, Cate Blanchett (phân cách bằng dấu phẩy)"
-                  value={form.cast} onChange={(e) => set("cast", e.target.value)} />
+                  value={form.cast} 
+                  isDisabled={isSubmitting}
+                  onChange={(e) => set("cast", e.target.value)} />
               </FormControl>
             </Box>
             <Box>
               <Text sx={labelStyle}>Nhà phát hành</Text>
               <FormControl>
                 <Input {...inputStyle} placeholder="VD: Marvel Studios"
-                  value={form.distributor} onChange={(e) => set("distributor", e.target.value)} />
+                  value={form.distributor} 
+                  isDisabled={isSubmitting}
+                  onChange={(e) => set("distributor", e.target.value)} />
               </FormControl>
             </Box>
           </Box>
@@ -375,6 +386,7 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
                 <Text sx={labelStyle}>Trạng thái *</Text>
                 <FormControl>
                   <Select {...inputStyle} value={form.status}
+                    isDisabled={isSubmitting}
                     onChange={(e) => set("status", e.target.value)}>
                     {STATUS_OPTS.map(opt => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -386,7 +398,9 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
                 <Text sx={labelStyle}>Link trailer (YouTube)</Text>
                 <FormControl>
                   <Input {...inputStyle} placeholder="https://youtu.be/..."
-                    value={form.trailer} onChange={(e) => set("trailer", e.target.value)} />
+                    value={form.trailer} 
+                    isDisabled={isSubmitting}
+                    onChange={(e) => set("trailer", e.target.value)} />
                 </FormControl>
               </Box>
             </Grid>
@@ -394,14 +408,15 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
               <Text sx={labelStyle}>Ngôn ngữ</Text>
               <Flex gap="16px" flexWrap="wrap">
                 {LANGUAGE_OPTS.map(lang => (
-                  <label key={lang} style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
+                  <label key={lang} style={{ display: "flex", alignItems: "center", gap: "8px", cursor: isSubmitting ? "not-allowed" : "pointer" }}>
                     <input
                       type="checkbox"
                       checked={(form.language || []).includes(lang)}
                       onChange={() => handleLanguageChange(lang)}
-                      style={{ width: "18px", height: "18px", cursor: "pointer" }}
+                      disabled={isSubmitting}
+                      style={{ width: "18px", height: "18px", cursor: isSubmitting ? "not-allowed" : "pointer" }}
                     />
-                    <span>{lang}</span>
+                    <span style={{ opacity: isSubmitting ? 0.6 : 1 }}>{lang}</span>
                   </label>
                 ))}
               </Flex>
@@ -417,7 +432,9 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
                   _hover={{ border: "1.5px solid #f97316" }}
                   transition="all 0.2s"
                   rows={4} placeholder="Nhập mô tả nội dung phim..."
-                  value={form.description} onChange={(e) => set("description", e.target.value)}
+                  value={form.description} 
+                  isDisabled={isSubmitting}
+                  onChange={(e) => set("description", e.target.value)}
                 />
               </FormControl>
             </Box>
@@ -434,8 +451,36 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
             <Text sx={labelStyle} mb="7px">URL poster (dọc)</Text>
             <FormControl mb="10px">
               <Input {...inputStyle} placeholder="https://..."
-                value={form.poster} onChange={(e) => set("poster", e.target.value)} />
+                value={form.poster} 
+                isDisabled={isSubmitting}
+                onChange={(e) => set("poster", e.target.value)} />
             </FormControl>
+
+            {/* Hiển thị ảnh hiện tại */}
+            {(form.poster || imagePreview) && (
+              <Box position="relative" mb="12px" borderRadius="10px" overflow="hidden" border={`1px solid ${cardBorder}`}>
+                <Image 
+                  src={imagePreview || form.poster} 
+                  alt="Poster preview"
+                  objectFit="cover"
+                  w="100%"
+                  h="250px"
+                  fallbackSrc="https://via.placeholder.com/600x900?text=Không+có+ảnh"
+                />
+                <Button
+                  position="absolute"
+                  top="8px"
+                  right="8px"
+                  size="sm"
+                  colorScheme="red"
+                  borderRadius="full"
+                  onClick={handleRemoveImage}
+                  isDisabled={isSubmitting}
+                >
+                  <Icon as={MdDelete} />
+                </Button>
+              </Box>
+            )}
 
             <input
               ref={fileInputRef}
@@ -443,6 +488,7 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
               accept="image/*"
               style={{ display: "none" }}
               onChange={handleFileSelect}
+              disabled={isSubmitting}
             />
             <Button
               w="100%" h="40px" borderRadius="9px"
@@ -450,33 +496,17 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
               fontSize="12.5px" fontWeight="600"
               _hover={{ bg: "#fff7ed", color: "#f97316", border: "1.5px solid #fed7aa" }}
               transition="all 0.2s"
-              leftIcon={<Icon as={uploading ? MdSchedule : MdCloudUpload} boxSize="16px" />}
-              isLoading={uploading} loadingText="Đang tải..."
+              leftIcon={<Icon as={MdCloudUpload} boxSize="16px" />}
               onClick={() => fileInputRef.current?.click()}
+              isDisabled={isSubmitting}
               mb="12px"
             >
-              Tải ảnh lên từ máy tính
+              {form.posterFile ? 'Thay đổi ảnh' : 'Tải ảnh lên từ máy tính'}
             </Button>
 
-            {form.poster ? (
-              <Box borderRadius="10px" overflow="hidden" border={`1px solid ${cardBorder}`}>
-                <img src={form.poster} alt="poster preview"
-                  style={{ width: "100%", display: "block", maxHeight: "300px", objectFit: "cover" }}
-                  onError={(e) => { e.target.style.display = "none"; }} />
-                {form.posterFile && (
-                  <Box p="6px 10px" bg="rgba(16,185,129,0.15)" borderTop={`1px solid ${cardBorder}`}>
-                    <Flex align="center" gap="6px">
-                      <Icon as={MdCheckCircle} boxSize="12px" color="#10b981" />
-                      <Text fontSize="11px" color="#10b981" fontWeight="600">
-                        Đã tải lên: {form.posterFile.name}
-                      </Text>
-                    </Flex>
-                  </Box>
-                )}
-              </Box>
-            ) : (
+            {!form.poster && !imagePreview && (
               <Flex direction="column" align="center" justify="center"
-                h="160px" borderRadius="10px" bg={dashedBg} border={`2px dashed ${dashedBorder}`}
+                h="100px" borderRadius="10px" bg={dashedBg} border={`2px dashed ${dashedBorder}`}
               >
                 <Icon as={MdImageSearch} boxSize="28px" color={textFaint} mb="6px" />
                 <Text fontSize="12px" color={textMuted}>Nhập URL hoặc tải ảnh lên</Text>
@@ -524,7 +554,7 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
         </Flex>
       </Grid>
 
-      {/* Save bar */}
+      {/* Save bar với loading state */}
       <Box {...cardStyle} borderRadius="14px" border={`1px solid ${cardBorder}`}
         boxShadow="0 1px 4px rgba(0,0,0,0.04)"
         p={{ base: "14px 16px", md: "16px 20px" }} mt="16px"
@@ -541,6 +571,7 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
             border={`1.5px solid ${secondaryBtnBorder}`} _hover={{ bg: secondaryBtnBg }} transition="all 0.2s"
             leftIcon={<Icon as={MdClose} />}
             onClick={onCancel}
+            isDisabled={isSubmitting}
           >
             Hủy bỏ
           </Button>
@@ -549,12 +580,14 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
             fontWeight="700" fontSize="13px"
             bg="linear-gradient(135deg, #f97316 0%, #fb923c 60%, #fbbf24 100%)"
             color="#ffffff" boxShadow="0 4px 16px rgba(249,115,22,0.35)"
-            _hover={{ boxShadow: "0 8px 24px rgba(249,115,22,0.45)", transform: "translateY(-1px)" }}
+            _hover={{ boxShadow: isSubmitting ? "0 4px 16px rgba(249,115,22,0.35)" : "0 8px 24px rgba(249,115,22,0.45)", transform: isSubmitting ? "none" : "translateY(-1px)" }}
             _active={{ transform: "translateY(0)" }} transition="all 0.2s"
-            leftIcon={<Icon as={MdCheckCircle} />}
+            leftIcon={isSubmitting ? <Spinner size="sm" color="white" /> : <Icon as={MdCheckCircle} />}
             onClick={handleSubmit}
+            isDisabled={isSubmitting}
+            opacity={isSubmitting ? 0.8 : 1}
           >
-            {isAdd ? "Thêm phim" : "Lưu thay đổi"}
+            {isSubmitting ? "Đang xử lý..." : (isAdd ? "Thêm phim" : "Lưu thay đổi")}
           </Button>
         </Flex>
       </Box>

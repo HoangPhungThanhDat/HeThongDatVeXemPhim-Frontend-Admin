@@ -1,9 +1,10 @@
-// index.jsx
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+// src/views/admin/quanlyghe/index.jsx
+
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
   Box, Flex, Text, Grid, SimpleGrid, Button, Select,
   Icon, useColorMode, useDisclosure, Spinner,
-  Input, InputGroup, InputLeftElement
+  Input, InputGroup, InputLeftElement, useToast
 } from "@chakra-ui/react";
 import {
   MdChair, MdMeetingRoom, MdTheaters, MdInfo, MdLayers,
@@ -18,8 +19,7 @@ import RoomCard from "./components/RoomCard";
 import SeatMapView from "./components/SeatMapView";
 import { ROW_LABELS } from "./constants";
 import { useSeatManagement } from "./hooks/useSeatManagement";
-import RoomApi from "../../../api/RoomApi";
-import CinemasApi from "../../../api/CinemasApi";
+import RoomSeatApi from "../../../api/RoomSeatApi";
 
 // Màu sắc cho chế độ tối - tông xanh
 const DARK_THEME = {
@@ -43,6 +43,7 @@ export default function QuanLyGhe() {
   const isDark = colorMode === "dark";
   const colors = getSeatColors(isDark);
   const navigate = useNavigate();
+  const toast = useToast();
   
   // Dark mode colors
   const accentColor = isDark ? DARK_THEME.accent : "#f97316";
@@ -64,6 +65,12 @@ export default function QuanLyGhe() {
   const [loading, setLoading] = useState(true);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [isLoadingRooms, setIsLoadingRooms] = useState(false);
+  const [isLoadingSeats, setIsLoadingSeats] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // ✅ Ref để tránh refresh nhiều lần
+  const refreshTimeoutRef = useRef(null);
+  const isRefreshingRef = useRef(false);
 
   // Modal controls
   const editSeatModal = useDisclosure();
@@ -76,88 +83,126 @@ export default function QuanLyGhe() {
     message: ""
   });
 
-  // Load cinemas from API
-  useEffect(() => {
-    loadCinemas();
-  }, []);
-
-  const loadCinemas = async () => {
+  // ✅ Load dữ liệu từ API mới
+  const loadCinemas = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await CinemasApi.getAll();
-      const cinemasData = res.data.data || res.data || [];
+      const res = await RoomSeatApi.getCinemas();
+      const cinemasData = res?.data?.data || res?.data || [];
       setCinemas(cinemasData);
       
       if (cinemasData.length > 0) {
         setSelectedCinema(cinemasData[0]);
-        await loadRoomsByCinema(cinemasData[0].CinemaId);
+        await loadRoomsByCinema(cinemasData[0].id);
       }
     } catch (err) {
-      console.error("Lỗi load rạp chiếu:", err);
+      console.error("❌ Lỗi load rạp chiếu:", err);
+      toast({
+        title: "Lỗi tải rạp",
+        description: "Không thể tải danh sách rạp chiếu",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
-  const loadRoomsByCinema = async (cinemaId) => {
+  const loadRoomsByCinema = useCallback(async (cinemaId) => {
+    if (!cinemaId) {
+      setRooms([]);
+      return;
+    }
+    
     try {
       setIsLoadingRooms(true);
-      const res = await RoomApi.getAll();
-      const roomsData = res.data.data || res.data || [];
+      const res = await RoomSeatApi.getRooms(cinemaId);
+      const roomsData = res?.data?.data || res?.data || [];
       
-      const formattedRooms = roomsData
-        .filter(room => room.CinemaId === cinemaId)
-        .map(room => ({
-          id: room.RoomId,
-          name: room.Name,
-          type: room.RoomType?.toLowerCase() || "standard",
-          rows: room.Rows || 8,
-          cols: room.Columns || 12,
-          status: room.Status?.toLowerCase() === "active" ? "active" : "maintenance",
-          capacity: room.Capacity || 0,
-          cinemaId: room.CinemaId,
-        }));
+      console.log("✅ Danh sách phòng:", roomsData);
+      
+      const formattedRooms = roomsData.map(room => ({
+        id: room.id,
+        name: room.name,
+        type: room.room_type?.toLowerCase() || "standard",
+        rows: 8,
+        cols: 12,
+        status: room.status?.toLowerCase() === "active" ? "active" : "maintenance",
+        capacity: room.seat_count || 0,
+        cinemaId: room.cinema_id,
+        stats: room.stats || { total: 0, available: 0, booked: 0 }
+      }));
+      
       setRooms(formattedRooms);
     } catch (err) {
-      console.error("Lỗi load phòng:", err);
+      console.error("❌ Lỗi load phòng:", err);
+      toast({
+        title: "Lỗi tải phòng",
+        description: "Không thể tải danh sách phòng chiếu",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      setRooms([]);
     } finally {
       setIsLoadingRooms(false);
     }
-  };
+  }, [toast]);
 
+  // ✅ Sử dụng hook useSeatManagement
   const seatManagement = useSeatManagement(
     selectedRoom?.id || null,
     selectedRoom || null
   );
 
-  const handleCinemaChange = async (cinema) => {
+  // ✅ Khởi tạo dữ liệu
+  useEffect(() => {
+    loadCinemas();
+  }, [loadCinemas]);
+
+  // ✅ Xử lý chọn rạp
+  const handleCinemaChange = useCallback(async (cinema) => {
     setSelectedCinema(cinema);
-    await loadRoomsByCinema(cinema.CinemaId);
-  };
-
-  const handleViewRoom = (room) => {
-    setSelectedRoom(room);
-    setIsEditMode(false);
-    setEditingRoom(null);
-  };
-
-  const handleEditMode = (room) => {
-    setEditingRoom(room);
-    setIsEditMode(true);
-    setSelectedRoom(room);
-  };
-
-  const handleDeleteDialog = (onConfirm, title, message) => {
-    setDeleteDialogConfig({ onConfirm, title, message });
-    deleteDialog.onOpen();
-  };
-
-  const handleBack = () => {
     setSelectedRoom(null);
     setIsEditMode(false);
     setEditingRoom(null);
-  };
+    await loadRoomsByCinema(cinema.id);
+  }, [loadRoomsByCinema]);
 
+  // ✅ Xử lý xem phòng
+  const handleViewRoom = useCallback((room) => {
+    setSelectedRoom(room);
+    setIsEditMode(false);
+    setEditingRoom(null);
+    seatManagement.loadSeats(room.id, true);
+  }, [seatManagement]);
+
+  // ✅ Xử lý chỉnh sửa phòng
+  const handleEditMode = useCallback((room) => {
+    setEditingRoom(room);
+    setIsEditMode(true);
+    setSelectedRoom(room);
+    seatManagement.loadSeats(room.id, true);
+  }, [seatManagement]);
+
+  // ✅ Xử lý quay lại
+  const handleBack = useCallback(() => {
+    if (refreshTimeoutRef.current) {
+      clearTimeout(refreshTimeoutRef.current);
+      refreshTimeoutRef.current = null;
+    }
+    isRefreshingRef.current = false;
+    
+    setSelectedRoom(null);
+    setIsEditMode(false);
+    setEditingRoom(null);
+    if (selectedCinema) {
+      loadRoomsByCinema(selectedCinema.id);
+    }
+  }, [selectedCinema, loadRoomsByCinema]);
+
+  // ✅ Xử lý lọc danh sách phòng
   const filteredRooms = useMemo(() => {
     return rooms.filter(room => {
       const matchKeyword = room.name.toLowerCase().includes(searchKeyword.toLowerCase());
@@ -167,110 +212,244 @@ export default function QuanLyGhe() {
     });
   }, [rooms, searchKeyword, filterType]);
 
-  useEffect(() => {
-    console.log("📊 editSeatModal state:", {
-      isOpen: editSeatModal.isOpen,
-      onOpen: editSeatModal.onOpen,
-      onClose: editSeatModal.onClose
-    });
-  }, [editSeatModal.isOpen]);
+  // ✅ Hàm refresh seats - CHỈ GỌI 1 LẦN
+  const refreshSeats = useCallback(() => {
+    if (isRefreshingRef.current || refreshTimeoutRef.current) {
+      console.log("⏳ Đang refresh, bỏ qua...");
+      return;
+    }
+    
+    isRefreshingRef.current = true;
+    setIsRefreshing(true);
+    
+    console.log("🔄 Refresh seats cho phòng:", selectedRoom?.id);
+    
+    seatManagement.loadSeats(selectedRoom?.id, true)
+      .finally(() => {
+        refreshTimeoutRef.current = setTimeout(() => {
+          isRefreshingRef.current = false;
+          setIsRefreshing(false);
+          refreshTimeoutRef.current = null;
+          console.log("✅ Refresh hoàn tất");
+        }, 500);
+      });
+  }, [selectedRoom, seatManagement]);
 
-  useEffect(() => {
-    console.log("📊 selectedSeat changed:", seatManagement.selectedSeat);
-  }, [seatManagement.selectedSeat]);
+  // ✅ Hàm xử lý setDeleteTarget - QUAN TRỌNG
+  const handleSetDeleteTarget = useCallback((target) => {
+    console.log("🗑️ Delete target:", target);
+    
+    if (target.type === "seat") {
+      deleteDialog.onOpen();
+      setDeleteDialogConfig({
+        title: "Xóa ghế",
+        message: `Bạn có chắc chắn muốn xóa ghế ${target.Row || target.row}${target.Number || target.number}?`,
+        onConfirm: async () => {
+          setIsLoadingSeats(true);
+          try {
+            const result = await seatManagement.handleDeleteSeat(target.SeatId || target.id);
+            if (result) {
+              console.log("✅ Xóa ghế thành công, đang refresh...");
+              setTimeout(() => {
+                refreshSeats();
+              }, 500);
+            }
+            deleteDialog.onClose();
+          } catch (error) {
+            console.error("❌ Lỗi xóa ghế:", error);
+            toast({
+              title: "❌ Lỗi xóa ghế",
+              description: error.message || "Vui lòng thử lại",
+              status: "error",
+              duration: 3000,
+              isClosable: true,
+            });
+          } finally {
+            setIsLoadingSeats(false);
+          }
+        }
+      });
+    } else if (target.type === "row") {
+      deleteDialog.onOpen();
+      setDeleteDialogConfig({
+        title: "Xóa hàng",
+        message: `Bạn có chắc chắn muốn xóa hàng ${ROW_LABELS[target.row]}?`,
+        onConfirm: async () => {
+          setIsLoadingSeats(true);
+          try {
+            await seatManagement.handleDeleteRow(ROW_LABELS[target.row]);
+            setTimeout(() => {
+              refreshSeats();
+            }, 500);
+            deleteDialog.onClose();
+          } catch (error) {
+            console.error("❌ Lỗi xóa hàng:", error);
+          } finally {
+            setIsLoadingSeats(false);
+          }
+        }
+      });
+    } else if (target.type === "col") {
+      deleteDialog.onOpen();
+      setDeleteDialogConfig({
+        title: "Xóa cột",
+        message: `Bạn có chắc chắn muốn xóa cột ${(target.col || 0) + 1}?`,
+        onConfirm: async () => {
+          setIsLoadingSeats(true);
+          try {
+            await seatManagement.handleDeleteCol((target.col || 0) + 1);
+            setTimeout(() => {
+              refreshSeats();
+            }, 500);
+            deleteDialog.onClose();
+          } catch (error) {
+            console.error("❌ Lỗi xóa cột:", error);
+          } finally {
+            setIsLoadingSeats(false);
+          }
+        }
+      });
+    }
+  }, [seatManagement, refreshSeats, toast, deleteDialog]);
 
-  useEffect(() => {
-    console.log("📊 seatsData in index:", {
-      length: seatManagement.seatsData?.length,
-      firstRowLength: seatManagement.seatsData?.[0]?.length,
-      totalSeats: seatManagement.seatsData?.flat()?.length,
-      loading: seatManagement.loading,
-      isInitialized: seatManagement.isInitialized
-    });
-  }, [seatManagement.seatsData, seatManagement.loading, seatManagement.isInitialized]);
-
-  const seatMapKey = useMemo(() => {
-    return `${selectedRoom?.id || ''}-${seatManagement.seatsData?.length || 0}-${seatManagement.isInitialized ? 'ready' : 'loading'}-${Date.now()}`;
-  }, [selectedRoom?.id, seatManagement.seatsData?.length, seatManagement.isInitialized]);
-
+  // ✅ Nếu đã chọn phòng -> hiển thị SeatMapView
   if (selectedRoom) {
+    const showLoading = isLoadingSeats || isRefreshing || seatManagement.loading;
+    
     return (
       <Box pt={{ base: "100px", md: "80px" }} bg={isDark ? DARK_THEME.bg : "#f8fafc"} minH="100vh" px="6px">
-        <SeatMapView
-          key={seatMapKey}
-          room={selectedRoom}
-          cinemaName={selectedCinema?.Name || ""}
-          onBack={handleBack}
-          onEditMode={handleEditMode}
-          isEditMode={isEditMode}
-          seatsData={seatManagement.seatsData}
-          scale={seatManagement.scale}
-          filter={seatManagement.filter}
-          stats={seatManagement.stats}
-          selectedSeat={seatManagement.selectedSeat}
-          loading={seatManagement.loading}
-          editSeatModal={{
-            isOpen: editSeatModal.isOpen,
-            onOpen: editSeatModal.onOpen,
-            onClose: editSeatModal.onClose
-          }}
-          addRowModal={{
-            isOpen: addRowModal.isOpen,
-            onOpen: addRowModal.onOpen,
-            onClose: addRowModal.onClose
-          }}
-          addColModal={{
-            isOpen: addColModal.isOpen,
-            onOpen: addColModal.onOpen,
-            onClose: addColModal.onClose
-          }}
-          deleteDialog={{
-            isOpen: deleteDialog.isOpen,
-            onClose: deleteDialog.onClose,
-            onConfirm: deleteDialogConfig.onConfirm,
-            title: deleteDialogConfig.title,
-            message: deleteDialogConfig.message
-          }}
-          handleSeatEdit={(seat) => {
-            console.log("📝 handleSeatEdit called in index:", seat);
-            seatManagement.handleSeatEdit(seat);
-            console.log("📝 Opening edit modal...");
-            editSeatModal.onOpen();
-          }}
-          handleSaveSeat={async (updatedSeat) => {
-            console.log("💾 Saving seat:", updatedSeat);
-            await seatManagement.handleSaveSeat(updatedSeat);
-          }}
-          handleAddRows={seatManagement.handleAddRows}
-          handleAddCols={seatManagement.handleAddCols}
-          handleDeleteSeat={seatManagement.handleDeleteSeat}
-          handleResetSeats={seatManagement.handleResetSeats}
-          zoomIn={seatManagement.zoomIn}
-          zoomOut={seatManagement.zoomOut}
-          setFilter={seatManagement.setFilter}
-          setDeleteTarget={(target) => {
-            console.log("🗑️ Delete target:", target);
-            if (target.type === "seat") {
-              handleDeleteDialog(
-                () => seatManagement.handleDeleteSeat(target),
-                "Xóa ghế",
-                `Bạn có chắc chắn muốn xóa ghế ${target.id || target.SeatId}?`
-              );
-            } else if (target.type === "row") {
-              handleDeleteDialog(
-                () => seatManagement.handleDeleteRow(target.row),
-                "Xóa hàng",
-                `Bạn có chắc chắn muốn xóa hàng ${ROW_LABELS[target.row]}?`
-              );
-            } else if (target.type === "col") {
-              handleDeleteDialog(
-                () => seatManagement.handleDeleteCol(target.col),
-                "Xóa cột",
-                `Bạn có chắc chắn muốn xóa cột ${(target.col || 0) + 1}?`
-              );
-            }
-          }}
-        />
+        {showLoading && seatManagement.seatsData.length === 0 ? (
+          <Flex align="center" justify="center" h="400px">
+            <Spinner size="xl" color={accentColor} thickness="4px" />
+            <Text ml="16px" fontSize="16px" color={isDark ? DARK_THEME.textSecondary : "#64748b"}>
+              Đang tải dữ liệu ghế...
+            </Text>
+          </Flex>
+        ) : (
+          <SeatMapView
+            key={`seatmap-${selectedRoom.id}`}
+            room={selectedRoom}
+            cinemaName={selectedCinema?.name || ""}
+            onBack={handleBack}
+            onEditMode={handleEditMode}
+            isEditMode={isEditMode}
+            seatsData={seatManagement.seatsData}
+            scale={seatManagement.scale}
+            filter={seatManagement.filter}
+            stats={seatManagement.stats}
+            selectedSeat={seatManagement.selectedSeat}
+            loading={showLoading}
+            editSeatModal={{
+              isOpen: editSeatModal.isOpen,
+              onOpen: editSeatModal.onOpen,
+              onClose: editSeatModal.onClose
+            }}
+            addRowModal={{
+              isOpen: addRowModal.isOpen,
+              onOpen: addRowModal.onOpen,
+              onClose: addRowModal.onClose
+            }}
+            addColModal={{
+              isOpen: addColModal.isOpen,
+              onOpen: addColModal.onOpen,
+              onClose: addColModal.onClose
+            }}
+            deleteDialog={deleteDialog}
+            deleteDialogConfig={deleteDialogConfig}
+            handleSeatEdit={(seat) => {
+              console.log("📝 handleSeatEdit called in index:", seat);
+              seatManagement.handleSeatEdit(seat);
+              editSeatModal.onOpen();
+            }}
+            handleSaveSeat={async (updatedSeat) => {
+              console.log("💾 Saving seat:", updatedSeat);
+              setIsLoadingSeats(true);
+              try {
+                await seatManagement.handleSaveSeat(updatedSeat);
+                setTimeout(() => {
+                  refreshSeats();
+                }, 300);
+              } catch (error) {
+                console.error("❌ Lỗi save seat:", error);
+              } finally {
+                setIsLoadingSeats(false);
+                editSeatModal.onClose();
+              }
+            }}
+            handleAddRows={async (count, position) => {
+              setIsLoadingSeats(true);
+              try {
+                await seatManagement.handleAddRows(count, position);
+                setTimeout(() => {
+                  refreshSeats();
+                }, 300);
+              } finally {
+                setIsLoadingSeats(false);
+                addRowModal.onClose();
+              }
+            }}
+            handleAddCols={async (count, position) => {
+              setIsLoadingSeats(true);
+              try {
+                await seatManagement.handleAddCols(count, position);
+                setTimeout(() => {
+                  refreshSeats();
+                }, 300);
+              } finally {
+                setIsLoadingSeats(false);
+                addColModal.onClose();
+              }
+            }}
+            handleDeleteSeat={async (seatId) => {
+              setIsLoadingSeats(true);
+              try {
+                await seatManagement.handleDeleteSeat(seatId);
+                setTimeout(() => {
+                  refreshSeats();
+                }, 300);
+              } finally {
+                setIsLoadingSeats(false);
+              }
+            }}
+            handleResetSeats={async () => {
+              setIsLoadingSeats(true);
+              try {
+                await seatManagement.handleResetSeats();
+                setTimeout(() => {
+                  refreshSeats();
+                }, 300);
+              } finally {
+                setIsLoadingSeats(false);
+              }
+            }}
+            handleDeleteRow={async (row) => {
+              setIsLoadingSeats(true);
+              try {
+                await seatManagement.handleDeleteRow(row);
+                setTimeout(() => {
+                  refreshSeats();
+                }, 300);
+              } finally {
+                setIsLoadingSeats(false);
+              }
+            }}
+            handleDeleteCol={async (col) => {
+              setIsLoadingSeats(true);
+              try {
+                await seatManagement.handleDeleteCol(col);
+                setTimeout(() => {
+                  refreshSeats();
+                }, 300);
+              } finally {
+                setIsLoadingSeats(false);
+              }
+            }}
+            zoomIn={seatManagement.zoomIn}
+            zoomOut={seatManagement.zoomOut}
+            setFilter={seatManagement.setFilter}
+            setDeleteTarget={handleSetDeleteTarget}
+          />
+        )}
       </Box>
     );
   }
@@ -311,7 +490,7 @@ export default function QuanLyGhe() {
               <Icon as={MdSearch} color={isDark ? DARK_THEME.labelColor : "#94a3b8"} boxSize="14px" />
             </InputLeftElement>
             <Input
-              placeholder="Search..."
+              placeholder="Tìm phòng..."
               value={searchKeyword}
               onChange={(e) => setSearchKeyword(e.target.value)}
               bg={isDark ? DARK_THEME.inputBg : "#f8fafc"}
@@ -335,12 +514,7 @@ export default function QuanLyGhe() {
             border={`1px solid ${isDark ? DARK_THEME.border : "#e2e8f0"}`}
             color={isDark ? DARK_THEME.text : "#0f172a"}
             _hover={{ bg: isDark ? DARK_THEME.hoverBg : "#f1f5f9" }}
-            onClick={() => {
-              loadCinemas();
-              if (selectedCinema) {
-                loadRoomsByCinema(selectedCinema.CinemaId);
-              }
-            }}
+            onClick={loadCinemas}
             isLoading={loading}
           >
             Làm mới
@@ -371,15 +545,15 @@ export default function QuanLyGhe() {
         ) : (
           <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap="10px">
             {cinemas.map((cinema) => (
-              <Box key={cinema.CinemaId}
+              <Box key={cinema.id}
                 p="12px 14px" borderRadius="12px" cursor="pointer"
-                border={selectedCinema?.CinemaId === cinema.CinemaId 
+                border={selectedCinema?.id === cinema.id 
                   ? `2px solid ${isDark ? DARK_THEME.accent : "#f97316"}` 
                   : `1.5px solid ${isDark ? DARK_THEME.border : "#e2e8f0"}`}
-                bg={selectedCinema?.CinemaId === cinema.CinemaId 
+                bg={selectedCinema?.id === cinema.id 
                   ? (isDark ? DARK_THEME.hoverBg : "#fff7ed") 
                   : (isDark ? DARK_THEME.inputBg : "#fafbfc")}
-                boxShadow={selectedCinema?.CinemaId === cinema.CinemaId 
+                boxShadow={selectedCinema?.id === cinema.id 
                   ? `0 2px 12px ${isDark ? DARK_THEME.accentShadow : "rgba(249,115,22,0.18)"}` 
                   : "none"}
                 _hover={{ 
@@ -391,25 +565,25 @@ export default function QuanLyGhe() {
               >
                 <Flex align="center" gap="10px">
                   <Box w="32px" h="32px" borderRadius="9px" flexShrink="0"
-                    bg={selectedCinema?.CinemaId === cinema.CinemaId 
+                    bg={selectedCinema?.id === cinema.id 
                       ? gradientBg 
                       : (isDark ? DARK_THEME.inputBg : "#f1f5f9")}
                     display="flex" alignItems="center" justifyContent="center"
                   >
                     <Icon as={MdTheaters} boxSize="14px"
-                      color={selectedCinema?.CinemaId === cinema.CinemaId 
+                      color={selectedCinema?.id === cinema.id 
                         ? "white" 
                         : (isDark ? DARK_THEME.labelColor : "#94a3b8")} />
                   </Box>
                   <Box flex="1" minW="0">
                     <Text fontSize="12.5px" fontWeight="800" color={isDark ? DARK_THEME.text : "#0f172a"} noOfLines={1}>
-                      {cinema.Name}
+                      {cinema.name}
                     </Text>
                     <Text fontSize="10.5px" color={isDark ? DARK_THEME.labelColor : "#94a3b8"} noOfLines={1}>
-                      {cinema.Address || "Đang cập nhật địa chỉ"}
+                      {cinema.city || "Đang cập nhật"}
                     </Text>
                   </Box>
-                  {selectedCinema?.CinemaId === cinema.CinemaId && (
+                  {selectedCinema?.id === cinema.id && (
                     <Box w="8px" h="8px" borderRadius="full" bg={isDark ? DARK_THEME.accent : "#f97316"} flexShrink="0"
                       sx={{ animation: `${pulse} 1.8s ease infinite` }} />
                   )}
@@ -527,7 +701,10 @@ export default function QuanLyGhe() {
           ) : (
             <Grid templateColumns={{ base: "1fr", md: "1fr 1fr", xl: "1fr 1fr 1fr" }} gap="12px">
               {filteredRooms.map((room, i) => (
-                <RoomCard key={room.id} room={room} index={i}
+                <RoomCard 
+                  key={room.id} 
+                  room={room} 
+                  index={i}
                   onView={handleViewRoom}
                   onEditMode={handleEditMode}
                   isDark={isDark}

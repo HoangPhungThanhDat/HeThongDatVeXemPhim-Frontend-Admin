@@ -6,11 +6,21 @@ import {
 } from "@chakra-ui/react";
 import { MdReplay, MdLock, MdPerson, MdWarning, MdCheckCircle, MdInfoOutline } from "react-icons/md";
 import { FaTicketAlt, FaUserClock } from "react-icons/fa";
-import { SEAT_STATUS, ORANGE } from "../constants";
+import { SEAT_STATUS, SEAT_STATUS_DEFAULT, ORANGE } from "../constants";
 import { SectionTitle } from "./shared/SectionTitle";
 import { pulseDot } from "./shared/animations";
 
-export function SeatInfoPanel({ selectedSeat, onReset, theme }) {
+export function SeatInfoPanel({ selectedSeat, onReset, onDelete, theme }) {
+  // ✅ Fallback cho theme
+  const safeTheme = theme || {
+    isDark: false,
+    bgCard: "white",
+    bgMuted: "#f8fafc",
+    text: "#0f172a",
+    textMuted: "#94a3b8",
+    textSub: "#64748b",
+  };
+
   if (!selectedSeat) {
     return (
       <Flex
@@ -24,20 +34,25 @@ export function SeatInfoPanel({ selectedSeat, onReset, theme }) {
         <Icon
           as={MdInfoOutline}
           boxSize="48px"
-          color={theme.isDark ? "#4a5568" : "#cbd5e1"}
+          color={safeTheme.isDark ? "#4a5568" : "#cbd5e1"}
         />
-        <Text fontSize="14px" fontWeight="600" color={theme.textMuted} textAlign="center">
+        <Text fontSize="14px" fontWeight="600" color={safeTheme.textMuted} textAlign="center">
           Chọn một ghế trên sơ đồ<br />để xem chi tiết
         </Text>
       </Flex>
     );
   }
 
-  const cfg = SEAT_STATUS[selectedSeat.status];
+  // ✅ Lấy status an toàn
+  const statusKey = selectedSeat.status || 'trong';
+  const cfg = SEAT_STATUS[statusKey] || SEAT_STATUS_DEFAULT;
+
+  // Kiểm tra xem có thể reset không
+  const canReset = statusKey === "giu" || statusKey === "loi";
 
   return (
     <>
-      <SectionTitle label="Chi tiết ghế" icon={MdInfoOutline} theme={theme} />
+      <SectionTitle label="Chi tiết ghế" icon={MdInfoOutline} theme={safeTheme} />
 
       <Flex align="center" gap="14px" mb="18px">
         <Box
@@ -51,18 +66,20 @@ export function SeatInfoPanel({ selectedSeat, onReset, theme }) {
           justifyContent="center"
         >
           <Text fontSize="18px" fontWeight="800" color={cfg.color}>
-            {selectedSeat.id}
+            {selectedSeat.row || ''}{selectedSeat.num || ''}
           </Text>
         </Box>
         <Box>
-          <Text fontSize="16px" fontWeight="800" color={theme.text}>Ghế {selectedSeat.id}</Text>
+          <Text fontSize="16px" fontWeight="800" color={safeTheme.text}>
+            Ghế {selectedSeat.row || ''}{selectedSeat.num || ''}
+          </Text>
           <Flex align="center" gap="6px">
             <Box
               w="8px"
               h="8px"
               borderRadius="full"
               bg={cfg.dot}
-              sx={selectedSeat.status === "giu" ? { animation: `${pulseDot} 2s infinite` } : undefined}
+              sx={statusKey === "giu" ? { animation: `${pulseDot} 2s infinite` } : undefined}
             />
             <Text
               fontSize="14px"
@@ -76,23 +93,23 @@ export function SeatInfoPanel({ selectedSeat, onReset, theme }) {
       </Flex>
 
       <VStack spacing="10px" align="stretch" mb="18px">
-        {selectedSeat.ticketCode && (
-          <Box p="10px 12px" borderRadius="10px" bg={theme.bgMuted} border={theme.isDark ? "1px solid rgba(255,255,255,0.08)" : "1px solid #f1f5f9"}>
+        {selectedSeat.ticket_code && (
+          <Box p="10px 12px" borderRadius="10px" bg={safeTheme.bgMuted} border={safeTheme.isDark ? "1px solid rgba(255,255,255,0.08)" : "1px solid #f1f5f9"}>
             <Flex align="center" gap="6px" mb="2px">
               <Icon as={FaTicketAlt} boxSize="12px" color={ORANGE.OR} />
-              <Text fontSize="9px" fontWeight="700" color={theme.textMuted} letterSpacing="0.8px" textTransform="uppercase">Mã vé</Text>
+              <Text fontSize="9px" fontWeight="700" color={safeTheme.textMuted} letterSpacing="0.8px" textTransform="uppercase">Mã vé</Text>
             </Flex>
-            <Text fontSize="13px" fontWeight="700" color={theme.text}>{selectedSeat.ticketCode}</Text>
+            <Text fontSize="13px" fontWeight="700" color={safeTheme.text}>{selectedSeat.ticket_code}</Text>
           </Box>
         )}
 
-        {selectedSeat.customer && (
-          <Box p="10px 12px" borderRadius="10px" bg={theme.bgMuted} border={theme.isDark ? "1px solid rgba(255,255,255,0.08)" : "1px solid #f1f5f9"}>
+        {selectedSeat.customer_name && (
+          <Box p="10px 12px" borderRadius="10px" bg={safeTheme.bgMuted} border={safeTheme.isDark ? "1px solid rgba(255,255,255,0.08)" : "1px solid #f1f5f9"}>
             <Flex align="center" gap="6px" mb="2px">
               <Icon as={MdPerson} boxSize="12px" color={ORANGE.OR} />
-              <Text fontSize="9px" fontWeight="700" color={theme.textMuted} letterSpacing="0.8px" textTransform="uppercase">Khách hàng</Text>
+              <Text fontSize="9px" fontWeight="700" color={safeTheme.textMuted} letterSpacing="0.8px" textTransform="uppercase">Khách hàng</Text>
             </Flex>
-            <Text fontSize="13px" fontWeight="700" color={theme.text}>{selectedSeat.customer}</Text>
+            <Text fontSize="13px" fontWeight="700" color={safeTheme.text}>{selectedSeat.customer_name}</Text>
           </Box>
         )}
 
@@ -102,7 +119,7 @@ export function SeatInfoPanel({ selectedSeat, onReset, theme }) {
               <Icon as={FaUserClock} boxSize="12px" color={ORANGE.OR} />
               <Text fontSize="9px" fontWeight="700" color={ORANGE.OR} letterSpacing="0.8px" textTransform="uppercase">Thời gian giữ</Text>
             </Flex>
-            <Text fontSize="13px" fontWeight="700" color={theme.text}>{selectedSeat.heldSince}</Text>
+            <Text fontSize="13px" fontWeight="700" color={safeTheme.text}>{selectedSeat.heldSince}</Text>
           </Box>
         )}
 
@@ -116,15 +133,15 @@ export function SeatInfoPanel({ selectedSeat, onReset, theme }) {
           </Box>
         )}
 
-        {!selectedSeat.ticketCode && !selectedSeat.heldSince && !selectedSeat.note && (
-          <Flex align="center" gap="8px" p="12px" borderRadius="10px" bg={theme.bgMuted} border={theme.isDark ? "1px solid rgba(255,255,255,0.08)" : "1px solid #f1f5f9"}>
+        {!selectedSeat.ticket_code && !selectedSeat.heldSince && !selectedSeat.note && (
+          <Flex align="center" gap="8px" p="12px" borderRadius="10px" bg={safeTheme.bgMuted} border={safeTheme.isDark ? "1px solid rgba(255,255,255,0.08)" : "1px solid #f1f5f9"}>
             <Icon as={MdCheckCircle} boxSize="18px" color="#10b981" />
-            <Text fontSize="13px" fontWeight="600" color={theme.textMuted}>Ghế đang trống, sẵn sàng đặt</Text>
+            <Text fontSize="13px" fontWeight="600" color={safeTheme.textMuted}>Ghế đang trống, sẵn sàng đặt</Text>
           </Flex>
         )}
       </VStack>
 
-      {(selectedSeat.status === "giu" || selectedSeat.status === "loi") ? (
+      {canReset ? (
         <Button
           w="100%"
           h="48px"
@@ -141,7 +158,7 @@ export function SeatInfoPanel({ selectedSeat, onReset, theme }) {
           _active={{ transform: "translateY(0)" }}
           transition="all .25s"
           leftIcon={<Icon as={MdReplay} boxSize="18px" />}
-          onClick={() => onReset(selectedSeat)}
+          onClick={() => onReset && onReset(selectedSeat)}
         >
           Đặt lại trạng thái ghế
         </Button>
@@ -152,12 +169,12 @@ export function SeatInfoPanel({ selectedSeat, onReset, theme }) {
           gap="8px"
           p="14px"
           borderRadius="12px"
-          bg={theme.bgMuted}
-          border={theme.isDark ? "1px solid rgba(255,255,255,0.08)" : "1px solid #f1f5f9"}
+          bg={safeTheme.bgMuted}
+          border={safeTheme.isDark ? "1px solid rgba(255,255,255,0.08)" : "1px solid #f1f5f9"}
         >
-          <Icon as={MdLock} boxSize="18px" color={theme.textMuted} />
-          <Text fontSize="13px" fontWeight="600" color={theme.textMuted}>
-            {selectedSeat.status === "dat" ? "Ghế đã có vé hợp lệ" : selectedSeat.status === "baoTri" ? "Ghế đang bảo trì" : "Không thể reset"}
+          <Icon as={MdLock} boxSize="18px" color={safeTheme.textMuted} />
+          <Text fontSize="13px" fontWeight="600" color={safeTheme.textMuted}>
+            {statusKey === "dat" ? "Ghế đã có vé hợp lệ" : statusKey === "baoTri" ? "Ghế đang bảo trì" : "Không thể reset"}
           </Text>
         </Flex>
       )}

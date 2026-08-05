@@ -2,22 +2,22 @@
 
 import { useState } from "react";
 import {
-  Box, Grid, Text, Button, Flex, SimpleGrid, FormControl,
+  Box, Grid, Text, Button, Flex, SimpleGrid,
   Input, Select, Textarea, Icon, useColorModeValue,
-  useBreakpointValue, Collapse
+  useBreakpointValue, Collapse, Image, Spinner
 } from "@chakra-ui/react";
 import { 
   MdArrowBack, MdClose, MdCheckCircle, MdCalendarToday, 
   MdLocalOffer, MdAttachMoney, MdBarChart, MdExpandMore, MdExpandLess,
-  MdCardGiftcard 
+  MdImage, MdDelete, MdCloudUpload
 } from "react-icons/md";
 import { FaTag, FaPercent } from "react-icons/fa";
 import { SectionTitle } from "./shared/SectionTitle";
 import { StatusBadge } from "./shared/StatusBadge";
 import { TypeBadge } from "./shared/TypeBadge";
-import { scaleIn, fadeIn, pulse } from "./shared/animations";  // <-- Thêm pulse
+import { scaleIn, fadeIn, pulse } from "./shared/animations";
 import { 
-  STATUS_CONFIG,   // <-- Thêm STATUS_CONFIG
+  STATUS_CONFIG,
   TYPE_CONFIG, 
   TYPE_MAP, 
   DISCOUNT_TYPE_OPTS, 
@@ -28,6 +28,8 @@ export function KhuyenMaiForm({ promo, onCancel, onSave, isAdd = false }) {
   const isDark = useColorModeValue(false, true);
   const isMobile = useBreakpointValue({ base: true, lg: false });
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false); // ✅ Thêm state loading
 
   const empty = {
     Title: "",
@@ -73,6 +75,39 @@ export function KhuyenMaiForm({ promo, onCancel, onSave, isAdd = false }) {
   });
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
+
+  // Xử lý chọn file ảnh
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+      if (!validTypes.includes(file.type)) {
+        alert('Vui lòng chọn file ảnh định dạng JPG, PNG, WebP hoặc GIF');
+        return;
+      }
+      
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Kích thước file tối đa 5MB');
+        return;
+      }
+      
+      set('ImageFile', file);
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target.result);
+        set('ImageUrl', e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Xóa ảnh
+  const handleRemoveImage = () => {
+    set('ImageFile', null);
+    set('ImageUrl', null);
+    setImagePreview(null);
+  };
 
   const inputBg = useColorModeValue("#fafafa", "#0f172a");
   const inputBorder = useColorModeValue("#e8edf3", "#2d3a6b");
@@ -124,9 +159,78 @@ export function KhuyenMaiForm({ promo, onCancel, onSave, isAdd = false }) {
     return "1+1";
   };
 
+  // ✅ HÀM XỬ LÝ SUBMIT - TẠO FORMDATA VÀ HIỂN THỊ LOADING
+  const handleSubmit = async () => {
+    // Kiểm tra validate cơ bản
+    if (!form.Title) {
+      alert('Vui lòng nhập tên chương trình');
+      return;
+    }
+    if (!form.StartDate || !form.EndDate) {
+      alert('Vui lòng chọn ngày bắt đầu và ngày kết thúc');
+      return;
+    }
+    if (!form.DiscountValue || Number(form.DiscountValue) <= 0) {
+      alert('Vui lòng nhập giá trị giảm giá hợp lệ');
+      return;
+    }
+
+    // Bắt đầu loading
+    setIsSubmitting(true);
+
+    try {
+      const formData = new FormData();
+      
+      // Thêm các trường dữ liệu
+      formData.append('Title', form.Title || '');
+      formData.append('Code', form.Code || '');
+      formData.append('Description', form.Description || '');
+      formData.append('DiscountType', form.DiscountType || 'Percentage');
+      formData.append('DiscountValue', form.DiscountValue || '0');
+      formData.append('StartDate', form.StartDate || '');
+      formData.append('EndDate', form.EndDate || '');
+      formData.append('Status', form.Status || 'Scheduled');
+      formData.append('ApplyFor', form.ApplyFor || 'Tất cả phim');
+      formData.append('ApplyTarget', form.ApplyTarget || '');
+      formData.append('MinOrder', form.MinOrder || '0');
+      formData.append('MaxDiscount', form.MaxDiscount || '0');
+      formData.append('UsageLimit', form.UsageLimit || '0');
+      formData.append('IsActive', form.IsActive ? '1' : '0');
+      
+      // Xử lý ảnh
+      if (form.ImageFile) {
+        formData.append('ImageUrl', form.ImageFile);
+      } else if (form.ImageUrl && form.ImageUrl.startsWith('http')) {
+        formData.append('ImageUrl', form.ImageUrl);
+      }
+      
+      // Gọi callback với FormData
+      await onSave(formData);
+    } catch (error) {
+      console.error('Lỗi khi submit form:', error);
+    } finally {
+      // Kết thúc loading
+      setIsSubmitting(false);
+    }
+  };
+
   const PreviewPanel = () => (
     <Box {...cardStyle} borderRadius="16px" p="18px">
       <SectionTitle label="Xem trước" />
+      
+      {(form.ImageUrl || imagePreview) && (
+        <Box mb="12px" borderRadius="10px" overflow="hidden" border={`1px solid ${cardBorder}`}>
+          <Image 
+            src={imagePreview || form.ImageUrl} 
+            alt={form.Title || "Preview"}
+            objectFit="cover"
+            w="100%"
+            h="150px"
+            fallbackSrc="https://via.placeholder.com/800x400?text=Không+có+ảnh"
+          />
+        </Box>
+      )}
+      
       {form.Title ? (
         <Flex direction="column" gap="12px" sx={{ animation: `${fadeIn} 0.2s ease both` }}>
           <Box p="18px" borderRadius="12px"
@@ -195,6 +299,7 @@ export function KhuyenMaiForm({ promo, onCancel, onSave, isAdd = false }) {
           _hover={{ bg: useColorModeValue("#f8fafc", "#0f172a") }}
           flexShrink="0"
           onClick={onCancel}
+          isDisabled={isSubmitting}
         >
           Quay lại
         </Button>
@@ -216,6 +321,7 @@ export function KhuyenMaiForm({ promo, onCancel, onSave, isAdd = false }) {
             fontSize="13px" fontWeight="700"
             rightIcon={<Icon as={previewOpen ? MdExpandLess : MdExpandMore} />}
             onClick={() => setPreviewOpen(v => !v)}
+            isDisabled={isSubmitting}
           >
             {previewOpen ? "Ẩn xem trước" : "Xem trước khuyến mãi"}
           </Button>
@@ -233,12 +339,14 @@ export function KhuyenMaiForm({ promo, onCancel, onSave, isAdd = false }) {
             <Box mb="14px">
               <Text sx={labelStyle}>Tên chương trình *</Text>
               <Input {...inputStyle} placeholder="VD: Thứ 4 Vui Vẻ – Giảm 30%"
-                value={form.Title} onChange={e => set("Title", e.target.value)} />
+                value={form.Title} onChange={e => set("Title", e.target.value)} 
+                isDisabled={isSubmitting} />
             </Box>
             <Box mb="14px">
               <Text sx={labelStyle}>Mã khuyến mãi</Text>
               <Input {...inputStyle} placeholder="VD: SALE2024"
-                value={form.Code} onChange={e => set("Code", e.target.value)} />
+                value={form.Code} onChange={e => set("Code", e.target.value)} 
+                isDisabled={isSubmitting} />
             </Box>
             <Box>
               <Text sx={labelStyle}>Mô tả chương trình</Text>
@@ -263,7 +371,67 @@ export function KhuyenMaiForm({ promo, onCancel, onSave, isAdd = false }) {
                 placeholder="Mô tả chi tiết điều kiện và lợi ích của chương trình..."
                 value={form.Description} 
                 onChange={e => set("Description", e.target.value)}
+                isDisabled={isSubmitting}
               />
+            </Box>
+          </Box>
+
+          {/* Upload ảnh */}
+          <Box {...cardStyle} borderRadius="16px" p={{ base: "16px", md: "20px" }}>
+            <SectionTitle label="Hình ảnh khuyến mãi" />
+            
+            {(form.ImageUrl || imagePreview) && (
+              <Box position="relative" mb="12px" borderRadius="10px" overflow="hidden" border={`1px solid ${cardBorder}`}>
+                <Image 
+                  src={imagePreview || form.ImageUrl} 
+                  alt="Banner khuyến mãi"
+                  objectFit="cover"
+                  w="100%"
+                  h="160px"
+                  fallbackSrc="https://via.placeholder.com/800x400?text=Không+có+ảnh"
+                />
+                <Button
+                  position="absolute"
+                  top="8px"
+                  right="8px"
+                  size="sm"
+                  colorScheme="red"
+                  borderRadius="full"
+                  onClick={handleRemoveImage}
+                  isDisabled={isSubmitting}
+                >
+                  <Icon as={MdDelete} />
+                </Button>
+              </Box>
+            )}
+
+            <Box
+              border="2px dashed"
+              borderColor={inputBorder}
+              borderRadius="10px"
+              p="24px"
+              textAlign="center"
+              cursor={isSubmitting ? "not-allowed" : "pointer"}
+              _hover={{ borderColor: isSubmitting ? "inherit" : "#f97316", bg: useColorModeValue("#fafafa", "#0f172a") }}
+              transition="all 0.2s"
+              onClick={() => !isSubmitting && document.getElementById('file-upload').click()}
+              opacity={isSubmitting ? 0.6 : 1}
+            >
+              <input
+                id="file-upload"
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handleFileChange}
+                disabled={isSubmitting}
+              />
+              <Icon as={MdCloudUpload} boxSize="32px" color={textSecondary} mb="8px" />
+              <Text fontSize="13px" fontWeight="600" color={textSecondary}>
+                {form.ImageFile || form.ImageUrl ? 'Thay đổi ảnh' : 'Tải ảnh lên'}
+              </Text>
+              <Text fontSize="11px" color={textSecondary}>
+                JPG, PNG, WebP (tối đa 5MB)
+              </Text>
             </Box>
           </Box>
 
@@ -275,11 +443,12 @@ export function KhuyenMaiForm({ promo, onCancel, onSave, isAdd = false }) {
                 const cfg = TYPE_CONFIG[value];
                 const isSelected = form.DiscountType === value;
                 return (
-                  <Box key={value} p="12px 14px" borderRadius="12px" cursor="pointer"
+                  <Box key={value} p="12px 14px" borderRadius="12px" cursor={isSubmitting ? "not-allowed" : "pointer"}
                     bg={isSelected ? useColorModeValue(cfg.bg, "#0f172a") : useColorModeValue("#f8fafc", "#0f172a")}
                     border={isSelected ? `2px solid ${cfg.border}` : (isDark ? "2px solid #2d3a6b" : "2px solid #f1f5f9")}
                     transition="all 0.2s"
-                    onClick={() => { set("DiscountType", value); set("DiscountValue", ""); }}
+                    onClick={() => { if (!isSubmitting) { set("DiscountType", value); set("DiscountValue", ""); } }}
+                    opacity={isSubmitting ? 0.6 : 1}
                   >
                     <Flex align="center" gap="8px">
                       <Box w="28px" h="28px" borderRadius="8px"
@@ -309,7 +478,8 @@ export function KhuyenMaiForm({ promo, onCancel, onSave, isAdd = false }) {
                   <Input {...inputStyle} type="number"
                     placeholder={form.DiscountType === "Percentage" ? "VD: 30" : "VD: 50000"}
                     value={form.DiscountValue} 
-                    onChange={e => set("DiscountValue", e.target.value)} 
+                    onChange={e => set("DiscountValue", e.target.value)}
+                    isDisabled={isSubmitting} 
                   />
                 </Box>
                 <Box>
@@ -319,7 +489,8 @@ export function KhuyenMaiForm({ promo, onCancel, onSave, isAdd = false }) {
                   <Input {...inputStyle} type="number"
                     placeholder={form.DiscountType === "Percentage" ? "VD: 50000" : "VD: 100000"}
                     value={form.DiscountType === "Percentage" ? form.MaxDiscount : form.MinOrder}
-                    onChange={e => set(form.DiscountType === "Percentage" ? "MaxDiscount" : "MinOrder", e.target.value)} 
+                    onChange={e => set(form.DiscountType === "Percentage" ? "MaxDiscount" : "MinOrder", e.target.value)}
+                    isDisabled={isSubmitting} 
                   />
                 </Box>
               </Grid>
@@ -329,12 +500,14 @@ export function KhuyenMaiForm({ promo, onCancel, onSave, isAdd = false }) {
               <Box>
                 <Text sx={labelStyle}>Đơn hàng tối thiểu (đ)</Text>
                 <Input {...inputStyle} type="number" placeholder="VD: 100000 (0 = không giới hạn)"
-                  value={form.MinOrder} onChange={e => set("MinOrder", e.target.value)} />
+                  value={form.MinOrder} onChange={e => set("MinOrder", e.target.value)}
+                  isDisabled={isSubmitting} />
               </Box>
               <Box>
                 <Text sx={labelStyle}>Giới hạn lượt dùng</Text>
                 <Input {...inputStyle} type="number" placeholder="VD: 500 (0 = không giới hạn)"
-                  value={form.UsageLimit} onChange={e => set("UsageLimit", e.target.value)} />
+                  value={form.UsageLimit} onChange={e => set("UsageLimit", e.target.value)}
+                  isDisabled={isSubmitting} />
               </Box>
             </Grid>
           </Box>
@@ -346,12 +519,14 @@ export function KhuyenMaiForm({ promo, onCancel, onSave, isAdd = false }) {
               <Box>
                 <Text sx={labelStyle}>Ngày bắt đầu *</Text>
                 <Input {...inputStyle} type="date"
-                  value={form.StartDate} onChange={e => set("StartDate", e.target.value)} />
+                  value={form.StartDate} onChange={e => set("StartDate", e.target.value)}
+                  isDisabled={isSubmitting} />
               </Box>
               <Box>
                 <Text sx={labelStyle}>Ngày kết thúc *</Text>
                 <Input {...inputStyle} type="date"
-                  value={form.EndDate} onChange={e => set("EndDate", e.target.value)} />
+                  value={form.EndDate} onChange={e => set("EndDate", e.target.value)}
+                  isDisabled={isSubmitting} />
               </Box>
             </Grid>
             {form.StartDate && form.EndDate && (
@@ -377,11 +552,12 @@ export function KhuyenMaiForm({ promo, onCancel, onSave, isAdd = false }) {
               <Text sx={labelStyle}>Áp dụng cho *</Text>
               <Grid templateColumns={{ base: "1fr 1fr", sm: "repeat(4,1fr)" }} gap="8px">
                 {APPLY_FOR_OPTS.map(opt => (
-                  <Box key={opt} p="10px 12px" borderRadius="9px" cursor="pointer"
+                  <Box key={opt} p="10px 12px" borderRadius="9px" cursor={isSubmitting ? "not-allowed" : "pointer"}
                     bg={form.ApplyFor === opt ? useColorModeValue("#fff7ed", "#0f172a") : useColorModeValue("#f8fafc", "#0f172a")}
                     border={form.ApplyFor === opt ? "2px solid #fed7aa" : (isDark ? "2px solid #2d3a6b" : "2px solid #f1f5f9")}
                     transition="all 0.2s"
-                    onClick={() => { set("ApplyFor", opt); set("ApplyTarget", ""); }}
+                    onClick={() => { if (!isSubmitting) { set("ApplyFor", opt); set("ApplyTarget", ""); } }}
+                    opacity={isSubmitting ? 0.6 : 1}
                   >
                     <Flex align="center" gap="6px">
                       <Icon as={MdLocalOffer} boxSize="13px"
@@ -401,7 +577,8 @@ export function KhuyenMaiForm({ promo, onCancel, onSave, isAdd = false }) {
                 <Input {...inputStyle} 
                   placeholder={`Nhập ${form.ApplyFor.replace(" cụ thể","")}...`}
                   value={form.ApplyTarget} 
-                  onChange={e => set("ApplyTarget", e.target.value)} 
+                  onChange={e => set("ApplyTarget", e.target.value)}
+                  isDisabled={isSubmitting} 
                 />
               </Box>
             )}
@@ -421,11 +598,12 @@ export function KhuyenMaiForm({ promo, onCancel, onSave, isAdd = false }) {
                 const cfg = STATUS_CONFIG[s];
                 const isSelected = form.Status === s;
                 return (
-                  <Box key={s} p="10px 14px" borderRadius="9px" cursor="pointer"
+                  <Box key={s} p="10px 14px" borderRadius="9px" cursor={isSubmitting ? "not-allowed" : "pointer"}
                     bg={isSelected ? useColorModeValue(cfg.bg, cfg.darkBg || "#0f172a") : useColorModeValue("#f8fafc", "#0f172a")}
                     border={isSelected ? `2px solid ${isDark ? cfg.darkBorder || cfg.border : cfg.border}` : (isDark ? "2px solid #2d3a6b" : "2px solid #f1f5f9")}
                     transition="all 0.2s"
-                    onClick={() => set("Status", s)}
+                    onClick={() => { if (!isSubmitting) set("Status", s); }}
+                    opacity={isSubmitting ? 0.6 : 1}
                   >
                     <Flex align="center" gap="7px">
                       <Box w="7px" h="7px" borderRadius="full" bg={cfg.dot}
@@ -450,7 +628,7 @@ export function KhuyenMaiForm({ promo, onCancel, onSave, isAdd = false }) {
         )}
       </Grid>
 
-      {/* Save bar */}
+      {/* ✅ Save bar với loading state */}
       <Box {...cardStyle} borderRadius="14px" p={{ base: "14px 16px", md: "16px 20px" }} mt="16px"
         position={{ base: "sticky", md: "static" }} bottom="0" zIndex="10"
       >
@@ -463,19 +641,36 @@ export function KhuyenMaiForm({ promo, onCancel, onSave, isAdd = false }) {
             transition="all 0.2s"
             leftIcon={<Icon as={MdClose} />}
             onClick={onCancel}
+            isDisabled={isSubmitting}
           >
             Hủy
           </Button>
           <Button flex={{ base: "2", md: "none" }} h="42px" px="28px" borderRadius="10px"
             fontWeight="700" fontSize="13px"
-            bg="linear-gradient(135deg, #f97316 0%, #fb923c 60%, #fbbf24 100%)"
-            color="#ffffff" boxShadow="0 4px 16px rgba(249,115,22,0.35)"
-            _hover={{ boxShadow: "0 8px 24px rgba(249,115,22,0.45)", transform: "translateY(-1px)" }}
-            _active={{ transform: "translateY(0)" }} transition="all 0.2s"
-            leftIcon={<Icon as={MdCheckCircle} />}
-            onClick={() => onSave(form)}
+            bg={isSubmitting 
+              ? "linear-gradient(135deg, #f97316 0%, #fb923c 60%, #fbbf24 100%)" 
+              : "linear-gradient(135deg, #f97316 0%, #fb923c 60%, #fbbf24 100%)"
+            }
+            color="#ffffff" 
+            boxShadow={isSubmitting 
+              ? "0 4px 16px rgba(249,115,22,0.35)" 
+              : "0 4px 16px rgba(249,115,22,0.35)"
+            }
+            _hover={{ 
+              boxShadow: isSubmitting 
+                ? "0 4px 16px rgba(249,115,22,0.35)" 
+                : "0 8px 24px rgba(249,115,22,0.45)", 
+              transform: isSubmitting ? "none" : "translateY(-1px)" 
+            }}
+            _active={{ transform: "translateY(0)" }} 
+            transition="all 0.2s"
+            leftIcon={isSubmitting ? <Spinner size="sm" color="white" /> : <Icon as={MdCheckCircle} />}
+            onClick={handleSubmit}
+            isDisabled={isSubmitting}
+            opacity={isSubmitting ? 0.8 : 1}
+            cursor={isSubmitting ? "not-allowed" : "pointer"}
           >
-            {isAdd ? "Tạo khuyến mãi" : "Lưu thay đổi"}
+            {isSubmitting ? "Đang xử lý..." : (isAdd ? "Tạo khuyến mãi" : "Lưu thay đổi")}
           </Button>
         </Flex>
       </Box>

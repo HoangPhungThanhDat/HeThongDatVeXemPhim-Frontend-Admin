@@ -11,7 +11,7 @@ import {
 } from "@chakra-ui/react";
 import { MdCheckCircle, MdError, MdBuild } from "react-icons/md";
 import { FaTicketAlt, FaUserClock } from "react-icons/fa";
-import { SEAT_STATUS, ORANGE } from "../constants";
+import { SEAT_STATUS, SEAT_STATUS_DEFAULT, SEAT_TYPE_COLORS, ORANGE } from "../constants";
 import { pulseDot, pulseWarn } from "./shared/animations";
 
 const SeatButton = ({ seat, isSelected, onClick, onStatusChange, theme }) => {
@@ -20,37 +20,62 @@ const SeatButton = ({ seat, isSelected, onClick, onStatusChange, theme }) => {
   const buttonRef = useRef(null);
   const menuRef = useRef(null);
   const timeoutRef = useRef(null);
-  const cfg = SEAT_STATUS[seat.status];
 
+  // ✅ Lấy status an toàn
+  const statusKey = seat?.status || 'trong';
+  const cfg = SEAT_STATUS[statusKey] || SEAT_STATUS_DEFAULT;
+
+  // ✅ Lấy loại ghế và màu sắc tương ứng
+  const seatType = seat?.seat_type?.toLowerCase() || 'normal';
+  const typeColors = SEAT_TYPE_COLORS[seatType] || SEAT_TYPE_COLORS.normal;
+
+  if (!seat) return null;
+
+  // ✅ Xác định màu sắc dựa trên trạng thái và loại ghế
   const getBgColor = () => {
     if (isSelected) return ORANGE.ORGRAD;
-    return cfg.bg;
+    
+    // Nếu ghế đã đặt -> màu đỏ
+    if (statusKey === 'dat') return '#dc2626';
+    // Nếu ghế đang giữ -> màu vàng
+    if (statusKey === 'giu') return '#f59e0b';
+    // Nếu ghế lỗi -> màu tím
+    if (statusKey === 'loi') return '#7c3aed';
+    // Nếu ghế bảo trì -> màu xám
+    if (statusKey === 'baoTri') return '#9ca3af';
+    
+    // Mặc định: dùng màu theo loại ghế
+    return typeColors.bg;
   };
 
   const getBorderColor = () => {
     if (isSelected) return ORANGE.OR;
-    return cfg.border;
+    if (statusKey === 'dat') return '#dc2626';
+    if (statusKey === 'giu') return '#f59e0b';
+    if (statusKey === 'loi') return '#7c3aed';
+    if (statusKey === 'baoTri') return '#9ca3af';
+    return typeColors.border;
   };
 
   const getTextColor = () => {
     if (isSelected) return "white";
-    return cfg.color;
+    if (statusKey === 'dat' || statusKey === 'giu' || statusKey === 'loi' || statusKey === 'baoTri') return "white";
+    return typeColors.color;
   };
 
   // Các trạng thái có thể chọn
   const statusOptions = [
     { key: 'trong', label: 'Trống', icon: MdCheckCircle, color: '#059669' },
     { key: 'dat', label: 'Đã đặt', icon: FaTicketAlt, color: '#dc2626' },
-    { key: 'giu', label: 'Đang giữ', icon: FaUserClock, color: ORANGE.OR },
+    { key: 'giu', label: 'Đang giữ', icon: FaUserClock, color: '#f59e0b' },
     { key: 'loi', label: 'Lỗi / Kẹt', icon: MdError, color: '#7c3aed' },
-    { key: 'baoTri', label: 'Bảo trì', icon: MdBuild, color: '#6b7280' },
+    { key: 'baoTri', label: 'Bảo trì', icon: MdBuild, color: '#9ca3af' },
   ];
 
   const handleStatusChange = (newStatus) => {
     if (onStatusChange) {
       onStatusChange(seat.id, newStatus);
     }
-    // Đóng menu sau khi chọn
     setIsHovered(false);
   };
 
@@ -60,17 +85,13 @@ const SeatButton = ({ seat, isSelected, onClick, onStatusChange, theme }) => {
       const rect = buttonRef.current.getBoundingClientRect();
       const isTopRow = seat.row === 'A' || seat.row === 'B';
       
-      // Kiểm tra xem menu có bị tràn ra ngoài màn hình không
       let top = isTopRow ? rect.bottom + 8 : rect.top - 8;
       let transform = 'translateX(-50%)';
       
-      // Nếu menu ở dưới mà bị tràn xuống dưới, chuyển lên trên
       if (isTopRow && top + 40 > window.innerHeight) {
         top = rect.top - 8;
         transform = 'translateX(-50%) translateY(-100%)';
-      }
-      // Nếu menu ở trên mà bị tràn lên trên, chuyển xuống dưới
-      else if (!isTopRow && top < 0) {
+      } else if (!isTopRow && top < 0) {
         top = rect.bottom + 8;
         transform = 'translateX(-50%)';
       }
@@ -83,9 +104,7 @@ const SeatButton = ({ seat, isSelected, onClick, onStatusChange, theme }) => {
     }
   }, [isHovered, seat.row]);
 
-  // Xử lý hover vào ghế
   const handleMouseEnter = () => {
-    // Clear timeout nếu có
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
@@ -93,22 +112,23 @@ const SeatButton = ({ seat, isSelected, onClick, onStatusChange, theme }) => {
     setIsHovered(true);
   };
 
-  // Xử lý rời khỏi ghế hoặc menu
   const handleMouseLeave = () => {
-    // Delay để cho phép di chuyển từ ghế sang menu
     timeoutRef.current = setTimeout(() => {
       setIsHovered(false);
     }, 200);
   };
 
-  // Xử lý hover vào menu
   const handleMenuEnter = () => {
-    // Clear timeout khi hover vào menu
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
   };
+
+  const seatLabel = seat.row && seat.num ? `${seat.row}${seat.num}` : '?';
+
+  // ✅ Kiểm tra có icon đặc biệt cho loại ghế không
+  const hasTypeIcon = typeColors.icon && statusKey !== 'dat' && statusKey !== 'loi' && statusKey !== 'baoTri';
 
   return (
     <Box
@@ -120,10 +140,11 @@ const SeatButton = ({ seat, isSelected, onClick, onStatusChange, theme }) => {
       <Tooltip
         label={
           <Box p="4px">
-            <Text fontWeight="700">{seat.id}</Text>
+            <Text fontWeight="700">{seatLabel}</Text>
             <Text fontSize="11px" color="gray.300">{cfg.label}</Text>
-            {seat.customer && <Text fontSize="10px" color="gray.400">{seat.customer}</Text>}
-            {seat.ticketCode && <Text fontSize="10px" color="gray.400">Mã: {seat.ticketCode}</Text>}
+            <Text fontSize="10px" color="gray.400">Loại: {typeColors.label}</Text>
+            {seat.customer_name && <Text fontSize="10px" color="gray.400">{seat.customer_name}</Text>}
+            {seat.ticket_code && <Text fontSize="10px" color="gray.400">Mã: {seat.ticket_code}</Text>}
             <Text fontSize="10px" color="gray.400" mt="4px">Hover để đổi trạng thái</Text>
           </Box>
         }
@@ -148,9 +169,9 @@ const SeatButton = ({ seat, isSelected, onClick, onStatusChange, theme }) => {
           border={`2px solid ${getBorderColor()}`}
           boxShadow={isSelected ? `0 4px 16px ${ORANGE.ORSW}` : "none"}
           sx={
-            seat.status === "loi"
+            statusKey === "loi"
               ? { animation: `${pulseWarn} 1.8s infinite` }
-              : seat.status === "giu"
+              : statusKey === "giu"
                 ? { animation: `${pulseDot} 2s infinite` }
                 : undefined
           }
@@ -162,10 +183,26 @@ const SeatButton = ({ seat, isSelected, onClick, onStatusChange, theme }) => {
           }}
           _active={{ transform: "scale(0.92)" }}
           transition="all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)"
-          onClick={() => onClick(seat.id)}
+          onClick={() => onClick && onClick(seat.id)}
         >
-          {seat.num}
-          {seat.status === "giu" && (
+          {seat.num || '?'}
+          
+          {/* ✅ Hiển thị icon đặc biệt cho loại ghế */}
+          {hasTypeIcon && (
+            <Box
+              position="absolute"
+              top="-6px"
+              right="-6px"
+              fontSize="10px"
+              zIndex="2"
+              lineHeight="1"
+            >
+              {typeColors.icon}
+            </Box>
+          )}
+          
+          {/* Badge trạng thái */}
+          {statusKey === "giu" && (
             <Box
               position="absolute"
               top="-4px"
@@ -173,12 +210,12 @@ const SeatButton = ({ seat, isSelected, onClick, onStatusChange, theme }) => {
               w="14px"
               h="14px"
               borderRadius="full"
-              bg={ORANGE.OR}
+              bg="#f59e0b"
               border="2px solid white"
-              boxShadow="0 2px 8px rgba(234,88,12,0.4)"
+              boxShadow="0 2px 8px rgba(245,158,11,0.4)"
             />
           )}
-          {seat.status === "dat" && (
+          {statusKey === "dat" && (
             <Box
               position="absolute"
               top="-4px"
@@ -191,10 +228,23 @@ const SeatButton = ({ seat, isSelected, onClick, onStatusChange, theme }) => {
               boxShadow="0 2px 8px rgba(220,38,38,0.4)"
             />
           )}
+          {statusKey === "loi" && (
+            <Box
+              position="absolute"
+              top="-4px"
+              right="-4px"
+              w="14px"
+              h="14px"
+              borderRadius="full"
+              bg="#7c3aed"
+              border="2px solid white"
+              boxShadow="0 2px 8px rgba(124,58,237,0.4)"
+            />
+          )}
         </Button>
       </Tooltip>
 
-      {/* Menu đổi trạng thái sử dụng Portal */}
+      {/* Menu đổi trạng thái */}
       {isHovered && (
         <Portal>
           <Box
@@ -215,7 +265,7 @@ const SeatButton = ({ seat, isSelected, onClick, onStatusChange, theme }) => {
               top: menuPosition.top,
               left: menuPosition.left,
               transform: menuPosition.transform || 'translateX(-50%)',
-              pointerEvents: 'auto', // Đảm bảo menu có thể click
+              pointerEvents: 'auto',
             }}
           >
             {statusOptions.map((opt) => (
@@ -231,7 +281,7 @@ const SeatButton = ({ seat, isSelected, onClick, onStatusChange, theme }) => {
                 fontSize="10px"
                 fontWeight="600"
                 color={opt.color}
-                bg={seat.status === opt.key ? `${opt.color}20` : "transparent"}
+                bg={statusKey === opt.key ? `${opt.color}20` : "transparent"}
                 _hover={{
                   bg: `${opt.color}20`,
                   transform: "scale(1.05)",

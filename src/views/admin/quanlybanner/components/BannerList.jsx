@@ -1,9 +1,7 @@
-// views/admin/quanlybanner/components/BannerList.jsx
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box, Flex, Text, Button, Icon, Input, Select, SimpleGrid,
-  useColorModeValue, useDisclosure, Spinner
+  useColorModeValue, Spinner
 } from "@chakra-ui/react";
 import { MdAdd, MdSearch, MdImage, MdToggleOn, MdVisibilityOff, MdSchedule } from "react-icons/md";
 import { StatCard } from "./shared/StatCard";
@@ -33,22 +31,41 @@ export function BannerList({
   const placeholderC = useColorModeValue("#b0bac8", "#3d5a80");
   const colHeadColor = useColorModeValue("#94a3b8", "#4a6080");
 
-  const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure();
-  const [bannerToDelete, setBannerToDelete] = useState(null);
-  const { onDragStart, onDragOver, onDrop, onDragEnd } = useDragSort(banners, setBanners);
-
-  const handleDeleteRequest = (banner) => { 
-    setBannerToDelete(banner); 
-    onDeleteOpen(); 
-  };
+  // State quản lý modal xóa
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, banner: null });
   
-  const handleDeleteConfirm = () => {
-    if (!bannerToDelete) return;
-    onDelete(bannerToDelete.BannerId || bannerToDelete.id);
-    onDeleteClose(); 
-    setBannerToDelete(null);
+  // ✅ Sử dụng useDragSort với các hàm mới
+  const { onDragStart, onDragOver, onDrop, onDragEnd, addToTop } = useDragSort(banners, setBanners);
+
+  // ✅ Hàm xử lý khi thêm banner mới
+  const handleAddBanner = () => {
+    if (onAdd) {
+      onAdd();
+    }
   };
 
+  // ✅ Hàm mở modal xóa
+  const openDeleteModal = (banner) => {
+    setDeleteModal({ isOpen: true, banner });
+  };
+
+  // ✅ Hàm đóng modal xóa
+  const closeDeleteModal = () => {
+    setDeleteModal({ isOpen: false, banner: null });
+  };
+
+  // ✅ Hàm xác nhận xóa
+  const handleConfirmDelete = async () => {
+    if (!deleteModal.banner) return;
+    try {
+      await onDelete(deleteModal.banner.BannerId || deleteModal.banner.id);
+      closeDeleteModal();
+    } catch (error) {
+      console.error("Lỗi khi xóa:", error);
+    }
+  };
+
+  // ✅ SỬA: handleMoveUp - đưa lên trên và đảm bảo order đúng
   const handleMoveUp = (id) => {
     setBanners((prev) => {
       const sorted = [...prev].sort((a, b) => (a.order || a.Order || 0) - (b.order || b.Order || 0));
@@ -64,6 +81,7 @@ export function BannerList({
     });
   };
 
+  // ✅ SỬA: handleMoveDown - đưa xuống dưới và đảm bảo order đúng
   const handleMoveDown = (id) => {
     setBanners((prev) => {
       const sorted = [...prev].sort((a, b) => (a.order || a.Order || 0) - (b.order || b.Order || 0));
@@ -79,16 +97,95 @@ export function BannerList({
     });
   };
 
-  // Lấy id từ banner (hỗ trợ cả BannerId và id)
+  // ✅ THÊM: Hàm đưa banner lên đầu
+  const handleMoveToTop = (id) => {
+    setBanners((prev) => {
+      const item = prev.find(b => (b.BannerId || b.id) === id);
+      if (!item) return prev;
+      
+      const remaining = prev.filter(b => (b.BannerId || b.id) !== id);
+      const reordered = [item, ...remaining];
+      
+      return reordered.map((item, i) => ({ 
+        ...item, 
+        order: i + 1 
+      }));
+    });
+  };
+
+  // ✅ THÊM: useEffect để sắp xếp banners khi có thay đổi
+  useEffect(() => {
+    if (banners.length > 0) {
+      // Đảm bảo order được cập nhật đúng
+      const hasOrder = banners.some(b => b.order !== undefined);
+      if (!hasOrder) {
+        setBanners(prev => prev.map((item, i) => ({ ...item, order: i + 1 })));
+      }
+    }
+  }, [banners.length]);
+
+  // ✅ Lấy id từ banner (hỗ trợ cả BannerId và id)
   const getBannerId = (banner) => banner.BannerId || banner.id;
+
+  // ✅ Hàm render nội dung danh sách
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <Flex direction="column" align="center" justify="center" py="40px">
+          <Spinner size="lg" color="#f97316" thickness="3px" />
+          <Text fontSize="13px" fontWeight="600" color={subColor} mt="12px">
+            Đang tải danh sách banner...
+          </Text>
+        </Flex>
+      );
+    }
+
+    if (filtered.length === 0) {
+      return (
+        <Flex direction="column" align="center" justify="center" py="40px" color={hintColor}>
+          <Icon as={MdImage} boxSize="32px" mb="8px" />
+          <Text fontSize="13px" fontWeight="600" color={subColor}>Không tìm thấy banner nào</Text>
+        </Flex>
+      );
+    }
+
+    return (
+      <Flex direction="column" gap={{ base: "10px", md: "6px" }}>
+        {filtered.map((b, i) => {
+          const bannerId = b.BannerId || b.id;
+          return (
+            <BannerRow 
+              key={bannerId} 
+              banner={b} 
+              index={i}
+              isFirst={i === 0} 
+              isLast={i === filtered.length - 1}
+              onView={() => onView(b)}
+              onEdit={() => onEdit(b)}
+              onHide={() => onHide(bannerId)}
+              onDelete={() => openDeleteModal(b)}
+              onMoveUp={() => handleMoveUp(bannerId)} 
+              onMoveDown={() => handleMoveDown(bannerId)}
+              onMoveToTop={() => handleMoveToTop(bannerId)}
+              onDragStart={onDragStart} 
+              onDragOver={onDragOver}
+              onDrop={onDrop} 
+              onDragEnd={onDragEnd}
+            />
+          );
+        })}
+      </Flex>
+    );
+  };
 
   return (
     <>
-      <ConfirmDeleteModal 
-        isOpen={isDeleteOpen} 
-        onClose={onDeleteClose}
-        onConfirm={handleDeleteConfirm} 
-        banner={bannerToDelete} 
+      {/* ✅ Modal xóa - Đã có loading bên trong */}
+      <ConfirmDeleteModal
+        isOpen={deleteModal.isOpen}
+        onClose={closeDeleteModal}
+        onConfirm={handleConfirmDelete}
+        banner={deleteModal.banner}
       />
 
       {/* Header với nút Thêm banner */}
@@ -128,7 +225,7 @@ export function BannerList({
           _active={{ transform: "translateY(0)" }} 
           transition="all 0.2s"
           leftIcon={<Icon as={MdAdd} />}
-          onClick={onAdd} 
+          onClick={handleAddBanner} 
           w={{ base: "100%", md: "auto" }}
           sx={{ animation: `${fadeIn} 0.4s ease 0.1s both` }}
         >
@@ -170,7 +267,6 @@ export function BannerList({
                 <option value="Tất cả">Tất cả trạng thái</option>
                 <option value="Active">Đang hiện</option>
                 <option value="Inactive">Đã ẩn</option>
-                <option value="Scheduled">Hẹn giờ</option>
               </Select>
             </Box>
           </Flex>
@@ -209,7 +305,6 @@ export function BannerList({
                 <option value="Tất cả">Tất cả trạng thái</option>
                 <option value="Active">Đang hiện</option>
                 <option value="Inactive">Đã ẩn</option>
-                <option value="Scheduled">Hẹn giờ</option>
               </Select>
             </Box>
           </Flex>
@@ -250,44 +345,7 @@ export function BannerList({
 
         {/* Rows */}
         <Box p={{ base: "10px", md: "10px" }}>
-          {loading ? (
-            <Flex direction="column" align="center" justify="center" py="40px">
-              <Spinner size="lg" color="#f97316" thickness="3px" />
-              <Text fontSize="13px" fontWeight="600" color={subColor} mt="12px">
-                Đang tải danh sách banner...
-              </Text>
-            </Flex>
-          ) : filtered.length === 0 ? (
-            <Flex direction="column" align="center" justify="center" py="40px" color={hintColor}>
-              <Icon as={MdImage} boxSize="32px" mb="8px" />
-              <Text fontSize="13px" fontWeight="600" color={subColor}>Không tìm thấy banner nào</Text>
-            </Flex>
-          ) : (
-            <Flex direction="column" gap={{ base: "10px", md: "6px" }}>
-              {filtered.map((b, i) => {
-                const bannerId = b.BannerId || b.id;
-                return (
-                  <BannerRow 
-                    key={bannerId} 
-                    banner={b} 
-                    index={i}
-                    isFirst={i === 0} 
-                    isLast={i === filtered.length - 1}
-                    onView={() => onView(b)}
-                    onEdit={() => onEdit(b)}
-                    onHide={() => onHide(bannerId)}
-                    onDelete={() => handleDeleteRequest(b)}
-                    onMoveUp={() => handleMoveUp(bannerId)} 
-                    onMoveDown={() => handleMoveDown(bannerId)}
-                    onDragStart={onDragStart} 
-                    onDragOver={onDragOver}
-                    onDrop={onDrop} 
-                    onDragEnd={onDragEnd}
-                  />
-                );
-              })}
-            </Flex>
-          )}
+          {renderContent()}
         </Box>
 
         {/* Hint */}

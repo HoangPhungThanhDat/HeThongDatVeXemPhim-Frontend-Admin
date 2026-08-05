@@ -1,8 +1,18 @@
+// src/api/MovieApi.js
 import axios from "./AxiosAdmin";
 
 const MovieApi = {
   getAll: () => axios.get("/movies"),
   getById: (MovieId) => axios.get(`/movies/${MovieId}`),
+  
+  // ✅ Lấy phim theo trạng thái
+  getByStatus: (status) => axios.get(`/movies?status=${status}`),
+  
+  // ✅ Lấy phim đang chiếu
+  getNowShowing: () => axios.get(`/movies?status=NowShowing`),
+  
+  // ✅ Lấy phim sắp chiếu
+  getComingSoon: () => axios.get(`/movies?status=ComingSoon`),
 
   create: (data, config) => axios.post("/movies", data, config),
 

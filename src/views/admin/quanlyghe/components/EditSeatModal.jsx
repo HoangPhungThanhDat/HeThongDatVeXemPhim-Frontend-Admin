@@ -1,4 +1,5 @@
-// components/EditSeatModal.jsx
+// src/views/admin/quanlyghe/components/EditSeatModal.jsx
+
 import React, { useState, useEffect } from "react";
 import {
   Modal, ModalOverlay, ModalContent, ModalHeader,
@@ -6,9 +7,55 @@ import {
   FormControl, FormLabel, Select, VStack, Box, Flex, Text, Button, Icon,
   useToast
 } from "@chakra-ui/react";
-import { MdEdit, MdWarning } from "react-icons/md";
+import { MdEdit, MdWarning, MdEventSeat } from "react-icons/md";
 import { getSeatColors } from "./shared/StatCard";
-import { SEAT_TYPES, ROW_LABELS } from "../constants";
+import { ROW_LABELS } from "../constants";
+
+// ✅ Hàm lấy màu cho từng loại ghế
+const getSeatColor = (type) => {
+  const colors = {
+    'Normal': '#d1fae5',
+    'VIP': '#f5f3ff',
+    'Couple': '#fef3c7',  // ✅ Vàng cho ghế đôi
+    'Sweetbox': '#fdf2f8',
+    'Accessible': '#f0f9ff',
+  };
+  return colors[type] || '#d1fae5';
+};
+
+const getSeatBorder = (type) => {
+  const borders = {
+    'Normal': '#6ee7b7',
+    'VIP': '#a78bfa',
+    'Couple': '#fcd34d',  // ✅ Viền vàng cho ghế đôi
+    'Sweetbox': '#f9a8d4',
+    'Accessible': '#7dd3fc',
+  };
+  return borders[type] || '#6ee7b7';
+};
+
+const getSeatTextColor = (type) => {
+  const colors = {
+    'Normal': '#065f46',
+    'VIP': '#5b21b6',
+    'Couple': '#92400e',  // ✅ Màu chữ vàng đậm
+    'Sweetbox': '#9d174d',
+    'Accessible': '#1e40af',
+  };
+  return colors[type] || '#374151';
+};
+
+// ✅ Hàm lấy icon cho từng loại ghế
+const getSeatIcon = (type) => {
+  const icons = {
+    'Normal': 'A',
+    'VIP': '⭐',
+    'Couple': '💑',
+    'Sweetbox': '💝',
+    'Accessible': '♿',
+  };
+  return icons[type] || 'A';
+};
 
 export default function EditSeatModal({ 
   isOpen, 
@@ -24,9 +71,10 @@ export default function EditSeatModal({
   const toast = useToast();
   
   const [type, setType] = useState("Normal");
-  const [status, setStatus] = useState("Available"); // Chỉ có "Available" hoặc "Booked"
+  const [status, setStatus] = useState("Available");
   const [isLoading, setIsLoading] = useState(false);
 
+  // Reset state khi modal mở
   useEffect(() => {
     if (seat && isOpen) {
       console.log("📝 EditSeatModal - seat data:", seat);
@@ -39,6 +87,8 @@ export default function EditSeatModal({
         const typeLower = seat.type.toLowerCase();
         if (typeLower === 'vip') mappedType = "VIP";
         else if (typeLower === 'couple') mappedType = "Couple";
+        else if (typeLower === 'sweetbox') mappedType = "Sweetbox";
+        else if (typeLower === 'accessible') mappedType = "Accessible";
         else mappedType = "Normal";
       }
       setType(mappedType);
@@ -61,6 +111,7 @@ export default function EditSeatModal({
     }
   }, [seat, isOpen]);
 
+  // Reset loading khi modal đóng
   useEffect(() => {
     if (!isOpen) {
       setIsLoading(false);
@@ -74,41 +125,51 @@ export default function EditSeatModal({
         status: "warning",
         duration: 3000,
         isClosable: true,
+        position: "top-right",
+      });
+      return;
+    }
+
+    if (typeof onSave !== 'function') {
+      console.error("❌ onSave is not a function");
+      toast({
+        title: "Lỗi hệ thống",
+        description: "Không thể lưu thay đổi",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+        position: "top-right",
       });
       return;
     }
 
     setIsLoading(true);
     try {
-      // CHỈ CHO PHÉP 2 GIÁ TRỊ: "Available" HOẶC "Booked"
-      const seatTypeValue = type; // "Normal", "VIP", "Couple"
-      const statusValue = status; // "Available" hoặc "Booked"
+      const finalStatus = status === "Booked" ? "Booked" : "Available";
       
-      // ĐẢM BẢO STATUS CHỈ LÀ "Available" HOẶC "Booked"
-      let finalStatus = "Available";
-      if (statusValue === "Booked") {
-        finalStatus = "Booked";
-      } else {
-        finalStatus = "Available";
-      }
-
       const updatedSeat = {
         ...seat,
-        SeatType: seatTypeValue,
+        SeatType: type,
         Status: finalStatus,
+        seat_type: type,
+        status: finalStatus,
         type: type.toLowerCase(),
         booked: finalStatus === "Booked"
       };
       
-      console.log("📤 Saving seat - SeatType:", seatTypeValue);
-      console.log("📤 Saving seat - Status:", finalStatus);
-      console.log("📤 Full payload:", updatedSeat);
+      console.log("📤 Saving seat - Payload:", {
+        SeatId: seat.SeatId || seat.id,
+        SeatType: type,
+        Status: finalStatus,
+        full: updatedSeat
+      });
       
-      await onSave(updatedSeat);
+      const result = await onSave(updatedSeat);
+      console.log("✅ Save result:", result);
       
       toast({
         title: "✅ Cập nhật ghế thành công!",
-        description: `Loại: ${seatTypeValue} | Trạng thái: ${finalStatus === "Booked" ? "Đã đặt" : "Còn trống"}`,
+        description: `Loại: ${type} | Trạng thái: ${finalStatus === "Booked" ? "Đã đặt" : "Còn trống"}`,
         status: "success",
         duration: 3000,
         isClosable: true,
@@ -118,14 +179,16 @@ export default function EditSeatModal({
       onClose();
     } catch (error) {
       console.error("❌ Lỗi khi lưu ghế:", error);
-      console.error("❌ Chi tiết lỗi:", error.response?.data);
       
       let errorMessage = "Vui lòng thử lại";
       if (error.response?.data?.errors) {
         const errors = error.response.data.errors;
-        errorMessage = Object.values(errors).flat().join(", ");
+        const errorValues = Object.values(errors).flat();
+        errorMessage = errorValues.join(", ");
       } else if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
       }
       
       toast({
@@ -141,18 +204,30 @@ export default function EditSeatModal({
     }
   };
 
-  if (!seat) return null;
+  if (!seat) {
+    return null;
+  }
 
-  const seatId = seat.id || seat.SeatId || "N/A";
+  const seatId = seat.SeatId || seat.id || "N/A";
   const rowLabel = seat.row !== undefined ? ROW_LABELS[seat.row] : (seat.Row || "N/A");
   const seatNumber = seat.col !== undefined ? seat.col + 1 : (seat.Number || "N/A");
+
+  const seatTypes = [
+    { value: "Normal", label: "Ghế thường (Normal)", color: "#10b981" },
+    { value: "VIP", label: "Ghế VIP", color: "#8b5cf6" },
+    { value: "Couple", label: "Ghế đôi (Couple)", color: "#f59e0b" },
+    { value: "Sweetbox", label: "Sweetbox", color: "#ec4899" },
+    { value: "Accessible", label: "Ghế ưu tiên", color: "#3b82f6" },
+  ];
+
+  const isLoadingState = isLoading || parentLoading;
 
   return (
     <Modal 
       isOpen={isOpen} 
       onClose={onClose} 
       size="md" 
-      closeOnOverlayClick={!isLoading && !parentLoading}
+      closeOnOverlayClick={!isLoadingState}
       isCentered
     >
       <ModalOverlay backdropFilter="blur(4px)" />
@@ -180,7 +255,7 @@ export default function EditSeatModal({
         </ModalHeader>
         <ModalCloseButton 
           color={colors.subColor} 
-          isDisabled={isLoading || parentLoading} 
+          isDisabled={isLoadingState} 
           mt="8px"
           mr="8px"
         />
@@ -222,19 +297,21 @@ export default function EditSeatModal({
                 color={colors.textColor}
                 value={type}
                 onChange={(e) => setType(e.target.value)}
-                isDisabled={isLoading || parentLoading}
+                isDisabled={isLoadingState}
                 _focus={{ border: "1.5px solid #f97316", boxShadow: "0 0 0 3px rgba(249,115,22,0.1)" }}
                 _hover={{ border: "1.5px solid #f97316" }}
                 transition="all 0.2s"
                 size="lg"
               >
-                <option value="Normal">Ghế thường (Normal)</option>
-                <option value="VIP">Ghế VIP</option>
-                <option value="Couple">Ghế đôi (Couple)</option>
+                {seatTypes.map((st) => (
+                  <option key={st.value} value={st.value}>
+                    {st.label}
+                  </option>
+                ))}
               </Select>
             </FormControl>
 
-            {/* Trạng thái - CHỈ 2 LỰA CHỌN */}
+            {/* Trạng thái */}
             <FormControl>
               <FormLabel fontSize="13px" fontWeight="700" color={colors.subColor} display="flex" alignItems="center" gap="8px">
                 <Icon as={MdEdit} boxSize="14px" color="#f97316" />
@@ -247,7 +324,7 @@ export default function EditSeatModal({
                 color={colors.textColor}
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                isDisabled={isLoading || parentLoading}
+                isDisabled={isLoadingState}
                 _focus={{ border: "1.5px solid #f97316", boxShadow: "0 0 0 3px rgba(249,115,22,0.1)" }}
                 _hover={{ border: "1.5px solid #f97316" }}
                 transition="all 0.2s"
@@ -257,6 +334,40 @@ export default function EditSeatModal({
                 <option value="Booked">🔴 Đã đặt</option>
               </Select>
             </FormControl>
+
+            {/* ✅ Preview - SỬA MÀU CHO COUPLE */}
+            <Box 
+              p="12px 14px" 
+              borderRadius="10px" 
+              bg={isDark ? "#1a2744" : "#f0fdf4"}
+              border={`1px solid ${isDark ? "#1a3a5c" : "#86efac"}`}
+            >
+              <Flex align="center" gap="12px">
+                <Box
+                  w="40px"
+                  h="40px"
+                  borderRadius="8px"
+                  bg={getSeatColor(type)}
+                  border={`2px solid ${getSeatBorder(type)}`}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  fontSize="16px"
+                  fontWeight="700"
+                  color={getSeatTextColor(type)}
+                >
+                  {getSeatIcon(type)}
+                </Box>
+                <Box>
+                  <Text fontSize="14px" fontWeight="700" color={colors.textColor}>
+                    {seatTypes.find(t => t.value === type)?.label || "Ghế thường"}
+                  </Text>
+                  <Text fontSize="12px" color={status === "Booked" ? "#dc2626" : "#059669"}>
+                    {status === "Booked" ? "🔴 Đã đặt" : "🟢 Còn trống"}
+                  </Text>
+                </Box>
+              </Flex>
+            </Box>
 
             {/* Cảnh báo */}
             <Box 
@@ -287,7 +398,7 @@ export default function EditSeatModal({
               border={`1.5px solid ${colors.borderCard}`}
               _hover={{ bg: isDark ? "#2d3748" : "#f8fafc" }}
               onClick={onClose}
-              isDisabled={isLoading || parentLoading}
+              isDisabled={isLoadingState}
             >
               Hủy bỏ
             </Button>
@@ -308,8 +419,9 @@ export default function EditSeatModal({
               _active={{ transform: "translateY(0)" }}
               transition="all 0.2s"
               onClick={handleSave}
-              isLoading={isLoading || parentLoading}
+              isLoading={isLoadingState}
               loadingText="Đang lưu..."
+              isDisabled={!seat}
             >
               💾 Lưu thay đổi
             </Button>

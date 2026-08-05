@@ -52,7 +52,6 @@ const labelStyle = (isDark) => ({
 export const ComboForm = ({ combo, onCancel, onSave, isAdd = false, isDark }) => {
   const fileInputRef = useRef(null);
   
-  // ✅ Khởi tạo form với dữ liệu từ combo (nếu có)
   const [form, setForm] = useState(() => {
     if (combo) {
       return {
@@ -94,7 +93,6 @@ export const ComboForm = ({ combo, onCancel, onSave, isAdd = false, isDark }) =>
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Kiểm tra kích thước file (tối đa 5MB)
       if (file.size > 5 * 1024 * 1024) {
         Swal.fire({
           toast: true,
@@ -108,7 +106,6 @@ export const ComboForm = ({ combo, onCancel, onSave, isAdd = false, isDark }) =>
         return;
       }
       
-      // Kiểm tra định dạng file
       const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
       if (!allowedTypes.includes(file.type)) {
         Swal.fire({
@@ -123,12 +120,11 @@ export const ComboForm = ({ combo, onCancel, onSave, isAdd = false, isDark }) =>
         return;
       }
       
-      // Lưu file và tạo preview
       const previewUrl = URL.createObjectURL(file);
       setImagePreview(previewUrl);
       set("imageFile", file);
-      set("imageUrl", ""); // Xóa URL cũ
-      set("image", ""); // Xóa image cũ
+      set("imageUrl", "");
+      set("image", "");
     }
   };
 
@@ -149,7 +145,7 @@ export const ComboForm = ({ combo, onCancel, onSave, isAdd = false, isDark }) =>
     set("imageUrl", url);
     set("image", url);
     setImagePreview(url);
-    set("imageFile", null); // Xóa file nếu có
+    set("imageFile", null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -158,7 +154,6 @@ export const ComboForm = ({ combo, onCancel, onSave, isAdd = false, isDark }) =>
   // ✅ Hàm submit form
   const handleSubmit = async () => {
     try {
-      // Kiểm tra các trường bắt buộc
       if (!form.name || form.name.trim() === "") {
         Swal.fire({
           toast: true,
@@ -195,7 +190,6 @@ export const ComboForm = ({ combo, onCancel, onSave, isAdd = false, isDark }) =>
         return;
       }
 
-      // Kiểm tra thành phần combo (ít nhất 1 mục)
       const validItems = form.items.filter(i => i.trim() !== "");
       if (validItems.length === 0) {
         Swal.fire({
@@ -211,7 +205,6 @@ export const ComboForm = ({ combo, onCancel, onSave, isAdd = false, isDark }) =>
 
       setIsSubmitting(true);
 
-      // ✅ Chuẩn bị dữ liệu gửi đi
       const submitData = {
         name: form.name.trim(),
         description: form.description || "",
@@ -223,20 +216,11 @@ export const ComboForm = ({ combo, onCancel, onSave, isAdd = false, isDark }) =>
         isSeasonal: form.isSeasonal || false,
         tag: form.tag || "Mới",
         items: validItems,
-        // ✅ QUAN TRỌNG: Chỉ gửi ảnh dưới dạng file hoặc URL thật
-        imageFile: form.imageFile || null, // File ảnh (nếu có)
-        imageUrl: form.imageUrl || "", // URL ảnh (nếu có)
-        // ✅ Nếu không có ảnh và đang sửa, giữ nguyên ảnh cũ
-        existingImage: combo?.image || "", // Ảnh cũ từ database
+        // ✅ Chỉ gửi file nếu có ảnh mới
+        imageFile: form.imageFile || null,
+        // ✅ Nếu không có ảnh mới và đang sửa, giữ nguyên ảnh cũ
+        existingImage: combo?.image || "",
       };
-
-      console.log("📤 Submit data:", {
-        name: submitData.name,
-        price: submitData.price,
-        hasFile: !!submitData.imageFile,
-        imageUrl: submitData.imageUrl,
-        existingImage: submitData.existingImage,
-      });
 
       await onSave(submitData);
     } catch (error) {

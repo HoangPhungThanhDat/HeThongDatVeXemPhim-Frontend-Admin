@@ -1,8 +1,16 @@
+// src/api/UserApi.js
 import axiosAdmin from "./AxiosAdmin";
 
 const UserApi = {
   getAll: () => axiosAdmin.get("/users"),
   getById: (id) => axiosAdmin.get(`/users/${id}`),
+  
+  // ✅ Lấy user theo email
+  getByEmail: (email) => axiosAdmin.get(`/users?email=${email}`),
+  
+  // ✅ Lấy user theo vai trò
+  getByRole: (roleId) => axiosAdmin.get(`/users?roleId=${roleId}`),
+  
   create: (data) => axiosAdmin.post("/users", data),
   update: (id, data) => axiosAdmin.put(`/users/${id}`, data),
   delete: (id) => axiosAdmin.delete(`/users/${id}`),

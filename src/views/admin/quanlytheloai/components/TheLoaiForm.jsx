@@ -1,9 +1,8 @@
-
-
 import { useState } from "react";
 import {
   Box, Grid, Text, Button, Flex, SimpleGrid, FormControl,
   Input, Select, Textarea, Icon, Switch, useColorModeValue,
+  Spinner
 } from "@chakra-ui/react";
 import {
   MdArrowBack, MdClose, MdCheckCircle, MdStar,
@@ -17,6 +16,7 @@ import { STATUS_OPTS, ICON_OPTIONS, GENRE_PALETTES } from "../constants";
 
 export function TheLoaiForm({ genre, onCancel, onSave, isAdd = false }) {
   const isDark = useColorModeValue(false, true);
+  const [isSubmitting, setIsSubmitting] = useState(false); //  Thêm state loading
   
   const empty = {
     name: "",
@@ -109,21 +109,37 @@ export function TheLoaiForm({ genre, onCancel, onSave, isAdd = false }) {
 
   const PreviewIcon = getIconComponent(form.icon);
 
-  const handleSubmit = () => {
+  //  Xử lý submit với loading
+  const handleSubmit = async () => {
     if (!form.name.trim()) {
       alert("Vui lòng nhập tên thể loại");
       return;
     }
-    const submitData = {
-      Name: form.name.trim(),
-      Slug: form.slug || toSlug(form.name),
-      Color: form.color,
-      Icon: form.icon,
-      Description: form.description,
-      Status: form.status,
-      Featured: form.featured,
-    };
-    onSave(submitData);
+    
+    // Bật loading
+    setIsSubmitting(true);
+    
+    try {
+      const submitData = {
+        Name: form.name.trim(),
+        Slug: form.slug || toSlug(form.name),
+        Color: form.color,
+        Icon: form.icon,
+        Description: form.description,
+        Status: form.status,
+        Featured: form.featured,
+      };
+      
+      // Gọi hàm onSave và đợi nó hoàn thành
+      await onSave(submitData);
+      
+      // Nếu thành công, không cần làm gì thêm vì onSave đã xử lý
+    } catch (error) {
+      console.error("Lỗi khi lưu thể loại:", error);
+    } finally {
+      // Tắt loading sau khi hoàn thành (cả thành công và thất bại)
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -137,6 +153,7 @@ export function TheLoaiForm({ genre, onCancel, onSave, isAdd = false }) {
           border={`1.5px solid ${cardBorder}`}
           _hover={{ bg: filterBg }}
           flexShrink="0" onClick={onCancel}
+          isDisabled={isSubmitting} //  Disable khi đang loading
         >
           Quay lại
         </Button>
@@ -173,6 +190,7 @@ export function TheLoaiForm({ genre, onCancel, onSave, isAdd = false }) {
                     set("name", e.target.value);
                     if (!form.slug || isAdd) set("slug", toSlug(e.target.value));
                   }} 
+                  isDisabled={isSubmitting} //  Disable khi đang loading
                 />
               </Box>
               <Box>
@@ -181,6 +199,7 @@ export function TheLoaiForm({ genre, onCancel, onSave, isAdd = false }) {
                   value={form.slug} 
                   onChange={(e) => set("slug", e.target.value)}
                   bg={form.slug ? (isDark ? "rgba(16,185,129,0.08)" : "#f0fdf4") : inputBg}
+                  isDisabled={isSubmitting} //  Disable khi đang loading
                 />
                 {form.slug && (
                   <Text fontSize="10px" color="#10b981" mt="4px" fontWeight="600">
@@ -199,6 +218,7 @@ export function TheLoaiForm({ genre, onCancel, onSave, isAdd = false }) {
                   transition="all 0.2s"
                   rows={3} placeholder="Mô tả ngắn về thể loại phim này..."
                   value={form.description} onChange={(e) => set("description", e.target.value)}
+                  isDisabled={isSubmitting} //  Disable khi đang loading
                 />
               </Box>
             </Flex>
@@ -223,8 +243,9 @@ export function TheLoaiForm({ genre, onCancel, onSave, isAdd = false }) {
                       border={form.status === s.value
                         ? (s.value === "Active" ? "2px solid #6ee7b7" : `2px solid ${cardBorder}`)
                         : "2px solid transparent"}
-                      onClick={() => set("status", s.value)}
+                      onClick={() => !isSubmitting && set("status", s.value)} //  Không cho click khi loading
                       transition="all 0.15s"
+                      opacity={isSubmitting ? 0.5 : 1} //  Mờ khi loading
                     >
                       <Flex align="center" gap="6px">
                         <Box w="6px" h="6px" borderRadius="full"
@@ -243,9 +264,10 @@ export function TheLoaiForm({ genre, onCancel, onSave, isAdd = false }) {
               <Box p="12px 14px" borderRadius="10px"
                 bg={form.featured ? (isDark ? "rgba(249,115,22,0.08)" : "#fff7ed") : filterBg}
                 border={`1.5px solid ${form.featured ? (isDark ? "rgba(249,115,22,0.3)" : "#fed7aa") : cardBorder}`}
-                cursor="pointer"
-                onClick={() => set("featured", !form.featured)}
+                cursor={isSubmitting ? "not-allowed" : "pointer"} //  Không cho click khi loading
+                onClick={() => !isSubmitting && set("featured", !form.featured)} //  Kiểm tra loading
                 transition="all 0.2s"
+                opacity={isSubmitting ? 0.5 : 1} //  Mờ khi loading
               >
                 <Flex align="center" justify="space-between">
                   <Box>
@@ -280,6 +302,8 @@ export function TheLoaiForm({ genre, onCancel, onSave, isAdd = false }) {
         {/* Right - Preview */}
         <Box {...cardStyle} borderRadius="16px" p={{ base: "16px", md: "20px" }}
           position={{ base: "static", lg: "sticky" }} top="90px"
+          opacity={isSubmitting ? 0.6 : 1} //  Mờ khi loading
+          transition="opacity 0.3s"
         >
           <SectionTitle label="Xem trước" />
           {form.name ? (
@@ -341,7 +365,7 @@ export function TheLoaiForm({ genre, onCancel, onSave, isAdd = false }) {
         </Box>
       </Grid>
 
-      {/* Save bar */}
+      {/* Save bar -  Đã có loading */}
       <Box {...cardStyle} borderRadius="14px" p={{ base: "14px 16px", md: "16px 22px" }} mt="16px"
         position={{ base: "sticky", md: "static" }} bottom="0" zIndex="10"
       >
@@ -352,19 +376,40 @@ export function TheLoaiForm({ genre, onCancel, onSave, isAdd = false }) {
             _hover={{ bg: filterBg }} transition="all 0.2s"
             leftIcon={<Icon as={MdClose} />}
             onClick={onCancel}
+            isDisabled={isSubmitting} //  Disable khi đang loading
           >
             Hủy bỏ
           </Button>
           <Button flex={{ base: "2", md: "none" }}
             h="44px" px="28px" borderRadius="10px" fontWeight="700" fontSize="13px"
-            bg="linear-gradient(135deg, #f97316 0%, #fb923c 60%, #fbbf24 100%)"
-            color="white" boxShadow="0 4px 18px rgba(249,115,22,0.38)"
-            _hover={{ boxShadow: "0 8px 28px rgba(249,115,22,0.48)", transform: "translateY(-1px)" }}
-            _active={{ transform: "translateY(0)" }} transition="all 0.2s"
-            leftIcon={<Icon as={MdCheckCircle} />}
+            bg={isSubmitting 
+              ? "linear-gradient(135deg, #94a3b8, #64748b)" //  Màu xám khi loading
+              : "linear-gradient(135deg, #f97316 0%, #fb923c 60%, #fbbf24 100%)"
+            }
+            color="white" 
+            boxShadow={isSubmitting 
+              ? "none" 
+              : "0 4px 18px rgba(249,115,22,0.38)"
+            }
+            _hover={!isSubmitting && { 
+              boxShadow: "0 8px 28px rgba(249,115,22,0.48)", 
+              transform: "translateY(-1px)" 
+            }}
+            _active={!isSubmitting && { transform: "translateY(0)" }}
+            transition="all 0.2s"
+            leftIcon={!isSubmitting && <Icon as={MdCheckCircle} />} //  Ẩn icon khi loading
             onClick={handleSubmit}
+            isDisabled={isSubmitting} //  Disable khi đang loading
+            cursor={isSubmitting ? "not-allowed" : "pointer"}
           >
-            {isAdd ? "Thêm thể loại" : "Lưu thay đổi"}
+            {isSubmitting ? (
+              <Flex align="center" gap="8px">
+                <Spinner size="sm" color="white" />
+                <Text>Đang lưu...</Text>
+              </Flex>
+            ) : (
+              isAdd ? "Thêm thể loại" : "Lưu thay đổi"
+            )}
           </Button>
         </Flex>
       </Box>

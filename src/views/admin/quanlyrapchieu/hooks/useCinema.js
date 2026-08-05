@@ -17,7 +17,6 @@ export const useCinema = () => {
       const data = response.data.data || response.data || [];
       setCinemas(data);
       
-      // Khởi tạo rooms cho từng cinema
       const roomsData = {};
       data.forEach(c => {
         roomsData[c.CinemaId] = c.Rooms || [];
@@ -54,6 +53,7 @@ export const useCinema = () => {
     });
   }, []);
 
+  // ✅ ADD CINEMA - Hỗ trợ upload ảnh lên Cloudinary
   const handleAddCinema = useCallback(async (formData) => {
     setIsSubmitting(true);
     try {
@@ -62,22 +62,31 @@ export const useCinema = () => {
       payload.append("Address", formData.Address);
       payload.append("City", formData.City);
       payload.append("Phone", formData.Phone);
-      payload.append("Email", formData.Email);
-      payload.append("Status", formData.Status);
+      payload.append("Email", formData.Email || "");
+      payload.append("Status", formData.Status || "Active");
       payload.append("OpenTime", formData.OpenTime || "08:00 – 23:00");
       payload.append("Description", formData.Description || "");
       payload.append("Manager", formData.Manager || "");
       
-      if (formData.ImageFile) {
+      // ✅ Upload ảnh lên Cloudinary
+      if (formData.ImageFile instanceof File) {
         payload.append("ImageUrl", formData.ImageFile);
       }
+
+      console.log("📤 Creating cinema:", {
+        Name: formData.Name,
+        Address: formData.Address,
+        hasImage: formData.ImageFile instanceof File,
+      });
 
       const response = await CinemasApi.create(payload, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+      
       const newCinema = response.data.data || response.data;
       setCinemas((prev) => [newCinema, ...prev]);
       setRooms((prev) => ({ ...prev, [newCinema.CinemaId]: [] }));
+      
       showToast("success", "🎉 Thêm rạp thành công!");
       setIsSubmitting(false);
       return true;
@@ -89,6 +98,7 @@ export const useCinema = () => {
     }
   }, [showToast]);
 
+  // ✅ UPDATE CINEMA - Hỗ trợ upload ảnh mới lên Cloudinary
   const handleUpdateCinema = useCallback(async (cinemaId, formData) => {
     setIsSubmitting(true);
     try {
@@ -98,21 +108,30 @@ export const useCinema = () => {
       payload.append("Address", formData.Address);
       payload.append("City", formData.City);
       payload.append("Phone", formData.Phone);
-      payload.append("Email", formData.Email);
-      payload.append("Status", formData.Status);
+      payload.append("Email", formData.Email || "");
+      payload.append("Status", formData.Status || "Active");
       payload.append("OpenTime", formData.OpenTime || "08:00 – 23:00");
       payload.append("Description", formData.Description || "");
       payload.append("Manager", formData.Manager || "");
       
-      if (formData.ImageFile) {
+      // ✅ Upload ảnh mới lên Cloudinary (nếu có)
+      if (formData.ImageFile instanceof File) {
         payload.append("ImageUrl", formData.ImageFile);
       }
+
+      console.log(`📤 Updating cinema ${cinemaId}:`, {
+        Name: formData.Name,
+        Address: formData.Address,
+        hasImage: formData.ImageFile instanceof File,
+      });
 
       const response = await CinemasApi.update(cinemaId, payload, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+      
       const updatedCinema = response.data.data || response.data;
       setCinemas((prev) => prev.map((c) => c.CinemaId === cinemaId ? updatedCinema : c));
+      
       showToast("success", "✅ Cập nhật rạp thành công!");
       setIsSubmitting(false);
       return true;
@@ -124,6 +143,7 @@ export const useCinema = () => {
     }
   }, [showToast]);
 
+  // ✅ DELETE CINEMA - Xóa cả ảnh trên Cloudinary
   const handleDeleteCinema = useCallback(async (cinemaId) => {
     try {
       await CinemasApi.delete(cinemaId);
@@ -142,6 +162,7 @@ export const useCinema = () => {
     }
   }, [showToast]);
 
+  // ✅ TOGGLE STATUS - Bật/tắt trạng thái rạp
   const handleToggleStatus = useCallback(async (cinemaId, currentStatus) => {
     try {
       const cinema = cinemas.find(c => c.CinemaId === cinemaId);
@@ -150,12 +171,20 @@ export const useCinema = () => {
       const newStatus = currentStatus === "Active" ? "Inactive" : "Active";
       const payload = new FormData();
       payload.append("_method", "PUT");
-      payload.append("Name", cinema.Name);
-      payload.append("Address", cinema.Address);
-      payload.append("City", cinema.City);
-      payload.append("Phone", cinema.Phone);
-      payload.append("Email", cinema.Email);
+      payload.append("Name", cinema.Name || "");
+      payload.append("Address", cinema.Address || "");
+      payload.append("City", cinema.City || "");
+      payload.append("Phone", cinema.Phone || "");
+      payload.append("Email", cinema.Email || "");
       payload.append("Status", newStatus);
+      payload.append("OpenTime", cinema.OpenTime || "08:00 – 23:00");
+      payload.append("Description", cinema.Description || "");
+      payload.append("Manager", cinema.Manager || "");
+      
+      // ✅ Giữ nguyên ảnh cũ
+      if (cinema.ImageUrl) {
+        payload.append("ImageUrl", cinema.ImageUrl);
+      }
 
       await CinemasApi.update(cinemaId, payload, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -172,91 +201,12 @@ export const useCinema = () => {
     }
   }, [cinemas, showToast]);
 
-  const handleAddRoom = useCallback((cinemaId, roomData) => {
-    const newRoom = {
-      RoomId: Date.now(),
-      Name: roomData.Name,
-      Type: roomData.Type,
-      Seats: roomData.Seats,
-      Status: roomData.Status,
-      Price: roomData.Price,
-      CurrentMovie: null,
-      NextShow: null,
-    };
-    
-    setRooms((prev) => ({
-      ...prev,
-      [cinemaId]: [...(prev[cinemaId] || []), newRoom],
-    }));
-    
-    // Update cinema stats
-    setCinemas((prev) => prev.map((c) => {
-      if (c.CinemaId === cinemaId) {
-        const totalRooms = (rooms[cinemaId]?.length || 0) + 1;
-        const totalSeats = (rooms[cinemaId] || []).reduce((s, r) => s + (r.Seats || 0), 0) + roomData.Seats;
-        const activeRooms = (rooms[cinemaId] || []).filter(r => r.Status === "Active").length + (roomData.Status === "Active" ? 1 : 0);
-        return { ...c, TotalRooms: totalRooms, TotalSeats: totalSeats, ActiveRooms: activeRooms };
-      }
-      return c;
-    }));
-    
-    showToast("success", "✅ Thêm phòng chiếu thành công!");
-  }, [rooms, showToast]);
-
-  const handleToggleRoomStatus = useCallback((cinemaId, roomId) => {
-    setRooms((prev) => {
-      const updated = (prev[cinemaId] || []).map((r) =>
-        (r.RoomId === roomId || r.id === roomId)
-          ? { ...r, Status: r.Status === "Active" ? "Inactive" : "Active" }
-          : r
-      );
-      return { ...prev, [cinemaId]: updated };
-    });
-    
-    const room = (rooms[cinemaId] || []).find(r => r.RoomId === roomId || r.id === roomId);
-    const isActive = room?.Status === "Active";
-    setCinemas((prev) => prev.map((c) => {
-      if (c.CinemaId === cinemaId) {
-        const activeRooms = (rooms[cinemaId] || []).filter(r => 
-          r.Status === "Active" && (r.RoomId !== roomId && r.id !== roomId)
-        ).length + (isActive ? 0 : 1);
-        return { ...c, ActiveRooms: activeRooms };
-      }
-      return c;
-    }));
-    
-    showToast("info", isActive ? "⏸ Phòng đã chuyển bảo trì" : "✅ Phòng đã kích hoạt");
-  }, [rooms, showToast]);
-
-  const handleDeleteRoom = useCallback((cinemaId, roomId) => {
-    setRooms((prev) => ({
-      ...prev,
-      [cinemaId]: (prev[cinemaId] || []).filter(r => r.RoomId !== roomId && r.id !== roomId),
-    }));
-    
-    const room = (rooms[cinemaId] || []).find(r => r.RoomId === roomId || r.id === roomId);
-    setCinemas((prev) => prev.map((c) => {
-      if (c.CinemaId === cinemaId) {
-        const totalRooms = (rooms[cinemaId]?.length || 0) - 1;
-        const totalSeats = (rooms[cinemaId] || []).reduce((s, r) => 
-          s + (r.Seats || 0), 0) - (room?.Seats || 0);
-        const activeRooms = (rooms[cinemaId] || []).filter(r => 
-          r.Status === "Active" && r.RoomId !== roomId && r.id !== roomId
-        ).length;
-        return { ...c, TotalRooms: totalRooms, TotalSeats: totalSeats, ActiveRooms: activeRooms };
-      }
-      return c;
-    }));
-    
-    showToast("info", "🗑️ Đã xóa phòng chiếu");
-  }, [rooms, showToast]);
-
-  // ✅ Cập nhật getCinemaStats - TÍNH TỔNG GHẾ
+  // ✅ GET CINEMA STATS - Tính tổng ghế từ API
   const getCinemaStats = useCallback(() => {
     let totalRooms = 0;
     let totalSeats = 0;
     
-    // Tính tổng số phòng và ghế từ tất cả rạp
+    // ✅ Tính tổng từ cinemas (dữ liệu từ API)
     cinemas.forEach(cinema => {
       totalRooms += cinema.TotalRooms || 0;
       totalSeats += cinema.TotalSeats || 0;
@@ -270,6 +220,49 @@ export const useCinema = () => {
       totalSeats: totalSeats,
     };
   }, [cinemas]);
+
+  // ✅ ADD ROOM - Thêm phòng chiếu
+  const handleAddRoom = useCallback((cinemaId, roomData) => {
+    const newRoom = {
+      RoomId: Date.now(),
+      Name: roomData.Name,
+      RoomType: roomData.RoomType || "2D",
+      Seats: roomData.Seats || 0,
+      Status: roomData.Status || "Active",
+    };
+    
+    setRooms((prev) => ({
+      ...prev,
+      [cinemaId]: [...(prev[cinemaId] || []), newRoom],
+    }));
+    
+    showToast("success", "✅ Thêm phòng chiếu thành công!");
+  }, [showToast]);
+
+  // ✅ TOGGLE ROOM STATUS - Bật/tắt trạng thái phòng
+  const handleToggleRoomStatus = useCallback((cinemaId, roomId) => {
+    setRooms((prev) => {
+      const updated = (prev[cinemaId] || []).map((r) =>
+        (r.RoomId === roomId || r.id === roomId)
+          ? { ...r, Status: r.Status === "Active" ? "Inactive" : "Active" }
+          : r
+      );
+      return { ...prev, [cinemaId]: updated };
+    });
+    
+    const room = (rooms[cinemaId] || []).find(r => r.RoomId === roomId || r.id === roomId);
+    const isActive = room?.Status === "Active";
+    showToast("info", isActive ? "⏸ Phòng đã chuyển bảo trì" : "✅ Phòng đã kích hoạt");
+  }, [rooms, showToast]);
+
+  // ✅ DELETE ROOM - Xóa phòng chiếu
+  const handleDeleteRoom = useCallback((cinemaId, roomId) => {
+    setRooms((prev) => ({
+      ...prev,
+      [cinemaId]: (prev[cinemaId] || []).filter(r => r.RoomId !== roomId && r.id !== roomId),
+    }));
+    showToast("info", "🗑️ Đã xóa phòng chiếu");
+  }, [showToast]);
 
   return {
     cinemas,

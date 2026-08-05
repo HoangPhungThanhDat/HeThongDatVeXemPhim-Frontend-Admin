@@ -22,8 +22,16 @@ export const useUser = () => {
     [search, statusFilter]
   );
 
-  const { data: users, total, totalPages, page, loading, goToPage, reload } =
-    useServerPagination(UserApi.getPaged, { limit: PAGE_SIZE, extraParams });
+  const { 
+    data: users, 
+    total, 
+    totalPages, 
+    page, 
+    loading, 
+    goToPage, 
+    reload,
+    prependData, // ✅ Lấy prependData từ hook
+  } = useServerPagination(UserApi.getPaged, { limit: PAGE_SIZE, extraParams });
 
   // Load roles - SỬA LẠI
   useEffect(() => {
@@ -114,12 +122,30 @@ export const useUser = () => {
     }
   }, [reload, showToast]);
 
-  // Add user
+  // ✅ SỬA: Add user - Thêm vào đầu danh sách
   const handleAddUser = useCallback(async (formData) => {
     setIsSubmitting(true);
     try {
-      await UserApi.create(formData);
-      reload();
+      const response = await UserApi.create(formData);
+      const newUser = response.data?.data || response.data || {};
+      
+      // ✅ Tạo object user mới với đầy đủ fields
+      const userItem = {
+        UserId: newUser.UserId || newUser.id,
+        FullName: newUser.FullName || formData.FullName || "",
+        Email: newUser.Email || formData.Email || "",
+        PhoneNumber: newUser.PhoneNumber || formData.PhoneNumber || "",
+        Status: newUser.Status || formData.Status || "Active",
+        RoleId: newUser.RoleId || formData.RoleId || 2,
+        CreatedAt: new Date().toISOString(),
+        UpdatedAt: new Date().toISOString(),
+        // Giữ các field khác
+        ...newUser,
+      };
+      
+      // ✅ THÊM VÀO ĐẦU DANH SÁCH
+      prependData(userItem);
+      
       showToast("success", "🎉 Thêm người dùng thành công!");
       return true;
     } catch (error) {
@@ -129,9 +155,9 @@ export const useUser = () => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [reload, showToast]);
+  }, [prependData, showToast]);
 
-  // Update user
+  // ✅ SỬA: Update user - Cập nhật và đưa lên đầu
   const handleUpdateUser = useCallback(async (userId, formData) => {
     setIsSubmitting(true);
     try {
@@ -139,8 +165,13 @@ export const useUser = () => {
       if (!formData.PasswordHash) {
         delete formData.PasswordHash;
       }
-      await UserApi.update(userId, formData);
+      
+      const response = await UserApi.update(userId, formData);
+      const updatedUser = response.data?.data || response.data || {};
+      
+      // ✅ Reload để cập nhật dữ liệu mới
       reload();
+      
       showToast("success", "✅ Cập nhật người dùng thành công!");
       return true;
     } catch (error) {

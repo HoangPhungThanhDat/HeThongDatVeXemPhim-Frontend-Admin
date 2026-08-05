@@ -21,7 +21,7 @@ import {
   MdMeetingRoom,
   MdSearch
 } from "react-icons/md";
-import { ORANGE, ROWS } from "../constants";
+import { ORANGE, ROWS, SEAT_TYPE_COLORS } from "../constants";
 import SeatButton from "./SeatButton";
 import { SeatLegend } from "./SeatLegend";
 import { shimmer } from "./shared/animations";
@@ -50,17 +50,28 @@ export function SeatMapView({
 }) {
   const isSmallScreen = useBreakpointValue({ base: true, md: false });
 
-  // Nhóm ghế theo hàng
+  // ✅ Nhóm ghế theo hàng - Lọc bỏ ghế không hợp lệ
   const grouped = React.useMemo(() => {
-    return ROWS.map((row) => seats.filter((s) => s.row === row));
+    const validSeats = seats.filter(s => s && s.row && s.num !== undefined && s.num !== null);
+    return ROWS.map((row) => validSeats.filter((s) => s.row === row));
   }, [seats]);
 
-  // Format date an toàn
+  // ✅ Format date an toàn
   const formatDateTime = (dateString) => {
-    if (!dateString) return 'Invalid Date';
+    if (!dateString) return 'Chưa có lịch';
     try {
       const date = new Date(dateString);
-      if (isNaN(date.getTime())) return 'Invalid Date';
+      if (isNaN(date.getTime())) {
+        const parsed = Date.parse(dateString);
+        if (isNaN(parsed)) return dateString;
+        return new Date(parsed).toLocaleString('vi-VN', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      }
       return date.toLocaleString('vi-VN', {
         day: '2-digit',
         month: '2-digit',
@@ -69,22 +80,25 @@ export function SeatMapView({
         minute: '2-digit'
       });
     } catch (error) {
-      return 'Invalid Date';
+      return dateString;
     }
   };
 
-  // Lấy tên phim từ showtime
+  // ✅ Lấy tên phim từ showtime
   const getMovieTitle = (showtime) => {
-    if (!showtime) return 'Unknown Movie';
+    if (!showtime) return 'Unknown';
+    if (showtime.movie_title) return showtime.movie_title;
     if (showtime.Movie?.Title) return showtime.Movie.Title;
-    if (showtime.movie) return showtime.movie;
+    if (showtime.movie?.title) return showtime.movie.title;
     if (showtime.MovieId?.Title) return showtime.MovieId.Title;
-    return 'Unknown Movie';
+    if (showtime.movie) return showtime.movie;
+    return 'Unknown';
   };
 
   // Lấy tên phòng từ showtime
   const getRoomName = (showtime) => {
     if (!showtime) return '';
+    if (showtime.room_name) return showtime.room_name;
     if (showtime.Room?.Name) return showtime.Room.Name;
     if (showtime.roomName) return showtime.roomName;
     if (showtime.RoomId?.Name) return showtime.RoomId.Name;
@@ -96,16 +110,14 @@ export function SeatMapView({
     if (!showtime) return 0;
     if (showtime.Price) return showtime.Price;
     if (showtime.price) return showtime.price;
-    if (showtime.TicketPrice) return showtime.TicketPrice;
     return 0;
   };
 
   // Lấy thời gian từ showtime
   const getStartTime = (showtime) => {
     if (!showtime) return null;
+    if (showtime.start_time) return showtime.start_time;
     if (showtime.StartTime) return showtime.StartTime;
-    if (showtime.startTime) return showtime.startTime;
-    if (showtime.time) return showtime.time;
     return null;
   };
 
@@ -115,16 +127,24 @@ export function SeatMapView({
     if (room.SeatCount) return room.SeatCount;
     if (room.seatCount) return room.seatCount;
     if (room.capacity) return room.capacity;
-    if (room.Capacity) return room.Capacity;
     if (seats.length > 0) return seats.length;
     return 0;
   };
 
-  // Kiểm tra có đang loading không
   const isLoading = loading || isChangingData;
-
-  // Kiểm tra đã có dữ liệu ghế chưa
   const hasSeats = seats.length > 0;
+
+  // ✅ Hàm lấy màu cho từng loại ghế trong Legend
+  const getLegendColor = (type) => {
+    const colors = {
+      normal: { bg: "#ecfdf5", border: "#6ee7b7", label: "Thường" },
+      vip: { bg: "#ede9fe", border: "#8b5cf6", label: "VIP" },
+      couple: { bg: "#fef3c7", border: "#f59e0b", label: "Đôi" },
+      sweetbox: { bg: "#fce7f3", border: "#ec4899", label: "Sweetbox" },
+      accessible: { bg: "#dbeafe", border: "#3b82f6", label: "Ưu tiên" },
+    };
+    return colors[type] || colors.normal;
+  };
 
   return (
     <Box
@@ -143,13 +163,7 @@ export function SeatMapView({
           <Box>
             <Flex align="center" gap="6px" mb="6px">
               <Icon as={MdMeetingRoom} boxSize="14px" color={theme.textMuted} />
-              <Text
-                fontSize="10px"
-                fontWeight="700"
-                color={theme.textMuted}
-                letterSpacing="0.8px"
-                textTransform="uppercase"
-              >
+              <Text fontSize="10px" fontWeight="700" color={theme.textMuted} letterSpacing="0.8px" textTransform="uppercase">
                 Rạp chiếu
               </Text>
             </Flex>
@@ -174,7 +188,7 @@ export function SeatMapView({
               <option value="">-- Chọn rạp --</option>
               {cinemas.map((c) => (
                 <option key={c.id || c.CinemaId} value={c.id || c.CinemaId}>
-                  {c.Name || c.name || c.CinemaName || 'Unknown Cinema'}
+                  {c.name || c.Name || c.CinemaName || 'Unknown Cinema'}
                 </option>
               ))}
             </Select>
@@ -184,13 +198,7 @@ export function SeatMapView({
           <Box>
             <Flex align="center" gap="6px" mb="6px">
               <Icon as={MdEventSeat} boxSize="14px" color={theme.textMuted} />
-              <Text
-                fontSize="10px"
-                fontWeight="700"
-                color={theme.textMuted}
-                letterSpacing="0.8px"
-                textTransform="uppercase"
-              >
+              <Text fontSize="10px" fontWeight="700" color={theme.textMuted} letterSpacing="0.8px" textTransform="uppercase">
                 Phòng chiếu
               </Text>
             </Flex>
@@ -217,7 +225,7 @@ export function SeatMapView({
                 const seatCount = getSeatCount(r);
                 return (
                   <option key={r.id || r.RoomId} value={r.id || r.RoomId}>
-                    {r.Name || r.name || r.RoomName || 'Unknown Room'} ({seatCount} ghế)
+                    {r.name || r.Name || r.RoomName || 'Unknown Room'} ({seatCount} ghế)
                   </option>
                 );
               })}
@@ -228,13 +236,7 @@ export function SeatMapView({
           <Box>
             <Flex align="center" gap="6px" mb="6px">
               <Icon as={MdAccessTime} boxSize="14px" color={theme.textMuted} />
-              <Text
-                fontSize="10px"
-                fontWeight="700"
-                color={theme.textMuted}
-                letterSpacing="0.8px"
-                textTransform="uppercase"
-              >
+              <Text fontSize="10px" fontWeight="700" color={theme.textMuted} letterSpacing="0.8px" textTransform="uppercase">
                 Suất chiếu
               </Text>
             </Flex>
@@ -257,12 +259,22 @@ export function SeatMapView({
               isDisabled={showtimesForRoom.length === 0}
             >
               <option value="">-- Chọn suất chiếu --</option>
-              {showtimesForRoom.map((s) => (
-                <option key={s.id || s.ShowtimeId} value={s.id || s.ShowtimeId}>
-                  {formatDateTime(getStartTime(s))} · {getMovieTitle(s)}
-                </option>
-              ))}
+              {showtimesForRoom.map((st) => {
+                const id = st.id || st.ShowtimeId;
+                const movieTitle = getMovieTitle(st);
+                const timeStr = getStartTime(st);
+                const formattedTime = formatDateTime(timeStr);
+                
+                return (
+                  <option key={id} value={id}>
+                    {movieTitle} - {formattedTime}
+                  </option>
+                );
+              })}
             </Select>
+            {showtimesForRoom.length === 0 && roomId && (
+              <Text fontSize="11px" color="#f59e0b" mt="2px">⚠️ Không có suất chiếu</Text>
+            )}
           </Box>
         </SimpleGrid>
 
@@ -352,13 +364,7 @@ export function SeatMapView({
       {/* Seat Grid */}
       <Box overflowX="auto" pb="4px" opacity={isLoading && hasSeats ? "0.5" : "1"} transition="all .3s">
         {!hasFullSelection ? (
-          <Flex
-            direction="column"
-            align="center"
-            justify="center"
-            py="60px"
-            gap="16px"
-          >
+          <Flex direction="column" align="center" justify="center" py="60px" gap="16px">
             <Icon as={MdEventSeat} boxSize="48px" color={theme.textMuted} opacity="0.2" />
             <Text fontSize="16px" fontWeight="600" color={theme.textMuted}>
               Vui lòng chọn đầy đủ thông tin
@@ -368,46 +374,8 @@ export function SeatMapView({
             </Text>
           </Flex>
         ) : !hasSeats && !isLoading ? (
-          <Flex
-            direction="column"
-            align="center"
-            justify="center"
-            py="60px"
-            gap="16px"
-          >
+          <Flex direction="column" align="center" justify="center" py="60px" gap="16px">
             <Icon as={MdSearch} boxSize="48px" color={ORANGE.OR} opacity="0.3" />
-            <Text fontSize="16px" fontWeight="600" color={theme.textMuted}>
-              Bấm "Xem ghế" để tải dữ liệu
-            </Text>
-            <Text fontSize="13px" color={theme.textMuted} opacity="0.7">
-              Sau khi chọn đủ thông tin, bấm nút Xem ghế
-            </Text>
-          </Flex>
-        ) : isLoading && !hasSeats ? (
-          <Flex
-            direction="column"
-            align="center"
-            justify="center"
-            py="60px"
-            gap="16px"
-          >
-            <Spinner size="xl" color={ORANGE.OR} thickness="4px" />
-            <Text fontSize="16px" fontWeight="600" color={theme.textMuted}>
-              Đang tải dữ liệu ghế...
-            </Text>
-            <Text fontSize="13px" color={theme.textMuted} opacity="0.7">
-              Vui lòng chờ trong giây lát
-            </Text>
-          </Flex>
-        ) : !hasSeats ? (
-          <Flex
-            direction="column"
-            align="center"
-            justify="center"
-            py="60px"
-            gap="16px"
-          >
-            <Icon as={MdEventSeat} boxSize="48px" color={theme.textMuted} opacity="0.3" />
             <Text fontSize="16px" fontWeight="600" color={theme.textMuted}>
               Chưa có ghế nào cho suất chiếu này
             </Text>
@@ -415,61 +383,101 @@ export function SeatMapView({
               Vui lòng tạo ghế tự động
             </Text>
           </Flex>
+        ) : isLoading && !hasSeats ? (
+          <Flex direction="column" align="center" justify="center" py="60px" gap="16px">
+            <Spinner size="xl" color={ORANGE.OR} thickness="4px" />
+            <Text fontSize="16px" fontWeight="600" color={theme.textMuted}>
+              Đang tải dữ liệu ghế...
+            </Text>
+          </Flex>
         ) : (
-          <Flex
-            direction="column"
-            gap={{ base: "6px", md: "8px" }}
-            minW={isSmallScreen ? "400px" : "auto"}
-          >
-            {grouped.map((rowSeats, ri) => (
-              <Flex
-                key={ROWS[ri]}
-                align="center"
-                gap={{ base: "6px", md: "10px" }}
-              >
-                <Box w="24px" flexShrink="0">
-                  <Text
-                    fontSize="12px"
-                    fontWeight="800"
-                    color={theme.textMuted}
-                    textAlign="center"
-                  >
-                    {ROWS[ri]}
-                  </Text>
-                </Box>
-                <Flex
-                  gap={{ base: "6px", md: "10px" }}
-                  flex="1"
-                  justify="center"
-                >
-                  {rowSeats.map((seat) => (
-                    <SeatButton
-                      key={seat.id}
-                      seat={seat}
-                      isSelected={seat.id === selectedSeatId}
-                      onClick={onSeatClick}
-                      onStatusChange={onStatusChange}
-                      theme={theme}
-                    />
-                  ))}
+          <Flex direction="column" gap={{ base: "6px", md: "8px" }} minW={isSmallScreen ? "400px" : "auto"}>
+            {grouped.map((rowSeats, ri) => {
+              const row = ROWS[ri];
+              if (!rowSeats || rowSeats.length === 0) return null;
+              
+              return (
+                <Flex key={row} align="center" gap={{ base: "6px", md: "10px" }}>
+                  <Box w="24px" flexShrink="0">
+                    <Text fontSize="12px" fontWeight="800" color={theme.textMuted} textAlign="center">
+                      {row}
+                    </Text>
+                  </Box>
+                  <Flex gap={{ base: "6px", md: "10px" }} flex="1" justify="center">
+                    {rowSeats.map((seat) => {
+                      if (!seat || !seat.id) return null;
+                      
+                      return (
+                        <SeatButton
+                          key={seat.id}
+                          seat={seat}
+                          isSelected={seat.id === selectedSeatId}
+                          onClick={onSeatClick}
+                          onStatusChange={onStatusChange}
+                          theme={theme}
+                        />
+                      );
+                    })}
+                  </Flex>
                 </Flex>
-              </Flex>
-            ))}
+              );
+            })}
           </Flex>
         )}
       </Box>
 
-      {/* Legend & Info */}
+      {/* ✅ Legend & Info - SỬA PHẦN NÀY */}
       <Box mt="20px" opacity={isLoading && hasSeats ? "0.5" : "1"} transition="all .3s">
-        <Flex
-          direction={{ base: "column", sm: "row" }}
-          align={{ base: "flex-start", sm: "center" }}
-          justify="space-between"
-          gap="10px"
-        >
-          <SeatLegend theme={theme} />
+        <Flex direction={{ base: "column", sm: "row" }} align={{ base: "flex-start", sm: "center" }} justify="space-between" gap="10px">
+          
+          {/* ✅ Legend đầy đủ */}
+          <Flex flexWrap="wrap" gap="8px 16px">
+            <Text fontSize="10px" fontWeight="700" color={theme.textMuted} letterSpacing="1px" textTransform="uppercase" mr="4px">
+              Chú thích:
+            </Text>
+            
+            {/* Trạng thái ghế */}
+            <Flex align="center" gap="5px">
+              <Box w="16px" h="13px" borderRadius="3px" bg="#ecfdf5" border="1.5px solid #6ee7b7" />
+              <Text fontSize="11px" color={theme.text} fontWeight="500">Trống</Text>
+            </Flex>
+            <Flex align="center" gap="5px">
+              <Box w="16px" h="13px" borderRadius="3px" bg="#dc2626" border="1.5px solid #dc2626" />
+              <Text fontSize="11px" color={theme.text} fontWeight="500">Đã đặt</Text>
+            </Flex>
+            <Flex align="center" gap="5px">
+              <Box w="16px" h="13px" borderRadius="3px" bg="#fef3c7" border="1.5px solid #f59e0b" />
+              <Text fontSize="11px" color={theme.text} fontWeight="500">Đang giữ</Text>
+            </Flex>
+            <Flex align="center" gap="5px">
+              <Box w="16px" h="13px" borderRadius="3px" bg="#ede9fe" border="1.5px solid #8b5cf6" />
+              <Text fontSize="11px" color={theme.text} fontWeight="500">Lỗi</Text>
+            </Flex>
+            <Flex align="center" gap="5px">
+              <Box w="16px" h="13px" borderRadius="3px" bg="#f3f4f6" border="1.5px solid #9ca3af" />
+              <Text fontSize="11px" color={theme.text} fontWeight="500">Bảo trì</Text>
+            </Flex>
+            
+            <Box w="1px" h="18px" bg={theme.textMuted} opacity="0.3" mx="4px" />
+            
+            {/* ✅ Loại ghế - Thêm đầy đủ */}
+            {Object.entries(SEAT_TYPE_COLORS).map(([key, cfg]) => {
+              const colors = getLegendColor(key);
+              return (
+                <Flex key={key} align="center" gap="5px">
+                  <Box w="16px" h="13px" borderRadius="3px" bg={colors.bg} border={`1.5px solid ${colors.border}`} />
+                  <Text fontSize="11px" color={theme.text} fontWeight="500">
+                    {cfg.icon && <span style={{ marginRight: '2px' }}>{cfg.icon}</span>}
+                    {cfg.label}
+                  </Text>
+                </Flex>
+              );
+            })}
+          </Flex>
+          
+          {/* Tỷ lệ lấp đầy */}
           {hasSeats && (
-            <Flex align="center" gap="6px">
+            <Flex align="center" gap="6px" flexShrink="0">
               <Icon as={MdInfoOutline} boxSize="14px" color={theme.textMuted} />
               <Text fontSize="11px" color={theme.textMuted}>
                 Tỷ lệ lấp đầy:{" "}
@@ -481,6 +489,7 @@ export function SeatMapView({
           )}
         </Flex>
 
+        {/* Info hover */}
         <Flex
           align="center"
           gap="6px"

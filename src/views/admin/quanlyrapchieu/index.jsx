@@ -1,5 +1,3 @@
-// src/views/admin/quanlyrapchieu/index.jsx
-
 import React, { useState } from "react";
 import {
   Box, Flex, Text, Button, Icon, SimpleGrid, Grid,
@@ -108,8 +106,12 @@ export default function QuanLyRap() {
         setView("list");
         setSelected(null);
       } else if (selected) {
+        // ✅ Cập nhật lại selected với dữ liệu mới
+        const updatedCinema = cinemas.find(c => c.CinemaId === selected.CinemaId);
+        if (updatedCinema) {
+          setSelected(updatedCinema);
+        }
         setView("detail");
-        setSelected({ ...selected, ...formData });
       }
     }
   };
