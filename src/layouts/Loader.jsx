@@ -1,811 +1,657 @@
 // src/layouts/Loader.jsx
-
 import React from "react";
 import { useColorMode } from "@chakra-ui/react";
 
-// Màu sắc cho chế độ tối - tông xanh
-const DARK_THEME = {
-  bg: "#0a1628",
-  cardBg: "#0f1f3a",
-  border: "#1a3a5c",
-  text: "#e8f4f8",
-  textSecondary: "#88b4d8",
-  labelColor: "#5a8ab5",
-  inputBg: "#0a1f35",
-  hoverBg: "#142d4f",
-  accent: "#4a9eff",
-  accentLight: "#6ab0ff",
-  accentShadow: "rgba(74, 158, 255, 0.25)",
-};
-
-export default function Loader() {
+export default function Loader({
+  message = "Đang tải dữ liệu...",
+  variant = "page",
+  statCount = 4,
+  rowCount = 6,
+  showTable = true,
+}) {
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
 
-  // Dark mode colors
-  const accentColor = isDark ? DARK_THEME.accent : "#ea580c";
-  const accentLight = isDark ? DARK_THEME.accentLight : "#fb923c";
-  const accentLighter = isDark ? "#6ab0ff" : "#fbbf24";
-  const bgPage = isDark ? DARK_THEME.bg : "#f8fafc";
-  const bgCard = isDark ? DARK_THEME.cardBg : "white";
-  const borderCard = isDark ? DARK_THEME.border : "#f1f5f9";
-  const textColor = isDark ? DARK_THEME.textSecondary : "#64748b";
-  const textDark = isDark ? DARK_THEME.text : "#0f172a";
-  const skeletonBg = isDark ? "#1a2a4a" : "#e8edf3";
-  const skeletonBg2 = isDark ? "#2a3a5a" : "#f1f5f9";
-  const skeletonBgDark = isDark ? "#2d3748" : "#e8edf3";
-  const skeletonBgDark2 = isDark ? "#4a5568" : "#f1f5f9";
-  const statBg = isDark ? DARK_THEME.cardBg : "white";
-  const statBorder = isDark ? DARK_THEME.border : "#f1f5f9";
-  const tableBg = isDark ? DARK_THEME.cardBg : "white";
-  const tableBorder = isDark ? DARK_THEME.border : "#f1f5f9";
-  const tableHeaderBg = isDark ? DARK_THEME.inputBg : "#fafbfc";
-  const tableHeaderBorder = isDark ? DARK_THEME.border : "#f1f5f9";
-  const rowBorder = isDark ? DARK_THEME.border : "#f8fafc";
-
   return (
-    <div className={`loader-container ${isDark ? "dark-mode" : "light-mode"}`}>
-      <div className="loader-wrapper">
-        {/* Loading Spinner */}
-        <div className="loader-spinner-container">
-          <div className="loader-spinner">
-            <div className="spinner-ring"></div>
-            <div className="spinner-ring"></div>
-            <div className="spinner-ring"></div>
-            <div className="spinner-ring"></div>
-            <div className="spinner-logo">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 4v16M17 4v16M3 8h18M3 16h18" />
-              </svg>
-            </div>
+    <div
+      className={`film-loader film-loader--${variant} ${isDark ? "is-dark" : "is-light"}`}
+      role="status"
+      aria-live="polite"
+      aria-label={message}
+    >
+      {/* Particles nền */}
+      <div className="film-loader__particles" aria-hidden="true">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <span key={i} className={`particle particle--${i + 1}`} />
+        ))}
+      </div>
+
+      {/* ── FILM REEL (2 cuộn phim quay) ── */}
+      <div className="film-loader__reel" aria-hidden="true">
+        <div className="reel reel--left">
+          <div className="reel__spokes">
+            <span /><span /><span /><span /><span /><span />
           </div>
-          <p className="loader-text">Đang tải dữ liệu...</p>
+          <div className="reel__hub" />
         </div>
 
-        {/* Skeleton Loading */}
-        <div className="skeleton-wrapper">
-          {/* Header Skeleton */}
-          <div className="skeleton-header">
-            <div className="skeleton-avatar">
-              <div className="avatar-shimmer"></div>
-            </div>
-            <div className="skeleton-header-content">
-              <div className="skeleton-line skeleton-line-lg"></div>
-              <div className="skeleton-line skeleton-line-sm"></div>
-            </div>
-          </div>
-
-          {/* Stats Skeleton */}
-          <div className="skeleton-stats">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="skeleton-stat-card">
-                <div className="skeleton-stat-content">
-                  <div className="skeleton-line skeleton-line-xs"></div>
-                  <div className="skeleton-line skeleton-line-md"></div>
-                  <div className="skeleton-line skeleton-line-xs"></div>
-                </div>
-                <div className="skeleton-stat-icon">
-                  <div className="icon-shimmer"></div>
-                </div>
-              </div>
+        <div className="film-loader__strip">
+          <div className="strip__perforations">
+            {Array.from({ length: 20 }).map((_, i) => (
+              <span key={i} />
             ))}
           </div>
-
-          {/* Table Skeleton */}
-          <div className="skeleton-table">
-            <div className="skeleton-table-header">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="skeleton-line skeleton-line-sm"></div>
-              ))}
-            </div>
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="skeleton-table-row">
-                <div className="skeleton-cell skeleton-cell-sm">
-                  <div className="skeleton-line skeleton-line-xs"></div>
-                </div>
-                <div className="skeleton-cell skeleton-cell-md">
-                  <div className="skeleton-line skeleton-line-sm"></div>
-                  <div className="skeleton-line skeleton-line-xs"></div>
-                </div>
-                <div className="skeleton-cell skeleton-cell-sm">
-                  <div className="skeleton-line skeleton-line-sm"></div>
-                </div>
-                <div className="skeleton-cell skeleton-cell-md">
-                  <div className="skeleton-line skeleton-line-sm"></div>
-                </div>
-                <div className="skeleton-cell skeleton-cell-sm">
-                  <div className="skeleton-line skeleton-line-sm"></div>
-                </div>
-                <div className="skeleton-cell skeleton-cell-sm">
-                  <div className="skeleton-btn"></div>
-                  <div className="skeleton-btn skeleton-btn-secondary"></div>
-                </div>
-              </div>
+          <div className="strip__perforations strip__perforations--bottom">
+            {Array.from({ length: 20 }).map((_, i) => (
+              <span key={i} />
             ))}
           </div>
+        </div>
+
+        <div className="reel reel--right">
+          <div className="reel__spokes">
+            <span /><span /><span /><span /><span /><span />
+          </div>
+          <div className="reel__hub" />
         </div>
       </div>
 
+      {/* ── TEXT ── */}
+      <div className="film-loader__text">
+        <span className="film-loader__text-line">{message}</span>
+        <div className="film-loader__dots">
+          <span /><span /><span />
+        </div>
+      </div>
+
+      {/* ── PROGRESS BAR ── */}
+      <div className="film-loader__progress">
+        <div className="film-loader__progress-bar" />
+      </div>
+
+      {/* ── SKELETON (đơn giản hơn) ── */}
+      <div className="film-loader__skeleton">
+        {/* Stats row */}
+        <div className="film-loader__stats">
+          {Array.from({ length: statCount }).map((_, i) => (
+            <div
+              key={i}
+              className="stat-tile"
+              style={{ animationDelay: `${i * 0.08}s` }}
+            >
+              <div className="stat-tile__icon" />
+              <div className="stat-tile__content">
+                <div className="stat-tile__line stat-tile__line--sm" />
+                <div className="stat-tile__line stat-tile__line--lg" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* List rows */}
+        {showTable && (
+          <div className="film-loader__list">
+            {Array.from({ length: rowCount }).map((_, i) => (
+              <div
+                key={i}
+                className="list-row"
+                style={{ animationDelay: `${i * 0.06}s` }}
+              >
+                <div className="list-row__avatar" />
+                <div className="list-row__content">
+                  <div className="list-row__line list-row__line--md" />
+                  <div className="list-row__line list-row__line--sm" />
+                </div>
+                <div className="list-row__badge" />
+                <div className="list-row__actions">
+                  <div className="list-row__btn" />
+                  <div className="list-row__btn list-row__btn--icon" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════════
+          STYLES
+          ═══════════════════════════════════════════════════════════ */}
       <style>{`
-        .loader-container {
+        /* ═══════════════════════════════════════════════════════════
+           THEME TOKENS
+           ═══════════════════════════════════════════════════════════ */
+        .film-loader {
+          /* Light mode — cinema vàng cam */
+          --accent:           #f59e0b;
+          --accent-2:         #ea580c;
+          --accent-glow:      rgba(245, 158, 11, 0.4);
+
+          --bg:               #fefbf6;
+          --bg-card:          #ffffff;
+          --bg-skeleton:      #f3f4f6;
+          --bg-skeleton-2:    #e5e7eb;
+
+          --border:           #f1f5f9;
+          --text:             #1f2937;
+          --text-dim:         #6b7280;
+
+          --shadow:           0 2px 8px rgba(0,0,0,0.04);
+
+          /* Layout */
           min-height: 100vh;
-          display: flex;
-          align-items: flex-start;
-          justify-content: center;
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          position: relative;
-          overflow: hidden;
-          transition: background 0.3s ease;
-        }
-
-        .loader-container.light-mode {
-          background: ${bgPage};
-        }
-
-        .loader-container.dark-mode {
-          background: ${bgPage};
-        }
-
-        /* Background gradient orbs */
-        .loader-container.light-mode::before {
-          content: '';
-          position: fixed;
-          width: 600px;
-          height: 600px;
-          background: radial-gradient(circle, rgba(234, 88, 12, 0.06) 0%, transparent 70%);
-          top: -200px;
-          right: -200px;
-          border-radius: 50%;
-          pointer-events: none;
-        }
-
-        .loader-container.light-mode::after {
-          content: '';
-          position: fixed;
-          width: 400px;
-          height: 400px;
-          background: radial-gradient(circle, rgba(251, 146, 60, 0.05) 0%, transparent 70%);
-          bottom: -100px;
-          left: -100px;
-          border-radius: 50%;
-          pointer-events: none;
-        }
-
-        .loader-container.dark-mode::before {
-          content: '';
-          position: fixed;
-          width: 600px;
-          height: 600px;
-          background: radial-gradient(circle, rgba(74, 158, 255, 0.08) 0%, transparent 70%);
-          top: -200px;
-          right: -200px;
-          border-radius: 50%;
-          pointer-events: none;
-        }
-
-        .loader-container.dark-mode::after {
-          content: '';
-          position: fixed;
-          width: 400px;
-          height: 400px;
-          background: radial-gradient(circle, rgba(106, 176, 255, 0.06) 0%, transparent 70%);
-          bottom: -100px;
-          left: -100px;
-          border-radius: 50%;
-          pointer-events: none;
-        }
-
-        .loader-wrapper {
-          width: 100%;
-          max-width: 1320px;
-          margin: 0 auto;
-          padding: 20px 24px;
-          position: relative;
-          z-index: 1;
-        }
-
-        /* ===== SPINNER ===== */
-        .loader-spinner-container {
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          padding: 30px 0 20px 0;
-          animation: fadeInDown 0.6s ease;
-        }
-
-        .loader-spinner {
+          gap: 32px;
+          padding: 40px 24px;
           position: relative;
-          width: 64px;
-          height: 64px;
-          margin-bottom: 16px;
+          overflow: hidden;
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          background: var(--bg);
+          transition: background 0.4s ease;
         }
 
-        .spinner-ring {
+        .film-loader--section {
+          min-height: 500px;
+          padding: 40px 24px;
+        }
+
+        .film-loader--inline {
+          min-height: auto;
+          padding: 24px;
+          gap: 20px;
+        }
+
+        /* Dark mode — cinema xanh dương */
+        .film-loader.is-dark {
+          --accent:           #4a9eff;
+          --accent-2:         #6ab0ff;
+          --accent-glow:      rgba(74, 158, 255, 0.5);
+
+          --bg:               #0a1628;
+          --bg-card:          #0f1f3a;
+          --bg-skeleton:      #1a2a4a;
+          --bg-skeleton-2:    #2a3a5a;
+
+          --border:           #1a3a5c;
+          --text:             #e8f4f8;
+          --text-dim:         #88b4d8;
+
+          --shadow:           0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           PARTICLES — bụi sáng bay lên như phòng chiếu phim
+           ═══════════════════════════════════════════════════════════ */
+        .film-loader__particles {
           position: absolute;
-          width: 64px;
-          height: 64px;
+          inset: 0;
+          pointer-events: none;
+          overflow: hidden;
+          z-index: 0;
+        }
+
+        .particle {
+          position: absolute;
+          bottom: -10px;
+          width: 3px;
+          height: 3px;
           border-radius: 50%;
-          border: 3px solid transparent;
-          animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+          background: var(--accent);
+          opacity: 0;
+          box-shadow: 0 0 8px var(--accent-glow);
+          animation: particleFloat 6s ease-in infinite;
         }
 
-        .loader-container.light-mode .spinner-ring:nth-child(1) {
-          border-top-color: #ea580c;
-          animation-delay: -0.45s;
+        .particle--1  { left: 8%;  animation-delay: 0.0s; animation-duration: 5s;   }
+        .particle--2  { left: 18%; animation-delay: 0.8s; animation-duration: 6.5s; }
+        .particle--3  { left: 28%; animation-delay: 1.6s; animation-duration: 5.5s; }
+        .particle--4  { left: 38%; animation-delay: 2.4s; animation-duration: 7s;   }
+        .particle--5  { left: 48%; animation-delay: 3.2s; animation-duration: 5.2s; }
+        .particle--6  { left: 58%; animation-delay: 0.4s; animation-duration: 6.8s; }
+        .particle--7  { left: 68%; animation-delay: 1.2s; animation-duration: 5.8s; }
+        .particle--8  { left: 78%; animation-delay: 2.0s; animation-duration: 6.2s; }
+        .particle--9  { left: 88%; animation-delay: 2.8s; animation-duration: 5.4s; }
+        .particle--10 { left: 15%; animation-delay: 3.6s; animation-duration: 7.2s; }
+        .particle--11 { left: 45%; animation-delay: 4.2s; animation-duration: 6.0s; }
+        .particle--12 { left: 75%; animation-delay: 4.8s; animation-duration: 5.6s; }
+
+        @keyframes particleFloat {
+          0%   { transform: translateY(0) scale(0.5); opacity: 0; }
+          20%  { opacity: 1; }
+          80%  { opacity: 0.6; }
+          100% { transform: translateY(-100vh) scale(1.2); opacity: 0; }
         }
 
-        .loader-container.light-mode .spinner-ring:nth-child(2) {
-          border-right-color: #fb923c;
-          animation-delay: -0.3s;
-        }
-
-        .loader-container.light-mode .spinner-ring:nth-child(3) {
-          border-bottom-color: #fbbf24;
-          animation-delay: -0.15s;
-        }
-
-        .loader-container.light-mode .spinner-ring:nth-child(4) {
-          border-left-color: #ea580c;
-          animation-delay: 0s;
-        }
-
-        .loader-container.dark-mode .spinner-ring:nth-child(1) {
-          border-top-color: ${accentColor};
-          animation-delay: -0.45s;
-        }
-
-        .loader-container.dark-mode .spinner-ring:nth-child(2) {
-          border-right-color: ${accentLight};
-          animation-delay: -0.3s;
-        }
-
-        .loader-container.dark-mode .spinner-ring:nth-child(3) {
-          border-bottom-color: ${accentLighter};
-          animation-delay: -0.15s;
-        }
-
-        .loader-container.dark-mode .spinner-ring:nth-child(4) {
-          border-left-color: ${accentColor};
-          animation-delay: 0s;
-        }
-
-        .spinner-logo {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          width: 24px;
-          height: 24px;
-          animation: pulse 2s ease-in-out infinite;
-        }
-
-        .loader-container.light-mode .spinner-logo {
-          color: #ea580c;
-        }
-
-        .loader-container.dark-mode .spinner-logo {
-          color: ${accentColor};
-        }
-
-        .spinner-logo svg {
-          width: 100%;
-          height: 100%;
-        }
-
-        .loader-text {
-          font-size: 14px;
-          font-weight: 500;
-          letter-spacing: 0.5px;
-          animation: pulse 1.5s ease-in-out infinite;
-          transition: color 0.3s ease;
-        }
-
-        .loader-container.light-mode .loader-text {
-          color: #64748b;
-        }
-
-        .loader-container.dark-mode .loader-text {
-          color: ${textColor};
-        }
-
-        /* ===== SKELETON ===== */
-        .skeleton-wrapper {
-          animation: fadeIn 0.8s ease 0.2s both;
-        }
-
-        .skeleton-header {
+        /* ═══════════════════════════════════════════════════════════
+           FILM REEL — 2 cuộn phim quay ngược chiều
+           ═══════════════════════════════════════════════════════════ */
+        .film-loader__reel {
+          position: relative;
+          z-index: 1;
           display: flex;
           align-items: center;
-          gap: 16px;
-          margin-bottom: 28px;
-          padding: 8px 0;
+          gap: 0;
+          filter: drop-shadow(0 8px 24px var(--accent-glow));
         }
 
-        .skeleton-avatar {
-          width: 48px;
-          height: 48px;
+        .reel {
+          position: relative;
+          width: 68px;
+          height: 68px;
+          border-radius: 50%;
+          background: var(--accent);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow:
+            inset 0 0 0 6px var(--bg),
+            inset 0 0 0 8px var(--accent-2),
+            0 0 20px var(--accent-glow);
+        }
+
+        .reel--left  { animation: reelSpin 3.5s linear infinite; }
+        .reel--right { animation: reelSpin 3.5s linear infinite reverse; }
+
+        .reel__spokes {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .reel__spokes span {
+          position: absolute;
+          width: 4px;
+          height: 22px;
+          background: var(--bg);
+          border-radius: 2px;
+          top: 12px;
+          left: 50%;
+          margin-left: -2px;
+          transform-origin: 2px 22px;
+        }
+        .reel__spokes span:nth-child(1) { transform: rotate(0deg);   }
+        .reel__spokes span:nth-child(2) { transform: rotate(60deg);  }
+        .reel__spokes span:nth-child(3) { transform: rotate(120deg); }
+        .reel__spokes span:nth-child(4) { transform: rotate(180deg); }
+        .reel__spokes span:nth-child(5) { transform: rotate(240deg); }
+        .reel__spokes span:nth-child(6) { transform: rotate(300deg); }
+
+        .reel__hub {
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          background: var(--bg);
+          border: 3px solid var(--accent-2);
+          z-index: 1;
+        }
+
+        @keyframes reelSpin {
+          0%   { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           FILM STRIP — dải phim nối giữa 2 cuộn
+           ═══════════════════════════════════════════════════════════ */
+        .film-loader__strip {
+          position: relative;
+          width: 140px;
+          height: 44px;
+          background: var(--accent-2);
+          margin: 0 -8px;
+          overflow: hidden;
+          box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .strip__perforations {
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 4px;
+          display: flex;
+          gap: 6px;
+          padding: 0 6px;
+          animation: stripMove 2s linear infinite;
+        }
+
+        .strip__perforations--bottom { top: auto; bottom: 4px; }
+
+        .strip__perforations span {
+          flex-shrink: 0;
+          width: 6px;
+          height: 6px;
+          background: var(--bg);
+          border-radius: 1px;
+        }
+
+        @keyframes stripMove {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-24px); }
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           TEXT
+           ═══════════════════════════════════════════════════════════ */
+        .film-loader__text {
+          position: relative;
+          z-index: 1;
+          display: flex;
+          align-items: baseline;
+          gap: 6px;
+          color: var(--text);
+          font-size: 15px;
+          font-weight: 600;
+          letter-spacing: 0.3px;
+        }
+
+        .film-loader__dots {
+          display: inline-flex;
+          gap: 3px;
+        }
+
+        .film-loader__dots span {
+          width: 5px;
+          height: 5px;
+          border-radius: 50%;
+          background: var(--accent);
+          animation: dotBounce 1.4s ease-in-out infinite;
+        }
+        .film-loader__dots span:nth-child(1) { animation-delay: 0s;    }
+        .film-loader__dots span:nth-child(2) { animation-delay: 0.2s;  }
+        .film-loader__dots span:nth-child(3) { animation-delay: 0.4s;  }
+
+        @keyframes dotBounce {
+          0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+          30%           { transform: translateY(-6px); opacity: 1; }
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           PROGRESS BAR — thanh tiến trình chạy vô tận
+           ═══════════════════════════════════════════════════════════ */
+        .film-loader__progress {
+          position: relative;
+          z-index: 1;
+          width: 240px;
+          height: 4px;
+          border-radius: 2px;
+          background: var(--bg-skeleton);
+          overflow: hidden;
+        }
+
+        .film-loader__progress-bar {
+          position: absolute;
+          top: 0;
+          left: -40%;
+          width: 40%;
+          height: 100%;
+          border-radius: 2px;
+          background: linear-gradient(90deg, transparent, var(--accent), var(--accent-2), transparent);
+          animation: progressRun 1.6s ease-in-out infinite;
+        }
+
+        @keyframes progressRun {
+          0%   { left: -40%; }
+          100% { left: 100%; }
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           SKELETON — STATS
+           ═══════════════════════════════════════════════════════════ */
+        .film-loader__skeleton {
+          position: relative;
+          z-index: 1;
+          width: 100%;
+          max-width: 900px;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+          margin-top: 8px;
+        }
+
+        .film-loader__stats {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 14px;
+        }
+
+        .stat-tile {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 16px 18px;
+          background: var(--bg-card);
+          border: 1px solid var(--border);
           border-radius: 14px;
+          box-shadow: var(--shadow);
+          opacity: 0;
+          animation: tileFadeIn 0.5s ease forwards;
+        }
+
+        @keyframes tileFadeIn {
+          from { opacity: 0; transform: translateY(8px); }
+          to   { opacity: 1; transform: translateY(0);   }
+        }
+
+        .stat-tile__icon {
+          width: 36px;
+          height: 36px;
+          border-radius: 10px;
+          background: linear-gradient(135deg, var(--bg-skeleton), var(--bg-skeleton-2));
           position: relative;
           overflow: hidden;
           flex-shrink: 0;
-          transition: background 0.3s ease;
         }
 
-        .loader-container.light-mode .skeleton-avatar {
-          background: linear-gradient(135deg, #e2e8f0, #f1f5f9);
-        }
-
-        .loader-container.dark-mode .skeleton-avatar {
-          background: linear-gradient(135deg, #1a2a4a, #2a3a5a);
-        }
-
-        .avatar-shimmer,
-        .icon-shimmer {
+        .stat-tile__icon::after {
+          content: '';
           position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
+          inset: 0;
+          background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
           transform: translateX(-100%);
           animation: shimmer 1.8s ease-in-out infinite;
         }
 
-        .loader-container.light-mode .avatar-shimmer,
-        .loader-container.light-mode .icon-shimmer {
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
-        }
-
-        .loader-container.dark-mode .avatar-shimmer,
-        .loader-container.dark-mode .icon-shimmer {
-          background: linear-gradient(90deg, transparent, rgba(74, 158, 255, 0.08), transparent);
-        }
-
-        .skeleton-header-content {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-
-        /* ===== STATS ===== */
-        .skeleton-stats {
-          display: grid;
-          grid-template-columns: repeat(5, 1fr);
-          gap: 14px;
-          margin-bottom: 28px;
-        }
-
-        .skeleton-stat-card {
-          border-radius: 16px;
-          padding: 20px 22px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          position: relative;
-          overflow: hidden;
-          transition: all 0.3s ease, background 0.3s ease, border-color 0.3s ease;
-        }
-
-        .loader-container.light-mode .skeleton-stat-card {
-          background: ${statBg};
-          border: 1px solid ${statBorder};
-          box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-        }
-
-        .loader-container.dark-mode .skeleton-stat-card {
-          background: ${statBg};
-          border: 1px solid ${statBorder};
-          box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-        }
-
-        .skeleton-stat-card::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 3px;
-          transition: background 0.3s ease;
-        }
-
-        .loader-container.light-mode .skeleton-stat-card::before {
-          background: linear-gradient(90deg, #ea580c, #fb923c, #fbbf24);
-          opacity: 0.3;
-        }
-
-        .loader-container.dark-mode .skeleton-stat-card::before {
-          background: linear-gradient(90deg, ${accentColor}, ${accentLight}, ${accentLighter});
-          opacity: 0.4;
-        }
-
-        .skeleton-stat-content {
+        .stat-tile__content {
           flex: 1;
           display: flex;
           flex-direction: column;
           gap: 6px;
         }
 
-        .skeleton-stat-icon {
-          width: 44px;
-          height: 44px;
+        .stat-tile__line {
+          border-radius: 4px;
+          background: var(--bg-skeleton);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .stat-tile__line::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+          transform: translateX(-100%);
+          animation: shimmer 1.8s ease-in-out infinite;
+        }
+
+        .stat-tile__line--sm { width: 40%; height: 8px; }
+        .stat-tile__line--lg { width: 75%; height: 12px; }
+
+        /* ═══════════════════════════════════════════════════════════
+           SKELETON — LIST ROWS
+           ═══════════════════════════════════════════════════════════ */
+        .film-loader__list {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .list-row {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          padding: 14px 18px;
+          background: var(--bg-card);
+          border: 1px solid var(--border);
           border-radius: 12px;
+          box-shadow: var(--shadow);
+          opacity: 0;
+          animation: tileFadeIn 0.5s ease forwards;
+        }
+
+        .list-row__avatar {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background: var(--bg-skeleton);
           position: relative;
           overflow: hidden;
           flex-shrink: 0;
-          transition: background 0.3s ease;
         }
 
-        .loader-container.light-mode .skeleton-stat-icon {
-          background: #f1f5f9;
+        .list-row__avatar::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+          transform: translateX(-100%);
+          animation: shimmer 1.8s ease-in-out infinite;
         }
 
-        .loader-container.dark-mode .skeleton-stat-icon {
-          background: #1a2a4a;
-        }
-
-        /* ===== TABLE ===== */
-        .skeleton-table {
-          border-radius: 16px;
-          overflow: hidden;
-          transition: background 0.3s ease, border-color 0.3s ease;
-        }
-
-        .loader-container.light-mode .skeleton-table {
-          background: ${tableBg};
-          border: 1px solid ${tableBorder};
-          box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-        }
-
-        .loader-container.dark-mode .skeleton-table {
-          background: ${tableBg};
-          border: 1px solid ${tableBorder};
-          box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-        }
-
-        .skeleton-table-header {
-          display: grid;
-          grid-template-columns: 45px 2.5fr 0.8fr 0.8fr 0.7fr 0.8fr 1.2fr;
-          gap: 12px;
-          padding: 16px 20px;
-          border-bottom: 1px solid;
-          transition: background 0.3s ease, border-color 0.3s ease;
-        }
-
-        .loader-container.light-mode .skeleton-table-header {
-          background: ${tableHeaderBg};
-          border-color: ${tableHeaderBorder};
-        }
-
-        .loader-container.dark-mode .skeleton-table-header {
-          background: ${tableHeaderBg};
-          border-color: ${tableHeaderBorder};
-        }
-
-        .skeleton-table-header .skeleton-line {
-          height: 12px;
-          width: 80%;
-          border-radius: 4px;
-        }
-
-        .skeleton-table-row {
-          display: grid;
-          grid-template-columns: 45px 2.5fr 0.8fr 0.8fr 0.7fr 0.8fr 1.2fr;
-          gap: 12px;
-          padding: 14px 20px;
-          border-bottom: 1px solid;
-          align-items: center;
-          transition: background 0.3s ease, border-color 0.3s ease;
-        }
-
-        .loader-container.light-mode .skeleton-table-row {
-          border-color: ${rowBorder};
-        }
-
-        .loader-container.dark-mode .skeleton-table-row {
-          border-color: ${rowBorder};
-        }
-
-        .skeleton-table-row:last-child {
-          border-bottom: none;
-        }
-
-        .skeleton-cell {
+        .list-row__content {
+          flex: 1;
           display: flex;
           flex-direction: column;
-          gap: 4px;
-        }
-
-        .skeleton-cell-sm {
-          align-items: flex-start;
-          justify-content: center;
-        }
-
-        .skeleton-cell-md {
           gap: 6px;
         }
 
-        /* ===== SKELETON LINES ===== */
-        .skeleton-line {
-          border-radius: 6px;
-          height: 12px;
+        .list-row__line {
+          height: 10px;
+          border-radius: 4px;
+          background: var(--bg-skeleton);
           position: relative;
           overflow: hidden;
-          transition: background 0.3s ease;
         }
 
-        .loader-container.light-mode .skeleton-line {
-          background: linear-gradient(90deg, ${skeletonBg} 25%, ${skeletonBg2} 50%, ${skeletonBg} 75%);
-          background-size: 200% 100%;
+        .list-row__line::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+          transform: translateX(-100%);
+          animation: shimmer 1.8s ease-in-out infinite;
         }
 
-        .loader-container.dark-mode .skeleton-line {
-          background: linear-gradient(90deg, ${skeletonBgDark} 25%, ${skeletonBgDark2} 50%, ${skeletonBgDark} 75%);
-          background-size: 200% 100%;
-        }
+        .list-row__line--md { width: 55%; }
+        .list-row__line--sm { width: 35%; }
 
-        .skeleton-line-lg {
+        .list-row__badge {
+          width: 72px;
           height: 24px;
-          width: 60%;
+          border-radius: 12px;
+          background: var(--bg-skeleton);
+          position: relative;
+          overflow: hidden;
+          flex-shrink: 0;
+        }
+
+        .list-row__badge::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+          transform: translateX(-100%);
+          animation: shimmer 1.8s ease-in-out infinite;
+        }
+
+        .list-row__actions {
+          display: flex;
+          gap: 6px;
+          flex-shrink: 0;
+        }
+
+        .list-row__btn {
+          width: 56px;
+          height: 30px;
           border-radius: 8px;
+          background: var(--bg-skeleton);
+          position: relative;
+          overflow: hidden;
         }
 
-        .skeleton-line-md {
-          height: 16px;
-          width: 80%;
-          border-radius: 6px;
+        .list-row__btn--icon { width: 30px; }
+
+        .list-row__btn::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+          transform: translateX(-100%);
+          animation: shimmer 1.8s ease-in-out infinite;
         }
 
-        .skeleton-line-sm {
-          height: 14px;
-          width: 90%;
-          border-radius: 6px;
-        }
-
-        .skeleton-line-xs {
-          height: 10px;
-          width: 50%;
-          border-radius: 4px;
-        }
-
-        /* ===== SKELETON BUTTONS ===== */
-        .skeleton-btn {
-          width: 70px;
-          height: 32px;
-          border-radius: 8px;
-          transition: background 0.3s ease;
-        }
-
-        .loader-container.light-mode .skeleton-btn {
-          background: linear-gradient(90deg, ${skeletonBg} 25%, ${skeletonBg2} 50%, ${skeletonBg} 75%);
-          background-size: 200% 100%;
-        }
-
-        .loader-container.dark-mode .skeleton-btn {
-          background: linear-gradient(90deg, ${skeletonBgDark} 25%, ${skeletonBgDark2} 50%, ${skeletonBgDark} 75%);
-          background-size: 200% 100%;
-        }
-
-        .skeleton-btn-secondary {
-          width: 32px;
-          margin-left: 6px;
-        }
-
-        .skeleton-cell-sm .skeleton-btn:last-child {
-          margin-left: 6px;
-        }
-
-        /* ===== ANIMATIONS ===== */
         @keyframes shimmer {
-          0% {
-            transform: translateX(-100%);
-          }
-          100% {
-            transform: translateX(100%);
-          }
+          0%   { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
         }
 
-        .loader-container.light-mode .skeleton-line,
-        .loader-container.light-mode .skeleton-btn {
-          animation: skeletonShimmer 1.8s ease-in-out infinite;
-        }
-
-        .loader-container.dark-mode .skeleton-line,
-        .loader-container.dark-mode .skeleton-btn {
-          animation: skeletonShimmerDark 1.8s ease-in-out infinite;
-        }
-
-        @keyframes skeletonShimmer {
-          0% {
-            background-position: -200% 0;
-          }
-          100% {
-            background-position: 200% 0;
-          }
-        }
-
-        @keyframes skeletonShimmerDark {
-          0% {
-            background-position: -200% 0;
-          }
-          100% {
-            background-position: 200% 0;
-          }
-        }
-
-        @keyframes spin {
-          0% {
-            transform: rotate(0deg);
-          }
-          100% {
-            transform: rotate(360deg);
-          }
-        }
-
-        @keyframes pulse {
-          0%, 100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.5;
-          }
-        }
-
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-
-        @keyframes fadeInDown {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 1200px) {
-          .skeleton-table-header,
-          .skeleton-table-row {
-            grid-template-columns: 40px 2fr 0.7fr 0.7fr 0.6fr 0.7fr 1fr;
-          }
-        }
-
-        @media (max-width: 992px) {
-          .skeleton-stats {
-            grid-template-columns: repeat(3, 1fr);
-          }
-
-          .skeleton-table-header {
-            display: none;
-          }
-
-          .skeleton-table-row {
-            grid-template-columns: 1fr;
-            gap: 10px;
-            padding: 16px 18px;
-          }
-
-          .loader-container.light-mode .skeleton-table-row {
-            border-bottom: 2px solid #f1f5f9;
-          }
-
-          .loader-container.dark-mode .skeleton-table-row {
-            border-bottom: 2px solid ${DARK_THEME.border};
-          }
-
-          .skeleton-cell {
-            flex-direction: row;
-            align-items: center;
-            justify-content: space-between;
-          }
-
-          .skeleton-cell-sm {
-            justify-content: flex-start;
-          }
-
-          .skeleton-line {
-            width: 60% !important;
-          }
-
-          .skeleton-line-lg {
-            width: 100% !important;
-          }
-
-          .skeleton-cell-sm .skeleton-line {
-            width: 30% !important;
-          }
-        }
-
+        /* ═══════════════════════════════════════════════════════════
+           RESPONSIVE
+           ═══════════════════════════════════════════════════════════ */
         @media (max-width: 768px) {
-          .loader-wrapper {
-            padding: 16px 16px;
-          }
+          .film-loader { gap: 24px; padding: 32px 16px; }
 
-          .skeleton-stats {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-          }
+          .reel { width: 52px; height: 52px; }
+          .reel__spokes span { height: 16px; top: 10px; transform-origin: 2px 16px; }
+          .reel__hub { width: 14px; height: 14px; }
 
-          .skeleton-stat-card {
-            padding: 16px 18px;
-          }
+          .film-loader__strip { width: 100px; height: 36px; }
 
-          .skeleton-stat-icon {
-            width: 36px;
-            height: 36px;
-          }
+          .film-loader__stats { grid-template-columns: repeat(2, 1fr); }
 
-          .skeleton-table-row {
-            padding: 14px 16px;
-          }
+          .list-row { padding: 12px 14px; gap: 10px; }
+          .list-row__btn { width: 40px; }
 
-          .loader-spinner-container {
-            padding: 20px 0 16px 0;
-          }
-
-          .loader-spinner {
-            width: 48px;
-            height: 48px;
-          }
-
-          .spinner-ring {
-            width: 48px;
-            height: 48px;
-            border-width: 2.5px;
-          }
-
-          .spinner-logo {
-            width: 18px;
-            height: 18px;
-          }
-
-          .loader-text {
-            font-size: 13px;
-          }
+          .film-loader__text { font-size: 14px; }
+          .film-loader__progress { width: 180px; }
         }
 
         @media (max-width: 480px) {
-          .skeleton-stats {
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-          }
+          .film-loader { gap: 20px; padding: 24px 12px; }
 
-          .skeleton-stat-card {
-            padding: 12px 14px;
-            border-radius: 12px;
-          }
+          .reel { width: 44px; height: 44px; }
+          .reel__spokes span { height: 14px; top: 8px; transform-origin: 2px 14px; }
+          .reel__hub { width: 12px; height: 12px; }
 
-          .skeleton-stat-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 10px;
-          }
+          .film-loader__strip { width: 80px; height: 32px; }
 
-          .skeleton-line-lg {
-            height: 20px;
-          }
+          .film-loader__stats { grid-template-columns: 1fr 1fr; gap: 10px; }
+          .stat-tile { padding: 12px 14px; }
 
-          .skeleton-header {
-            gap: 12px;
-          }
+          .list-row__badge { display: none; }
+        }
 
-          .skeleton-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-          }
-
-          .loader-wrapper {
-            padding: 12px 10px;
+        /* ═══════════════════════════════════════════════════════════
+           ACCESSIBILITY
+           ═══════════════════════════════════════════════════════════ */
+        @media (prefers-reduced-motion: reduce) {
+          .reel--left,
+          .reel--right,
+          .strip__perforations,
+          .film-loader__progress-bar,
+          .particle,
+          .film-loader__dots span,
+          .stat-tile__icon::after,
+          .stat-tile__line::after,
+          .list-row__avatar::after,
+          .list-row__line::after,
+          .list-row__badge::after,
+          .list-row__btn::after {
+            animation: none !important;
           }
         }
       `}</style>

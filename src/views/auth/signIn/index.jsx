@@ -7,8 +7,9 @@ import {
   Monitor, Smartphone, Globe, Lock, Mail, User, 
   AlertCircle, Music, Clapperboard, XCircle
 } from "lucide-react";
-import AuthApi from "api/AuthApi";
+import AuthApi from "api/auth/AuthApi";
 import { jwtDecode } from "jwt-decode";
+import { saveAuthData, clearAuthStorage } from "utils/auth";
 import "../../../assets/css/Login.css";
 
 /* ── Live Clock ── */
@@ -95,7 +96,7 @@ const Login = () => {
   const [isProcessing, setIsProcessing] = useState(false);
 
   // ── DASHBOARD URL ──
-  const DASHBOARD_URL = "/admin/default";
+  const DASHBOARD_URL = "/admin/home";
 
   // ============================================
   // XỬ LÝ GOOGLE CALLBACK
@@ -135,7 +136,7 @@ const Login = () => {
             console.warn("❌ User is not admin:", { roleId, roleName });
             setGoogleError("Tài khoản không có quyền truy cập Admin! Vui lòng liên hệ quản trị viên.");
             setIsProcessing(false);
-            localStorage.removeItem("token");
+            clearAuthStorage();
             window.history.replaceState({}, document.title, window.location.pathname);
             return;
           }
@@ -143,16 +144,13 @@ const Login = () => {
           if (user.Status !== "Active" && user.Status !== "active") {
             setGoogleError("Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên!");
             setIsProcessing(false);
-            localStorage.removeItem("token");
+            clearAuthStorage();
             window.history.replaceState({}, document.title, window.location.pathname);
             return;
           }
           
-          localStorage.setItem("token", token);
-          localStorage.setItem("role", user.RoleName || "Admin");
-          localStorage.setItem("fullname", user.FullName);
-          localStorage.setItem("UserId", user.UserId);
-          localStorage.setItem("email", user.Email);
+          // ⭐ Lưu access_token + user info (refresh token đã có trong HttpOnly cookie)
+          saveAuthData(token, user);
           
           console.log("✅ Đã lưu thông tin user:", {
             roleId: user.RoleId,
@@ -169,6 +167,7 @@ const Login = () => {
           console.error("❌ Google login error:", err);
           setGoogleError("Xác thực Google thất bại. Vui lòng thử lại!");
           setIsProcessing(false);
+          clearAuthStorage();
         }
       };
       
@@ -192,29 +191,45 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!validate()) return;
+
     setLoading(true);
     setGoogleError(null);
+
     try {
       const response = await AuthApi.Login({ Email: email, Password: password });
-      const { token, user } = response.data;
-      const decoded = jwtDecode(token);
+      const { access_token, user } = response.data;
+
+      // Giải mã token để lấy role
+      const decoded = jwtDecode(access_token);
       const roleName = decoded.role || decoded.RoleName;
+
       if (roleName !== "Admin") {
         alert("Bạn không có quyền đăng nhập vào hệ thống!");
         setLoading(false);
         return;
       }
-      localStorage.setItem("token", token);
-      localStorage.setItem("role", roleName);
-      localStorage.setItem("fullname", user.FullName);
-      localStorage.setItem("UserId", user.UserId);
-      localStorage.setItem("email", user.Email);
+
+      // ⭐ Lưu access_token + user info (KHÔNG lưu refresh token!)
+      // Refresh token đã được backend set vào HttpOnly cookie tự động
+      saveAuthData(access_token, {
+        RoleName: roleName,
+        FullName: user.FullName,
+        UserId:   user.UserId,
+        Email:    user.Email,
+      });
+
+      console.log("✅ Login success:", user);
+
       window.location.href = DASHBOARD_URL;
     } catch (error) {
+      console.error("❌ Login error:", error);
+
       if (error.response?.status === 401) {
         setEmailError(true);
         setPwdError(true);
         alert("Sai tên đăng nhập hoặc mật khẩu!");
+      } else if (error.response?.status === 403) {
+        alert(error.response?.data?.error || "Tài khoản không có quyền truy cập!");
       } else {
         alert("Đăng nhập thất bại. Vui lòng thử lại!");
       }

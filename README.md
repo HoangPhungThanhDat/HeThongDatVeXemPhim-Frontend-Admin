@@ -36,14 +36,14 @@
 
 **Gấu Phim Admin** là giao diện Back-office phục vụ **Quản trị viên (Admin)** và **Nhân viên rạp (Staff)** quản lý toàn bộ nghiệp vụ của hệ thống đặt vé xem phim Gấu Phim: phim & suất chiếu, phòng chiếu & sơ đồ ghế, đơn hàng & vé, khuyến mãi, người dùng, phân quyền và báo cáo thống kê.
 
-Dự án được khởi tạo từ template **Horizon UI (Chakra UI)** và được tuỳ biến sâu: mỗi module nghiệp vụ (`quanlyphim`, `quanlyghe`, `quanlydonhang`...) là một feature module độc lập, gồm `components/`, `hooks/`, `variables/` và `constants.js` riêng — giúp dễ bảo trì khi hệ thống mở rộng thêm module.
+Dự án được khởi tạo từ template **Horizon UI (Chakra UI)** và được tuỳ biến sâu theo hướng **tổ chức theo nhóm nghiệp vụ (domain)**: các module trong `views/admin/` được gom vào 7 nhóm `booking`, `catalog`, `cinema`, `marketing`, `report`, `user`, `system`; lớp gọi API trong `api/` cũng chia theo đúng các nhóm tương ứng. Mỗi module là một feature độc lập, gồm `components/`, `hooks/`, `constants.js` và `index.jsx` riêng — giúp dễ bảo trì khi hệ thống mở rộng thêm module.
 
 ---
 
 ## ✨ Tính Năng
 
 <details open>
-<summary><b>🎥 Quản Lý Nội Dung</b></summary>
+<summary><b>🎥 Quản Lý Nội Dung (<code>catalog</code>, <code>marketing</code>)</b></summary>
 
 - Quản lý phim, thể loại, diễn viên, nhà phát hành (`quanlyphim`, `quanlytheloai`, `quanlydienvien`, `quanlynhaphathanh`)
 - Quản lý banner trang chủ với kéo-thả sắp xếp thứ tự (`quanlybanner` + `useDragSort`)
@@ -53,68 +53,70 @@ Dự án được khởi tạo từ template **Horizon UI (Chakra UI)** và đư
 </details>
 
 <details>
-<summary><b>🏢 Quản Lý Rạp, Phòng & Ghế</b></summary>
+<summary><b>🏢 Quản Lý Rạp, Phòng & Ghế (<code>cinema</code>)</b></summary>
 
 - Quản lý chuỗi rạp chiếu (`quanlyrapchieu`)
 - Quản lý phòng chiếu với xem trước sơ đồ ghế (`quanlyphongchieu`, `SeatMapPreview`)
-- Thiết kế/chỉnh sửa sơ đồ ghế theo hàng-cột, chọn loại ghế (`quanlyghe`)
-- Theo dõi & cập nhật trạng thái ghế theo từng suất chiếu, có drawer chi tiết ghế (`quanlytrangthaighe`)
+- Thiết kế/chỉnh sửa sơ đồ ghế theo hàng-cột, chọn loại ghế (`quanlyghe`: `AddRowModal`, `AddColumnModal`, `EditSeatModal`, `SeatMapView`)
+- Theo dõi & cập nhật trạng thái ghế theo từng suất chiếu, có drawer chi tiết ghế và reset ghế (`quanlytrangthaighe`)
 
 </details>
 
 <details>
-<summary><b>🗓️ Suất Chiếu & Lịch Chiếu</b></summary>
+<summary><b>🗓️ Suất Chiếu & Lịch Chiếu (<code>cinema</code>)</b></summary>
 
-- Quản lý suất chiếu, chỉnh giá hàng loạt, phát hiện xung đột lịch (`quanlysuatchieu`)
-- Lịch chiếu định kỳ theo tuần, nhân bản lịch tuần (`quanlylichchieudinhky`, `CloneWeekModal`)
-
-</details>
-
-<details>
-<summary><b>🎟️ Vé & Đơn Hàng</b></summary>
-
-- Tạo vé thủ công với sơ đồ ghế trực quan (`TaoVeMoi.jsx`)
-- Xem chi tiết vé, hiển thị mã QR (`TicketDetail.jsx`, `QRModal.jsx`)
-- Quản lý đơn hàng: lọc, xem chi tiết, xử lý hoàn tiền, xuất Excel (`quanlydonhang`, `RefundModal.jsx`, `exportExcel.js`)
-- Xem trạng thái vé/đơn trên di động (`MobileTicketList.jsx`)
+- Quản lý suất chiếu, chỉnh giá hàng loạt, nhân bản lịch tuần (`quanlysuatchieu`: `BulkEditPriceModal`, `CloneWeekModal`)
+- Lịch chiếu định kỳ theo tuần với giao diện `WeekView`, chỉnh giá hàng loạt, nhân bản tuần (`quanlylichchieudinhky`)
 
 </details>
 
 <details>
-<summary><b>👥 Người Dùng, Hội Viên & Phân Quyền</b></summary>
+<summary><b>🎟️ Vé & Đơn Hàng (<code>booking</code>)</b></summary>
+
+- Tạo vé thủ công với sơ đồ ghế trực quan, chỉnh sửa vé (`quanlyve`: `TaoVeMoi`, `TicketEdit`, `TicketDetail`)
+- Hiển thị mã QR của vé (`QRModal`)
+- Quản lý đặt vé/đơn hàng: lọc, xem chi tiết, xử lý hoàn tiền, xuất Excel (`quanlydatve`, `quanlydonhang`, `RefundModal`, `exportExcel.js`)
+- Xem danh sách vé trên di động (`MobileTicketList`)
+- Quản lý thanh toán (`quanlythanhtoan`)
+
+</details>
+
+<details>
+<summary><b>👥 Người Dùng, Hội Viên & Phân Quyền (<code>user</code>)</b></summary>
 
 - Quản lý người dùng: tạo, sửa, xoá, gửi thông báo (`quanlynguoidung`)
 - Quản lý hội viên & điểm tích luỹ (`quanlyhoivien`)
-- Phân quyền theo vai trò với ma trận quyền chi tiết (`quanlyphanquyen`)
-- Hỗ trợ khách hàng: xử lý liên hệ, theo dõi tiến trình xử lý (`hotrokhachhang`)
+- Phân quyền theo vai trò, gán vai trò cho người dùng (`quanlyphanquyen`: `RoleForm`, `AssignRoleModal`)
+- Hỗ trợ khách hàng: xử lý liên hệ, theo dõi tiến trình xử lý (`hotrokhachhang`: `ContactProcess`)
+- Quản lý đánh giá khách hàng và danh sách yêu thích (`quanlydanhgia`, `quanlydanhsachyeuthich`)
 
 </details>
 
 <details>
-<summary><b>🎁 Khuyến Mãi & Voucher</b></summary>
+<summary><b>🎁 Khuyến Mãi & Voucher (<code>marketing</code>)</b></summary>
 
 - Tạo/quản lý mã giảm giá, voucher (`quanlyvoucher`)
 - Chương trình khuyến mãi theo loại, có bộ lọc nâng cao (`quanlykhuyenmai`)
-- Quản lý danh sách yêu thích của khách hàng (`quanlydanhsachyeuthich`)
+- Quản lý thông báo hệ thống (`quanlythongbao`)
 
 </details>
 
 <details>
-<summary><b>📊 Báo Cáo & Thống Kê</b></summary>
+<summary><b>📊 Báo Cáo & Thống Kê (<code>report</code>, <code>home</code>)</b></summary>
 
-- Dashboard tổng quan: doanh thu tuần, biểu đồ tròn, bảng dữ liệu phức hợp (`views/admin/default`)
+- Dashboard tổng quan: doanh thu, biểu đồ, bảng dữ liệu (`views/admin/home`)
 - Thống kê doanh số & combo bán chạy (`thongke`, `thongkecombo`)
-- Quản lý đánh giá khách hàng với cập nhật gần thời gian thực bằng polling (`quanlydanhgia`) — Socket.IO của hệ thống hiện được dùng ở frontend người dùng, chưa tích hợp vào Admin
-- Nhật ký hoạt động hệ thống (`LogHeThong`)
+- Nhật ký hoạt động hệ thống (`nhatkyhethong`)
+- Cập nhật gần thời gian thực bằng polling ở các trang cần dữ liệu "sống" (ví dụ `quanlydanhgia`, `quanlytrangthaighe`) — Socket.IO của hệ thống hiện được dùng ở frontend người dùng, chưa tích hợp vào Admin
 
 </details>
 
 <details>
-<summary><b>⚙️ Khác</b></summary>
+<summary><b>⚙️ Hệ Thống & Khác (<code>system</code>)</b></summary>
 
-- Quản lý menu điều hướng (`quanlymenu`), thông báo hệ thống (`quanlythongbao`), thanh toán (`quanlythanhtoan`)
 - Trang cá nhân người quản trị (`profile`)
-- Hỗ trợ giao diện RTL (`rtlProvider`, `stylis-plugin-rtl`)
+- Đăng nhập Admin/Staff với phiên làm việc qua **HttpOnly Cookie** và tự động làm mới token (`useTokenRefresh`)
+- Dark/Light mode theo Chakra UI (`useColorMode`)
 
 </details>
 
@@ -160,8 +162,7 @@ Dự án được khởi tạo từ template **Horizon UI (Chakra UI)** và đư
 |---|---|---|
 | `@chakra-ui/react` | 2.6.1 | Bộ UI component chính, hỗ trợ `useColorMode`/`useColorModeValue` cho dark mode |
 | `react-router-dom` | ^6.25 | Điều hướng & bảo vệ route (`PrivateRoute.js`) |
-| `axios` | ^1.17 | Gọi API, có instance riêng `AxiosAdmin.js` |
-| `jwt-decode` | ^4.0 | Giải mã JWT phía client (kiểm tra hạn token, lấy thông tin user) |
+| `axios` | ^1.17 | Gọi API, instance riêng `api/client/AxiosAdmin.js` (bật `withCredentials` để gửi cookie) |
 | `framer-motion` | ^11.3 | Animation cho modal, card, sidebar |
 | `apexcharts` / `react-apexcharts` | 3.50 / 1.4 | Biểu đồ dashboard (doanh thu, traffic) |
 | `recharts` | ^3.6 | Biểu đồ bổ sung cho các trang thống kê |
@@ -172,7 +173,6 @@ Dự án được khởi tạo từ template **Horizon UI (Chakra UI)** và đư
 | `react-calendar` | ^5.0 | Lịch mini trên dashboard |
 | `react-custom-scrollbars-2` | ^4.5 | Thanh cuộn tuỳ chỉnh |
 | `lucide-react` / `react-icons` | mới nhất | Bộ icon |
-| `stylis` + `stylis-plugin-rtl` | ^4.3 / ^2.0 | Hỗ trợ giao diện RTL cho Chakra |
 
 > Dự án dùng **Create React App** (`react-scripts` 5) làm build tool, không phải Vite.
 
@@ -187,6 +187,7 @@ Dự án được khởi tạo từ template **Horizon UI (Chakra UI)** và đư
 | Node.js | >= 18.x (khuyến nghị LTS) |
 | npm | >= 8.x |
 | RAM | >= 4GB |
+| Backend | Laravel API (`laravel-movie-booking`) đang chạy, đã cho phép origin của Admin trong CORS |
 
 ### Cài Đặt
 
@@ -209,62 +210,99 @@ npm start
 
 Mặc định ứng dụng chạy tại `http://localhost:3000`. Đăng nhập bằng tài khoản Admin/Staff đã được seed ở phía backend (Laravel).
 
+> ⚠️ Vì token nằm trong cookie, backend phải khai báo `http://localhost:3000` trong `allowed_origins` (ví dụ biến `ADMIN_FRONTEND_URL`) và bật `supports_credentials`. Nếu không, đăng nhập sẽ thành công nhưng các request sau đó bị `401`.
+
 ---
 
 ## 📁 Cấu Trúc Dự Án
 
 ```
+public/                       # index.html, favicon, manifest, robots.txt, banner
+
 src/
-├── api/                     # Lớp gọi API — mỗi module 1 file (25 file)
-│   ├── AxiosAdmin.js        # Instance axios dùng chung: gắn JWT, tự clear + redirect khi 401
-│   ├── AuthApi.js
-│   ├── MovieApi.js
-│   ├── RoomManagementApi.js
-│   ├── SeatManagementApi.js
-│   ├── TicketManagementApi.js
-│   └── ...                  # Banner, Cinemas, Order, Promotion, Role, Schedule, Showtime, User...
+├── api/                      # Lớp gọi API — chia theo nhóm nghiệp vụ (25 file API + 1 axios instance)
+│   ├── client/
+│   │   └── AxiosAdmin.js     # Axios instance dùng chung: withCredentials, tự refresh khi 401
+│   ├── auth/                 # AuthApi
+│   ├── booking/              # OrderApi, OrderDetailApi, ScheduleApi, ShowtimeSeatApi, TicketApi, TicketManagementApi
+│   ├── catalog/              # DistributorApi, GenreApi, MovieApi, MovieCastApi, NewApi
+│   ├── cinema/               # CinemasApi, RoomApi, RoomManagementApi, RoomSeatApi, SeatApi, SeatManagementApi, ShowtimeApi
+│   ├── marketing/            # BannerApi, FoodAndDrinkApi, PromotionApi
+│   └── user/                 # ContactApi, RoleApi, UserApi
 │
-├── components/              # Component dùng chung toàn app
-│   ├── sidebar/, navbar/, footer/
-│   ├── card/, charts/, fields/
-│   └── PrivateRoute.js      # Bảo vệ route theo trạng thái đăng nhập/vai trò
+├── assets/                   # css (App.css, Login.css) và img
+│
+├── components/               # Component dùng chung toàn app
+│   ├── calendar/, card/, charts/, dataDisplay/, fields/
+│   ├── footer/, icons/, navbar/, scroll/, scrollbar/, separator/
+│   ├── sidebar/              # Sidebar + components (Brand, Content, Links)
+│   └── PrivateRoute.js       # Chặn route khi chưa có phiên đăng nhập hợp lệ
 │
 ├── contexts/
-│   └── SidebarContext.js    # State sidebar (thu/mở rộng)
+│   └── SidebarContext.js     # State sidebar (thu/mở rộng)
 │
 ├── hooks/
-│   └── useServerPagination.js
+│   ├── useServerPagination.js
+│   └── useTokenRefresh.js    # Tự động làm mới Access Token qua Refresh Token (cookie)
 │
 ├── layouts/
 │   ├── admin/                # Layout khu vực quản trị
-│   └── auth/                 # Layout đăng nhập
+│   ├── auth/                 # Layout đăng nhập
+│   └── Loader.jsx
 │
-├── theme/                    # Cấu hình theme Chakra UI (màu sắc, component style override)
+├── theme/                    # Theme Chakra UI (additions, components, foundations, styles)
+├── utils/
+│   └── auth.js               # Tiện ích xác thực dùng chung
+├── variables/
+│   └── charts.js             # Cấu hình biểu đồ
+├── constants/, services/     # Dành cho hằng số/service dùng chung (hiện còn trống)
 │
-└── views/admin/               # 30 module nghiệp vụ, mỗi module theo cấu trúc:
-    ├── quanlyphim/
-    │   ├── components/        # UI con: Card, Detail, Form, List, Row, FilterDrawer...
-    │   │   └── shared/         # Badge, StatCard, SectionTitle, animations dùng riêng cho module
-    │   ├── hooks/              # Hook nghiệp vụ (usePhim.js, useOrders.js...)
-    │   ├── variables/          # Cấu hình cột bảng, dữ liệu mẫu
-    │   ├── constants.js        # Hằng số, tuỳ chọn dropdown, giá trị mặc định
-    │   └── index.jsx           # Điểm vào của trang
-    ├── quanlyghe/
-    ├── quanlytrangthaighe/    # Realtime trạng thái ghế theo suất chiếu
-    ├── quanlyve/              # TaoVeMoi, TicketDetail, QRModal
-    ├── quanlydonhang/         # RefundModal, exportExcel
-    ├── quanlyphanquyen/
-    ├── ... (27 module khác)
-    └── default/                # Dashboard tổng quan
+├── views/
+│   ├── auth/signIn/          # Trang đăng nhập
+│   └── admin/                # Module nghiệp vụ, chia theo nhóm
+│       ├── booking/          # quanlydatve · quanlydonhang · quanlythanhtoan · quanlyve
+│       ├── catalog/          # quanlyphim · quanlytheloai · quanlydienvien · quanlynhaphathanh
+│       ├── cinema/           # quanlyrapchieu · quanlyphongchieu · quanlyghe · quanlytrangthaighe
+│       │                     # quanlysuatchieu · quanlylichchieudinhky
+│       ├── marketing/        # quanlybanner · quanlycombo · quanlykhuyenmai · quanlyvoucher
+│       │                     # quanlytintuc · quanlythongbao
+│       ├── report/           # thongke · thongkecombo · nhatkyhethong
+│       ├── user/             # quanlynguoidung · quanlyphanquyen · quanlyhoivien
+│       │                     # quanlydanhgia · quanlydanhsachyeuthich · hotrokhachhang
+│       ├── system/           # profile
+│       └── home/             # Dashboard tổng quan
+│
+├── App.js
+├── index.js
+└── routes.js                 # Khai báo route & menu sidebar
 ```
 
-Toàn bộ module nghiệp vụ: `quanlybanner`, `quanlycombo`, `quanlydanhgia`, `quanlydanhsachyeuthich`, `quanlydatve`, `quanlydienvien`, `quanlydonhang`, `quanlyghe`, `quanlyhoivien`, `quanlykhuyenmai`, `quanlylichchieudinhky`, `quanlymenu`, `quanlynguoidung`, `quanlynhaphathanh`, `quanlyphanquyen`, `quanlyphim`, `quanlyphongchieu`, `quanlyrapchieu`, `quanlysuatchieu`, `quanlythanhtoan`, `quanlytheloai`, `quanlythongbao`, `quanlytintuc`, `quanlytrangthaighe`, `quanlyve`, `quanlyvoucher`, `thongke`, `thongkecombo`, `hotrokhachhang`, `LogHeThong`.
+### Cấu Trúc Một Module Nghiệp Vụ
+
+Các module đầy đủ (ví dụ `catalog/quanlyphim`) theo mẫu sau:
+
+```
+quanlyphim/
+├── components/
+│   ├── shared/               # Badge, StatCard, SectionTitle, animations dùng riêng cho module
+│   ├── PhimCard.jsx · PhimRow.jsx · PhimList.jsx      # Hiển thị dạng lưới / bảng / danh sách
+│   ├── PhimDetail.jsx · PhimForm.jsx                  # Chi tiết & biểu mẫu thêm/sửa
+│   ├── FilterDrawer.jsx · ConfirmDeleteModal.jsx · TrailerModal.jsx
+├── hooks/
+│   └── usePhim.js            # Logic nghiệp vụ: gọi API, state, lọc, phân trang
+├── constants.js              # Hằng số, tuỳ chọn dropdown, giá trị mặc định
+└── index.jsx                 # Điểm vào của trang, ghép nối state và component
+```
+
+Một số module có thêm thư mục riêng khi cần: `utils/` (ví dụ `exportExcel.js` ở `quanlydatve`, `quanlydonhang`), `services/` và `utils/` (ở `quanlytrangthaighe`), `components/mini/` (ở `quanlylichchieudinhky`), `variables/` (ở `thongke`).
+
+Các module nhẹ hơn (`quanlythanhtoan`, `quanlyvoucher`, `quanlythongbao`, `nhatkyhethong`, `thongkecombo`, `quanlydanhgia`, `quanlydanhsachyeuthich`, `quanlyhoivien`, `home`) hiện chỉ gồm `components/` và `index.jsx`.
 
 ---
 
 ## 🔗 Kết Nối Backend
 
-Admin panel này gọi API từ backend **Laravel 12** (`laravel-movie-booking`) qua instance `axios` cấu hình sẵn trong `src/api/AxiosAdmin.js`.
+Admin panel này gọi API từ backend **Laravel 12** (`laravel-movie-booking`) qua instance `axios` cấu hình sẵn trong `src/api/client/AxiosAdmin.js`.
 
 ### Biến Môi Trường
 
@@ -272,12 +310,26 @@ Admin panel này gọi API từ backend **Laravel 12** (`laravel-movie-booking`)
 REACT_APP_API_URL=http://localhost:8000/api
 ```
 
-### Cơ Chế Xác Thực
+### Cơ Chế Xác Thực (Access Token + Refresh Token trong HttpOnly Cookie)
 
-- Token JWT được lưu tại `localStorage` sau khi đăng nhập (`AuthApi.js`)
-- `AxiosAdmin.js` tự động gắn header `Authorization: Bearer <token>` cho mọi request
-- Khi API trả về `401`, instance tự động xoá token và điều hướng người dùng về trang đăng nhập
-- `jwt-decode` được dùng để đọc thông tin/hạn token phía client mà không cần gọi thêm API
+Admin **không còn lưu JWT trong `localStorage`**. Sau khi đăng nhập, backend đặt **Access Token** và **Refresh Token** vào **HttpOnly Cookie**; JavaScript phía client không đọc được hai cookie này, nên giảm đáng kể rủi ro bị đánh cắp token qua XSS.
+
+| Thành phần | Vai trò |
+|---|---|
+| `AxiosAdmin.js` | Bật `withCredentials: true` để trình duyệt tự gửi cookie theo mọi request; không còn gắn header `Authorization` thủ công |
+| `useTokenRefresh.js` | Khi Access Token hết hạn, gọi `POST /api/auth/refresh` (dựa vào Refresh Token trong cookie) để cấp lại phiên |
+| `PrivateRoute.js` | Chỉ cho vào khu vực quản trị khi phiên đăng nhập còn hợp lệ |
+| `utils/auth.js` | Hàm tiện ích liên quan đăng nhập/đăng xuất |
+
+Luồng xử lý:
+
+1. Đăng nhập → backend trả `Set-Cookie` cho `access_token` và `refresh_token` (HttpOnly).
+2. Mọi request sau đó tự đính kèm cookie nhờ `withCredentials`.
+3. Khi API trả `401` (Access Token hết hạn) → gọi refresh **một lần** → thử lại request ban đầu.
+4. Nếu refresh thất bại (Refresh Token hết hạn hoặc đã bị thu hồi) → đưa người dùng về trang đăng nhập.
+5. Đăng xuất → gọi `POST /api/auth/logout` để thu hồi Refresh Token và xoá cookie.
+
+Lưu ý khi chạy: backend phải bật CORS với `supports_credentials = true` và liệt kê **origin cụ thể** của Admin (không dùng `*`). Khi Admin và API khác site ở môi trường production, cookie cần `SameSite=None; Secure` và chạy qua HTTPS.
 
 ### Cập Nhật Thời Gian Thực
 
@@ -290,7 +342,9 @@ Backend đã hỗ trợ Socket.IO/Pusher cho realtime (đang được tích hợ
 - **Theming**: dùng `useColorMode` / `useColorModeValue` của Chakra UI cho mọi light/dark mode — không dùng state `isDark` cục bộ hay nút toggle tự viết.
 - **Dark mode**: dùng bảng màu navy: `#111c44`, `#0b1437`, `#1B254B`, `#2D3A6B` (không dùng gray trung tính).
 - **Accent color**: cam `#f97316` / `#fb923c`, kết hợp navy `#0b1437` / `#111c44` cho các trang đã redesign (Login, TicketDetail, QRModal, TaoVeMoi...).
-- **Kiến trúc module**: mỗi trang lớn tách `components/shared/` (badge, stat card, animation dùng chung trong module), `variables/` (cấu hình bảng, data mẫu) và `constants.js` (option, giá trị mặc định).
+- **Kiến trúc module**: mỗi trang lớn tách `components/shared/` (badge, stat card, animation dùng chung trong module), `hooks/` (logic nghiệp vụ) và `constants.js` (option, giá trị mặc định); `index.jsx` làm điểm vào.
+- **Phân nhóm**: module mới đặt vào đúng nhóm nghiệp vụ (`booking`, `catalog`, `cinema`, `marketing`, `report`, `user`, `system`) và file API tương ứng đặt trong thư mục cùng tên ở `src/api/`.
+- **Xác thực**: không lưu token vào `localStorage`/`sessionStorage`; mọi request API đi qua `AxiosAdmin.js`.
 - **Export dữ liệu**: các chức năng xuất CSV/Excel dùng UTF-8 BOM để hiển thị đúng tiếng Việt trên Excel.
 
 ---
@@ -305,7 +359,7 @@ npm test
 npm test -- --watch
 ```
 
-Bộ công cụ test: `@testing-library/react`, `@testing-library/jest-dom`, `@testing-library/user-event`.
+Môi trường test dùng bộ công cụ mặc định của CRA (Jest, React Testing Library). Hiện repo chưa có file test cho các module; nên bắt đầu với các luồng quan trọng như `AxiosAdmin` (refresh khi 401), `PrivateRoute` và các hook nghiệp vụ.
 
 ---
 
@@ -316,6 +370,8 @@ Bộ công cụ test: `@testing-library/react`, `@testing-library/jest-dom`, `@t
 ```bash
 npm run build
 ```
+
+> Nhớ cập nhật `REACT_APP_API_URL` trỏ đúng domain backend production trước khi build, đồng thời đảm bảo backend cho phép origin của Admin trong CORS và cookie được cấu hình `Secure` (HTTPS).
 
 ### Deploy Lên GitHub Pages (đã cấu hình sẵn trong `package.json`)
 
@@ -349,7 +405,7 @@ netlify deploy --prod --dir=build
 </IfModule>
 ```
 
-> Nhớ cập nhật `REACT_APP_API_URL` trỏ đúng domain backend production trước khi build.
+> 💡 Nên đặt Admin và API cùng site (ví dụ `admin.gauphim.com` và `api.gauphim.com`) để cookie hoạt động ổn định với `SameSite=Lax`, thay vì phải dùng `SameSite=None`.
 
 ---
 
@@ -363,9 +419,11 @@ netlify deploy --prod --dir=build
 
 ### Tiêu Chuẩn Code
 
-- Theo cấu trúc module đã có: `components/` (kèm `shared/` nếu cần), `hooks/`, `variables/`, `constants.js`, `index.jsx`
+- Đặt module vào đúng nhóm trong `views/admin/` và theo cấu trúc: `components/` (kèm `shared/` nếu cần), `hooks/`, `constants.js`, `index.jsx`
+- Mỗi module có file API riêng trong nhóm tương ứng ở `src/api/`, gọi qua `AxiosAdmin`
 - Dark mode luôn dùng `useColorModeValue`, theo bảng màu navy đã thống nhất
-- Format theo `prettier.config.js` có sẵn trong repo
+- Lint theo `.eslintrc.json`, format theo `prettier.config.js` có sẵn trong repo
+- Ghi lại thay đổi quan trọng trong `CHANGELOG.md`
 - Commit message rõ ràng theo dạng `feat:`, `fix:`, `refactor:`...
 
 ---

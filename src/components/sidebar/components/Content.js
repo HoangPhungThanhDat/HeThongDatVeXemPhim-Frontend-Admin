@@ -10,22 +10,26 @@ import React from "react";
 
 function SidebarContent(props) {
   const { routes } = props;
+
   // SIDEBAR
   return (
-    <Flex direction='column' height='100%' pt='25px' px="16px" borderRadius='30px'>
+    <Flex
+      direction="column"
+      pt="25px"
+      px="16px"
+      pb="40px"
+      borderRadius="30px"
+      minH="100%"
+    >
       <Brand />
-      <Stack direction='column' mb='auto' mt='8px'>
-        <Box ps='20px' pe={{ md: "16px", "2xl": "1px" }}>
+
+      <Stack direction="column" mt="8px" spacing={1}>
+        <Box ps="20px" pe={{ md: "16px", "2xl": "1px" }}>
           <Links routes={routes} />
         </Box>
       </Stack>
 
-      <Box
-        mt='60px'
-        mb='40px'
-        borderRadius='30px'>
- 
-      </Box>
+      <Box mt="40px" mb="20px" />
     </Flex>
   );
 }

@@ -1,4 +1,5 @@
 // src/App.js
+import useTokenRefresh from "hooks/useTokenRefresh";
 import './assets/css/App.css';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import AuthLayout from './layouts/auth';
@@ -7,21 +8,24 @@ import PrivateRoute from './components/PrivateRoute';
 import { ChakraProvider } from '@chakra-ui/react';
 import initialTheme from './theme/theme';
 import { useState } from 'react';
-import SignInCentered from 'views/auth/signIn'; // ✅ Thêm import
+import SignInCentered from 'views/auth/signIn';
 
 export default function Main() {
   const [currentTheme, setCurrentTheme] = useState(initialTheme);
   
+  // ⭐ Auto refresh access token trước khi hết hạn
+  useTokenRefresh();
+
   return (
     <ChakraProvider theme={currentTheme}>
       <Routes>
-        {/* ✅ Route /login dành cho Google callback (không cần layout) */}
+        {/* Google OAuth callback */}
         <Route path="/login" element={<SignInCentered />} />
         
-        {/* Route công khai — trang đăng nhập */}
+        {/* Auth (login form) */}
         <Route path="auth/*" element={<AuthLayout />} />
 
-        {/* Route được bảo vệ — phải đăng nhập mới vào được */}
+        {/* Admin — yêu cầu đăng nhập */}
         <Route
           path="admin/*"
           element={
@@ -31,8 +35,11 @@ export default function Main() {
           }
         />
 
-        {/* Mặc định → /admin (nếu chưa login sẽ bị PrivateRoute đá về /auth/sign-in) */}
+        {/* Mặc định: / → /admin */}
         <Route path="/" element={<Navigate to="/admin" replace />} />
+        
+        {/* ⭐ Catch-all: bất kỳ path lạ → /admin (PrivateRoute sẽ đá về login nếu chưa login) */}
+        <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>
     </ChakraProvider>
   );
