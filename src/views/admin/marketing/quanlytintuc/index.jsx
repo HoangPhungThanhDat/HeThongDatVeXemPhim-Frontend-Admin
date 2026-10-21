@@ -1,6 +1,6 @@
-// views/admin/quanlytintuc/index.jsx
 
-import { useState, useEffect } from "react";
+
+import { useState } from "react";
 import { Box, useToast } from "@chakra-ui/react";
 import { TinTucList } from "./components/TinTucList";
 import { TinTucForm } from "./components/TinTucForm";
@@ -11,45 +11,23 @@ export default function QuanLyTinTuc() {
   const [view, setView] = useState("list");
   const [selected, setSelected] = useState(null);
   const toast = useToast();
-  
+
   const {
-    articles,
-    loading,
-    search,
-    setSearch,
-    filterStatus,
-    setFilterStatus,
-    filterCategory,
-    setFilterCategory,
-    filtered,
-    counts,
-    totalViews,
-    toggleStatus,
-    deleteArticle,
-    createArticle,
-    updateArticle,
+    articles, loading, search, setSearch,
+    filterStatus, setFilterStatus,
+    filterCategory, setFilterCategory,
+    filtered, counts, totalViews, updatingIds,
+    toggleStatus, deleteArticle, createArticle, updateArticle,
     refreshArticles,
   } = useTinTuc();
 
-  // Auto publish scheduled articles (simulate cron job)
-  useEffect(() => {
-    const autoPublish = () => {
-      // In real app, this would be handled by server cron job
-    };
-    autoPublish();
-    const id = setInterval(autoPublish, 30000);
-    return () => clearInterval(id);
-  }, []);
-
-  //  Xử lý lưu (thêm hoặc sửa)
   const handleSave = async (formData) => {
     try {
       let success = false;
-      
       if (view === "add") {
         success = await createArticle(formData);
       } else {
-        const id = selected?.NewsId || selected?.id;
+        const id = selected?.id || selected?.NewsId;
         if (!id) {
           toast({
             title: "Lỗi",
@@ -62,7 +40,6 @@ export default function QuanLyTinTuc() {
         }
         success = await updateArticle(id, formData);
       }
-      
       if (success) {
         setView("list");
         await refreshArticles();
@@ -71,7 +48,8 @@ export default function QuanLyTinTuc() {
       console.error("Lỗi khi lưu bài viết:", error);
       toast({
         title: "Lỗi",
-        description: error.response?.data?.message || "Có lỗi xảy ra khi lưu",
+        description:
+          error.response?.data?.message || "Có lỗi xảy ra khi lưu",
         status: "error",
         duration: 3000,
         isClosable: true,
@@ -79,7 +57,6 @@ export default function QuanLyTinTuc() {
     }
   };
 
-  //  Xử lý xóa với xác nhận
   const handleDelete = (id) => {
     if (window.confirm("Bạn có chắc muốn xóa bài viết này?")) {
       deleteArticle(id);
@@ -87,23 +64,9 @@ export default function QuanLyTinTuc() {
     }
   };
 
-  //  Xử lý khi chọn xem chi tiết
-  const handleView = (article) => {
-    setSelected(article);
-    setView("detail");
-  };
-
-  //  Xử lý khi chọn sửa
-  const handleEdit = (article) => {
-    setSelected(article);
-    setView("edit");
-  };
-
-  //  Xử lý khi thêm mới
-  const handleAdd = () => {
-    setSelected(null);
-    setView("add");
-  };
+  const handleView = (article) => { setSelected(article); setView("detail"); };
+  const handleEdit = (article) => { setSelected(article); setView("edit"); };
+  const handleAdd = () => { setSelected(null); setView("add"); };
 
   if (view === "list") {
     return (
@@ -125,13 +88,17 @@ export default function QuanLyTinTuc() {
           onEdit={handleEdit}
           onToggleStatus={toggleStatus}
           onDelete={handleDelete}
+          updatingIds={updatingIds}
         />
       </Box>
     );
   }
 
   if (view === "detail" && selected) {
-    const article = articles.find((a) => (a.NewsId || a.id) === (selected.NewsId || selected.id)) || selected;
+    const article =
+      articles.find(
+        (a) => (a.id || a.NewsId) === (selected.id || selected.NewsId),
+      ) || selected;
     return (
       <Box pt={{ base: "100px", md: "80px" }}>
         <TinTucDetail
@@ -156,7 +123,10 @@ export default function QuanLyTinTuc() {
   }
 
   if (view === "edit" && selected) {
-    const article = articles.find((a) => (a.NewsId || a.id) === (selected.NewsId || selected.id)) || selected;
+    const article =
+      articles.find(
+        (a) => (a.id || a.NewsId) === (selected.id || selected.NewsId),
+      ) || selected;
     return (
       <Box pt={{ base: "100px", md: "80px" }}>
         <TinTucForm

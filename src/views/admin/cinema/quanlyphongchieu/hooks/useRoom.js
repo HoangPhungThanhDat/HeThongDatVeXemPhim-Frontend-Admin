@@ -14,11 +14,9 @@ export const useRoom = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedCinemaId, setSelectedCinemaId] = useState(null);
 
-  // ✅ Ref để kiểm tra đã initialized chưa
   const isInitialized = useRef(false);
   const isMounted = useRef(true);
 
-  // ✅ Cleanup khi unmount
   useEffect(() => {
     isMounted.current = true;
     return () => {
@@ -26,27 +24,15 @@ export const useRoom = () => {
     };
   }, []);
 
-  /**
-   * 📊 Load dashboard - CHỈ GỌI 1 LẦN DUY NHẤT
-   */
-  const loadDashboard = useCallback(async () => {
-    // ✅ Nếu đã initialized thì không gọi lại
-    if (isInitialized.current) {
-      console.log('⏭️ Đã load dashboard trước đó, bỏ qua');
-      return;
-    }
-
+  const loadDashboard = useCallback(async (force = false) => {
+    if (isInitialized.current && !force) return;
     try {
       setLoading(true);
-      console.log('🔄 Đang load dashboard lần đầu...');
-
       const response = await RoomManagementApi.getDashboard();
-
       if (response.success && isMounted.current) {
         const data = response.data;
         setDashboardData(data);
 
-        // Xử lý danh sách rạp
         const cinemaList = data.map((cinema) => ({
           CinemaId: cinema.CinemaId,
           Name: cinema.Name,
@@ -60,55 +46,35 @@ export const useRoom = () => {
         }));
         setCinemas(cinemaList);
 
-        // Nhóm phòng theo rạp
         const groupedRooms = {};
         data.forEach((cinema) => {
-          groupedRooms[cinema.CinemaId] = cinema.Rooms.map((room) => ({
-            ...room,
-          }));
+          groupedRooms[cinema.CinemaId] = cinema.Rooms.map((room) => ({ ...room }));
         });
         setRooms(groupedRooms);
 
-        // Chọn rạp đầu tiên (CHỈ 1 LẦN)
         if (cinemaList.length > 0 && !selectedCinemaId) {
           setSelectedCinemaId(cinemaList[0].CinemaId);
         }
-
-        // ✅ Đánh dấu đã initialized
         isInitialized.current = true;
-        console.log('✅ Dashboard loaded successfully');
       }
     } catch (error) {
       console.error('❌ Lỗi load dashboard:', error);
       if (isMounted.current) {
         Swal.fire({
-          toast: true,
-          position: 'top-end',
-          icon: 'error',
-          title: 'Không thể tải dữ liệu!',
-          showConfirmButton: false,
-          timer: 3000,
+          toast: true, position: 'top-end', icon: 'error',
+          title: 'Không thể tải dữ liệu!', showConfirmButton: false, timer: 3000,
         });
       }
     } finally {
-      if (isMounted.current) {
-        setLoading(false);
-      }
+      if (isMounted.current) setLoading(false);
     }
-  }, [selectedCinemaId]); // ✅ Vẫn giữ dependency nhưng đã có isInitialized để ngăn gọi lại
+  }, [selectedCinemaId]);
 
-  /**
-   * 🎯 Lấy chi tiết phòng + sơ đồ ghế
-   */
   const loadRoomDetail = useCallback(async (roomId) => {
     if (!roomId) return null;
-
     try {
       setLoadingDetail(true);
-      console.log(`🔄 Đang load chi tiết phòng ${roomId}...`);
-
       const response = await RoomManagementApi.getRoomDetail(roomId);
-
       if (response.success && isMounted.current) {
         setRoomDetail(response.data);
         return response.data;
@@ -116,52 +82,24 @@ export const useRoom = () => {
       return null;
     } catch (error) {
       console.error('❌ Lỗi load chi tiết phòng:', error);
-      if (isMounted.current) {
-        Swal.fire({
-          toast: true,
-          position: 'top-end',
-          icon: 'error',
-          title: 'Không thể tải chi tiết phòng!',
-          showConfirmButton: false,
-          timer: 3000,
-        });
-      }
       return null;
     } finally {
-      if (isMounted.current) {
-        setLoadingDetail(false);
-      }
+      if (isMounted.current) setLoadingDetail(false);
     }
   }, []);
 
-  /**
-   * 🔄 Refresh dữ liệu sau CRUD
-   * ✅ Reset initialized để load lại
-   */
   const refreshData = useCallback(async () => {
-    console.log('🔄 Refresh dữ liệu...');
     isInitialized.current = false;
-    await loadDashboard();
+    await loadDashboard(true);
   }, [loadDashboard]);
 
-  /**
-   * 🎉 Toast notification
-   */
   const showToast = useCallback((icon, message) => {
     Swal.fire({
-      toast: true,
-      position: 'top-end',
-      icon,
-      title: message,
-      showConfirmButton: false,
-      timer: 3000,
-      timerProgressBar: true,
+      toast: true, position: 'top-end', icon, title: message,
+      showConfirmButton: false, timer: 3000, timerProgressBar: true,
     });
   }, []);
 
-  /**
-   * ➕ Thêm phòng chiếu
-   */
   const handleAddRoom = useCallback(
     async (roomData) => {
       setIsSubmitting(true);
@@ -175,66 +113,89 @@ export const useRoom = () => {
         };
 
         await RoomManagementApi.createRoom(payload);
-        await refreshData();
+        
+        const tempRoom = {
+          RoomId: `temp_${Date.now()}`,
+          Name: payload.Name,
+          RoomType: payload.RoomType,
+          Status: payload.Status,
+          SeatCount: payload.SeatCount,
+          TotalSeats: 0,
+          BookedSeats: 0,
+          CurrentMovie: null,
+        };
+
+        setRooms((prev) => ({
+          ...prev,
+          [selectedCinemaId]: [...(prev[selectedCinemaId] || []), tempRoom],
+        }));
 
         showToast('success', '🎉 Thêm phòng chiếu thành công!');
-        setIsSubmitting(false);
         return true;
       } catch (error) {
         console.error('❌ Lỗi add room:', error);
-        showToast(
-          'error',
-          error.response?.data?.message || '❌ Thêm thất bại!',
-        );
-        setIsSubmitting(false);
+        showToast('error', error.response?.data?.message || '❌ Thêm thất bại!');
         return false;
+      } finally {
+        setIsSubmitting(false);
       }
     },
-    [selectedCinemaId, refreshData, showToast],
+    [selectedCinemaId, showToast],
   );
 
-  /**
-   * ✏️ Cập nhật phòng chiếu
-   */
   const handleUpdateRoom = useCallback(
     async (roomId, roomData) => {
       setIsSubmitting(true);
+
+      // 1. Cập nhật giao diện ngay lập tức
+      setRooms((prev) => {
+        const current = prev[selectedCinemaId] || [];
+        return {
+          ...prev,
+          [selectedCinemaId]: current.map((r) =>
+            r.RoomId === roomId ? { ...r, ...roomData, SeatCount: roomData.SeatCount } : r
+          ),
+        };
+      });
+
+      setRoomDetail((prev) => {
+        if (prev && prev.RoomId === roomId) return { ...prev, ...roomData };
+        return prev;
+      });
+
       try {
         const payload = {
           CinemaId: selectedCinemaId,
           Name: roomData.Name,
           RoomType: roomData.RoomType,
-          SeatCount: roomData.Capacity || roomData.TotalSeats || 0,
+          SeatCount: roomData.Capacity || roomData.TotalSeats || roomData.SeatCount || 0,
           Status: roomData.Status,
         };
 
         await RoomManagementApi.updateRoom(roomId, payload);
-        await refreshData();
-
+        
         showToast('success', '✅ Cập nhật phòng chiếu thành công!');
-        setIsSubmitting(false);
         return true;
       } catch (error) {
         console.error('❌ Lỗi update room:', error);
-        showToast(
-          'error',
-          error.response?.data?.message || '❌ Cập nhật thất bại!',
-        );
-        setIsSubmitting(false);
+        showToast('error', error.response?.data?.message || '❌ Cập nhật thất bại!');
         return false;
+      } finally {
+        setIsSubmitting(false);
       }
     },
-    [selectedCinemaId, refreshData, showToast],
+    [selectedCinemaId, showToast],
   );
 
-  /**
-   * 🗑️ Xóa phòng chiếu
-   */
   const handleDeleteRoom = useCallback(
     async (roomId) => {
       try {
         await RoomManagementApi.deleteRoom(roomId);
-        await refreshData();
+        
+        setRooms((prev) => ({
+          ...prev,
+          [selectedCinemaId]: (prev[selectedCinemaId] || []).filter((r) => r.RoomId !== roomId),
+        }));
 
         showToast('success', '🗑️ Xóa phòng chiếu thành công!');
         return true;
@@ -244,60 +205,64 @@ export const useRoom = () => {
         return false;
       }
     },
-    [refreshData, showToast],
+    [selectedCinemaId, showToast],
   );
 
   /**
-   * 🔄 Chuyển trạng thái phòng
+   * 🔄 Chuyển trạng thái phòng (Sửa lỗi 422)
    */
   const handleToggleRoomStatus = useCallback(
     async (roomId, currentStatus) => {
+      let newStatus;
+      if (currentStatus === 'Active') newStatus = 'Inactive';
+      else if (currentStatus === 'Inactive') newStatus = 'Maintenance';
+      else newStatus = 'Active';
+
+      // Cập nhật giao diện ngay
+      setRooms((prev) => ({
+        ...prev,
+        [selectedCinemaId]: (prev[selectedCinemaId] || []).map((r) =>
+          r.RoomId === roomId ? { ...r, Status: newStatus } : r
+        ),
+      }));
+
       try {
-        const room = (rooms[selectedCinemaId] || []).find(
-          (r) => r.RoomId === roomId,
-        );
+        const room = (rooms[selectedCinemaId] || []).find((r) => r.RoomId === roomId);
         if (!room) return;
 
-        let newStatus;
-        if (currentStatus === 'Active') newStatus = 'Inactive';
-        else if (currentStatus === 'Inactive') newStatus = 'Maintenance';
-        else newStatus = 'Active';
-
-        await RoomManagementApi.updateRoom(roomId, {
-          ...room,
+        // ✅ SỬA LỖI 422: Chỉ gửi các trường cần thiết và đảm bảo Name không bị rỗng
+        const payload = {
+          CinemaId: selectedCinemaId,
+          Name: room.Name || "Phòng chiếu", // Fallback nếu Name bị rỗng
+          RoomType: room.RoomType || "2D",
+          SeatCount: room.SeatCount || room.TotalSeats || 0,
           Status: newStatus,
-        });
+        };
 
-        await refreshData();
-
-        const statusLabel = {
-          Active: 'kích hoạt',
-          Inactive: 'khóa',
-          Maintenance: 'bảo trì',
-        }[newStatus];
-
+        await RoomManagementApi.updateRoom(roomId, payload);
+        
+        const statusLabel = { Active: 'kích hoạt', Inactive: 'khóa', Maintenance: 'bảo trì' }[newStatus];
         showToast('success', `✅ Đã ${statusLabel} phòng chiếu!`);
       } catch (error) {
         console.error('❌ Lỗi toggle status:', error);
+        console.log("Chi tiết lỗi 422:", error.response?.data); // Debug
+        
         showToast('error', '❌ Không thể cập nhật trạng thái!');
+        
+        // Khôi phục nếu lỗi
+        setRooms((prev) => ({
+          ...prev,
+          [selectedCinemaId]: (prev[selectedCinemaId] || []).map((r) =>
+            r.RoomId === roomId ? { ...r, Status: currentStatus } : r
+          ),
+        }));
       }
     },
-    [rooms, selectedCinemaId, refreshData, showToast],
+    [rooms, selectedCinemaId, showToast],
   );
 
-  /**
-   * 📋 Lấy danh sách phòng theo rạp
-   */
-  const getCinemaRooms = useCallback(
-    (cinemaId) => {
-      return rooms[cinemaId] || [];
-    },
-    [rooms],
-  );
+  const getCinemaRooms = useCallback((cinemaId) => rooms[cinemaId] || [], [rooms]);
 
-  /**
-   * 📊 Lấy thống kê của rạp
-   */
   const getStats = useCallback(
     (cinemaId) => {
       if (dashboardData) {
@@ -316,7 +281,6 @@ export const useRoom = () => {
           };
         }
       }
-      // Fallback
       const roomList = rooms[cinemaId] || [];
       return {
         total: roomList.length,
@@ -330,9 +294,6 @@ export const useRoom = () => {
     [rooms, dashboardData],
   );
 
-  /**
-   * 🪑 Cập nhật sơ đồ ghế
-   */
   const updateSeats = useCallback(
     async (roomId, seats) => {
       try {
@@ -341,17 +302,13 @@ export const useRoom = () => {
 
         if (response.success) {
           showToast('success', '✅ Cập nhật sơ đồ ghế thành công!');
-          // Refresh lại chi tiết phòng
           await loadRoomDetail(roomId);
           return true;
         }
         return false;
       } catch (error) {
         console.error('❌ Lỗi update seats:', error);
-        showToast(
-          'error',
-          error.response?.data?.message || '❌ Cập nhật thất bại!',
-        );
+        showToast('error', error.response?.data?.message || '❌ Cập nhật thất bại!');
         return false;
       } finally {
         setIsSubmitting(false);
@@ -360,40 +317,14 @@ export const useRoom = () => {
     [loadRoomDetail, showToast],
   );
 
-  // ✅ Effect chỉ chạy 1 lần khi mount
   useEffect(() => {
-    console.log('🚀 Khởi tạo useRoom...');
     loadDashboard();
-
-    // ✅ Cleanup
-    return () => {
-      isMounted.current = false;
-    };
-  }, []); // ✅ Dependency array rỗng - CHỈ CHẠY 1 LẦN
+  }, []);
 
   return {
-    // Dữ liệu
-    dashboardData,
-    cinemas,
-    rooms,
-    roomDetail,
-    loading,
-    loadingDetail,
-    isSubmitting,
-    selectedCinemaId,
-
-    // Actions
-    setSelectedCinemaId,
-    loadDashboard,
-    loadRoomDetail,
-    refreshData,
-    handleAddRoom,
-    handleUpdateRoom,
-    handleDeleteRoom,
-    handleToggleRoomStatus,
-    getCinemaRooms,
-    getStats,
-    updateSeats,
-    showToast,
+    dashboardData, cinemas, rooms, roomDetail, loading, loadingDetail, isSubmitting, selectedCinemaId,
+    setSelectedCinemaId, loadDashboard, loadRoomDetail, refreshData,
+    handleAddRoom, handleUpdateRoom, handleDeleteRoom, handleToggleRoomStatus,
+    getCinemaRooms, getStats, updateSeats, showToast,
   };
 };

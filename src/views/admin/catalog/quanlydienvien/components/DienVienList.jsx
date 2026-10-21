@@ -1,5 +1,3 @@
-
-
 import { useState } from "react";
 import {
   Box, Flex, Text, Button, Icon, Input, Select, SimpleGrid,
@@ -16,7 +14,7 @@ import { DienVienCard } from "./DienVienCard";
 import { ConfirmDeleteModal } from "./ConfirmDeleteModal";
 import { FilterDrawer } from "./FilterDrawer";
 import { fadeUp, fadeIn, shimmer } from "./shared/animations";
-import { ROLE_OPTS, STATUS_OPTS } from "../constants";
+import { ROLE_OPTS } from "../constants"; // Bỏ STATUS_OPTS
 
 // ✅ Component Pagination
 function Pagination({ page, totalPages, total, onPageChange, label, pageSize = 10 }) {
@@ -276,6 +274,8 @@ export function DienVienList({
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </Select>
+              
+              {/* ✅ ĐÃ SỬA: Truyền value chuẩn là Active/Inactive */}
               <Select
                 h={{ base: "40px", md: "34px" }} fontSize="12.5px" fontWeight="600" color={inputColor}
                 bg={filterBg} border={`1px solid ${filterBorder}`} borderRadius="9px"
@@ -285,9 +285,8 @@ export function DienVienList({
                 value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
               >
                 <option value="Tất cả">Tất cả trạng thái</option>
-                {STATUS_OPTS.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
+                <option value="Active">Đang hoạt động</option>
+                <option value="Inactive">Không hoạt động</option>
               </Select>
             </Flex>
           </Box>

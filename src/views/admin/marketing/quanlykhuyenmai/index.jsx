@@ -1,4 +1,3 @@
-// views/admin/quanlykhuyenmai/index.jsx
 
 import { useState } from "react";
 import { Box, useToast } from "@chakra-ui/react";
@@ -11,37 +10,22 @@ export default function QuanLyKhuyenMai() {
   const [view, setView] = useState("list");
   const [selected, setSelected] = useState(null);
   const toast = useToast();
-  
+
   const {
-    promos,
-    loading,
-    search,
-    setSearch,
-    filterStatus,
-    setFilterStatus,
-    filterType,
-    setFilterType,
-    filtered,
-    counts,
-    toggleStatus,
-    deletePromo,
-    createPromo,
-    updatePromo,
-    refreshPromos,  // Thêm refreshPromos
+    promos, loading, search, setSearch,
+    filterStatus, setFilterStatus,
+    filterType, setFilterType,
+    filtered, counts, updatingIds,
+    toggleStatus, deletePromo, createPromo, updatePromo, refreshPromos,
   } = useKhuyenMai();
 
-  // Xử lý lưu (thêm hoặc sửa) - nhận FormData
   const handleSave = async (formData) => {
     try {
       let success = false;
-      
-      // Debug: Log dữ liệu nhận được
-      console.log("📦 FormData received:", formData);
-      
       if (view === "add") {
         success = await createPromo(formData);
       } else {
-        const id = selected?.PromotionId || selected?.id;
+        const id = selected?.id || selected?.PromotionId;
         if (!id) {
           toast({
             title: "Lỗi",
@@ -54,10 +38,8 @@ export default function QuanLyKhuyenMai() {
         }
         success = await updatePromo(id, formData);
       }
-      
       if (success) {
         setView("list");
-        // Refresh danh sách sau khi thêm/sửa thành công
         await refreshPromos();
       }
     } catch (error) {
@@ -72,7 +54,6 @@ export default function QuanLyKhuyenMai() {
     }
   };
 
-  // Xử lý xóa với xác nhận
   const handleDelete = (id) => {
     if (window.confirm("Bạn có chắc muốn xóa khuyến mãi này?")) {
       deletePromo(id);
@@ -80,23 +61,9 @@ export default function QuanLyKhuyenMai() {
     }
   };
 
-  // Xử lý khi chọn xem chi tiết
-  const handleView = (promo) => {
-    setSelected(promo);
-    setView("detail");
-  };
-
-  // Xử lý khi chọn sửa
-  const handleEdit = (promo) => {
-    setSelected(promo);
-    setView("edit");
-  };
-
-  // Xử lý khi thêm mới
-  const handleAdd = () => {
-    setSelected(null);
-    setView("add");
-  };
+  const handleView = (promo) => { setSelected(promo); setView("detail"); };
+  const handleEdit = (promo) => { setSelected(promo); setView("edit"); };
+  const handleAdd = () => { setSelected(null); setView("add"); };
 
   if (view === "list") {
     return (
@@ -118,20 +85,21 @@ export default function QuanLyKhuyenMai() {
           onEdit={handleEdit}
           onToggle={toggleStatus}
           onDelete={handleDelete}
+          updatingIds={updatingIds}
         />
       </Box>
     );
   }
 
   if (view === "detail" && selected) {
-    const promo = promos.find((p) => (p.PromotionId || p.id) === (selected.PromotionId || selected.id)) || selected;
+    const promo = promos.find((p) => (p.id || p.PromotionId) === (selected.id || selected.PromotionId)) || selected;
     return (
       <Box pt={{ base: "120px", md: "80px" }} minH="100vh">
         <KhuyenMaiDetail
           promo={promo}
           onBack={() => setView("list")}
           onEdit={() => setView("edit")}
-          onDelete={() => handleDelete(promo.PromotionId || promo.id)}
+          onDelete={() => handleDelete(promo.id || promo.PromotionId)}
         />
       </Box>
     );
@@ -140,24 +108,16 @@ export default function QuanLyKhuyenMai() {
   if (view === "add") {
     return (
       <Box pt={{ base: "120px", md: "80px" }} minH="100vh">
-        <KhuyenMaiForm
-          isAdd
-          onCancel={() => setView("list")}
-          onSave={handleSave}
-        />
+        <KhuyenMaiForm isAdd onCancel={() => setView("list")} onSave={handleSave} />
       </Box>
     );
   }
 
   if (view === "edit" && selected) {
-    const promo = promos.find((p) => (p.PromotionId || p.id) === (selected.PromotionId || selected.id)) || selected;
+    const promo = promos.find((p) => (p.id || p.PromotionId) === (selected.id || selected.PromotionId)) || selected;
     return (
       <Box pt={{ base: "120px", md: "80px" }} minH="100vh">
-        <KhuyenMaiForm
-          promo={promo}
-          onCancel={() => setView("detail")}
-          onSave={handleSave}
-        />
+        <KhuyenMaiForm promo={promo} onCancel={() => setView("detail")} onSave={handleSave} />
       </Box>
     );
   }

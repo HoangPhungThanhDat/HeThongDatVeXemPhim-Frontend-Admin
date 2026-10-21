@@ -5,7 +5,7 @@ import {
 } from "@chakra-ui/react";
 import { 
   MdAdd, MdSearch, MdFilterList, MdPlayCircle, MdTimer, MdDone,
-  MdChevronLeft, MdChevronRight, MdRefresh // ✅ Thêm MdRefresh
+  MdChevronLeft, MdChevronRight
 } from "react-icons/md";
 import { FaFilm } from "react-icons/fa";
 import { StatCard } from "./shared/StatCard";
@@ -16,7 +16,6 @@ import { FilterDrawer } from "./FilterDrawer";
 import { fadeUp, fadeIn } from "./shared/animations";
 import { STATUS_OPTS, GENRE_OPTS } from "../constants";
 
-// ✅ Component Pagination
 function Pagination({ page, totalPages, total, onPageChange, label, pageSize = 10 }) {
   if (totalPages <= 1) return null;
 
@@ -98,11 +97,10 @@ function Pagination({ page, totalPages, total, onPageChange, label, pageSize = 1
 
 export function PhimList({ 
   movies, loading, genres, total, totalPages, page, goToPage,
-  onAdd, onView, onEdit, onHide, onDelete,
+  onAdd, onView, onEdit, onDelete,
+  onUpdateStatus, // ✅ Thêm prop mới
   filterStatus, setFilterStatus, filterGenre, setFilterGenre,
   search, setSearch, counts,
-  onAutoUpdateStatus, // ✅ Thêm prop
-  isUpdatingStatus, // ✅ Thêm prop
 }) {
   const isMobile = useBreakpointValue({ base: true, md: false });
   const cardBg = useColorModeValue("white", "#0b1437");
@@ -125,8 +123,6 @@ export function PhimList({
   const { isOpen: isFilterOpen, onOpen: onFilterOpen, onClose: onFilterClose } = useDisclosure();
   const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure();
   const [deleteTarget, setDeleteTarget] = useState(null);
-
-  const activeFilters = (filterStatus !== "Tất cả" ? 1 : 0) + (filterGenre !== "Tất cả" ? 1 : 0);
 
   const handleDeleteRequest = (movie) => {
     setDeleteTarget(movie);
@@ -190,23 +186,8 @@ export function PhimList({
           </Text>
         </Box>
         
-        {/* ✅ Thêm nút Cập nhật trạng thái */}
+        {/* ✅ Chỉ còn nút Thêm phim */}
         <Flex gap="10px" w={{ base: "100%", md: "auto" }}>
-          <Button 
-            h="40px" px="16px" borderRadius="10px" fontWeight="700" fontSize="13px"
-            bg="linear-gradient(135deg, #3b82f6, #6366f1)" color="white"
-            boxShadow="0 4px 14px rgba(59,130,246,0.35)"
-            _hover={{ boxShadow: "0 6px 20px rgba(59,130,246,0.45)", transform: "translateY(-1px)" }}
-            _active={{ transform: "translateY(0)" }} transition="all 0.2s"
-            leftIcon={<Icon as={MdRefresh} />}
-            onClick={onAutoUpdateStatus}
-            isLoading={isUpdatingStatus}
-            loadingText="Đang cập nhật..."
-            w={{ base: "100%", md: "auto" }}
-          >
-            Cập nhật trạng thái
-          </Button>
-          
           <Button 
             h="40px" px="20px" borderRadius="10px" fontWeight="700" fontSize="13px"
             bg="linear-gradient(135deg, #f97316, #fb923c)" color="white"
@@ -336,7 +317,7 @@ export function PhimList({
               Đánh giá
             </Text>
           </Box>
-          <Box w="200px" flexShrink="0" textAlign="right">
+          <Box w="240px" flexShrink="0" textAlign="right">
             <Text fontSize="10px" fontWeight="800" color={subColor} letterSpacing="1px" textTransform="uppercase">
               Hành động
             </Text>
@@ -373,7 +354,7 @@ export function PhimList({
                     index={globalIndex}
                     onView={onView}
                     onEdit={onEdit}
-                    onHide={onHide}
+                    onUpdateStatus={onUpdateStatus}
                     onDelete={handleDeleteRequest}
                   />
                 ) : (
@@ -383,7 +364,7 @@ export function PhimList({
                     index={globalIndex}
                     onView={onView}
                     onEdit={onEdit}
-                    onHide={onHide}
+                    onUpdateStatus={onUpdateStatus}
                     onDelete={handleDeleteRequest}
                   />
                 );

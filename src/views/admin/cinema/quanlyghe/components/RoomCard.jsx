@@ -1,6 +1,6 @@
-// src/views/admin/quanlyghe/components/RoomCard.jsx
 
-import React, { useState, useEffect } from 'react';
+
+import React from 'react';
 import {
   Box,
   Flex,
@@ -15,8 +15,7 @@ import { getSeatColors } from './shared/StatCard';
 import { fadeUp, shimmer } from './shared/animations';
 import RoomTypeBadge from './RoomTypeBadge';
 import StatusDot from './StatusDot';
-import { SEAT_TYPES, ROW_LABELS } from '../constants';
-import RoomSeatApi from 'api/cinema/RoomSeatApi';
+import { ROW_LABELS } from '../constants';
 
 // Màu sắc cho chế độ tối - tông xanh
 const DARK_THEME = {
@@ -64,9 +63,12 @@ export default function RoomCard({ room, index, onView, onEditMode, isDark }) {
   const { colorMode } = useColorMode();
   const darkMode = isDark !== undefined ? isDark : colorMode === 'dark';
   const colors = getSeatColors(darkMode);
-  const [seatCount, setSeatCount] = useState(0);
-  const [bookedCount, setBookedCount] = useState(0);
-  const [loading, setLoading] = useState(true);
+
+  // ✅ Lấy dữ liệu trực tiếp từ room.stats (Không gọi API)
+  const total = room.stats?.total || room.SeatCount || room.seat_count || 0;
+  const booked = room.stats?.booked || 0;
+  const empty = total - booked;
+  const pct = total > 0 ? Math.round((booked / total) * 100) : 0;
 
   // Dark mode colors
   const accentColor = darkMode ? DARK_THEME.accent : '#f97316';
@@ -87,40 +89,6 @@ export default function RoomCard({ room, index, onView, onEditMode, isDark }) {
   const textColor = darkMode ? DARK_THEME.text : '#0f172a';
   const subColor = darkMode ? DARK_THEME.textSecondary : '#94a3b8';
 
-  // ✅ Load ghế từ API mới RoomSeatApi
-  useEffect(() => {
-    loadSeatCount();
-  }, [room.id]);
-
-  const loadSeatCount = async () => {
-    try {
-      const res = await RoomSeatApi.getSeats(room.id);
-      const data = res?.data?.data || res?.data || {};
-      const seats = data.seats || [];
-
-      const total = seats.length;
-      const booked = seats.filter(
-        (s) => s.status === 'Booked' || s.status === 'booked',
-      ).length;
-      setSeatCount(total);
-      setBookedCount(booked);
-    } catch (err) {
-      console.error('❌ Lỗi load ghế:', err);
-      // Fallback: dùng seat_count từ room nếu có
-      if (room.capacity || room.seat_count) {
-        setSeatCount(room.capacity || room.seat_count || 0);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const total = seatCount;
-  const booked = bookedCount;
-  const empty = total - booked;
-  const pct = total > 0 ? Math.round((booked / total) * 100) : 0;
-
-  // ✅ Generate preview seats
   const previewSeats = generatePreviewSeats(room);
 
   return (
@@ -176,7 +144,7 @@ export default function RoomCard({ room, index, onView, onEditMode, isDark }) {
           </Box>
           <Box textAlign="right" flexShrink="0" ml="8px">
             <Text fontSize="20px" fontWeight="900" color={textColor}>
-              {loading ? '...' : total}
+              {total}
             </Text>
             <Text fontSize="10px" color={subColor} fontWeight="600">
               ghế
@@ -243,17 +211,17 @@ export default function RoomCard({ room, index, onView, onEditMode, isDark }) {
           {[
             {
               label: 'Đã đặt',
-              value: loading ? '...' : booked,
+              value: booked,
               color: '#dc2626',
             },
             {
               label: 'Còn trống',
-              value: loading ? '...' : empty,
+              value: empty,
               color: '#059669',
             },
             {
               label: 'Lấp đầy',
-              value: loading ? '...' : `${pct}%`,
+              value: `${pct}%`,
               color: darkMode ? DARK_THEME.accent : '#f97316',
             },
           ].map(({ label, value, color }) => (

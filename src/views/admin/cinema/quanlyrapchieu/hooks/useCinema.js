@@ -1,4 +1,4 @@
-// src/views/admin/quanlyrapchieu/hooks/useCinema.js
+
 
 import { useState, useEffect, useCallback } from 'react';
 import CinemasApi from 'api/cinema/CinemasApi';

@@ -25,12 +25,10 @@ export default function QuanLyPhim() {
     filterGenre,
     setFilterGenre,
     counts,
-    toggleHide,
     deleteMovie,
     createMovie,
     updateMovie,
-    autoUpdateStatus, // ✅ Lấy từ hook
-    isUpdatingStatus, // ✅ Lấy từ hook
+    updateMovieStatus, // ✅ Lấy hàm cập nhật trạng thái
   } = usePhim();
 
   const handleSave = async (formData) => {
@@ -110,10 +108,8 @@ export default function QuanLyPhim() {
           onAdd={handleAdd}
           onView={handleView}
           onEdit={handleEdit}
-          onHide={toggleHide}
           onDelete={handleDelete}
-          onAutoUpdateStatus={autoUpdateStatus} // ✅ Truyền vào
-          isUpdatingStatus={isUpdatingStatus} // ✅ Truyền vào
+          onUpdateStatus={updateMovieStatus} // ✅ Truyền xuống
         />
       </Box>
     );

@@ -111,41 +111,7 @@ const RoomRow = ({ room, index, onToggleMaintenance, onDeleteRoom }) => {
           <StatusDot status={roomStatus} />
         </Box>
 
-        {/* Đang chiếu / Suất tiếp */}
-        <Box flex="2" minW="0" pr="12px" mb={{ base: "8px", md: "0" }}>
-          {currentMovie ? (
-            <Flex align="center" gap="6px">
-              <Box 
-                w="6px" 
-                h="6px" 
-                borderRadius="full" 
-                bg="#f97316"
-                sx={{ animation: `${pulseDot} 1.8s ease infinite` }} 
-              />
-              <Box>
-                <Text fontSize="12px" fontWeight="700" color={textColor} noOfLines={1}>
-                  {currentMovie}
-                </Text>
-                {nextShow && (
-                  <Text fontSize="10.5px" color={subColor}>
-                    Suất tiếp: {nextShow}
-                  </Text>
-                )}
-              </Box>
-            </Flex>
-          ) : nextShow ? (
-            <Box>
-              <Text fontSize="11px" color={subColor}>Suất tiếp theo</Text>
-              <Text fontSize="12.5px" fontWeight="700" color={textColor}>
-                {nextShow}
-              </Text>
-            </Box>
-          ) : (
-            <Text fontSize="12px" color={isDark ? "#475569" : "#cbd5e1"} fontStyle="italic">
-              Không có suất chiếu
-            </Text>
-          )}
-        </Box>
+       
 
         {/* Actions */}
         <Flex flexShrink="0" gap="6px" w={{ base: "100%", md: "auto" }} mt={{ base: "8px", md: "0" }}>

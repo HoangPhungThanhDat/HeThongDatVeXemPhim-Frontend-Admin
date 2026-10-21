@@ -1,9 +1,31 @@
-// src/views/admin/quanlydonhang/hooks/useOrders.js
 
 import { useState, useCallback, useRef } from 'react';
 import { useToast } from '@chakra-ui/react';
 import OrderApi from 'api/booking/OrderApi';
 import OrderDetailApi from 'api/booking/OrderDetailApi';
+
+// ✅ Đưa các hàm map ra ngoài component để không bị tạo lại mỗi lần render
+const mapStatus = (status) => {
+  const statusMap = {
+    Pending: 'Chờ thanh toán',
+    Paid: 'Đã thanh toán',
+    Cancelled: 'Đã hủy',
+    Completed: 'Đã check-in',
+    Refunded: 'Hoàn tiền',
+    Expired: 'Hết hạn',
+  };
+  return statusMap[status] || status || 'Chờ thanh toán';
+};
+
+const mapPayStatus = (status) => {
+  const map = {
+    Pending: 'Chờ thanh toán',
+    Success: 'Đã thanh toán',
+    Failed: 'Thất bại',
+    Refunded: 'Đã hoàn',
+  };
+  return map[status] || status || 'Chờ thanh toán';
+};
 
 export const useOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -21,44 +43,15 @@ export const useOrders = () => {
   const toast = useToast();
   const detailCache = useRef({});
 
-  // Map status từ DB sang status hiển thị
-  const mapStatus = (status) => {
-    const statusMap = {
-      Pending: 'Chờ thanh toán',
-      Paid: 'Đã thanh toán',
-      Cancelled: 'Đã hủy',
-      Completed: 'Đã check-in',
-      Refunded: 'Hoàn tiền',
-      Expired: 'Hết hạn',
-    };
-    return statusMap[status] || status || 'Chờ thanh toán';
-  };
-
-  // Map payment status
-  const mapPayStatus = (status) => {
-    const map = {
-      Pending: 'Chờ thanh toán',
-      Success: 'Đã thanh toán',
-      Failed: 'Thất bại',
-      Refunded: 'Đã hoàn',
-    };
-    return map[status] || status || 'Chờ thanh toán';
-  };
-
-  // Lấy chi tiết đơn hàng từ API
+  // Lấy chi tiết đơn hàng từ API (Chỉ gọi khi cần xem chi tiết)
   const fetchOrderDetail = useCallback(async (orderId) => {
     if (detailCache.current[orderId]) {
-      console.log(`✅ [${orderId}] Cache hit`);
       return detailCache.current[orderId];
     }
 
     try {
-      console.log(`📦 [${orderId}] Fetching detail from API...`);
-
       const response = await OrderApi.getDetails(orderId);
       const data = response?.data?.data || response?.data || response;
-
-      console.log(`📦 [${orderId}] API response:`, data);
 
       if (!data) {
         return getDefaultDetail();
@@ -138,8 +131,6 @@ export const useOrders = () => {
       };
 
       detailCache.current[orderId] = result;
-
-      console.log(`✅ [${orderId}] Detail parsed:`, result);
       return result;
     } catch (err) {
       console.error(`❌ [${orderId}] Error fetching detail:`, err);
@@ -167,7 +158,7 @@ export const useOrders = () => {
     foodList: [],
   });
 
-  // ✅ SỬA: fetchOrders - Sắp xếp đơn hàng mới nhất lên đầu
+  // ✅ fetchOrders: Không gọi API Detail trong vòng lặp, map trực tiếp từ API getAll
   const fetchOrders = useCallback(async () => {
     setLoading(true);
     try {
@@ -175,87 +166,66 @@ export const useOrders = () => {
       let data = response?.data?.data || response?.data || response || [];
       if (!Array.isArray(data)) data = [];
 
-      console.log(`📦 Orders count: ${data.length}`);
-
       if (data.length === 0) {
         setOrders([]);
         setTotalOrders(0);
-        setStats({
-          total: 0,
-          pending: 0,
-          paid: 0,
-          cancelled: 0,
-          refund: 0,
-          revenue: 0,
-        });
+        setStats({ total: 0, pending: 0, paid: 0, cancelled: 0, refund: 0, revenue: 0 });
         setLoading(false);
         return [];
       }
 
-      // Format orders - lấy detail cho từng order
-      const formatted = await Promise.all(
-        data.map(async (order, index) => {
-          const orderId = order.OrderId || order.id;
-          const detail = await fetchOrderDetail(orderId);
-
-          // Lấy thời gian tạo để sắp xếp
-          const createdAt =
-            order.OrderDate ||
-            order.orderDate ||
-            order.createdAt ||
-            new Date().toISOString();
-
-          return {
-            id: orderId,
-            customer: detail.customerName,
-            email: detail.customerEmail,
-            phone: detail.customerPhone || 'Chưa có SĐT',
-            total: order.TotalAmount || order.totalAmount || 0,
-            status: mapStatus(order.Status || order.status),
-            payStatus: mapPayStatus(order.PaymentStatus || order.paymentStatus),
-            createdAt: createdAt,
-            promotionId: order.PromotionId || order.promotionId,
-            movie: detail.movie,
-            cinema: detail.cinema,
-            room: detail.room,
-            showtime: detail.showtime,
-            format: detail.format,
-            seats: detail.seats || [],
-            combo: detail.combos || '',
-            ticketTotal: detail.ticketTotal || 0,
-            comboTotal: detail.comboTotal || 0,
-            payMethod: order.PaymentMethod || 'Chuyển khoản',
-            refundStatus: order.refundStatus || null,
-            refundNote: order.refundNote || '',
-            note: order.note || '',
-            isNew: index < 3,
-            rawDetail: detail.rawData,
-            ticketsList: detail.ticketsList || [],
-            foodList: detail.foodList || [],
-            promotion: detail.promotion,
-            summary: detail.summary,
-            // Thêm field để sắp xếp
-            _sortTime: new Date(createdAt).getTime(),
-          };
-        }),
-      );
-
-      // ✅ SẮP XẾP: Mới nhất lên đầu (theo createdAt giảm dần)
-      const sortedOrders = formatted.sort((a, b) => {
-        const timeA = a._sortTime || 0;
-        const timeB = b._sortTime || 0;
-        return timeB - timeA;
+      const formatted = data.map((order, index) => {
+        const orderId = order.OrderId || order.id;
+        const createdAt = order.OrderDate || order.orderDate || order.createdAt || new Date().toISOString();
+        
+        // ✅ Lấy thông tin khách hàng
+        const customerName = order.User?.FullName || order.User?.fullName || order.customer?.FullName || 'Khách hàng';
+        const customerEmail = order.User?.Email || order.User?.email || '';
+        const customerPhone = order.User?.PhoneNumber || order.User?.phone || 'Chưa có SĐT';
+        
+        // ✅ Lấy thông tin phim/rạp/ghế (Nếu Backend đã trả về)
+        const movieTitle = order.Movie?.Title || 'Bấm để xem';
+        const cinemaName = order.Cinema?.Name || 'Bấm để xem';
+        const roomName = order.Room?.Name || 'Bấm để xem';
+        const seats = order.Seats || ['Chưa có ghế'];
+        
+        return {
+          id: orderId,
+          customer: customerName,
+          email: customerEmail,
+          phone: customerPhone,
+          total: order.TotalAmount || order.totalAmount || 0,
+          status: mapStatus(order.Status || order.status),
+          payStatus: mapPayStatus(order.PaymentStatus || order.paymentStatus),
+          createdAt: createdAt,
+          promotionId: order.PromotionId || order.promotionId,
+          
+          // Map dữ liệu từ Backend
+          movie: movieTitle,
+          cinema: cinemaName,
+          room: roomName,
+          showtime: 'Đang cập nhật',
+          format: '2D',
+          seats: seats,
+          combo: '',
+          ticketTotal: 0,
+          comboTotal: 0,
+          payMethod: order.PaymentMethod || 'Chuyển khoản',
+          refundStatus: order.refundStatus || null,
+          refundNote: order.refundNote || '',
+          note: order.note || order.Note || '',
+          isNew: index < 3,
+          rawDetail: null,
+          ticketsList: [],
+          foodList: [],
+          promotion: null,
+          summary: null,
+          _sortTime: new Date(createdAt).getTime(),
+        };
       });
 
-      console.log(
-        '✅ Formatted orders (newest first):',
-        sortedOrders.slice(0, 5).map((o) => ({
-          id: o.id,
-          customer: o.customer,
-          movie: o.movie,
-          createdAt: o.createdAt,
-        })),
-      );
+      // Sắp xếp mới nhất lên đầu
+      const sortedOrders = formatted.sort((a, b) => b._sortTime - a._sortTime);
 
       setOrders(sortedOrders);
       setTotalOrders(sortedOrders.length);
@@ -263,18 +233,11 @@ export const useOrders = () => {
       // Tính stats
       const statsData = {
         total: sortedOrders.length,
-        pending: sortedOrders.filter(
-          (o) => o.status === 'Chờ thanh toán' || o.status === 'Đã đặt',
-        ).length,
-        paid: sortedOrders.filter(
-          (o) => o.status === 'Đã thanh toán' || o.status === 'Đã check-in',
-        ).length,
+        pending: sortedOrders.filter((o) => o.status === 'Chờ thanh toán' || o.status === 'Đã đặt').length,
+        paid: sortedOrders.filter((o) => o.status === 'Đã thanh toán' || o.status === 'Đã check-in').length,
         cancelled: sortedOrders.filter((o) => o.status === 'Đã hủy').length,
-        refund: sortedOrders.filter((o) => o.refundStatus === 'Đang chờ duyệt')
-          .length,
-        revenue: sortedOrders
-          .filter((o) => o.payStatus === 'Đã thanh toán')
-          .reduce((sum, o) => sum + (o.total || 0), 0),
+        refund: sortedOrders.filter((o) => o.refundStatus === 'Đang chờ duyệt').length,
+        revenue: sortedOrders.filter((o) => o.payStatus === 'Đã thanh toán').reduce((sum, o) => sum + (o.total || 0), 0),
       };
       setStats(statsData);
 
@@ -283,8 +246,7 @@ export const useOrders = () => {
       console.error('❌ Lỗi tải đơn hàng:', err);
       toast({
         title: 'Lỗi tải đơn hàng',
-        description:
-          err.response?.data?.message || 'Không thể tải danh sách đơn hàng',
+        description: err.response?.data?.message || 'Không thể tải danh sách đơn hàng',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -293,21 +255,17 @@ export const useOrders = () => {
     } finally {
       setLoading(false);
     }
-  }, [toast, fetchOrderDetail]);
+  }, [toast]);
 
-  // Clear cache
   const clearCache = useCallback(() => {
     detailCache.current = {};
-    console.log('🗑️ Cache cleared');
   }, []);
 
-  // Refresh orders
   const refreshOrders = useCallback(async () => {
     clearCache();
     return fetchOrders();
   }, [clearCache, fetchOrders]);
 
-  // ✅ SỬA: Cập nhật ghi chú và đưa lên đầu
   const updateNote = useCallback(
     async (orderId, note) => {
       try {
@@ -317,12 +275,7 @@ export const useOrders = () => {
           const updatedOrders = prev.map((o) =>
             o.id === orderId ? { ...o, note, _sortTime: Date.now() } : o,
           );
-          // Sắp xếp lại theo _sortTime
-          return updatedOrders.sort((a, b) => {
-            const timeA = a._sortTime || 0;
-            const timeB = b._sortTime || 0;
-            return timeB - timeA;
-          });
+          return updatedOrders.sort((a, b) => b._sortTime - a._sortTime);
         });
 
         toast({
@@ -337,8 +290,7 @@ export const useOrders = () => {
         console.error('❌ Lỗi cập nhật ghi chú:', err);
         toast({
           title: 'Lỗi',
-          description:
-            err.response?.data?.message || 'Không thể cập nhật ghi chú',
+          description: err.response?.data?.message || 'Không thể cập nhật ghi chú',
           status: 'error',
           duration: 3000,
           isClosable: true,
@@ -349,7 +301,6 @@ export const useOrders = () => {
     [toast],
   );
 
-  // ✅ SỬA: Xử lý hoàn tiền và đưa lên đầu
   const processRefund = useCallback(
     async (orderId, action, reason = '') => {
       try {
@@ -376,20 +327,12 @@ export const useOrders = () => {
             }
             return o;
           });
-          // Sắp xếp lại theo _sortTime
-          return updatedOrders.sort((a, b) => {
-            const timeA = a._sortTime || 0;
-            const timeB = b._sortTime || 0;
-            return timeB - timeA;
-          });
+          return updatedOrders.sort((a, b) => b._sortTime - a._sortTime);
         });
 
         toast({
           title: 'Thành công',
-          description:
-            action === 'approve'
-              ? 'Đã duyệt hoàn tiền'
-              : 'Đã từ chối hoàn tiền',
+          description: action === 'approve' ? 'Đã duyệt hoàn tiền' : 'Đã từ chối hoàn tiền',
           status: 'success',
           duration: 2000,
           isClosable: true,
@@ -399,8 +342,7 @@ export const useOrders = () => {
         console.error('❌ Lỗi xử lý hoàn tiền:', err);
         toast({
           title: 'Lỗi',
-          description:
-            err.response?.data?.message || 'Không thể xử lý hoàn tiền',
+          description: err.response?.data?.message || 'Không thể xử lý hoàn tiền',
           status: 'error',
           duration: 3000,
           isClosable: true,
@@ -411,12 +353,9 @@ export const useOrders = () => {
     [toast],
   );
 
-  // ✅ SỬA: Tạo đơn hàng mới và thêm vào đầu danh sách
   const createOrder = useCallback(
     async (orderData) => {
       try {
-        console.log('📤 Creating order with data:', orderData);
-
         const orderResponse = await OrderApi.create({
           UserId: orderData.userId,
           TotalAmount: orderData.total,
@@ -436,17 +375,12 @@ export const useOrders = () => {
           throw new Error('Không thể lấy ID đơn hàng từ response');
         }
 
-        console.log(`✅ Order created with ID: ${orderId}`);
-
-        // Lấy chi tiết đơn hàng vừa tạo
         const detail = await fetchOrderDetail(orderId);
         const now = new Date().toISOString();
 
-        // Tạo order object mới
         const newOrder = {
           id: orderId,
-          customer:
-            orderData.customerName || detail.customerName || 'Khách hàng',
+          customer: orderData.customerName || detail.customerName || 'Khách hàng',
           email: orderData.email || detail.customerEmail || '',
           phone: orderData.phone || detail.customerPhone || 'Chưa có SĐT',
           total: orderData.total || 0,
@@ -473,13 +407,9 @@ export const useOrders = () => {
           _sortTime: Date.now(),
         };
 
-        console.log('✅ New order object:', newOrder);
-
-        // ✅ THÊM VÀO ĐẦU DANH SÁCH
         setOrders((prev) => [newOrder, ...prev]);
         setTotalOrders((prev) => prev + 1);
 
-        // Cập nhật stats
         setStats((prev) => ({
           ...prev,
           total: prev.total + 1,
@@ -500,10 +430,7 @@ export const useOrders = () => {
         console.error('❌ Lỗi tạo đơn hàng:', err);
         toast({
           title: 'Lỗi tạo đơn',
-          description:
-            err.response?.data?.message ||
-            err.message ||
-            'Không thể tạo đơn hàng',
+          description: err.response?.data?.message || err.message || 'Không thể tạo đơn hàng',
           status: 'error',
           duration: 3000,
           isClosable: true,

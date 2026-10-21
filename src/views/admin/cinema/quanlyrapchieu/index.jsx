@@ -19,7 +19,6 @@ import CinemaCard from "./components/CinemaCard";
 import CinemaDetail from "./components/CinemaDetail";
 import CinemaForm from "./components/CinemaForm";
 import AddCinemaPage from "./components/AddCinemaPage";
-import AddRoomModal from "./components/AddRoomModal";
 import DeleteConfirmDialog from "./components/DeleteConfirmDialog";
 import Loader from "layouts/Loader";
 
@@ -37,7 +36,6 @@ export default function QuanLyRap() {
     handleUpdateCinema,
     handleDeleteCinema,
     handleToggleStatus,
-    handleAddRoom,
     handleToggleRoomStatus,
     handleDeleteRoom,
     getCinemaStats,
@@ -49,7 +47,6 @@ export default function QuanLyRap() {
   const [filterStatus, setFilterStatus] = useState("Tất cả");
   const [deleteTarget, setDeleteTarget] = useState(null);
 
-  const addRoomModal = useDisclosure();
   const deleteDialog = useDisclosure();
 
   const bg = useColorModeValue("#f8fafc", "#0f172a");
@@ -106,7 +103,6 @@ export default function QuanLyRap() {
         setView("list");
         setSelected(null);
       } else if (selected) {
-        // ✅ Cập nhật lại selected với dữ liệu mới
         const updatedCinema = cinemas.find(c => c.CinemaId === selected.CinemaId);
         if (updatedCinema) {
           setSelected(updatedCinema);
@@ -153,15 +149,9 @@ export default function QuanLyRap() {
           rooms={rooms[selected.CinemaId] || []}
           onToggleMaintenance={(roomId) => handleToggleRoomStatus(selected.CinemaId, roomId)}
           onDeleteRoom={(roomId) => handleDeleteRoom(selected.CinemaId, roomId)}
-          onAddRoom={addRoomModal.onOpen}
+          // ✅ Đã xóa prop onAddRoom
           onToggleStatus={handleToggleStatus}
           isDark={isDark}
-        />
-        <AddRoomModal
-          isOpen={addRoomModal.isOpen}
-          onClose={addRoomModal.onClose}
-          onAdd={handleAddRoom}
-          cinemaId={selected.CinemaId}
         />
       </Box>
     );
@@ -193,14 +183,6 @@ export default function QuanLyRap() {
         cinemaName={deleteTarget?.Name || ""}
       />
 
-      {/* Add Room Modal */}
-      <AddRoomModal
-        isOpen={addRoomModal.isOpen}
-        onClose={addRoomModal.onClose}
-        onAdd={handleAddRoom}
-        cinemaId={selected?.CinemaId}
-      />
-
       {/* Header */}
       <Flex justify="space-between" align={{ base: "start", md: "center" }}
         direction={{ base: "column", md: "row" }} mb="20px" gap="12px">
@@ -222,15 +204,11 @@ export default function QuanLyRap() {
         </Box>
         <Flex align="center" gap="10px">
           <Button
-            h="40px"
-            w="40px"
-            p="0"
-            borderRadius="10px"
+            h="40px" w="40px" p="0" borderRadius="10px"
             bg={isDark ? "#2d3748" : "#f8fafc"}
             color={isDark ? "#94a3b8" : "#475569"}
             border={`1.5px solid ${isDark ? "#334155" : "#e2e8f0"}`}
-            onClick={toggleColorMode}
-            flexShrink="0"
+            onClick={toggleColorMode} flexShrink="0"
           >
             <Icon as={isDark ? MdLightMode : MdDarkMode} boxSize="18px" />
           </Button>
@@ -245,17 +223,11 @@ export default function QuanLyRap() {
           </Flex>
 
           <Button
-            h="40px"
-            px="18px"
-            borderRadius="10px"
-            fontWeight="700"
-            fontSize="13px"
-            bg="linear-gradient(135deg,#f97316,#fb923c)"
-            color="white"
+            h="40px" px="18px" borderRadius="10px" fontWeight="700" fontSize="13px"
+            bg="linear-gradient(135deg,#f97316,#fb923c)" color="white"
             boxShadow="0 4px 14px rgba(249,115,22,0.35)"
             _hover={{ boxShadow: "0 6px 20px rgba(249,115,22,0.45)", transform: "translateY(-1px)" }}
-            transition="all 0.2s"
-            leftIcon={<Icon as={MdAdd} />}
+            transition="all 0.2s" leftIcon={<Icon as={MdAdd} />}
             onClick={() => { setView("add"); setSelected(null); }}
           >
             Thêm rạp
@@ -263,36 +235,12 @@ export default function QuanLyRap() {
         </Flex>
       </Flex>
 
-      {/* ✅ Stats - Đã cập nhật tổng ghế */}
+      {/* Stats */}
       <SimpleGrid columns={{ base: 2, md: 4 }} spacing="12px" mb="20px">
-        <StatCard 
-          label="Tổng rạp" 
-          value={stats.total} 
-          icon={MdTheaters} 
-          accent="#f97316" 
-          delay={0} 
-        />
-        <StatCard 
-          label="Đang hoạt động" 
-          value={stats.active} 
-          icon={MdCheckCircle} 
-          accent="#059669" 
-          delay={0.05} 
-        />
-        <StatCard 
-          label="Tổng phòng" 
-          value={stats.totalRooms} 
-          icon={MdMeetingRoom} 
-          accent="#0284c7" 
-          delay={0.1} 
-        />
-        <StatCard 
-          label="Tổng ghế" 
-          value={stats.totalSeats} 
-          icon={MdChair} 
-          accent="#8b5cf6" 
-          delay={0.15} 
-        />
+        <StatCard label="Tổng rạp" value={stats.total} icon={MdTheaters} accent="#f97316" delay={0} />
+        <StatCard label="Đang hoạt động" value={stats.active} icon={MdCheckCircle} accent="#059669" delay={0.05} />
+        <StatCard label="Tổng phòng" value={stats.totalRooms} icon={MdMeetingRoom} accent="#0284c7" delay={0.1} />
+        <StatCard label="Tổng ghế" value={stats.totalSeats} icon={MdChair} accent="#8b5cf6" delay={0.15} />
       </SimpleGrid>
 
       {/* Filter bar */}

@@ -1,13 +1,5 @@
-
-
 import { useState, useEffect, useCallback, useRef } from "react";
 
-/**
- * @param {Function} apiFn      - Hàm gọi API, nhận { page, limit, ...params }
- * @param {Object}   options
- * @param {number}   options.limit       - Số dòng mỗi trang
- * @param {Object}   options.extraParams - Wrap bằng useMemo() ở component cha
- */
 export function useServerPagination(apiFn, { limit = 10, extraParams = {} } = {}) {
   const [data, setData]             = useState([]);
   const [total, setTotal]           = useState(0);
@@ -18,9 +10,12 @@ export function useServerPagination(apiFn, { limit = 10, extraParams = {} } = {}
 
   const abortRef        = useRef(null);
   const currentPage     = useRef(1);
-  const extraParamsRef  = useRef("");
+  
+  // ✅ Lưu trữ object extraParams trực tiếp
+  const extraParamsRef  = useRef(extraParams); 
+  const hasMounted      = useRef(false);
 
-  // Serialize 1 lần — so sánh string thay vì object reference
+  // Stringify để so sánh xem params có thay đổi thật sự không
   const extraParamsString = JSON.stringify(extraParams);
 
   const fetchPage = useCallback(async (targetPage) => {
@@ -30,10 +25,11 @@ export function useServerPagination(apiFn, { limit = 10, extraParams = {} } = {}
 
     setLoading(true);
     try {
+      // ✅ Gộp trực tiếp object extraParams hiện tại vào request
       const res = await apiFn({
         page:  targetPage,
         limit,
-        ...JSON.parse(extraParamsRef.current || "{}"),
+        ...extraParamsRef.current, 
         signal: abortRef.current.signal,
       });
 
@@ -94,19 +90,28 @@ export function useServerPagination(apiFn, { limit = 10, extraParams = {} } = {}
 
   // Load lần đầu
   useEffect(() => {
-    extraParamsRef.current = extraParamsString;
+    if (hasMounted.current) return;
+    hasMounted.current = true;
+    
+    extraParamsRef.current = extraParams;
     fetchPage(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Khi extraParams thay đổi THẬT SỰ
+  // Khi extraParams thay đổi
   useEffect(() => {
-    if (extraParamsRef.current === extraParamsString) return;
-    extraParamsRef.current = extraParamsString;
+    if (!hasMounted.current) return;
+    
+    // So sánh trực tiếp bằng string
+    if (JSON.stringify(extraParamsRef.current) === extraParamsString) return;
+
+    // Cập nhật ref và gọi lại API
+    extraParamsRef.current = extraParams;
     setPage(1);
     setPageKey((k) => k + 1);
     fetchPage(1);
-  }, [extraParamsString, fetchPage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [extraParamsString]);
 
   const goToPage = useCallback((p) => {
     setPage(p);
@@ -119,32 +124,22 @@ export function useServerPagination(apiFn, { limit = 10, extraParams = {} } = {}
     fetchPage(currentPage.current);
   }, [fetchPage]);
 
-  // ✅ THÊM: Hàm thêm item vào đầu danh sách
   const prependData = useCallback((newItem) => {
     setData(prev => {
-      // Kiểm tra trùng lặp
       const exists = prev.some(item => {
         const id1 = item?.id || item?.MovieId || item?.Id || item?.BannerId || item?.NewsId;
         const id2 = newItem?.id || newItem?.MovieId || newItem?.Id || newItem?.BannerId || newItem?.NewsId;
         return String(id1) === String(id2);
       });
       
-      if (exists) {
-        console.log("⚠️ Item already exists in list");
-        return prev;
-      }
-      
-      // Thêm vào đầu
-      console.log(" Adding new item to top of list");
+      if (exists) return prev;
       return [newItem, ...prev];
     });
     
-    // Cập nhật total
     setTotal(prev => prev + 1);
     setTotalPages(prev => Math.ceil((prev * limit + 1) / limit));
   }, [limit]);
 
-  // THÊM: Hàm cập nhật một item
   const updateData = useCallback((id, updatedItem) => {
     setData(prev => 
       prev.map(item => {
@@ -157,19 +152,16 @@ export function useServerPagination(apiFn, { limit = 10, extraParams = {} } = {}
     );
   }, []);
 
-  // THÊM: Hàm xóa một item
   const removeData = useCallback((id) => {
     setData(prev => prev.filter(item => {
       const itemId = item?.id || item?.MovieId || item?.Id || item?.BannerId || item?.NewsId;
       return String(itemId) !== String(id);
     }));
     
-    // Cập nhật total
     setTotal(prev => Math.max(0, prev - 1));
     setTotalPages(prev => Math.ceil((prev * limit - 1) / limit));
   }, [limit]);
 
-  // THÊM: Hàm đưa item lên đầu
   const moveToTop = useCallback((id) => {
     setData(prev => {
       const index = prev.findIndex(item => {
@@ -178,38 +170,16 @@ export function useServerPagination(apiFn, { limit = 10, extraParams = {} } = {}
       });
       
       if (index <= 0) return prev;
-      
       const item = prev[index];
-      const newData = [item, ...prev.slice(0, index), ...prev.slice(index + 1)];
-      return newData;
+      return [item, ...prev.slice(0, index), ...prev.slice(index + 1)];
     });
   }, []);
 
-  // THÊM: Hàm set data trực tiếp
-  const setDataDirect = useCallback((newData) => {
-    setData(newData);
-  }, []);
-
-  // THÊM: Hàm làm mới dữ liệu
-  const refreshData = useCallback(() => {
-    fetchPage(currentPage.current);
-  }, [fetchPage]);
+  const setDataDirect = useCallback((newData) => setData(newData), []);
+  const refreshData = useCallback(() => fetchPage(currentPage.current), [fetchPage]);
 
   return { 
-    data, 
-    total, 
-    totalPages, 
-    page, 
-    loading, 
-    pageKey, 
-    goToPage, 
-    reload,
-    // Các hàm mới
-    prependData,    // Thêm vào đầu
-    updateData,     // Cập nhật
-    removeData,     // Xóa
-    moveToTop,      // Đưa lên đầu
-    setData: setDataDirect, // Set data trực tiếp
-    refreshData,    // Làm mới
+    data, total, totalPages, page, loading, pageKey, goToPage, reload,
+    prependData, updateData, removeData, moveToTop, setData: setDataDirect, refreshData,
   };
 }

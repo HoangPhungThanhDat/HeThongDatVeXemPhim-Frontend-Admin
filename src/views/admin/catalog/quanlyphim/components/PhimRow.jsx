@@ -1,13 +1,17 @@
 import {
-  Box, Flex, Text, Button, Icon, useColorModeValue
+  Box, Flex, Text, Button, Icon, useColorModeValue,
+  Menu, MenuButton, MenuList, MenuItem, Portal, // ✅ Thêm Portal
 } from "@chakra-ui/react";
-import { MdVisibility, MdEdit, MdDeleteOutline, MdVisibilityOff, MdAccessTime, MdCalendarToday, MdStar } from "react-icons/md";
+import { 
+  MdVisibility, MdEdit, MdDeleteOutline, MdAccessTime, MdCalendarToday, 
+  MdStar, MdKeyboardArrowDown, MdPlayCircle, MdTimer, MdDone 
+} from "react-icons/md";
 import { StatusBadge } from "./shared/StatusBadge";
 import { AgeBadge } from "./shared/AgeBadge";
 import { fadeUp } from "./shared/animations";
 
 export function PhimRow({ 
-  movie, index, onView, onEdit, onHide, onDelete 
+  movie, index, onView, onEdit, onUpdateStatus, onDelete 
 }) {
   const cardBg = useColorModeValue("white", "#0b1437");
   const cardBorder = useColorModeValue("#f1f5f9", "rgba(255,255,255,0.08)");
@@ -29,23 +33,14 @@ export function PhimRow({
 
   const poster = movie.PosterUrl || movie.posterUrl || movie.poster || "";
   
-  // ✅ Sửa: Lấy thể loại từ nhiều nguồn khác nhau
   let genres = [];
-  // Nếu movie có genres là array
   if (movie.Genres && Array.isArray(movie.Genres)) {
     genres = movie.Genres;
-  } 
-  // Nếu movie có genreName (từ PhimList đã map)
-  else if (movie.genreName) {
+  } else if (movie.genreName) {
     genres = [movie.genreName];
-  } 
-  // Nếu movie có GenreName (từ API trả về)
-  else if (movie.GenreName) {
+  } else if (movie.GenreName) {
     genres = [movie.GenreName];
-  }
-  // Nếu movie có GenreId và có genreMap (cần truyền thêm prop)
-  else if (movie.GenreId) {
-    // Fallback: hiển thị GenreId
+  } else if (movie.GenreId) {
     genres = [`Thể loại ${movie.GenreId}`];
   }
 
@@ -90,7 +85,6 @@ export function PhimRow({
           <Text fontSize="13.5px" fontWeight="700" color={textPrimary} noOfLines={1}>
             {movie.Title || movie.title}
           </Text>
-          {/* ✅ Hiển thị thể loại */}
           {genres.length > 0 ? (
             <Flex gap="6px" mt="4px" flexWrap="wrap">
               {genres.slice(0, 3).map((g, idx) => (
@@ -141,6 +135,7 @@ export function PhimRow({
           >
             Xem
           </Button>
+          
           <Button size="xs" h="30px" px="10px" borderRadius="8px"
             bg="linear-gradient(135deg, #f97316, #fb923c)"
             color="white" fontSize="11.5px" fontWeight="600"
@@ -151,16 +146,57 @@ export function PhimRow({
           >
             Sửa
           </Button>
-          <Button size="xs" h="30px" px="10px" borderRadius="8px"
-            bg={secondaryBtnBg} color={secondaryBtnColor} border={`1px solid ${secondaryBtnBorder}`}
-            fontSize="11.5px" fontWeight="600"
-            leftIcon={<Icon as={MdVisibilityOff} boxSize="12px" />}
-            _hover={{ bg: dangerBg, color: dangerColor, border: `1px solid ${dangerBorder}` }}
-            transition="all 0.15s"
-            onClick={() => onHide(movie)}
-          >
-            Ẩn
-          </Button>
+          
+          {/* ✅ Menu Cập nhật trạng thái sử dụng Portal */}
+          <Menu placement="bottom-end" isLazy>
+            <MenuButton
+              as={Button}
+              size="xs" h="30px" px="10px" borderRadius="8px"
+              bg={secondaryBtnBg} color={secondaryBtnColor} border={`1px solid ${secondaryBtnBorder}`}
+              fontSize="11.5px" fontWeight="600"
+              rightIcon={<Icon as={MdKeyboardArrowDown} boxSize="14px" />}
+              _hover={{ bg: secondaryBtnHoverBg }} transition="all 0.15s"
+            >
+              Trạng thái
+            </MenuButton>
+            {/* ✅ Bọc MenuList trong Portal để thoát khỏi mọi khung giới hạn */}
+            <Portal>
+              <MenuList 
+                minW="160px" 
+                fontSize="13px" 
+                borderRadius="10px" 
+                p="2"
+                zIndex={9999}
+                boxShadow="0 10px 24px rgba(0,0,0,0.15)"
+              >
+                <MenuItem 
+                  onClick={() => onUpdateStatus(movie, 'NowShowing')}
+                  isDisabled={status === 'NowShowing'}
+                  fontSize="13px" fontWeight="500"
+                  icon={<Icon as={MdPlayCircle} boxSize="14px" color="#10b981" />}
+                >
+                  Đang chiếu
+                </MenuItem>
+                <MenuItem 
+                  onClick={() => onUpdateStatus(movie, 'ComingSoon')}
+                  isDisabled={status === 'ComingSoon'}
+                  fontSize="13px" fontWeight="500"
+                  icon={<Icon as={MdTimer} boxSize="14px" color="#f59e0b" />}
+                >
+                  Sắp chiếu
+                </MenuItem>
+                <MenuItem 
+                  onClick={() => onUpdateStatus(movie, 'Ended')}
+                  isDisabled={status === 'Ended'}
+                  fontSize="13px" fontWeight="500"
+                  icon={<Icon as={MdDone} boxSize="14px" color="#94a3b8" />}
+                >
+                  Ngừng chiếu
+                </MenuItem>
+              </MenuList>
+            </Portal>
+          </Menu>
+          
           <Button size="xs" h="30px" px="10px" borderRadius="8px"
             bg={dangerBg} color={dangerColor} border={`1px solid ${dangerBorder}`}
             fontSize="11.5px" fontWeight="600"

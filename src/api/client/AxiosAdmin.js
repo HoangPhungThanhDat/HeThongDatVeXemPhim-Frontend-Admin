@@ -4,15 +4,6 @@ import axios from "axios";
 const BASE_URL =
   process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
-/**
- * Axios instance cho toàn bộ API admin.
- *
- * Đặc điểm:
- *  - withCredentials: true → gửi/nhận HttpOnly cookie (refresh_token)
- *  - Request interceptor: tự gắn Bearer <access_token>
- *  - Response interceptor: tự động refresh khi 401 (TOKEN_EXPIRED)
- *  - Queue: nhiều request cùng lúc bị 401 → chỉ refresh 1 lần
- */
 const AxiosAdmin = axios.create({
   baseURL: BASE_URL,
   withCredentials: true, // ⭐ BẮT BUỘC để cookie hoạt động
@@ -22,6 +13,20 @@ const AxiosAdmin = axios.create({
     Accept: "application/json",
   },
 });
+
+// ════════════════════════════════════════════════════════
+// REQUEST INTERCEPTOR — Gắn Bearer Token
+// ════════════════════════════════════════════════════════
+AxiosAdmin.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 // ─── Biến module-scope để queue request khi đang refresh ───
 let isRefreshing = false;
@@ -43,7 +48,7 @@ const onRefreshFailed = (error) => {
 
 const clearAuthStorage = () => {
   localStorage.removeItem("access_token");
-  localStorage.removeItem("token"); // xóa luôn key cũ nếu còn
+  localStorage.removeItem("token");
   localStorage.removeItem("role");
   localStorage.removeItem("fullname");
   localStorage.removeItem("UserId");
@@ -51,32 +56,23 @@ const clearAuthStorage = () => {
 };
 
 // ════════════════════════════════════════════════════════
-// REQUEST INTERCEPTOR — Gắn access token
-// ════════════════════════════════════════════════════════
-AxiosAdmin.interceptors.request.use(
-  (config) => {
-    // ⭐ Đọc từ key mới "access_token"
-    const token = localStorage.getItem("access_token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-// ════════════════════════════════════════════════════════
 // RESPONSE INTERCEPTOR — Auto refresh khi 401
 // ════════════════════════════════════════════════════════
 AxiosAdmin.interceptors.response.use(
   (response) => response,
   async (error) => {
+    // ✅ Bỏ qua lỗi Cancel (nếu có dùng CancelToken ở nơi khác)
+    if (axios.isCancel(error) || error?.isSilent) {
+      return Promise.reject(error);
+    }
+
     const originalRequest = error.config;
 
     // Bỏ qua nếu không phải 401 hoặc đã retry rồi
     if (
       !error.response ||
       error.response.status !== 401 ||
+      !originalRequest ||
       originalRequest._retry
     ) {
       return Promise.reject(error);
@@ -110,7 +106,7 @@ AxiosAdmin.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      // ⭐ Gọi refresh — cookie HttpOnly tự gửi kèm
+      // Gọi refresh — cookie HttpOnly tự gửi kèm
       const { data } = await axios.post(
         `${BASE_URL}/auth/refresh`,
         {},

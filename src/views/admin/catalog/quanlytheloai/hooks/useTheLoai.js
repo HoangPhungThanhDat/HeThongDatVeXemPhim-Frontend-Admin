@@ -13,11 +13,14 @@ export function useTheLoai() {
     setLoading(true);
     try {
       const response = await GenreApi.getAll();
-      const data = response.data.data || response.data || [];
+      // Xử lý dữ liệu linh hoạt (đề phòng API trả về dạng mảng thẳng hoặc bọc trong data)
+      const rawData = response.data.data || response.data || [];
+      const data = Array.isArray(rawData) ? rawData : [];
 
       const transformed = data.map((item) => ({
         ...item,
         id: item.GenreId || item.id,
+        GenreId: item.GenreId || item.id, // ✅ Giữ lại ID gốc để gọi API Update/Delete
         name: item.Name || item.name || '',
         slug: item.Slug || item.slug || '',
         color: item.Color || item.color || '#f97316',
@@ -25,7 +28,8 @@ export function useTheLoai() {
         description: item.Description || item.description || '',
         status: item.Status || item.status || 'Active',
         featured: item.featured || false,
-        movieCount: item.movieCount || 0,
+        // ✅ Đảm bảo movieCount luôn là số
+        movieCount: item.movieCount !== undefined && item.movieCount !== null ? Number(item.movieCount) : 0,
         createdAt: item.CreatedAt || item.createdAt || '',
         updatedAt: item.UpdatedAt || item.updatedAt || '',
         createdBy: item.CreatedBy || item.createdBy || '',
@@ -55,8 +59,7 @@ export function useTheLoai() {
     () => ({
       total: genres.length,
       active: genres.filter((g) => g.status === 'Active').length,
-      featured: genres.filter((g) => g.featured && g.status === 'Active')
-        .length,
+      featured: genres.filter((g) => g.featured && g.status === 'Active').length,
       movies: genres.reduce((s, g) => s + (g.movieCount || 0), 0),
     }),
     [genres],
@@ -141,9 +144,10 @@ export function useTheLoai() {
           {
             ...newGenre,
             id: newGenre.GenreId || newGenre.id,
+            GenreId: newGenre.GenreId || newGenre.id,
             name: newGenre.Name || newGenre.name,
             status: newGenre.Status || newGenre.status,
-            movieCount: 0,
+            movieCount: 0, // Phim mới tạo mặc định chưa có phim nào
           },
           ...prev,
         ]);

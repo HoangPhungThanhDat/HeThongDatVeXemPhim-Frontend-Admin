@@ -1,4 +1,4 @@
-// views/admin/quanlybanner/components/shared/StatCard.jsx
+
 
 import { Box, Flex, Icon, Text, useColorModeValue } from "@chakra-ui/react";
 import { fadeUp } from "./animations";

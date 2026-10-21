@@ -4,8 +4,6 @@ import { BannerList } from './components/BannerList';
 import { BannerForm } from './components/BannerForm';
 import { BannerDetail } from './components/BannerDetail';
 import BannerApi from 'api/marketing/BannerApi';
-import { STATUS_MAP, POSITION_MAP } from './constants';
-import Swal from 'sweetalert2';
 
 export default function QuanLyBanner() {
   const [view, setView] = useState('list');
@@ -15,16 +13,20 @@ export default function QuanLyBanner() {
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('Tất cả');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // State theo dõi banner đang cập nhật trạng thái
+  const [updatingIds, setUpdatingIds] = useState(() => new Set());
+
   const toast = useToast();
 
-  // Lấy dữ liệu từ API
   const fetchBanners = useCallback(async () => {
     setLoading(true);
     try {
       const response = await BannerApi.getAll();
       const data = response.data.data || response.data || [];
+
+      // ✅ Chỉ giữ key lowercase — bỏ ...item để tránh key viết hoa gây bug
       const transformed = data.map((item, index) => ({
-        ...item,
         id: item.BannerId || item.id,
         order: item.Order || item.order || index + 1,
         title: item.Title || item.title || '',
@@ -44,6 +46,7 @@ export default function QuanLyBanner() {
         createdAt: item.CreatedAt || item.createdAt || '',
         updatedAt: item.UpdatedAt || item.updatedAt || '',
       }));
+
       setBanners(transformed);
     } catch (error) {
       console.error('Lỗi khi tải danh sách banner:', error);
@@ -83,14 +86,32 @@ export default function QuanLyBanner() {
     scheduled: banners.filter((b) => b.scheduledOn).length,
   };
 
-  // Xử lý ẩn banner
+  // ✅ Ẩn/hiện banner — optimistic update + loading indicator
   const handleHide = async (bannerId) => {
+    const banner = banners.find((b) => (b.BannerId || b.id) === bannerId);
+    if (!banner) return;
+
+    const currentStatus = banner.status || banner.Status || 'Inactive';
+    const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
+
+    // Đánh dấu đang cập nhật
+    setUpdatingIds((prev) => {
+      const next = new Set(prev);
+      next.add(bannerId);
+      return next;
+    });
+
+    // Optimistic update: đổi status ngay trên UI
+    const prevBanners = banners;
+    setBanners((prev) =>
+      prev.map((b) =>
+        (b.BannerId || b.id) === bannerId
+          ? { ...b, status: newStatus, Status: newStatus } // ✅ cập nhật cả 2 key
+          : b,
+      ),
+    );
+
     try {
-      const banner = banners.find((b) => (b.BannerId || b.id) === bannerId);
-      if (!banner) return;
-
-      const newStatus = banner.status === 'Active' ? 'Inactive' : 'Active';
-
       const formData = new FormData();
       formData.append('_method', 'PUT');
       formData.append('Status', newStatus);
@@ -98,12 +119,6 @@ export default function QuanLyBanner() {
       await BannerApi.update(bannerId, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-
-      setBanners((prev) =>
-        prev.map((b) =>
-          (b.BannerId || b.id) === bannerId ? { ...b, status: newStatus } : b,
-        ),
-      );
 
       toast({
         title: 'Thành công',
@@ -113,6 +128,9 @@ export default function QuanLyBanner() {
         isClosable: true,
       });
     } catch (error) {
+      // Rollback nếu API fail
+      setBanners(prevBanners);
+
       console.error('Lỗi khi cập nhật trạng thái:', error);
       toast({
         title: 'Lỗi',
@@ -123,10 +141,17 @@ export default function QuanLyBanner() {
         duration: 3000,
         isClosable: true,
       });
+    } finally {
+      // Bỏ đánh dấu
+      setUpdatingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(bannerId);
+        return next;
+      });
     }
   };
 
-  // ✅ SỬA: Xử lý xóa banner - trả về Promise để modal biết
+  // Xử lý xóa banner
   const handleDelete = async (bannerId) => {
     try {
       await BannerApi.delete(bannerId);
@@ -151,7 +176,7 @@ export default function QuanLyBanner() {
         duration: 3000,
         isClosable: true,
       });
-      throw error; // ✅ Ném lỗi để modal biết xóa thất bại
+      throw error;
     }
   };
 
@@ -174,14 +199,25 @@ export default function QuanLyBanner() {
       setBanners((prev) => [
         ...prev,
         {
-          ...newBanner,
           id: newBanner.BannerId || newBanner.id,
           order: prev.length + 1,
-          title: newBanner.Title || newBanner.title,
-          image: newBanner.ImageUrl || newBanner.image,
-          status: newBanner.Status || newBanner.status,
-          linkType: newBanner.LinkType || newBanner.linkType,
+          title: newBanner.Title || newBanner.title || '',
+          image: newBanner.ImageUrl || newBanner.image || '',
+          status: newBanner.Status || newBanner.status || 'Inactive',
+          linkType: newBanner.LinkType || newBanner.linkType || 'None',
           linkTarget: newBanner.LinkUrl || newBanner.linkUrl || '',
+          scheduleStart:
+            newBanner.ScheduleStart || newBanner.scheduleStart || '',
+          scheduleEnd: newBanner.ScheduleEnd || newBanner.scheduleEnd || '',
+          scheduledOn:
+            newBanner.ScheduledOn !== undefined
+              ? newBanner.ScheduledOn
+              : newBanner.scheduledOn || false,
+          note: newBanner.Note || newBanner.note || '',
+          position: newBanner.Position || newBanner.position || '',
+          userId: newBanner.UserId || newBanner.userId || '',
+          createdAt: newBanner.CreatedAt || newBanner.createdAt || '',
+          updatedAt: newBanner.UpdatedAt || newBanner.updatedAt || '',
         },
       ]);
 
@@ -236,11 +272,32 @@ export default function QuanLyBanner() {
             ? {
                 ...b,
                 ...updatedBanner,
-                image: updatedBanner.ImageUrl || updatedBanner.image || b.image,
+                id: updatedBanner.BannerId || updatedBanner.id || b.id,
+                status:
+                  updatedBanner.Status ||
+                  updatedBanner.status ||
+                  b.status, // ✅ đồng bộ status
+                title: updatedBanner.Title || updatedBanner.title || b.title,
+                image:
+                  updatedBanner.ImageUrl || updatedBanner.image || b.image,
                 linkTarget:
                   updatedBanner.LinkUrl ||
                   updatedBanner.linkUrl ||
                   b.linkTarget,
+                scheduleStart:
+                  updatedBanner.ScheduleStart ||
+                  updatedBanner.scheduleStart ||
+                  b.scheduleStart,
+                scheduleEnd:
+                  updatedBanner.ScheduleEnd ||
+                  updatedBanner.scheduleEnd ||
+                  b.scheduleEnd,
+                scheduledOn:
+                  updatedBanner.ScheduledOn !== undefined
+                    ? updatedBanner.ScheduledOn
+                    : updatedBanner.scheduledOn !== undefined
+                    ? updatedBanner.scheduledOn
+                    : b.scheduledOn,
               }
             : b,
         ),
@@ -269,7 +326,6 @@ export default function QuanLyBanner() {
     }
   };
 
-  // Xử lý lưu (thêm hoặc sửa)
   const handleSave = (formData) => {
     if (view === 'add') {
       handleAdd(formData);
@@ -302,6 +358,7 @@ export default function QuanLyBanner() {
           setSearch={setSearch}
           counts={counts}
           filtered={filtered}
+          updatingIds={updatingIds}
         />
       </Box>
     );
