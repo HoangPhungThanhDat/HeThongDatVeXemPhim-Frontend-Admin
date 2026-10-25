@@ -3,14 +3,6 @@ import { useEffect, useRef } from "react";
 import { jwtDecode } from "jwt-decode";
 import AuthApi from "api/auth/AuthApi";
 
-/**
- * Tự động refresh access token trước khi hết hạn.
- *
- * Cách hoạt động:
- *  - Cứ 60 giây kiểm tra 1 lần
- *  - Nếu access token còn < 2 phút → gọi /auth/refresh
- *  - Không làm gì nếu chưa login
- */
 export default function useTokenRefresh() {
   const isRefreshingRef = useRef(false);
 
@@ -37,22 +29,42 @@ export default function useTokenRefresh() {
             }
           } catch (e) {
             console.warn("Proactive refresh failed:", e);
+            
+            // ⭐ Nếu lỗi 401 (Refresh token hết hạn hoặc không hợp lệ)
+            if (e.response && e.response.status === 401) {
+              console.log("🧹 Refresh token không hợp lệ, đang đăng xuất...");
+              
+              // Xóa sạch bộ nhớ tạm
+              localStorage.removeItem("access_token");
+              localStorage.removeItem("token");
+              localStorage.removeItem("role");
+              localStorage.removeItem("fullname");
+              localStorage.removeItem("UserId");
+              localStorage.removeItem("email");
+
+              // ⭐ ĐÁ NGƯỜI DÙNG RA TRANG ĐĂNG NHẬP (Nếu chưa ở trang login)
+              if (!window.location.pathname.includes("/auth/sign-in")) {
+                window.location.href = "/auth/sign-in";
+              }
+            }
           } finally {
             isRefreshingRef.current = false;
           }
         }
       } catch (e) {
-        // Token malformed → bỏ qua, để interceptor xử lý
+        // Token malformed (hỏng) → xóa luôn và đá ra ngoài
+        localStorage.removeItem("access_token");
+        if (!window.location.pathname.includes("/auth/sign-in")) {
+          window.location.href = "/auth/sign-in";
+        }
       }
     };
 
-    checkIn1Minute();
+    // Kiểm tra ngay lập tức khi vừa vào trang
+    checkAndRefresh();
+    
+    // Cứ 60 giây kiểm tra 1 lần
     const interval = setInterval(checkAndRefresh, 60 * 1000);
-
-    function checkIn1Minute() {
-      // Kiểm tra ngay lập tức
-      checkAndRefresh();
-    }
 
     return () => clearInterval(interval);
   }, []);

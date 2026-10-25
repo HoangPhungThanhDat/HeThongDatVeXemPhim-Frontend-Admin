@@ -244,7 +244,7 @@ const Login = () => {
   const handleGoogleLogin = () => {
     setGoogleLoading(true);
     setGoogleError(null);
-    window.location.href = "http://localhost:5000/api/auth/google";
+    window.location.href = "https://fwd.host/http://movie-api.local/api/auth/google";
   };
 
   // ============================================

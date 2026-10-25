@@ -78,6 +78,7 @@ export default function Quanlysuatchieu() {
     handleDelete,
     handleToggleStatus,
     handleView,
+    reload,
     getMovieTitle,
     getRoomName,
   } = useShowtime();
@@ -88,6 +89,7 @@ export default function Quanlysuatchieu() {
   const [cloneModalOpen, setCloneModalOpen] = useState(false);
   const [bulkPriceModalOpen, setBulkPriceModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false); // ✅ Thêm state này
   
   // State cho form thêm mới
   const [newShowtime, setNewShowtime] = useState({
@@ -147,14 +149,24 @@ export default function Quanlysuatchieu() {
     setEditModalOpen(true);
   };
 
-  // Hàm xử lý thêm mới
-  const onAdd = () => {
-    handleAdd(newShowtime, () => setAddModalOpen(false));
+  // ✅ Hàm xử lý thêm mới (có loading)
+  const onAdd = async () => {
+    setIsSubmitting(true);
+    try {
+      await handleAdd(newShowtime, () => setAddModalOpen(false));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  // Hàm xử lý cập nhật
-  const onUpdate = () => {
-    handleUpdate(editing, () => setEditModalOpen(false));
+  // ✅ Hàm xử lý cập nhật (có loading)
+  const onUpdate = async () => {
+    setIsSubmitting(true);
+    try {
+      await handleUpdate(editing, () => setEditModalOpen(false));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Hàm xử lý xóa
@@ -169,6 +181,7 @@ export default function Quanlysuatchieu() {
 
   const onRefresh = async () => {
     setIsRefreshing(true);
+    await reload();
     setTimeout(() => setIsRefreshing(false), 500);
   };
 
@@ -199,13 +212,8 @@ export default function Quanlysuatchieu() {
         <Box sx={{ animation: `${fadeUp} 0.38s ease both` }}>
           <Flex align="center" gap="14px">
             <Box
-              w="48px"
-              h="48px"
-              borderRadius="14px"
-              bg={gradientBg}
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
+              w="48px" h="48px" borderRadius="14px" bg={gradientBg}
+              display="flex" alignItems="center" justifyContent="center"
               boxShadow={`0 8px 24px ${accentShadow}`}
               sx={{ animation: `${glow} 3s ease infinite` }}
             >
@@ -238,14 +246,11 @@ export default function Quanlysuatchieu() {
               aria-label="Toggle theme"
               icon={<Icon as={isDark ? MdLightMode : MdDarkMode} boxSize="18px" />}
               onClick={toggleColorMode}
-              size="sm"
-              borderRadius="10px"
+              size="sm" borderRadius="10px"
               bg={isDark ? DARK_THEME.inputBg : "white"}
               border={`1px solid ${borderColor}`}
               _hover={{ bg: isDark ? DARK_THEME.hoverBg : "#f1f5f9" }}
-              h="38px"
-              w="38px"
-              color={textColor}
+              h="38px" w="38px" color={textColor}
             />
           </Tooltip>
 
@@ -254,48 +259,30 @@ export default function Quanlysuatchieu() {
               aria-label="Refresh"
               icon={<Icon as={MdRefresh} boxSize="18px" />}
               onClick={onRefresh}
-              size="sm"
-              borderRadius="10px"
+              size="sm" borderRadius="10px"
               bg={isDark ? DARK_THEME.inputBg : "white"}
               border={`1px solid ${borderColor}`}
               _hover={{ bg: isDark ? DARK_THEME.hoverBg : "#f1f5f9" }}
-              h="38px"
-              w="38px"
-              color={textColor}
+              h="38px" w="38px" color={textColor}
+              isLoading={isRefreshing}
             />
           </Tooltip>
 
           {/* View mode toggle */}
-          <Flex
-            borderRadius="10px"
-            border={`1px solid ${borderColor}`}
-            overflow="hidden"
-            bg={isDark ? DARK_THEME.inputBg : "white"}
-          >
+          <Flex borderRadius="10px" border={`1px solid ${borderColor}`} overflow="hidden" bg={isDark ? DARK_THEME.inputBg : "white"}>
             {[
               { v: "list", ic: BsListUl, label: "Danh sách" },
               { v: "grid", ic: BsFillGrid3X3GapFill, label: "Lưới" },
             ].map(({ v, ic, label }) => (
               <Tooltip key={v} label={label}>
                 <Box
-                  w="36px"
-                  h="36px"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  cursor="pointer"
-                  bg={viewMode === v ? viewModeActiveBg : "transparent"}
+                  w="36px" h="36px" display="flex" alignItems="center" justifyContent="center"
+                  cursor="pointer" bg={viewMode === v ? viewModeActiveBg : "transparent"}
                   transition="all 0.2s"
-                  _hover={{ 
-                    bg: viewMode === v ? viewModeActiveBg : (isDark ? DARK_THEME.hoverBg : "#f1f5f9") 
-                  }}
+                  _hover={{ bg: viewMode === v ? viewModeActiveBg : (isDark ? DARK_THEME.hoverBg : "#f1f5f9") }}
                   onClick={() => setViewMode(v)}
                 >
-                  <Icon
-                    as={ic}
-                    boxSize="15px"
-                    color={viewMode === v ? "white" : (isDark ? DARK_THEME.textSecondary : "#6b7280")}
-                  />
+                  <Icon as={ic} boxSize="15px" color={viewMode === v ? "white" : (isDark ? DARK_THEME.textSecondary : "#6b7280")} />
                 </Box>
               </Tooltip>
             ))}
@@ -304,18 +291,12 @@ export default function Quanlysuatchieu() {
           <Tooltip label="Nhân bản lịch tuần">
             <Button
               leftIcon={<Icon as={MdContentCopy} />}
-              h="38px"
-              px="14px"
+              h="38px" px="14px"
               bg={isDark ? DARK_THEME.inputBg : "white"}
               color={isDark ? DARK_THEME.text : "#374151"}
-              borderRadius="10px"
-              fontWeight="600"
-              fontSize="12px"
+              borderRadius="10px" fontWeight="600" fontSize="12px"
               border={`1px solid ${borderColor}`}
-              _hover={{ 
-                bg: isDark ? DARK_THEME.hoverBg : "#f8fafc", 
-                borderColor: accentColor 
-              }}
+              _hover={{ bg: isDark ? DARK_THEME.hoverBg : "#f8fafc", borderColor: accentColor }}
               transition="all 0.2s"
               onClick={() => setCloneModalOpen(true)}
             >
@@ -327,18 +308,12 @@ export default function Quanlysuatchieu() {
           <Tooltip label="Chỉnh sửa giá hàng loạt">
             <Button
               leftIcon={<Icon as={MdAttachMoney} />}
-              h="38px"
-              px="14px"
+              h="38px" px="14px"
               bg={isDark ? DARK_THEME.inputBg : "white"}
               color={isDark ? DARK_THEME.text : "#374151"}
-              borderRadius="10px"
-              fontWeight="600"
-              fontSize="12px"
+              borderRadius="10px" fontWeight="600" fontSize="12px"
               border={`1px solid ${borderColor}`}
-              _hover={{ 
-                bg: isDark ? DARK_THEME.hoverBg : "#f8fafc", 
-                borderColor: accentColor 
-              }}
+              _hover={{ bg: isDark ? DARK_THEME.hoverBg : "#f8fafc", borderColor: accentColor }}
               transition="all 0.2s"
               onClick={() => setBulkPriceModalOpen(true)}
             >
@@ -349,18 +324,10 @@ export default function Quanlysuatchieu() {
 
           <Button
             leftIcon={<Icon as={MdAdd} />}
-            h="38px"
-            px="20px"
-            bg={gradientButton}
-            color="white"
-            borderRadius="10px"
-            fontWeight="700"
-            fontSize="13px"
+            h="38px" px="20px" bg={gradientButton} color="white"
+            borderRadius="10px" fontWeight="700" fontSize="13px"
             boxShadow={`0 4px 14px ${accentShadow}`}
-            _hover={{
-              boxShadow: `0 6px 24px ${accentShadow}`,
-              transform: "translateY(-2px)",
-            }}
+            _hover={{ boxShadow: `0 6px 24px ${accentShadow}`, transform: "translateY(-2px)" }}
             _active={{ transform: "translateY(0)" }}
             transition="all 0.2s"
             onClick={openAdd}
@@ -384,51 +351,26 @@ export default function Quanlysuatchieu() {
         <Flex gap="10px" wrap="wrap" align="center">
           <Box position="relative" flex={{ base: "1 1 100%", md: "1 1 280px" }} minW="200px">
             <Icon
-              as={MdSearch}
-              position="absolute"
-              left="12px"
-              top="50%"
-              transform="translateY(-50%)"
-              boxSize="16px"
-              color={isDark ? DARK_THEME.labelColor : "#9ca3af"}
+              as={MdSearch} position="absolute" left="12px" top="50%" transform="translateY(-50%)"
+              boxSize="16px" color={isDark ? DARK_THEME.labelColor : "#9ca3af"}
             />
             <Input
-              pl="36px"
-              h="40px"
-              fontSize="14px"
+              pl="36px" h="40px" fontSize="14px"
               placeholder="Tìm kiếm theo tên phim, phòng chiếu..."
-              bg={inputBg}
-              border={`1px solid ${inputBorder}`}
-              borderRadius="10px"
-              color={textColor}
+              bg={inputBg} border={`1px solid ${inputBorder}`} borderRadius="10px" color={textColor}
               _placeholder={{ color: subColor }}
-              _focus={{
-                border: `1.5px solid ${accentColor}`,
-                boxShadow: `0 0 0 3px ${isDark ? DARK_THEME.accentShadow : "rgba(249,115,22,0.12)"}`,
-              }}
+              _focus={{ border: `1.5px solid ${accentColor}`, boxShadow: `0 0 0 3px ${isDark ? DARK_THEME.accentShadow : "rgba(249,115,22,0.12)"}` }}
               transition="all 0.2s"
-              value={searchInput}
-              onChange={e => setSearchInput(e.target.value)}
+              value={searchInput} onChange={e => setSearchInput(e.target.value)}
             />
           </Box>
           
           <Select
-            h="40px"
-            w={{ base: "100%", sm: "160px" }}
-            fontSize="13px"
-            fontWeight="500"
-            bg={inputBg}
-            border={`1px solid ${inputBorder}`}
-            borderRadius="10px"
-            color={textColor}
-            _focus={{
-              border: `1.5px solid ${accentColor}`,
-              boxShadow: `0 0 0 3px ${isDark ? DARK_THEME.accentShadow : "rgba(249,115,22,0.12)"}`,
-            }}
-            _hover={{ borderColor: accentColor }}
-            transition="all 0.2s"
-            value={filterStatus}
-            onChange={e => setFilterStatus(e.target.value)}
+            h="40px" w={{ base: "100%", sm: "160px" }} fontSize="13px" fontWeight="500"
+            bg={inputBg} border={`1px solid ${inputBorder}`} borderRadius="10px" color={textColor}
+            _focus={{ border: `1.5px solid ${accentColor}`, boxShadow: `0 0 0 3px ${isDark ? DARK_THEME.accentShadow : "rgba(249,115,22,0.12)"}` }}
+            _hover={{ borderColor: accentColor }} transition="all 0.2s"
+            value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
           >
             <option value="">Tất cả trạng thái</option>
             <option value="Scheduled">📅 Đã lên lịch</option>
@@ -438,17 +380,9 @@ export default function Quanlysuatchieu() {
 
           {hasFilter && (
             <Button
-              size="sm"
-              h="34px"
-              px="12px"
-              borderRadius="8px"
-              variant="ghost"
-              color="#ef4444"
+              size="sm" h="34px" px="12px" borderRadius="8px" variant="ghost" color="#ef4444"
               leftIcon={<Icon as={MdClear} />}
-              onClick={() => {
-                setSearchInput("");
-                setFilterStatus("");
-              }}
+              onClick={() => { setSearchInput(""); setFilterStatus(""); }}
               _hover={{ bg: "#fef2f2" }}
             >
               Xóa lọc
@@ -469,8 +403,7 @@ export default function Quanlysuatchieu() {
         {/* ── Left: list / grid ── */}
         <Box>
           <Box
-            bg={bgColor}
-            borderRadius="18px"
+            bg={bgColor} borderRadius="18px"
             border={isDark ? `1px solid ${DARK_THEME.border}` : "1px solid #f1f5f9"}
             boxShadow={isDark ? `0 1px 6px ${DARK_THEME.accentShadow}` : "0 1px 6px rgba(0,0,0,0.04)"}
             sx={{ animation: `${fadeUp} 0.4s ease 0.12s both` }}
@@ -479,12 +412,10 @@ export default function Quanlysuatchieu() {
             {/* ✅ THÊM HEADER CỘT CHO BẢNG */}
             {viewMode === "list" && showtimes.length > 0 && (
               <Flex 
-                px="18px" 
-                py="10px" 
+                px="18px" py="10px" 
                 bg={isDark ? DARK_THEME.inputBg : "#fafbfc"}
                 borderBottom={`1px solid ${borderColor}`}
-                align="center"
-                display={{ base: "none", md: "flex" }}
+                align="center" display={{ base: "none", md: "flex" }}
               >
                 <Box w="32px" flexShrink="0">
                   <Text fontSize="10px" fontWeight="800" color={isDark ? DARK_THEME.labelColor : subColor} letterSpacing="1px" textTransform="uppercase">#</Text>
@@ -516,17 +447,10 @@ export default function Quanlysuatchieu() {
                 <Flex direction="column" gap="6px">
                   {showtimes.map((s, i) => (
                     <ShowtimeRow
-                      key={s.ShowtimeId}
-                      s={s}
-                      index={i}
+                      key={s.ShowtimeId} s={s} index={i}
                       isSelected={selected?.ShowtimeId === s.ShowtimeId}
-                      onView={handleView}
-                      onEdit={openEdit}
-                      onDelete={onDelete}
-                      onToggle={onToggle}
-                      isDark={isDark}
-                      getMovieTitle={getMovieTitle}
-                      getRoomName={getRoomName}
+                      onView={handleView} onEdit={openEdit} onDelete={onDelete} onToggle={onToggle}
+                      isDark={isDark} getMovieTitle={getMovieTitle} getRoomName={getRoomName}
                     />
                   ))}
                 </Flex>
@@ -534,78 +458,105 @@ export default function Quanlysuatchieu() {
                 <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} spacing="10px">
                   {showtimes.map((s, i) => (
                     <ShowtimeCard
-                      key={s.ShowtimeId}
-                      s={s}
-                      index={i}
+                      key={s.ShowtimeId} s={s} index={i}
                       isSelected={selected?.ShowtimeId === s.ShowtimeId}
-                      onView={handleView}
-                      onEdit={openEdit}
-                      onDelete={onDelete}
-                      onToggle={onToggle}
-                      isDark={isDark}
-                      getMovieTitle={getMovieTitle}
-                      getRoomName={getRoomName}
+                      onView={handleView} onEdit={openEdit} onDelete={onDelete} onToggle={onToggle}
+                      isDark={isDark} getMovieTitle={getMovieTitle} getRoomName={getRoomName}
                     />
                   ))}
                 </SimpleGrid>
               )}
             </Box>
 
-            {/* Pagination */}
+            {/* ✅ PAGINATION THÔNG MINH */}
             {totalPages > 1 && (
               <Flex
-                align="center"
-                justify="space-between"
-                px={{ base: "14px", md: "20px" }}
-                py="12px"
+                align="center" justify="space-between"
+                px={{ base: "14px", md: "20px" }} py="14px"
                 borderTop={isDark ? `1px solid ${DARK_THEME.border}` : "1px solid #f9fafb"}
                 bg={isDark ? DARK_THEME.inputBg : "#fafbfc"}
+                flexWrap="wrap" gap="10px"
               >
-                <Text fontSize="11.5px" color={isDark ? DARK_THEME.textSecondary : "#9ca3af"} fontWeight="500">
-                  Hiển thị <Text as="span" fontWeight="700" color={textColor}>{showtimes.length}</Text> / {total} suất chiếu
+                <Text fontSize="12px" color={isDark ? DARK_THEME.textSecondary : "#6b7280"}>
+                  Hiển thị <Text as="span" fontWeight="700" color={textColor}>{showtimes.length}</Text> trên tổng số <Text as="span" fontWeight="700" color={textColor}>{total}</Text> suất chiếu
                 </Text>
-                <Flex gap="6px" align="center">
-                  <Text fontSize="11px" color={isDark ? DARK_THEME.labelColor : "#d1d5db"}>
-                    Trang {page} / {totalPages}
-                  </Text>
-                  <Flex>
-                    <Box
-                      w="26px"
-                      h="26px"
-                      borderRadius="7px"
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="center"
-                      cursor={page > 1 ? "pointer" : "default"}
-                      color={isDark ? DARK_THEME.textSecondary : "#9ca3af"}
-                      border={isDark ? `1px solid ${DARK_THEME.border}` : "1px solid #e5e7eb"}
-                      bg={isDark ? DARK_THEME.inputBg : "#f9fafb"}
-                      opacity={page > 1 ? 1 : 0.4}
-                      _hover={{ bg: page > 1 ? (isDark ? DARK_THEME.hoverBg : "#f1f5f9") : undefined }}
-                      mx="2px"
-                      onClick={() => page > 1 && goToPage(page - 1)}
-                    >
-                      <Icon as={MdKeyboardArrowLeft} boxSize="14px" />
-                    </Box>
-                    <Box
-                      w="26px"
-                      h="26px"
-                      borderRadius="7px"
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="center"
-                      cursor={page < totalPages ? "pointer" : "default"}
-                      color={isDark ? DARK_THEME.textSecondary : "#9ca3af"}
-                      border={isDark ? `1px solid ${DARK_THEME.border}` : "1px solid #e5e7eb"}
-                      bg={isDark ? DARK_THEME.inputBg : "#f9fafb"}
-                      opacity={page < totalPages ? 1 : 0.4}
-                      _hover={{ bg: page < totalPages ? (isDark ? DARK_THEME.hoverBg : "#f1f5f9") : undefined }}
-                      mx="2px"
-                      onClick={() => page < totalPages && goToPage(page + 1)}
-                    >
-                      <Icon as={MdChevronRight} boxSize="14px" />
-                    </Box>
-                  </Flex>
+                
+                <Flex gap="4px" align="center">
+                  <Button
+                    size="sm" variant="ghost" h="30px" px="10px" borderRadius="8px"
+                    color={isDark ? DARK_THEME.textSecondary : "#64748b"}
+                    _hover={{ bg: isDark ? DARK_THEME.hoverBg : "#f1f5f9", color: accentColor }}
+                    isDisabled={page === 1} onClick={() => goToPage(1)}
+                  >
+                    Đầu
+                  </Button>
+
+                  <IconButton
+                    aria-label="Previous page"
+                    icon={<Icon as={MdKeyboardArrowLeft} boxSize="18px" />}
+                    size="sm" h="30px" w="30px" minW="30px" borderRadius="8px" bg="transparent"
+                    color={isDark ? DARK_THEME.textSecondary : "#64748b"}
+                    _hover={{ bg: isDark ? DARK_THEME.hoverBg : "#f1f5f9" }}
+                    isDisabled={page === 1} onClick={() => goToPage(page - 1)}
+                  />
+
+                  {(() => {
+                    const pages = [];
+                    const maxVisible = 5;
+                    let start = Math.max(1, page - Math.floor(maxVisible / 2));
+                    let end = Math.min(totalPages, start + maxVisible - 1);
+                    if (end - start + 1 < maxVisible) start = Math.max(1, end - maxVisible + 1);
+
+                    if (start > 1) {
+                      pages.push(
+                        <Button key={1} size="sm" h="30px" w="30px" minW="30px" borderRadius="8px" variant="ghost" onClick={() => goToPage(1)}>1</Button>
+                      );
+                      if (start > 2) pages.push(<Text key="dots-start" fontSize="12px" color={subColor}>...</Text>);
+                    }
+
+                    for (let i = start; i <= end; i++) {
+                      const isActive = i === page;
+                      pages.push(
+                        <Button
+                          key={i} size="sm" h="30px" w="30px" minW="30px" borderRadius="8px"
+                          fontWeight={isActive ? "800" : "600"} fontSize="12px"
+                          bg={isActive ? gradientButton : "transparent"}
+                          color={isActive ? "white" : (isDark ? DARK_THEME.textSecondary : "#64748b")}
+                          boxShadow={isActive ? `0 2px 8px ${accentShadow}` : "none"}
+                          _hover={!isActive ? { bg: isDark ? DARK_THEME.hoverBg : "#f1f5f9", color: textColor } : {}}
+                          onClick={() => goToPage(i)}
+                        >
+                          {i}
+                        </Button>
+                      );
+                    }
+
+                    if (end < totalPages) {
+                      if (end < totalPages - 1) pages.push(<Text key="dots-end" fontSize="12px" color={subColor}>...</Text>);
+                      pages.push(
+                        <Button key={totalPages} size="sm" h="30px" w="30px" minW="30px" borderRadius="8px" variant="ghost" onClick={() => goToPage(totalPages)}>{totalPages}</Button>
+                      );
+                    }
+                    return pages;
+                  })()}
+
+                  <IconButton
+                    aria-label="Next page"
+                    icon={<Icon as={MdChevronRight} boxSize="18px" />}
+                    size="sm" h="30px" w="30px" minW="30px" borderRadius="8px" bg="transparent"
+                    color={isDark ? DARK_THEME.textSecondary : "#64748b"}
+                    _hover={{ bg: isDark ? DARK_THEME.hoverBg : "#f1f5f9" }}
+                    isDisabled={page === totalPages} onClick={() => goToPage(page + 1)}
+                  />
+
+                  <Button
+                    size="sm" variant="ghost" h="30px" px="10px" borderRadius="8px"
+                    color={isDark ? DARK_THEME.textSecondary : "#64748b"}
+                    _hover={{ bg: isDark ? DARK_THEME.hoverBg : "#f1f5f9", color: accentColor }}
+                    isDisabled={page === totalPages} onClick={() => goToPage(totalPages)}
+                  >
+                    Cuối
+                  </Button>
                 </Flex>
               </Flex>
             )}
@@ -615,21 +566,14 @@ export default function Quanlysuatchieu() {
         {/* ── Right: detail panel ── */}
         {showDetail && (
           <Box
-            bg={bgColor}
-            borderRadius="18px"
+            bg={bgColor} borderRadius="18px"
             border={isDark ? `1px solid ${DARK_THEME.border}` : "1px solid #f1f5f9"}
             boxShadow={isDark ? `0 1px 6px ${DARK_THEME.accentShadow}` : "0 1px 6px rgba(0,0,0,0.04)"}
-            overflow="hidden"
-            sx={{ animation: `${slideLeft} 0.3s ease both` }}
-            h="fit-content"
-            position="sticky"
-            top="80px"
+            overflow="hidden" sx={{ animation: `${slideLeft} 0.3s ease both` }}
+            h="fit-content" position="sticky" top="80px"
           >
             <Flex
-              align="center"
-              justify="space-between"
-              px="18px"
-              py="14px"
+              align="center" justify="space-between" px="18px" py="14px"
               borderBottom={isDark ? `1px solid ${DARK_THEME.border}` : "1px solid #f9fafb"}
               bg={isDark 
                 ? `linear-gradient(135deg, ${DARK_THEME.inputBg} 0%, ${DARK_THEME.cardBg} 60%)`
@@ -647,34 +591,20 @@ export default function Quanlysuatchieu() {
                 )}
               </Flex>
               <Box
-                w="26px"
-                h="26px"
-                borderRadius="7px"
-                cursor="pointer"
+                w="26px" h="26px" borderRadius="7px" cursor="pointer"
                 bg={isDark ? DARK_THEME.inputBg : "#f3f4f6"}
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
+                display="flex" alignItems="center" justifyContent="center"
                 _hover={{ bg: "#fee2e2", color: "#ef4444" }}
                 transition="all 0.15s"
-                onClick={() => {
-                  setShowDetail(false);
-                  setSelected(null);
-                }}
+                onClick={() => { setShowDetail(false); setSelected(null); }}
               >
                 <Icon as={MdClose} boxSize="13px" color={isDark ? DARK_THEME.textSecondary : "#6b7280"} />
               </Box>
             </Flex>
             <DetailPanel
-              selected={selected}
-              onEdit={openEdit}
-              isDark={isDark}
-              onClose={() => {
-                setShowDetail(false);
-                setSelected(null);
-              }}
-              getMovieTitle={getMovieTitle}
-              getRoomName={getRoomName}
+              selected={selected} onEdit={openEdit} isDark={isDark}
+              onClose={() => { setShowDetail(false); setSelected(null); }}
+              getMovieTitle={getMovieTitle} getRoomName={getRoomName}
             />
           </Box>
         )}
@@ -690,6 +620,7 @@ export default function Quanlysuatchieu() {
         isDark={isDark}
         movies={movies}
         rooms={rooms}
+        isSubmitting={isSubmitting} // ✅ Truyền prop này
       />
 
       <EditModal
@@ -701,20 +632,17 @@ export default function Quanlysuatchieu() {
         isDark={isDark}
         movies={movies}
         rooms={rooms}
+        isSubmitting={isSubmitting} // ✅ Truyền prop này
       />
 
       <CloneWeekModal
-        isOpen={cloneModalOpen}
-        onClose={() => setCloneModalOpen(false)}
-        onClone={() => {}}
-        isDark={isDark}
+        isOpen={cloneModalOpen} onClose={() => setCloneModalOpen(false)}
+        onClone={() => {}} isDark={isDark}
       />
 
       <BulkEditPriceModal
-        isOpen={bulkPriceModalOpen}
-        onClose={() => setBulkPriceModalOpen(false)}
-        onApply={() => {}}
-        isDark={isDark}
+        isOpen={bulkPriceModalOpen} onClose={() => setBulkPriceModalOpen(false)}
+        onApply={() => {}} isDark={isDark}
       />
     </Box>
   );

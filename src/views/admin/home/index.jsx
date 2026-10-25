@@ -8,25 +8,16 @@ import {
   Badge,
   HStack,
   VStack,
-  CircularProgress,
-  CircularProgressLabel,
-  Stat,
-  StatLabel,
-  StatNumber,
-  StatHelpText,
-  StatArrow,
-  Divider,
-  Avatar,
-  AvatarGroup,
   Progress,
+  Divider,
+  Spinner,
 } from "@chakra-ui/react";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   MdLocalActivity,
   MdAttachMoney,
   MdPeople,
   MdMovie,
-  MdTrendingUp,
   MdEventSeat,
   MdStar,
   MdCalendarToday,
@@ -34,8 +25,6 @@ import {
 import {
   AreaChart,
   Area,
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -45,40 +34,7 @@ import {
   Pie,
   Cell,
 } from "recharts";
-
-// ─── Dữ liệu mẫu ────────────────────────────────────────────────────────────
-const revenueData = [
-  { day: "T2", revenue: 42, tickets: 185 },
-  { day: "T3", revenue: 38, tickets: 162 },
-  { day: "T4", revenue: 55, tickets: 241 },
-  { day: "T5", revenue: 47, tickets: 203 },
-  { day: "T6", revenue: 78, tickets: 342 },
-  { day: "T7", revenue: 96, tickets: 418 },
-  { day: "CN", revenue: 88, tickets: 381 },
-];
-
-const genreData = [
-  { name: "Hành động", value: 35, color: "#E53E3E" },
-  { name: "Tình cảm", value: 25, color: "#ED8936" },
-  { name: "Hoạt hình", value: 20, color: "#ECC94B" },
-  { name: "Kinh dị", value: 12, color: "#9F7AEA" },
-  { name: "Khác", value: 8, color: "#4A5568" },
-];
-
-const topMovies = [
-  { title: "Avengers: Doomsday", tickets: 1842, rating: 9.2, fill: 92 },
-  { title: "Lật Mặt 8", tickets: 1423, rating: 8.7, fill: 78 },
-  { title: "Doraemon 2026", tickets: 1205, rating: 8.9, fill: 65 },
-  { title: "Ma Da", tickets: 987, rating: 7.8, fill: 54 },
-];
-
-const recentBookings = [
-  { name: "Nguyễn Văn A", movie: "Avengers: Doomsday", seats: "F5, F6", time: "19:30", amount: "180.000đ", status: "confirmed" },
-  { name: "Trần Thị B", movie: "Lật Mặt 8", seats: "C3", time: "15:00", amount: "90.000đ", status: "confirmed" },
-  { name: "Lê Hoàng C", movie: "Doraemon 2026", seats: "D7, D8, D9", time: "10:00", amount: "270.000đ", status: "pending" },
-  { name: "Phạm Thu D", movie: "Ma Da", seats: "G2", time: "21:00", amount: "90.000đ", status: "confirmed" },
-  { name: "Hoàng Minh E", movie: "Avengers: Doomsday", seats: "A1, A2", time: "22:00", amount: "180.000đ", status: "cancelled" },
-];
+import DashboardApi from "api/admin/DashboardApi";
 
 // ─── Custom Tooltip ──────────────────────────────────────────────────────────
 const CustomTooltip = ({ active, payload, label }) => {
@@ -135,7 +91,6 @@ const KpiCard = ({ icon, label, value, sub, growth, color }) => {
         "0 2px 12px rgba(0,0,0,0.3)"
       )}
     >
-      {/* Accent glow góc trên phải */}
       <Box
         position="absolute"
         top="-20px"
@@ -158,15 +113,17 @@ const KpiCard = ({ icon, label, value, sub, growth, color }) => {
         >
           <Icon as={icon} w={5} h={5} color={color} />
         </Box>
-        <Badge
-          colorScheme={growth >= 0 ? "green" : "red"}
-          borderRadius="full"
-          px={2}
-          fontSize="xs"
-          fontWeight="bold"
-        >
-          {growth >= 0 ? "▲" : "▼"} {Math.abs(growth)}%
-        </Badge>
+        {growth !== undefined && (
+          <Badge
+            colorScheme={growth >= 0 ? "green" : "red"}
+            borderRadius="full"
+            px={2}
+            fontSize="xs"
+            fontWeight="bold"
+          >
+            {growth >= 0 ? "▲" : "▼"} {Math.abs(growth)}%
+          </Badge>
+        )}
       </HStack>
       <Text fontSize="2xl" fontWeight="800" color={textColor} lineHeight={1}>
         {value}
@@ -179,6 +136,7 @@ const KpiCard = ({ icon, label, value, sub, growth, color }) => {
 
 // ─── Main Dashboard ──────────────────────────────────────────────────────────
 export default function CinemaDashboard() {
+  // ⭐ 1. KHAI BÁO TẤT CẢ CÁC HOOK Ở TRÊN CÙNG
   const bg = useColorModeValue("#EBF4FF", "#0B1437");
   const cardBg = useColorModeValue("#EBF4FF", "#1A365D");
   const border = useColorModeValue("#CBD5E0", "#2D3748");
@@ -186,23 +144,70 @@ export default function CinemaDashboard() {
   const textSub = useColorModeValue("gray.500", "gray.400");
   const hoverBg = useColorModeValue("whiteAlpha.300", "whiteAlpha.100");
 
+  const [data, setData] = useState({
+    kpi: { revenue: "0đ", tickets: 0, newUsers: 0, fillRate: "0%" },
+    revenueChart: [],
+    genreChart: [],
+    topMovies: [],
+    recentBookings: []
+  });
+  const [loading, setLoading] = useState(true);
+
+  // Khai báo màu cho status ở đây
+  const greenBg = useColorModeValue("green.50", "green.900");
+  const greenColor = useColorModeValue("green.600", "green.300");
+  const orangeBg = useColorModeValue("orange.50", "orange.900");
+  const orangeColor = useColorModeValue("orange.500", "orange.300");
+  const redBg = useColorModeValue("red.50", "red.900");
+  const redColor = useColorModeValue("red.500", "red.300");
+  
+  const progressBg = useColorModeValue("gray.200", "gray.700");
+  const chartGridColor = useColorModeValue("rgba(0,0,0,0.04)", "rgba(255,255,255,0.04)");
+  const chartTickColor = useColorModeValue("#A0AEC0", "#4A5568");
+
+  // ⭐ 2. GỌI API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await DashboardApi.getStatistics();
+        const result = response.data?.data || response.data || response;
+        setData(result);
+      } catch (error) {
+        console.error("❌ Lỗi tải dữ liệu Dashboard:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // ⭐ 3. KHAI BÁO BIẾN STATUS (Sau khi đã có màu ở trên)
   const statusColor = {
-    confirmed: { 
-      bg: useColorModeValue("green.50", "green.900"), 
-      color: useColorModeValue("green.600", "green.300"), 
-      label: "Đã xác nhận" 
-    },
-    pending: { 
-      bg: useColorModeValue("orange.50", "orange.900"), 
-      color: useColorModeValue("orange.500", "orange.300"), 
-      label: "Chờ xử lý" 
-    },
-    cancelled: { 
-      bg: useColorModeValue("red.50", "red.900"), 
-      color: useColorModeValue("red.500", "red.300"), 
-      label: "Đã huỷ" 
-    },
+    confirmed: { bg: greenBg, color: greenColor, label: "Đã xác nhận" },
+    pending: { bg: orangeBg, color: orangeColor, label: "Chờ xử lý" },
+    cancelled: { bg: redBg, color: redColor, label: "Đã huỷ" },
   };
+
+  // ⭐ 4. BÂY GIỜ MỚI ĐƯỢC PHÉP RETURN SỚM (if loading)
+  if (loading) {
+    return (
+      <Flex justify="center" align="center" h="100vh" bg={bg} flexDir="column" gap={4}>
+        <Spinner size="xl" color="red.500" thickness="4px" />
+        <Text color={textSub} fontWeight="600">Đang tải dữ liệu tổng quan...</Text>
+      </Flex>
+    );
+  }
+
+  if (!data || !data.kpi) {
+    return (
+      <Flex justify="center" align="center" h="100vh" bg={bg}>
+        <Text color="red.500" fontWeight="bold">Không thể tải dữ liệu. Vui lòng thử lại!</Text>
+      </Flex>
+    );
+  }
+
+  const maxTicketCount = data.topMovies.length > 0 ? data.topMovies[0].tickets : 1;
 
   return (
     <Box pt={{ base: "130px", md: "80px", xl: "80px" }} px={{ base: 4, md: 6 }} bg={bg} minH="100vh">
@@ -236,16 +241,16 @@ export default function CinemaDashboard() {
 
       {/* KPI Row */}
       <SimpleGrid columns={{ base: 2, md: 2, lg: 4 }} gap={4} mb={6}>
-        <KpiCard icon={MdAttachMoney}  label="Doanh thu hôm nay" value="88tr đ"  sub="So với hôm qua"    growth={12.4} color="#E53E3E" />
-        <KpiCard icon={MdLocalActivity} label="Vé đã bán"         value="381"    sub="Hôm nay"           growth={8.1}  color="#ED8936" />
-        <KpiCard icon={MdPeople}        label="Khách hàng mới"    value="47"     sub="7 ngày qua"        growth={-3.2} color="#9F7AEA" />
-        <KpiCard icon={MdEventSeat}     label="Tỷ lệ lấp đầy"    value="76%"    sub="Trung bình rạp"    growth={5.6}  color="#38B2AC" />
+        <KpiCard icon={MdAttachMoney}  label="Doanh thu hôm nay" value={data.kpi.revenue}  sub="So với hôm qua"    growth={12.4} color="#E53E3E" />
+        <KpiCard icon={MdLocalActivity} label="Vé đã bán"         value={data.kpi.tickets}  sub="Hôm nay"           growth={8.1}  color="#ED8936" />
+        <KpiCard icon={MdPeople}        label="Khách hàng mới"    value={data.kpi.newUsers} sub="7 ngày qua"        growth={-3.2} color="#9F7AEA" />
+        <KpiCard icon={MdEventSeat}     label="Tỷ lệ lấp đầy"     value={data.kpi.fillRate} sub="Trung bình rạp"    growth={5.6}  color="#38B2AC" />
       </SimpleGrid>
 
       {/* Charts Row 1 */}
       <SimpleGrid columns={{ base: 1, lg: 3 }} gap={5} mb={5}>
 
-        {/* Biểu đồ doanh thu – chiếm 2/3 */}
+        {/* Biểu đồ doanh thu */}
         <Box
           gridColumn={{ lg: "span 2" }}
           bg={cardBg}
@@ -253,10 +258,7 @@ export default function CinemaDashboard() {
           borderColor={border}
           borderRadius="20px"
           p={5}
-          boxShadow={useColorModeValue(
-            "0 2px 12px rgba(0,0,0,0.06)",
-            "0 2px 12px rgba(0,0,0,0.3)"
-          )}
+          boxShadow={useColorModeValue("0 2px 12px rgba(0,0,0,0.06)", "0 2px 12px rgba(0,0,0,0.3)")}
         >
           <Flex justify="space-between" align="center" mb={5}>
             <Box>
@@ -275,7 +277,7 @@ export default function CinemaDashboard() {
             </HStack>
           </Flex>
           <ResponsiveContainer width="100%" height={200}>
-            <AreaChart data={revenueData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+            <AreaChart data={data.revenueChart} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="gradRev" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%"  stopColor="#E53E3E" stopOpacity={0.25} />
@@ -286,22 +288,9 @@ export default function CinemaDashboard() {
                   <stop offset="95%" stopColor="#ED8936" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid 
-                strokeDasharray="3 3" 
-                stroke={useColorModeValue("rgba(0,0,0,0.04)", "rgba(255,255,255,0.04)")} 
-                vertical={false} 
-              />
-              <XAxis 
-                dataKey="day" 
-                tick={{ fontSize: 12, fill: useColorModeValue("#A0AEC0", "#4A5568") }} 
-                axisLine={false} 
-                tickLine={false} 
-              />
-              <YAxis 
-                tick={{ fontSize: 11, fill: useColorModeValue("#A0AEC0", "#4A5568") }} 
-                axisLine={false} 
-                tickLine={false} 
-              />
+              <CartesianGrid strokeDasharray="3 3" stroke={chartGridColor} vertical={false} />
+              <XAxis dataKey="day" tick={{ fontSize: 12, fill: chartTickColor }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: chartTickColor }} axisLine={false} tickLine={false} />
               <Tooltip content={<CustomTooltip />} />
               <Area type="monotone" dataKey="revenue" name="revenue" stroke="#E53E3E" strokeWidth={2.5} fill="url(#gradRev)" dot={false} activeDot={{ r: 5, fill: "#E53E3E" }} />
               <Area type="monotone" dataKey="tickets" name="tickets" stroke="#ED8936" strokeWidth={2} fill="url(#gradTix)" dot={false} activeDot={{ r: 4, fill: "#ED8936" }} />
@@ -316,33 +305,25 @@ export default function CinemaDashboard() {
           borderColor={border}
           borderRadius="20px"
           p={5}
-          boxShadow={useColorModeValue(
-            "0 2px 12px rgba(0,0,0,0.06)",
-            "0 2px 12px rgba(0,0,0,0.3)"
-          )}
+          boxShadow={useColorModeValue("0 2px 12px rgba(0,0,0,0.06)", "0 2px 12px rgba(0,0,0,0.3)")}
         >
           <Text fontWeight="700" fontSize="md" color={textMain} mb={1}>Thể loại phim</Text>
           <Text fontSize="xs" color={textSub} mb={4}>Tỷ lệ vé theo thể loại</Text>
           <Flex justify="center" mb={4}>
-            <PieChart width={150} height={150}>
-              <Pie
-                data={genreData}
-                cx={70} cy={70}
-                innerRadius={42}
-                outerRadius={68}
-                paddingAngle={3}
-                dataKey="value"
-                startAngle={90}
-                endAngle={-270}
-              >
-                {genreData.map((entry, i) => (
-                  <Cell key={i} fill={entry.color} stroke="none" />
-                ))}
-              </Pie>
-            </PieChart>
+            {data.genreChart.length > 0 ? (
+              <PieChart width={150} height={150}>
+                <Pie data={data.genreChart} cx={70} cy={70} innerRadius={42} outerRadius={68} paddingAngle={3} dataKey="value" startAngle={90} endAngle={-270}>
+                  {data.genreChart.map((entry, i) => (
+                    <Cell key={i} fill={entry.color || "#CBD5E0"} stroke="none" />
+                  ))}
+                </Pie>
+              </PieChart>
+            ) : (
+              <Text fontSize="sm" color={textSub}>Chưa có dữ liệu</Text>
+            )}
           </Flex>
           <VStack spacing={2} align="stretch">
-            {genreData.map((g, i) => (
+            {data.genreChart.map((g, i) => (
               <HStack key={i} justify="space-between">
                 <HStack spacing={2}>
                   <Box w="8px" h="8px" borderRadius="2px" bg={g.color} flexShrink={0} />
@@ -365,26 +346,18 @@ export default function CinemaDashboard() {
           borderColor={border}
           borderRadius="20px"
           p={5}
-          boxShadow={useColorModeValue(
-            "0 2px 12px rgba(0,0,0,0.06)",
-            "0 2px 12px rgba(0,0,0,0.3)"
-          )}
+          boxShadow={useColorModeValue("0 2px 12px rgba(0,0,0,0.06)", "0 2px 12px rgba(0,0,0,0.3)")}
         >
           <Flex justify="space-between" align="center" mb={4}>
             <Text fontWeight="700" fontSize="md" color={textMain}>Top phim đang chiếu</Text>
             <Icon as={MdMovie} color="red.400" w={5} h={5} />
           </Flex>
           <VStack spacing={4} align="stretch">
-            {topMovies.map((m, i) => (
+            {data.topMovies.length > 0 ? data.topMovies.map((m, i) => (
               <Box key={i}>
                 <Flex justify="space-between" mb={1}>
                   <HStack spacing={2}>
-                    <Text
-                      fontSize="xs"
-                      fontWeight="800"
-                      color={i === 0 ? "red.500" : "gray.400"}
-                      w="16px"
-                    >
+                    <Text fontSize="xs" fontWeight="800" color={i === 0 ? "red.500" : "gray.400"} w="16px">
                       #{i + 1}
                     </Text>
                     <Text fontSize="sm" fontWeight="600" color={textMain} noOfLines={1}>
@@ -393,29 +366,31 @@ export default function CinemaDashboard() {
                   </HStack>
                   <HStack spacing={1}>
                     <Icon as={MdStar} w={3} h={3} color="yellow.400" />
-                    <Text fontSize="xs" fontWeight="700" color="yellow.500">{m.rating}</Text>
+                    <Text fontSize="xs" fontWeight="700" color="yellow.500">9.0</Text>
                   </HStack>
                 </Flex>
                 <Flex justify="space-between" align="center">
                   <Progress
-                    value={m.fill}
+                    value={(m.tickets / maxTicketCount) * 100}
                     size="xs"
                     colorScheme={i === 0 ? "red" : "orange"}
                     borderRadius="full"
                     flex={1}
                     mr={3}
-                    bg={useColorModeValue("gray.200", "gray.700")}
+                    bg={progressBg}
                   />
                   <Text fontSize="xs" color={textSub} flexShrink={0}>
                     {m.tickets.toLocaleString()} vé
                   </Text>
                 </Flex>
               </Box>
-            ))}
+            )) : (
+              <Text fontSize="sm" color={textSub} textAlign="center">Chưa có dữ liệu</Text>
+            )}
           </VStack>
         </Box>
 
-        {/* Lịch đặt vé gần đây — chiếm 2/3 */}
+        {/* Lịch đặt vé gần đây */}
         <Box
           gridColumn={{ lg: "span 2" }}
           bg={cardBg}
@@ -423,10 +398,7 @@ export default function CinemaDashboard() {
           borderColor={border}
           borderRadius="20px"
           p={5}
-          boxShadow={useColorModeValue(
-            "0 2px 12px rgba(0,0,0,0.06)",
-            "0 2px 12px rgba(0,0,0,0.3)"
-          )}
+          boxShadow={useColorModeValue("0 2px 12px rgba(0,0,0,0.06)", "0 2px 12px rgba(0,0,0,0.3)")}
           overflowX="auto"
         >
           <Flex justify="space-between" align="center" mb={4}>
@@ -436,9 +408,8 @@ export default function CinemaDashboard() {
             </Text>
           </Flex>
 
-          {/* Header */}
           <SimpleGrid columns={5} gap={2} mb={2} px={2}>
-            {["Khách hàng", "Phim", "Ghế", "Giờ chiếu", "Trạng thái"].map((h) => (
+            {["Khách hàng", "Phim", "Số tiền", "Trạng thái", "Ngày"].map((h) => (
               <Text key={h} fontSize="10px" fontWeight="700" color={textSub} textTransform="uppercase" letterSpacing="0.5px">
                 {h}
               </Text>
@@ -447,8 +418,8 @@ export default function CinemaDashboard() {
           <Divider mb={2} borderColor={border} />
 
           <VStack spacing={0} align="stretch">
-            {recentBookings.map((b, i) => {
-              const status = statusColor[b.status];
+            {data.recentBookings.length > 0 ? data.recentBookings.map((b, i) => {
+              const status = statusColor[b.status] || statusColor.pending;
               return (
                 <Box
                   key={i}
@@ -461,24 +432,17 @@ export default function CinemaDashboard() {
                   <SimpleGrid columns={5} gap={2} alignItems="center">
                     <Text fontSize="sm" fontWeight="600" color={textMain} noOfLines={1}>{b.name}</Text>
                     <Text fontSize="xs" color={textSub} noOfLines={1}>{b.movie}</Text>
-                    <Text fontSize="xs" color={textSub}>{b.seats}</Text>
-                    <Text fontSize="xs" color={textSub}>{b.time}</Text>
-                    <Badge
-                      bg={status.bg}
-                      color={status.color}
-                      fontSize="10px"
-                      fontWeight="700"
-                      px={2}
-                      py="2px"
-                      borderRadius="full"
-                      w="fit-content"
-                    >
+                    <Text fontSize="sm" fontWeight="700" color="green.500">{b.amount}</Text>
+                    <Badge bg={status.bg} color={status.color} fontSize="10px" fontWeight="700" px={2} py="2px" borderRadius="full" w="fit-content">
                       {status.label}
                     </Badge>
+                    <Text fontSize="xs" color={textSub}>Hôm nay</Text>
                   </SimpleGrid>
                 </Box>
               );
-            })}
+            }) : (
+              <Text fontSize="sm" color={textSub} textAlign="center" py={4}>Chưa có đơn hàng nào</Text>
+            )}
           </VStack>
         </Box>
       </SimpleGrid>

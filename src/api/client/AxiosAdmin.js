@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const BASE_URL =
-  process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+  process.env.REACT_APP_API_URL || "http://movie-api.local/api"; // ⭐ ĐÃ SỬA
 
 const AxiosAdmin = axios.create({
   baseURL: BASE_URL,
@@ -61,14 +61,12 @@ const clearAuthStorage = () => {
 AxiosAdmin.interceptors.response.use(
   (response) => response,
   async (error) => {
-    // ✅ Bỏ qua lỗi Cancel (nếu có dùng CancelToken ở nơi khác)
     if (axios.isCancel(error) || error?.isSilent) {
       return Promise.reject(error);
     }
 
     const originalRequest = error.config;
 
-    // Bỏ qua nếu không phải 401 hoặc đã retry rồi
     if (
       !error.response ||
       error.response.status !== 401 ||
@@ -78,7 +76,6 @@ AxiosAdmin.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Không refresh cho chính các endpoint auth
     const url = originalRequest.url || "";
     if (
       url.includes("/auth/refresh") ||
@@ -90,7 +87,6 @@ AxiosAdmin.interceptors.response.use(
 
     originalRequest._retry = true;
 
-    // Nếu đang refresh → xếp hàng chờ
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
         subscribeTokenRefresh((token, err) => {
@@ -121,10 +117,8 @@ AxiosAdmin.interceptors.response.use(
         throw new Error("No access_token in refresh response");
       }
 
-      // Lưu token mới
       localStorage.setItem("access_token", newAccessToken);
 
-      // Cập nhật user info nếu có
       if (data.user) {
         localStorage.setItem("fullname", data.user.FullName || "");
         localStorage.setItem("UserId", data.user.UserId || "");
@@ -134,7 +128,6 @@ AxiosAdmin.interceptors.response.use(
 
       onRefreshed(newAccessToken);
 
-      // Retry request gốc
       originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
       return AxiosAdmin(originalRequest);
     } catch (refreshError) {
@@ -143,7 +136,6 @@ AxiosAdmin.interceptors.response.use(
       onRefreshFailed(refreshError);
       clearAuthStorage();
 
-      // Chỉ redirect nếu chưa ở trang login
       if (!window.location.pathname.includes("/auth/sign-in")) {
         window.location.href = "/auth/sign-in";
       }

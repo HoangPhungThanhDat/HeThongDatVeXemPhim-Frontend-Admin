@@ -1,4 +1,4 @@
-// src/api/RoomManagementApi.js
+
 
 import axios from '../client/AxiosAdmin';
 
@@ -7,9 +7,10 @@ class RoomManagementApi {
    * 📊 Lấy toàn bộ dữ liệu dashboard (1 lần gọi duy nhất)
    * GET: /api/room-management/dashboard
    */
-  static async getDashboard() {
+  static async getDashboard(params = {}) {
     try {
-      const response = await axios.get('/room-management/dashboard');
+      // ✅ Thêm params để chống cache trình duyệt
+      const response = await axios.get('/room-management/dashboard', { params });
       return response.data;
     } catch (error) {
       console.error('❌ Lỗi load dashboard:', error);
@@ -66,11 +67,12 @@ class RoomManagementApi {
 
   /**
    * 📝 Thêm phòng chiếu mới
-   * POST: /api/rooms
+   * POST: /api/room-management/rooms
    */
   static async createRoom(data) {
     try {
-      const response = await axios.post('/rooms', data);
+      // ✅ Đổi endpoint cho đồng bộ
+      const response = await axios.post('/room-management/rooms', data);
       return response.data;
     } catch (error) {
       console.error('❌ Lỗi thêm phòng:', error);
@@ -80,11 +82,11 @@ class RoomManagementApi {
 
   /**
    * ✏️ Cập nhật phòng chiếu
-   * PUT: /api/rooms/{roomId}
+   * PUT: /api/room-management/rooms/{roomId}
    */
   static async updateRoom(roomId, data) {
     try {
-      const response = await axios.put(`/rooms/${roomId}`, data);
+      const response = await axios.put(`/room-management/rooms/${roomId}`, data);
       return response.data;
     } catch (error) {
       console.error('❌ Lỗi cập nhật phòng:', error);
@@ -94,11 +96,11 @@ class RoomManagementApi {
 
   /**
    * 🗑️ Xóa phòng chiếu
-   * DELETE: /api/rooms/{roomId}
+   * DELETE: /api/room-management/rooms/{roomId}
    */
   static async deleteRoom(roomId) {
     try {
-      const response = await axios.delete(`/rooms/${roomId}`);
+      const response = await axios.delete(`/room-management/rooms/${roomId}`);
       return response.data;
     } catch (error) {
       console.error('❌ Lỗi xóa phòng:', error);

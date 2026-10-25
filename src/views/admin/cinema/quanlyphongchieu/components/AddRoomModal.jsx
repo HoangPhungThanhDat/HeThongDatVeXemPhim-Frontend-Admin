@@ -4,12 +4,11 @@ import {
   Modal, ModalOverlay, ModalContent, ModalHeader,
   ModalBody, ModalFooter,
   ModalCloseButton, FormControl, FormLabel,
-  VStack, useToast, useColorMode, Divider,
+  VStack, useToast, useColorMode,
 } from "@chakra-ui/react";
 import { MdAdd, MdClose, MdInfo, MdCheckCircle } from "react-icons/md";
-import { FaBuilding, FaDoorClosed, FaFilm, FaToggleOn } from "react-icons/fa";
+import { FaBuilding, FaDoorClosed, FaFilm, FaToggleOn, FaChair } from "react-icons/fa";
 
-// Màu sắc cho chế độ tối - tông xanh
 const DARK_THEME = {
   bg: "#0a1628",
   cardBg: "#0f1f3a",
@@ -22,8 +21,6 @@ const DARK_THEME = {
   accent: "#4a9eff",
   accentLight: "#6ab0ff",
   accentShadow: "rgba(74, 158, 255, 0.25)",
-  gradientFrom: "#4a9eff",
-  gradientTo: "#6ab0ff",
 };
 
 const getInputStyle = (isDark) => ({
@@ -55,7 +52,6 @@ const AddRoomModal = ({ isOpen, onClose, onAdd, cinemas = [], isDark }) => {
   const darkMode = isDark !== undefined ? isDark : (colorMode === "dark");
   const toast = useToast();
   
-  // Dark mode colors
   const accentColor = darkMode ? DARK_THEME.accent : "#f97316";
   const accentShadow = darkMode ? DARK_THEME.accentShadow : "rgba(249,115,22,0.35)";
   const gradientBg = darkMode 
@@ -71,17 +67,21 @@ const AddRoomModal = ({ isOpen, onClose, onAdd, cinemas = [], isDark }) => {
   const subColor = darkMode ? DARK_THEME.textSecondary : "#64748b";
   const inputStyle = getInputStyle(darkMode);
   
+  // ✅ Thêm trường SeatCount (Số ghế) vào form
   const [form, setForm] = useState({
     CinemaId: "",
     Name: "",
     RoomType: "",
+    SeatCount: "",
     Status: "Active",
   });
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const selectedCinema = cinemas.find(c => c.CinemaId === Number(form.CinemaId));
 
-  const handleSubmit = () => {
-    if (!form.CinemaId || !form.Name || !form.RoomType) {
+  const handleSubmit = async () => {
+    if (!form.CinemaId || !form.Name || !form.RoomType || !form.SeatCount) {
       toast({
         title: "Vui lòng nhập đầy đủ thông tin",
         description: "Các trường có dấu * là bắt buộc",
@@ -93,27 +93,41 @@ const AddRoomModal = ({ isOpen, onClose, onAdd, cinemas = [], isDark }) => {
       return;
     }
 
+    if (Number(form.SeatCount) <= 0) {
+      toast({
+        title: "Số ghế không hợp lệ",
+        description: "Số ghế phải lớn hơn 0",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+        position: "top-right",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
     const newRoom = {
-      ...form,
-      TotalSeats: 0,
+      CinemaId: Number(form.CinemaId),
+      Name: form.Name.trim(),
+      RoomType: form.RoomType,
+      Capacity: Number(form.SeatCount), // ✅ Gửi Capacity để khớp với hook xử lý
+      Status: form.Status,
     };
 
-    onAdd(newRoom);
-    setForm({
-      CinemaId: "",
-      Name: "",
-      RoomType: "",
-      Status: "Active",
-    });
-    onClose();
-    toast({
-      title: "🎉 Thêm phòng chiếu thành công!",
-      description: "Hãy tạo ghế cho phòng này trong phần Quản lý ghế.",
-      status: "success",
-      duration: 4000,
-      isClosable: true,
-      position: "top-right",
-    });
+    try {
+      // ✅ Chờ API lưu thành công mới đóng form và báo thành công
+      const success = await onAdd(newRoom);
+      
+      if (success) {
+        setForm({ CinemaId: "", Name: "", RoomType: "", SeatCount: "", Status: "Active" });
+        onClose();
+        // Lưu ý: Toast thành công đã được hiển thị bên trong hook useRoom
+      }
+    } catch (error) {
+      console.error("Lỗi khi thêm phòng:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const getRoomTypeLabel = (type) => {
@@ -127,51 +141,42 @@ const AddRoomModal = ({ isOpen, onClose, onAdd, cinemas = [], isDark }) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="xl">
+    <Modal isOpen={isOpen} onClose={onClose} size="xl" isCentered>
       <ModalOverlay backdropFilter="blur(4px)" />
       <ModalContent bg={bg} borderRadius="20px" border={`1px solid ${border}`} maxH="90vh" overflow="hidden">
-        <Box h="4px" bg={gradientBg}
-          bgSize="200% 100%" sx={{ animation: "shimmer 3s linear infinite" }} />
+        <Box h="4px" bg={gradientBg} bgSize="200% 100%" sx={{ animation: "shimmer 3s linear infinite" }} />
         
         <ModalHeader color={textColor} fontWeight="800" fontSize="18px" pt="20px" pb="4px">
           <Flex align="center" gap="10px">
-            <Box w="40px" h="40px" borderRadius="11px"
-              bg={gradientSmall}
-              display="flex" alignItems="center" justifyContent="center"
-              boxShadow={`0 4px 12px ${accentShadow}`}
-            >
+            <Box w="40px" h="40px" borderRadius="11px" bg={gradientSmall}
+              display="flex" alignItems="center" justifyContent="center" boxShadow={`0 4px 12px ${accentShadow}`}>
               <Icon as={FaDoorClosed} boxSize="18px" color="white" />
             </Box>
             <Box>
-              <Text fontSize="18px" fontWeight="800" color={textColor}>
-                Thêm phòng chiếu mới
-              </Text>
-              <Text fontSize="12px" color={subColor}>
-                Tạo phòng chiếu mới cho rạp
-              </Text>
+              <Text fontSize="18px" fontWeight="800" color={textColor}>Thêm phòng chiếu mới</Text>
+              <Text fontSize="12px" color={subColor}>Tạo phòng chiếu mới cho rạp</Text>
             </Box>
           </Flex>
         </ModalHeader>
-        <ModalCloseButton top="18px" right="16px" color={subColor} />
+        <ModalCloseButton top="18px" right="16px" color={subColor} isDisabled={isSubmitting} />
 
         <ModalBody pb="4px" overflowY="auto">
           <VStack spacing="16px" align="stretch">
+            
             {/* Chọn rạp */}
             <FormControl isRequired>
               <FormLabel fontSize="12px" fontWeight="700" color={subColor} display="flex" alignItems="center" gap="6px">
-                <Icon as={FaBuilding} boxSize="12px" color={accentColor} />
-                Chọn rạp
+                <Icon as={FaBuilding} boxSize="12px" color={accentColor} /> Chọn rạp
               </FormLabel>
               <Select
                 {...inputStyle}
                 placeholder="-- Chọn rạp chiếu --"
                 value={form.CinemaId}
+                isDisabled={isSubmitting}
                 onChange={(e) => setForm({ ...form, CinemaId: e.target.value })}
               >
                 {cinemas.map((c) => (
-                  <option key={c.CinemaId} value={c.CinemaId}>
-                    {c.Name}
-                  </option>
+                  <option key={c.CinemaId} value={c.CinemaId}>{c.Name}</option>
                 ))}
               </Select>
             </FormControl>
@@ -180,13 +185,13 @@ const AddRoomModal = ({ isOpen, onClose, onAdd, cinemas = [], isDark }) => {
               {/* Tên phòng */}
               <FormControl isRequired>
                 <FormLabel fontSize="12px" fontWeight="700" color={subColor} display="flex" alignItems="center" gap="6px">
-                  <Icon as={FaDoorClosed} boxSize="12px" color={accentColor} />
-                  Tên phòng chiếu
+                  <Icon as={FaDoorClosed} boxSize="12px" color={accentColor} /> Tên phòng chiếu
                 </FormLabel>
                 <Input
                   {...inputStyle}
                   placeholder="VD: Phòng 1, Phòng VIP"
                   value={form.Name}
+                  isDisabled={isSubmitting}
                   onChange={(e) => setForm({ ...form, Name: e.target.value })}
                 />
               </FormControl>
@@ -194,13 +199,13 @@ const AddRoomModal = ({ isOpen, onClose, onAdd, cinemas = [], isDark }) => {
               {/* Loại phòng */}
               <FormControl isRequired>
                 <FormLabel fontSize="12px" fontWeight="700" color={subColor} display="flex" alignItems="center" gap="6px">
-                  <Icon as={FaFilm} boxSize="12px" color={accentColor} />
-                  Loại phòng
+                  <Icon as={FaFilm} boxSize="12px" color={accentColor} /> Loại phòng
                 </FormLabel>
                 <Select
                   {...inputStyle}
                   placeholder="-- Chọn loại phòng --"
                   value={form.RoomType}
+                  isDisabled={isSubmitting}
                   onChange={(e) => setForm({ ...form, RoomType: e.target.value })}
                 >
                   <option value="2D">2D Standard</option>
@@ -211,63 +216,71 @@ const AddRoomModal = ({ isOpen, onClose, onAdd, cinemas = [], isDark }) => {
               </FormControl>
             </Grid>
 
-            {/* Trạng thái */}
-            <FormControl isRequired>
-              <FormLabel fontSize="12px" fontWeight="700" color={subColor} display="flex" alignItems="center" gap="6px">
-                <Icon as={FaToggleOn} boxSize="12px" color={accentColor} />
-                Trạng thái
-              </FormLabel>
-              <Select
-                {...inputStyle}
-                value={form.Status}
-                onChange={(e) => setForm({ ...form, Status: e.target.value })}
-              >
-                <option value="Active">✅ Hoạt động</option>
-                <option value="Inactive">⛔ Không hoạt động</option>
-                <option value="Maintenance">🔧 Bảo trì</option>
-              </Select>
-            </FormControl>
+            <Grid templateColumns="1fr 1fr" gap="14px">
+              {/* ✅ THÊM MỚI: Số ghế */}
+              <FormControl isRequired>
+                <FormLabel fontSize="12px" fontWeight="700" color={subColor} display="flex" alignItems="center" gap="6px">
+                  <Icon as={FaChair} boxSize="12px" color={accentColor} /> Số ghế dự kiến
+                </FormLabel>
+                <Input
+                  {...inputStyle}
+                  type="number"
+                  placeholder="VD: 100"
+                  min="1"
+                  value={form.SeatCount}
+                  isDisabled={isSubmitting}
+                  onChange={(e) => setForm({ ...form, SeatCount: e.target.value })}
+                />
+              </FormControl>
+
+              {/* Trạng thái */}
+              <FormControl isRequired>
+                <FormLabel fontSize="12px" fontWeight="700" color={subColor} display="flex" alignItems="center" gap="6px">
+                  <Icon as={FaToggleOn} boxSize="12px" color={accentColor} /> Trạng thái
+                </FormLabel>
+                <Select
+                  {...inputStyle}
+                  value={form.Status}
+                  isDisabled={isSubmitting}
+                  onChange={(e) => setForm({ ...form, Status: e.target.value })}
+                >
+                  <option value="Active">✅ Hoạt động</option>
+                  <option value="Inactive">⛔ Không hoạt động</option>
+                  <option value="Maintenance">🔧 Bảo trì</option>
+                </Select>
+              </FormControl>
+            </Grid>
 
             {/* Thông báo */}
-            <Box
-              p="14px 16px"
-              borderRadius="12px"
+            <Box p="14px 16px" borderRadius="12px"
               bg={darkMode ? `${DARK_THEME.accent}15` : "rgba(59, 130, 246, 0.08)"}
               border={`1.5px solid ${darkMode ? DARK_THEME.border : "rgba(59, 130, 246, 0.25)"}`}
             >
               <Flex align="flex-start" gap="10px">
                 <Icon as={MdInfo} boxSize="18px" color={darkMode ? DARK_THEME.accent : "#3b82f6"} mt="2px" flexShrink="0" />
                 <Box fontSize="13px" color={darkMode ? DARK_THEME.textSecondary : "#475569"}>
-                  <Text fontWeight="700" color={darkMode ? DARK_THEME.text : "#1e293b"} mb="4px">
-                    💡 Lưu ý về số ghế
-                  </Text>
+                  <Text fontWeight="700" color={darkMode ? DARK_THEME.text : "#1e293b"} mb="4px">💡 Lưu ý</Text>
                   <Text fontSize="12px">
-                    Số ghế sẽ được tính tự động sau khi bạn tạo ghế cho phòng này.
-                    Sau khi tạo phòng, hãy vào phần <strong style={{ color: darkMode ? DARK_THEME.accent : "#3b82f6" }}>"Quản lý ghế"</strong> để tạo ghế hàng loạt.
+                    Số ghế bạn nhập là <strong>số ghế dự kiến</strong>. Hãy vào phần 
+                    <strong style={{ color: darkMode ? DARK_THEME.accent : "#3b82f6" }}> "Quản lý ghế"</strong> để xếp sơ đồ ghế chi tiết.
                   </Text>
                 </Box>
               </Flex>
             </Box>
 
             {/* Summary Box */}
-            {form.CinemaId && form.Name && form.RoomType && (
-              <Box
-                p="16px 18px"
-                borderRadius="12px"
+            {form.CinemaId && form.Name && form.RoomType && form.SeatCount && (
+              <Box p="16px 18px" borderRadius="12px"
                 bg={darkMode ? `${DARK_THEME.accent}12` : "rgba(247, 147, 30, 0.08)"}
                 border={`1.5px solid ${darkMode ? DARK_THEME.border : "rgba(247, 147, 30, 0.3)"}`}
                 sx={{ animation: "fadeIn 0.3s ease both" }}
               >
                 <Flex align="center" gap="10px" mb="12px">
-                  <Box w="28px" h="28px" borderRadius="8px"
-                    bg={gradientSmall}
-                    display="flex" alignItems="center" justifyContent="center"
-                  >
+                  <Box w="28px" h="28px" borderRadius="8px" bg={gradientSmall}
+                    display="flex" alignItems="center" justifyContent="center">
                     <Icon as={MdCheckCircle} boxSize="14px" color="white" />
                   </Box>
-                  <Text fontSize="14px" fontWeight="700" color={textColor}>
-                    Thông tin phòng chiếu
-                  </Text>
+                  <Text fontSize="14px" fontWeight="700" color={textColor}>Thông tin phòng chiếu</Text>
                 </Flex>
 
                 <Grid templateColumns="1fr 1fr" gap="8px" fontSize="13px" color={subColor}>
@@ -277,69 +290,40 @@ const AddRoomModal = ({ isOpen, onClose, onAdd, cinemas = [], isDark }) => {
                   </Flex>
                   <Flex align="center" gap="8px">
                     <Icon as={FaDoorClosed} boxSize="12px" color={accentColor} />
-                    <Text>Tên phòng: <strong style={{ color: textColor }}>{form.Name}</strong></Text>
+                    <Text>Tên: <strong style={{ color: textColor }}>{form.Name}</strong></Text>
                   </Flex>
                   <Flex align="center" gap="8px">
                     <Icon as={FaFilm} boxSize="12px" color={accentColor} />
-                    <Text>Loại phòng: <strong style={{ color: darkMode ? DARK_THEME.accentLight : "#3b82f6" }}>
-                      {getRoomTypeLabel(form.RoomType)}
-                    </strong></Text>
+                    <Text>Loại: <strong style={{ color: darkMode ? DARK_THEME.accentLight : "#3b82f6" }}>{getRoomTypeLabel(form.RoomType)}</strong></Text>
                   </Flex>
                   <Flex align="center" gap="8px">
-                    <Icon as={FaToggleOn} boxSize="12px" color={accentColor} />
-                    <Text>Trạng thái: <strong style={{ color: form.Status === "Active" ? "#10b981" : "#6b7280" }}>
-                      {form.Status === "Active" ? "✅ Hoạt động" : form.Status === "Inactive" ? "⛔ Không hoạt động" : "🔧 Bảo trì"}
-                    </strong></Text>
+                    <Icon as={FaChair} boxSize="12px" color={accentColor} />
+                    <Text>Số ghế: <strong style={{ color: darkMode ? DARK_THEME.accentLight : "#fbbf24" }}>{form.SeatCount} ghế</strong></Text>
                   </Flex>
                 </Grid>
-
-                <Box mt="10px" pt="10px" borderTop={`1px solid ${darkMode ? DARK_THEME.border : "#e8edf3"}`}>
-                  <Flex align="center" gap="8px">
-                    <Icon as={FaDoorClosed} boxSize="12px" color={darkMode ? DARK_THEME.accentLight : "#fbbf24"} />
-                    <Text fontSize="12px" color={darkMode ? DARK_THEME.textSecondary : "#64748b"}>
-                      Số ghế: <strong style={{ color: darkMode ? DARK_THEME.accentLight : "#fbbf24" }}>Chưa có (sẽ tính tự động)</strong>
-                    </Text>
-                  </Flex>
-                </Box>
               </Box>
             )}
           </VStack>
         </ModalBody>
 
         <ModalFooter gap="10px" pt="14px" pb="20px" borderTop={`1px solid ${border}`}>
-          <Button
-            flex="1"
-            h="42px"
-            px="22px"
-            variant="ghost"
-            color={subColor}
-            borderRadius="10px"
-            fontWeight="600"
-            fontSize="13px"
-            border={`1.5px solid ${border}`}
+          <Button flex="1" h="42px" px="22px" variant="ghost" color={subColor} borderRadius="10px"
+            fontWeight="600" fontSize="13px" border={`1.5px solid ${border}`}
             _hover={{ bg: darkMode ? DARK_THEME.hoverBg : "#f8fafc" }}
             leftIcon={<Icon as={MdClose} />}
             onClick={onClose}
+            isDisabled={isSubmitting}
           >
             Hủy bỏ
           </Button>
-          <Button
-            flex="2"
-            h="42px"
-            px="28px"
-            borderRadius="10px"
-            fontWeight="700"
-            fontSize="13px"
-            bg={gradientBg}
-            color="white"
-            boxShadow={`0 4px 16px ${accentShadow}`}
-            _hover={{
-              boxShadow: `0 8px 24px ${accentShadow}`,
-              transform: "translateY(-1px)"
-            }}
+          <Button flex="2" h="42px" px="28px" borderRadius="10px" fontWeight="700" fontSize="13px"
+            bg={gradientBg} color="white" boxShadow={`0 4px 16px ${accentShadow}`}
+            _hover={!isSubmitting ? { boxShadow: `0 8px 24px ${accentShadow}`, transform: "translateY(-1px)" } : {}}
             transition="all 0.2s"
             leftIcon={<Icon as={MdAdd} />}
             onClick={handleSubmit}
+            isLoading={isSubmitting}
+            loadingText="Đang thêm..."
           >
             Thêm phòng
           </Button>

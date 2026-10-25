@@ -1,5 +1,4 @@
 // src/views/admin/quanlyphim/hooks/usePhim.js
-
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useToast } from '@chakra-ui/react';
 import MovieApi from 'api/catalog/MovieApi';
@@ -8,6 +7,9 @@ import MovieCastApi from 'api/catalog/MovieCastApi';
 import { useServerPagination } from 'hooks/useServerPagination';
 
 const PAGE_SIZE = 10;
+
+// ✅ Helper an toàn
+const toStr = (v) => (v === null || v === undefined ? '' : String(v));
 
 export function usePhim() {
   const [genres, setGenres] = useState([]);
@@ -42,16 +44,15 @@ export function usePhim() {
 
       setStats({
         total: processedData.length,
-        playing: processedData.filter(m => m.Status === 'NowShowing' || m.status === 'NowShowing').length,
-        upcoming: processedData.filter(m => m.Status === 'ComingSoon' || m.status === 'ComingSoon').length,
-        ended: processedData.filter(m => m.Status === 'Ended' || m.status === 'Ended').length,
+        playing: processedData.filter(m => (m.Status || m.status) === 'NowShowing').length,
+        upcoming: processedData.filter(m => (m.Status || m.status) === 'ComingSoon').length,
+        ended: processedData.filter(m => (m.Status || m.status) === 'Ended').length,
       });
     } catch (error) {
       console.error('Lỗi khi tải thống kê:', error);
     }
   }, []);
 
-  // ✅ TẠO PARAMS GỬI LÊN SERVER
   const extraParams = useMemo(() => {
     const params = {};
     if (search && search.trim() !== '') params.search = search.trim();
@@ -76,7 +77,13 @@ export function usePhim() {
 
     for (const member of castMembers) {
       try {
-        const data = { MovieId: movieId, Name: member.name.trim(), Role: member.role, Status: 'Active', CreatedBy: userId };
+        const data = {
+          MovieId: movieId,
+          Name: String(member.name).trim(),
+          Role: member.role,
+          Status: 'Active',
+          CreatedBy: userId,
+        };
         const response = await MovieCastApi.create(data);
         results.push(response.data.data || response.data);
       } catch (error) {
@@ -86,13 +93,12 @@ export function usePhim() {
     return results;
   }, []);
 
-  // ✅ HÀM CẬP NHẬT TRẠNG THÁI (OPTIMISTIC UI - MƯỢT MÀ)
   const updateMovieStatus = useCallback(async (movie, newStatus) => {
     const id = movie.MovieId || movie.id;
     const oldStatus = movie.Status || movie.status || 'Ended';
 
     updateData(id, { Status: newStatus, status: newStatus });
-    
+
     setStats(prev => {
       const next = { ...prev };
       if (oldStatus === 'NowShowing') next.playing--;
@@ -329,9 +335,14 @@ export function usePhim() {
 
       if (formData.PosterFile instanceof File) data.append('PosterUrl', formData.PosterFile);
 
-      const castMembers = formData.CastMembers || [];
+      // ✅ Form đã gửi TOÀN BỘ cast (cũ + mới) — xóa hết rồi tạo lại là đúng
+      const castMembers = (formData.CastMembers || []).filter(
+        (m) => m && m.name && String(m.name).trim()
+      );
+
       await MovieApi.update(id, data, { headers: { 'Content-Type': 'multipart/form-data' } });
 
+      // Lấy cast hiện tại để xóa
       const currentMovieResponse = await MovieApi.getById(id);
       const currentMovie = currentMovieResponse.data.data || currentMovieResponse.data;
       const currentCast = currentMovie.castMembers || currentMovie.CastMembers || [];
@@ -343,10 +354,17 @@ export function usePhim() {
         }
       }
 
+      // Tạo lại toàn bộ cast từ form
       if (castMembers.length > 0) {
         for (const member of castMembers) {
           try {
-            const castData = { MovieId: id, Name: member.name.trim(), Role: member.role, Status: 'Active', CreatedBy: userId };
+            const castData = {
+              MovieId: id,
+              Name: String(member.name).trim(),
+              Role: member.role || 'Actor',
+              Status: 'Active',
+              CreatedBy: userId,
+            };
             await MovieCastApi.create(castData);
           } catch (error) {
             console.error(`Lỗi khi thêm cast member "${member.name}":`, error);

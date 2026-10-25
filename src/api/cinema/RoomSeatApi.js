@@ -1,48 +1,37 @@
-// src/api/RoomSeatApi.js
-
 import axios from '../client/AxiosAdmin';
 
 const RoomSeatApi = {
-  // Lấy danh sách rạp
-  getCinemas: () => {
-    return axios.get('/room-seat/cinemas');
+  getCinemas: () => axios.get('/room-seat/cinemas'),
+  getRooms: (cinemaId) => axios.get('/room-seat/rooms', { params: { cinema_id: cinemaId } }),
+  getSeats: (roomId) => axios.get(`/room-seat/room/${roomId}/seats`),
+
+  createBulkSeats: (roomId, seats) => axios.post('/seat-management/bulk-seats', { room_id: roomId, seats }),
+
+  // ✅ API MỚI: Gộp thêm hàng và cột
+  addSeats: (roomId, rowCount, colCount, position = 'end') => {
+    const payload = {
+      row_count: Number(rowCount),
+      col_count: Number(colCount),
+      position: position,
+    };
+    console.log("📤 [API addSeats] Payload:", payload);
+    
+    return axios.post(`/room-seat/room/${roomId}/add-seats`, payload)
+      .catch(error => {
+        console.error("🔥 [API addSeats] Lỗi từ Backend:", JSON.stringify(error.response?.data, null, 2));
+        throw error;
+      });
   },
 
-  // Lấy danh sách phòng theo rạp
-  getRooms: (cinemaId) => {
-    return axios.get('/room-seat/rooms', { params: { cinema_id: cinemaId } });
-  },
-
-  // Lấy sơ đồ ghế theo phòng
-  getSeats: (roomId) => {
-    return axios.get(`/room-seat/room/${roomId}/seats`);
-  },
-
-  // ✅ Tạo nhiều ghế cùng lúc (Bulk Create)
-  createBulkSeats: (roomId, seats) => {
-    return axios.post('/seat-management/bulk-seats', {
-      room_id: roomId,
-      seats,
-    });
-  },
-
-  // Thêm hàng
+  // Các API cũ (giữ để tương thích ngược)
   addRows: (roomId, rowCount, position = 'end') => {
-    return axios.post(`/room-seat/room/${roomId}/add-rows`, {
-      row_count: rowCount,
-      position: position,
-    });
+    return axios.post(`/room-seat/room/${roomId}/add-rows`, { row_count: Number(rowCount), position });
   },
 
-  // Thêm cột
   addCols: (roomId, colCount, position = 'end') => {
-    return axios.post(`/room-seat/room/${roomId}/add-cols`, {
-      col_count: colCount,
-      position: position,
-    });
+    return axios.post(`/room-seat/room/${roomId}/add-cols`, { col_count: Number(colCount), position });
   },
 
-  // Cập nhật ghế
   updateSeat: (seatId, data) => {
     return axios.put(`/room-seat/seat/${seatId}`, {
       seat_type: data.seat_type || data.SeatType || 'Normal',
@@ -50,25 +39,10 @@ const RoomSeatApi = {
     });
   },
 
-  // Xóa hàng
-  deleteRow: (roomId, row) => {
-    return axios.delete(`/room-seat/room/${roomId}/row/${row}`);
-  },
-
-  // Xóa cột
-  deleteCol: (roomId, col) => {
-    return axios.delete(`/room-seat/room/${roomId}/col/${col}`);
-  },
-
-  // Xóa 1 ghế
-  deleteSeat: (seatId) => {
-    return axios.delete(`/room-seat/seat/${seatId}`);
-  },
-
-  // Reset tất cả ghế
-  resetSeats: (roomId) => {
-    return axios.post(`/room-seat/room/${roomId}/reset`);
-  },
+  deleteRow: (roomId, row) => axios.delete(`/room-seat/room/${roomId}/row/${row}`),
+  deleteCol: (roomId, col) => axios.delete(`/room-seat/room/${roomId}/col/${col}`),
+  deleteSeat: (seatId) => axios.delete(`/room-seat/seat/${seatId}`),
+  resetSeats: (roomId) => axios.post(`/room-seat/room/${roomId}/reset`),
 };
 
 export default RoomSeatApi;

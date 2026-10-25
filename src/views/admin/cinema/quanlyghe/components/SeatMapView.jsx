@@ -17,8 +17,7 @@ import RoomTypeBadge from "./RoomTypeBadge";
 import StatusDot from "./StatusDot";
 import Seat from "./Seat";
 import EditSeatModal from "./EditSeatModal";
-import AddRowModal from "./AddRowModal";
-import AddColumnModal from "./AddColumnModal";
+import AddSeatModal from "./AddSeatModal"; // ✅ Import Modal mới
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
 import { ROW_LABELS, SEAT_TYPES } from "../constants";
 
@@ -37,7 +36,6 @@ const DARK_THEME = {
   accentShadow: "rgba(74, 158, 255, 0.25)",
 };
 
-// ✅ Hàm lấy màu chính xác cho từng loại ghế
 const getSeatTypeColor = (type) => {
   const colors = {
     regular: { bg: "#fff7ed", border: "#fb923c" },
@@ -61,28 +59,24 @@ export default function SeatMapView({
   stats = { total: 0, booked: 0, empty: 0 },
   selectedSeat = null,
   editSeatModal,
-  addRowModal,
-  addColModal,
+  addSeatModal, // ✅ Nhận prop mới thay vì addRowModal/addColModal
   deleteDialog,
   deleteDialogConfig,
   loading = false,
   handleSeatEdit,
   handleSaveSeat,
-  handleAddRows,
-  handleAddCols,
+  handleAddSeats, // ✅ Nhận hàm gộp mới
   handleDeleteSeat,
   handleResetSeats,
   zoomIn,
   zoomOut,
   setFilter,
   setDeleteTarget,
-  roomId
 }) {
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
   const colors = getSeatColors(isDark);
 
-  // Dark mode colors
   const accentColor = isDark ? DARK_THEME.accent : "#f97316";
   const accentShadow = isDark ? DARK_THEME.accentShadow : "rgba(249,115,22,0.3)";
   const gradientBg = isDark 
@@ -103,30 +97,21 @@ export default function SeatMapView({
   const btnColor = isDark ? DARK_THEME.textSecondary : "#475569";
   const btnHoverBg = isDark ? DARK_THEME.hoverBg : "#f1f5f9";
 
-  // Kiểm tra dữ liệu hợp lệ
   const isValidData = React.useMemo(() => {
     if (!seatsData || seatsData.length === 0) return false;
     return seatsData.some(row => row && row.length > 0);
   }, [seatsData]);
 
-  // Hàm xử lý click chỉnh sửa ghế
   const handleSeatEditClick = (seat) => {
-    console.log("🔑 Seat clicked for edit:", seat);
-    
     if (isEditMode && handleSeatEdit) {
       handleSeatEdit(seat);
       if (editSeatModal && editSeatModal.onOpen) {
-        console.log("🔑 Opening edit modal...");
         editSeatModal.onOpen();
-      } else {
-        console.error("❌ editSeatModal.onOpen is not available");
       }
     }
   };
 
-  // Hàm xử lý xóa ghế
   const handleSeatDeleteClick = (seat) => {
-    console.log("🗑️ Seat clicked for delete:", seat);
     if (setDeleteTarget) {
       const target = { 
         ...seat, 
@@ -141,7 +126,6 @@ export default function SeatMapView({
     }
   };
 
-  // ✅ Kiểm tra seatsData có hợp lệ không
   const safeSeatsData = React.useMemo(() => {
     if (!seatsData || !Array.isArray(seatsData) || seatsData.length === 0) {
       return [];
@@ -149,7 +133,6 @@ export default function SeatMapView({
     return seatsData.filter(row => row && row.length > 0);
   }, [seatsData]);
 
-  // ✅ Lấy số cột tối đa
   const maxCols = safeSeatsData.length > 0 ? safeSeatsData[0]?.length || 0 : 0;
 
   return (
@@ -207,16 +190,9 @@ export default function SeatMapView({
               bg={gradientBg}
               color="white"
               boxShadow={`0 2px 8px ${accentShadow}`}
-              _hover={{ 
-                boxShadow: `0 4px 16px ${accentShadow}`,
-                transform: "translateY(-1px)"
-              }}
+              _hover={{ boxShadow: `0 4px 16px ${accentShadow}`, transform: "translateY(-1px)" }}
               transition="all 0.2s"
-              onClick={() => {
-                if (onEditMode && room) {
-                  onEditMode(room);
-                }
-              }}
+              onClick={() => { if (onEditMode && room) onEditMode(room); }}
             >
               Chỉnh sửa ghế
             </Button>
@@ -262,27 +238,9 @@ export default function SeatMapView({
 
       {/* Stats row */}
       <SimpleGrid columns={{ base: 2, md: 4 }} spacing="10px" mb="16px">
-        <StatCard 
-          label="Tổng ghế" 
-          value={stats.total || 0} 
-          accent={isDark ? DARK_THEME.accent : "#f97316"} 
-          icon={MdLayers} 
-          isDark={isDark}
-        />
-        <StatCard 
-          label="Đã đặt" 
-          value={stats.booked || 0} 
-          accent="#dc2626" 
-          icon={MdLayers} 
-          isDark={isDark}
-        />
-        <StatCard 
-          label="Còn trống" 
-          value={stats.empty || 0} 
-          accent="#059669" 
-          icon={MdLayers} 
-          isDark={isDark}
-        />
+        <StatCard label="Tổng ghế" value={stats.total || 0} accent={isDark ? DARK_THEME.accent : "#f97316"} icon={MdLayers} isDark={isDark} />
+        <StatCard label="Đã đặt" value={stats.booked || 0} accent="#dc2626" icon={MdLayers} isDark={isDark} />
+        <StatCard label="Còn trống" value={stats.empty || 0} accent="#059669" icon={MdLayers} isDark={isDark} />
         <StatCard 
           label="Tỉ lệ đặt" 
           value={stats.total > 0 ? `${Math.round((stats.booked/stats.total)*100)}%` : "0%"}
@@ -325,21 +283,14 @@ export default function SeatMapView({
                     Click ghế để sửa · Click X để xóa
                   </Text>
                 </Box>
+                {/* ✅ Gộp 2 nút cũ thành 1 nút "Thêm ghế" */}
                 <Button size="xs" h="28px" px="8px" borderRadius="6px" fontSize="11px" fontWeight="700"
                   bg="#ecfdf5" color="#059669" border="1px solid #6ee7b7"
                   _hover={{ bg: "#d1fae5" }}
                   leftIcon={<Icon as={MdAdd} boxSize="12px" />}
-                  onClick={addRowModal?.onOpen || (() => {})}
+                  onClick={addSeatModal?.onOpen || (() => {})}
                 >
-                  Thêm hàng
-                </Button>
-                <Button size="xs" h="28px" px="8px" borderRadius="6px" fontSize="11px" fontWeight="700"
-                  bg="#ecfdf5" color="#059669" border="1px solid #6ee7b7"
-                  _hover={{ bg: "#d1fae5" }}
-                  leftIcon={<Icon as={MdAdd} boxSize="12px" />}
-                  onClick={addColModal?.onOpen || (() => {})}
-                >
-                  Thêm cột
+                  Thêm ghế
                 </Button>
                 <Button size="xs" h="28px" px="8px" borderRadius="6px" fontSize="11px" fontWeight="700"
                   bg="#fef2f2" color="#dc2626" border="1px solid #fca5a5"
@@ -381,11 +332,7 @@ export default function SeatMapView({
               Phòng chiếu này hiện không hoạt động. Vui lòng kiểm tra lại sau khi hoàn tất bảo trì.
             </Text>
             <Button
-              mt="8px"
-              size="sm"
-              borderRadius="10px"
-              bg={gradientBg}
-              color="white"
+              mt="8px" size="sm" borderRadius="10px" bg={gradientBg} color="white"
               _hover={{ boxShadow: `0 4px 16px ${accentShadow}` }}
               onClick={() => onEditMode(room)}
             >
@@ -403,17 +350,11 @@ export default function SeatMapView({
             <Text fontSize="16px" fontWeight="700" color={textColor}>Chưa có ghế</Text>
             <Text fontSize="13px" color={subColor} textAlign="center" maxW="320px">
               {loading ? "Đang tải dữ liệu..." : "Phòng này chưa có ghế nào."}
-              {isEditMode && !loading ? " Hãy sử dụng nút Thêm hàng hoặc Thêm cột để tạo ghế mới." : ""}
+              {isEditMode && !loading ? " Hãy bấm nút Thêm ghế để tạo ghế mới." : ""}
             </Text>
             {!isEditMode && !loading && (
-              <Button
-                mt="8px"
-                size="sm"
-                borderRadius="10px"
-                bg={gradientBg}
-                color="white"
-                _hover={{ boxShadow: `0 4px 16px ${accentShadow}` }}
-                onClick={() => onEditMode(room)}
+              <Button mt="8px" size="sm" borderRadius="10px" bg={gradientBg} color="white"
+                _hover={{ boxShadow: `0 4px 16px ${accentShadow}` }} onClick={() => onEditMode(room)}
               >
                 <Icon as={MdEdit} boxSize="14px" mr="6px" />
                 Chỉnh sửa phòng
@@ -424,32 +365,11 @@ export default function SeatMapView({
           <Box p="24px 20px" overflowX="auto">
             {/* Màn hình chiếu */}
             <Flex direction="column" align="center" mb="32px">
-              <Box
-                w={{ base: "60%", md: "45%" }}
-                h="4px"
-                borderRadius="full"
-                bg={gradientScreen}
-                mb="4px"
-                opacity="0.6"
+              <Box w={{ base: "60%", md: "45%" }} h="4px" borderRadius="full" bg={gradientScreen} mb="4px" opacity="0.6" />
+              <Box w={{ base: "70%", md: "55%" }} h="2px" borderRadius="full"
+                bg={isDark ? `linear-gradient(90deg, transparent, ${DARK_THEME.accent}15, transparent)` : "linear-gradient(90deg, transparent, rgba(249,115,22,0.12), transparent)"}
               />
-              <Box
-                w={{ base: "70%", md: "55%" }}
-                h="2px"
-                borderRadius="full"
-                bg={isDark 
-                  ? `linear-gradient(90deg, transparent, ${DARK_THEME.accent}15, transparent)`
-                  : "linear-gradient(90deg, transparent, rgba(249,115,22,0.12), transparent)"
-                }
-              />
-              <Text 
-                fontSize="10px" 
-                fontWeight="700" 
-                color={labelColor}
-                letterSpacing="8px" 
-                textTransform="uppercase"
-                mt="8px"
-                opacity="0.5"
-              >
+              <Text fontSize="10px" fontWeight="700" color={labelColor} letterSpacing="8px" textTransform="uppercase" mt="8px" opacity="0.5">
                 MÀN HÌNH
               </Text>
             </Flex>
@@ -457,25 +377,11 @@ export default function SeatMapView({
             {/* Sơ đồ ghế */}
             <Flex direction="column" align="center" gap={`${10 * scale}px`}>
               {safeSeatsData.map((row, ri) => {
-                if (!row || row.length === 0) {
-                  return null;
-                }
-                
+                if (!row || row.length === 0) return null;
                 return (
                   <Flex key={ri} align="center" gap={`${12 * scale}px`}>
-                    <Box 
-                      w={`${28 * scale}px`} 
-                      textAlign="center" 
-                      flexShrink="0"
-                      py={`${4 * scale}px`}
-                    >
-                      <Text 
-                        fontSize={`${11 * scale}px`} 
-                        fontWeight="800" 
-                        color={isDark ? DARK_THEME.border : "#94a3b8"}
-                        fontFamily="monospace"
-                        letterSpacing="1px"
-                      >
+                    <Box w={`${28 * scale}px`} textAlign="center" flexShrink="0" py={`${4 * scale}px`}>
+                      <Text fontSize={`${11 * scale}px`} fontWeight="800" color={isDark ? DARK_THEME.border : "#94a3b8"} fontFamily="monospace" letterSpacing="1px">
                         {ROW_LABELS[ri] || ri}
                       </Text>
                     </Box>
@@ -483,20 +389,14 @@ export default function SeatMapView({
                     <Flex gap={`${6 * scale}px`}>
                       {row.map((seat, ci) => {
                         if (!seat) return null;
-                        
                         let shouldHide = false;
                         if (filter === "booked") shouldHide = !seat.booked;
                         if (filter === "empty") shouldHide = seat.booked;
                         
                         if (shouldHide) {
                           return (
-                            <Box 
-                              key={seat?.id || `seat-${ri}-${ci}`} 
-                              w={`${32 * scale}px`} 
-                              h={`${24 * scale}px`}
-                              opacity={0.15} 
-                              transition="opacity 0.2s"
-                              borderRadius={`${4 * scale}px`}
+                            <Box key={seat?.id || `seat-${ri}-${ci}`} w={`${32 * scale}px`} h={`${24 * scale}px`}
+                              opacity={0.15} transition="opacity 0.2s" borderRadius={`${4 * scale}px`}
                               bg={isDark ? DARK_THEME.inputBg : "#f1f5f9"}
                               border={`1px dashed ${isDark ? DARK_THEME.border : "#e2e8f0"}`}
                             />
@@ -504,35 +404,15 @@ export default function SeatMapView({
                         }
                         
                         return (
-                          <Box 
-                            key={seat?.id || `seat-${ri}-${ci}`}
-                            transition="all 0.2s"
-                          >
-                            <Seat 
-                              seat={seat} 
-                              scale={scale} 
-                              isEditable={isEditMode}
-                              onEdit={handleSeatEditClick}
-                              onDelete={handleSeatDeleteClick}
-                            />
+                          <Box key={seat?.id || `seat-${ri}-${ci}`} transition="all 0.2s">
+                            <Seat seat={seat} scale={scale} isEditable={isEditMode} onEdit={handleSeatEditClick} onDelete={handleSeatDeleteClick} />
                           </Box>
                         );
                       })}
                     </Flex>
 
-                    <Box 
-                      w={`${28 * scale}px`} 
-                      textAlign="center" 
-                      flexShrink="0"
-                      py={`${4 * scale}px`}
-                    >
-                      <Text 
-                        fontSize={`${11 * scale}px`} 
-                        fontWeight="800" 
-                        color={isDark ? DARK_THEME.border : "#94a3b8"}
-                        fontFamily="monospace"
-                        letterSpacing="1px"
-                      >
+                    <Box w={`${28 * scale}px`} textAlign="center" flexShrink="0" py={`${4 * scale}px`}>
+                      <Text fontSize={`${11 * scale}px`} fontWeight="800" color={isDark ? DARK_THEME.border : "#94a3b8"} fontFamily="monospace" letterSpacing="1px">
                         {ROW_LABELS[ri] || ri}
                       </Text>
                     </Box>
@@ -547,20 +427,9 @@ export default function SeatMapView({
                   {Array.from({ length: maxCols }, (_, i) => {
                     const hasSeatInCol = safeSeatsData.some(row => row && row[i]);
                     if (!hasSeatInCol) return null;
-                    
                     return (
-                      <Box 
-                        key={i} 
-                        w={`${32 * scale}px`} 
-                        textAlign="center"
-                      >
-                        <Text 
-                          fontSize={`${9 * scale}px`} 
-                          fontWeight="600" 
-                          color={isDark ? DARK_THEME.border : "#cbd5e1"}
-                          fontFamily="monospace"
-                          opacity="0.4"
-                        >
+                      <Box key={i} w={`${32 * scale}px`} textAlign="center">
+                        <Text fontSize={`${9 * scale}px`} fontWeight="600" color={isDark ? DARK_THEME.border : "#cbd5e1"} fontFamily="monospace" opacity="0.4">
                           {i + 1}
                         </Text>
                       </Box>
@@ -573,24 +442,13 @@ export default function SeatMapView({
         )}
       </Box>
 
-      {/* ✅ Legend */}
+      {/* Legend */}
       {safeSeatsData.length > 0 && (
-        <Box 
-          bg={bgCard} 
-          borderRadius="14px" 
-          border={`1px solid ${borderCard}`}
-          boxShadow={isDark ? `0 1px 4px ${DARK_THEME.accentShadow}` : "0 1px 4px rgba(0,0,0,0.04)"} 
-          p="16px 20px"
+        <Box bg={bgCard} borderRadius="14px" border={`1px solid ${borderCard}`}
+          boxShadow={isDark ? `0 1px 4px ${DARK_THEME.accentShadow}` : "0 1px 4px rgba(0,0,0,0.04)"} p="16px 20px"
           sx={{ animation: `${fadeUp} 0.4s ease 0.1s both` }}
         >
-          <Text 
-            fontSize="10px" 
-            fontWeight="700" 
-            color={labelColor} 
-            letterSpacing="1.5px"
-            textTransform="uppercase" 
-            mb="12px"
-          >
+          <Text fontSize="10px" fontWeight="700" color={labelColor} letterSpacing="1.5px" textTransform="uppercase" mb="12px">
             Chú thích
           </Text>
           <Flex flexWrap="wrap" gap="12px 20px">
@@ -599,16 +457,8 @@ export default function SeatMapView({
               { bg: "#dc2626", border: "#dc2626", label: "Đã đặt" },
             ].map(({ bg, border, label }) => (
               <Flex key={label} align="center" gap="8px">
-                <Box 
-                  w="18px" 
-                  h="16px" 
-                  borderRadius="4px" 
-                  bg={bg}
-                  border={`2px solid ${border}`} 
-                />
-                <Text fontSize="12px" fontWeight="500" color={textColor}>
-                  {label}
-                </Text>
+                <Box w="18px" h="16px" borderRadius="4px" bg={bg} border={`2px solid ${border}`} />
+                <Text fontSize="12px" fontWeight="500" color={textColor}>{label}</Text>
               </Flex>
             ))}
             
@@ -626,16 +476,8 @@ export default function SeatMapView({
               
               return (
                 <Flex key={key} align="center" gap="8px">
-                  <Box 
-                    w="18px" 
-                    h="16px" 
-                    borderRadius="4px" 
-                    bg={bgColor}
-                    border={`2px solid ${borderColor}`}
-                  />
-                  <Text fontSize="12px" fontWeight="500" color={textColor}>
-                    {cfg.label}
-                  </Text>
+                  <Box w="18px" h="16px" borderRadius="4px" bg={bgColor} border={`2px solid ${borderColor}`} />
+                  <Text fontSize="12px" fontWeight="500" color={textColor}>{cfg.label}</Text>
                 </Flex>
               );
             })}
@@ -660,25 +502,18 @@ export default function SeatMapView({
         isDark={isDark}
       />
 
-      <AddRowModal
-        isOpen={addRowModal?.isOpen || false}
-        onClose={addRowModal?.onClose || (() => {})}
-        onAdd={handleAddRows}
+      {/* ✅ Modal mới gộp chung Thêm Hàng & Cột */}
+      <AddSeatModal
+        isOpen={addSeatModal?.isOpen || false}
+        onClose={addSeatModal?.onClose || (() => {})}
+        onAdd={handleAddSeats}
         roomName={room?.name || ""}
         currentRows={seatsData?.length || 0}
-        isDark={isDark}
-      />
-
-      <AddColumnModal
-        isOpen={addColModal?.isOpen || false}
-        onClose={addColModal?.onClose || (() => {})}
-        onAdd={handleAddCols}
-        roomName={room?.name || ""}
         currentCols={maxCols}
         isDark={isDark}
       />
 
-      {/* ✅ DeleteConfirmDialog - sử dụng deleteDialog và deleteDialogConfig */}
+      {/* DeleteConfirmDialog */}
       <DeleteConfirmDialog
         isOpen={deleteDialog?.isOpen || false}
         onClose={deleteDialog?.onClose || (() => {})}

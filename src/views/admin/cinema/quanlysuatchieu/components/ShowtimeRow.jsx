@@ -1,4 +1,4 @@
-// views/admin/quanlysuatchieu/components/ShowtimeRow.jsx
+// src/views/admin/quanlysuatchieu/components/ShowtimeRow.jsx
 
 import React from "react";
 import { Box, Flex, Text, Button, Icon, useColorModeValue, Tooltip } from "@chakra-ui/react";
@@ -31,22 +31,50 @@ export const ShowtimeRow = ({
   const textColor = useColorModeValue("#0f172a", "#f7fafc");
   const subColor = useColorModeValue("#64748b", "#a0aec0");
   
-  // Format date time
+  // ✅ Hàm parse ngày giờ "siêu bền" - Xử lý mọi định dạng
   const formatDateTime = (dateStr) => {
-    if (!dateStr) return "N/A";
+    if (!dateStr) return { date: "N/A", time: "N/A" };
     try {
-      const date = new Date(dateStr);
-      return date.toLocaleString('vi-VN', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
+      let date;
+      
+      // Xử lý chuỗi từ Backend (VD: "2026-10-23 14:30:00" hoặc "23-10-2026 14:30:00")
+      if (typeof dateStr === 'string') {
+        const parts = dateStr.split(' ');
+        if (parts.length === 2) {
+          const datePart = parts[0];
+          const timePart = parts[1];
+          
+          // Nếu ngày ở dạng DD-MM-YYYY
+          if (datePart.includes('-')) {
+            const dateParts = datePart.split('-');
+            if (dateParts[0].length === 2 && dateParts[2].length === 4) {
+              // Chuyển thành YYYY-MM-DD
+              date = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}T${timePart}`);
+            } else {
+              date = new Date(dateStr.replace(' ', 'T'));
+            }
+          } else {
+            date = new Date(dateStr.replace(' ', 'T'));
+          }
+        } else {
+           date = new Date(dateStr);
+        }
+      } else {
+        date = new Date(dateStr);
+      }
+
+      if (isNaN(date.getTime())) return { date: "N/A", time: "N/A" };
+
+      return {
+        date: date.toLocaleDateString('vi-VN'),
+        time: date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+      };
     } catch {
-      return dateStr;
+      return { date: "N/A", time: "N/A" };
     }
   };
+
+  const { date, time } = formatDateTime(s.StartTime);
 
   return (
     <Flex
@@ -78,16 +106,11 @@ export const ShowtimeRow = ({
 
       {/* Icon */}
       <Box
-        w="36px"
-        h="36px"
-        borderRadius="10px"
+        w="36px" h="36px" borderRadius="10px"
         bg="linear-gradient(135deg, #fff7ed, #ffedd5)"
         border="1px solid #fed7aa"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        flexShrink="0"
-        mr="8px"
+        display="flex" alignItems="center" justifyContent="center"
+        flexShrink="0" mr="8px"
       >
         <Icon as={BsCameraReelsFill} boxSize="14px" color="#f97316" />
       </Box>
@@ -110,13 +133,13 @@ export const ShowtimeRow = ({
         <Flex align="center" gap="5px" mb="1px">
           <Icon as={MdCalendarToday} boxSize="11px" color={subColor} />
           <Text fontSize="12px" fontWeight="600" color={subColor}>
-            {formatDateTime(s.StartTime)}
+            {date}
           </Text>
         </Flex>
         <Flex align="center" gap="5px">
           <Icon as={MdAccessTime} boxSize="11px" color={subColor} />
           <Text fontSize="12px" fontWeight="600" color={subColor}>
-            {s.StartTime ? formatDateTime(s.StartTime).split(' ')[1] : "N/A"}
+            {time}
           </Text>
         </Flex>
       </Box>
@@ -140,11 +163,7 @@ export const ShowtimeRow = ({
       <Flex gap="5px" flexShrink="0" onClick={e => e.stopPropagation()}>
         <Tooltip label="Xem chi tiết" placement="top" hasArrow>
           <Button
-            size="xs"
-            h="30px"
-            w="30px"
-            minW="30px"
-            borderRadius="8px"
+            size="xs" h="30px" w="30px" minW="30px" borderRadius="8px"
             bg={useColorModeValue("#f8fafc", "#2d3748")}
             color={useColorModeValue("#64748b", "#a0aec0")}
             border={`1px solid ${borderColor}`}
@@ -158,11 +177,7 @@ export const ShowtimeRow = ({
 
         <Tooltip label="Chỉnh sửa" placement="top" hasArrow>
           <Button
-            size="xs"
-            h="30px"
-            w="30px"
-            minW="30px"
-            borderRadius="8px"
+            size="xs" h="30px" w="30px" minW="30px" borderRadius="8px"
             bg="linear-gradient(135deg, #f97316, #fb923c)"
             color="white"
             _hover={{ opacity: 0.88, transform: "translateY(-1px)" }}
@@ -176,11 +191,7 @@ export const ShowtimeRow = ({
 
         <Tooltip label="Xóa" placement="top" hasArrow>
           <Button
-            size="xs"
-            h="30px"
-            w="30px"
-            minW="30px"
-            borderRadius="8px"
+            size="xs" h="30px" w="30px" minW="30px" borderRadius="8px"
             bg={useColorModeValue("#fef2f2", "#2d3748")}
             color={useColorModeValue("#dc2626", "#f87171")}
             border={useColorModeValue("1px solid #fca5a5", "1px solid #4a5568")}

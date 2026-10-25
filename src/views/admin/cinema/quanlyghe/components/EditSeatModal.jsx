@@ -1,60 +1,21 @@
-// src/views/admin/quanlyghe/components/EditSeatModal.jsx
-
 import React, { useState, useEffect } from "react";
 import {
   Modal, ModalOverlay, ModalContent, ModalHeader,
   ModalBody, ModalCloseButton, useColorMode,
-  FormControl, FormLabel, Select, VStack, Box, Flex, Text, Button, Icon,
-  useToast
+  Box, Flex, Text, Button, Icon, Grid,
+  useToast, Badge, Divider,
 } from "@chakra-ui/react";
 import { MdEdit, MdWarning, MdEventSeat } from "react-icons/md";
 import { getSeatColors } from "./shared/StatCard";
 import { ROW_LABELS } from "../constants";
 
-// ✅ Hàm lấy màu cho từng loại ghế
-const getSeatColor = (type) => {
-  const colors = {
-    'Normal': '#d1fae5',
-    'VIP': '#f5f3ff',
-    'Couple': '#fef3c7',  // ✅ Vàng cho ghế đôi
-    'Sweetbox': '#fdf2f8',
-    'Accessible': '#f0f9ff',
-  };
-  return colors[type] || '#d1fae5';
-};
-
-const getSeatBorder = (type) => {
-  const borders = {
-    'Normal': '#6ee7b7',
-    'VIP': '#a78bfa',
-    'Couple': '#fcd34d',  // ✅ Viền vàng cho ghế đôi
-    'Sweetbox': '#f9a8d4',
-    'Accessible': '#7dd3fc',
-  };
-  return borders[type] || '#6ee7b7';
-};
-
-const getSeatTextColor = (type) => {
-  const colors = {
-    'Normal': '#065f46',
-    'VIP': '#5b21b6',
-    'Couple': '#92400e',  // ✅ Màu chữ vàng đậm
-    'Sweetbox': '#9d174d',
-    'Accessible': '#1e40af',
-  };
-  return colors[type] || '#374151';
-};
-
-// ✅ Hàm lấy icon cho từng loại ghế
-const getSeatIcon = (type) => {
-  const icons = {
-    'Normal': 'A',
-    'VIP': '⭐',
-    'Couple': '💑',
-    'Sweetbox': '💝',
-    'Accessible': '♿',
-  };
-  return icons[type] || 'A';
+// ✅ Cấu hình loại ghế
+const SEAT_TYPES_CONFIG = {
+  Normal: { label: "Thường", bg: "#d1fae5", border: "#6ee7b7", text: "#065f46", icon: "A", desc: "Ghế tiêu chuẩn" },
+  VIP: { label: "VIP", bg: "#f5f3ff", border: "#a78bfa", text: "#5b21b6", icon: "⭐", desc: "Ghế cao cấp" },
+  Couple: { label: "Couple", bg: "#fef3c7", border: "#fcd34d", text: "#92400e", icon: "💑", desc: "Ghế đôi" },
+  Sweetbox: { label: "Sweetbox", bg: "#fdf2f8", border: "#f9a8d4", text: "#9d174d", icon: "💝", desc: "Ghế tình nhân" },
+  Accessible: { label: "Ưu tiên", bg: "#f0f9ff", border: "#7dd3fc", text: "#1e40af", icon: "♿", desc: "Ghế khuyết tật" },
 };
 
 export default function EditSeatModal({ 
@@ -74,79 +35,42 @@ export default function EditSeatModal({
   const [status, setStatus] = useState("Available");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Reset state khi modal mở
   useEffect(() => {
     if (seat && isOpen) {
-      console.log("📝 EditSeatModal - seat data:", seat);
-      
-      // Map SeatType
       let mappedType = "Normal";
-      if (seat.SeatType) {
-        mappedType = seat.SeatType;
-      } else if (seat.type) {
+      if (seat.SeatType) mappedType = seat.SeatType;
+      else if (seat.type) {
         const typeLower = seat.type.toLowerCase();
         if (typeLower === 'vip') mappedType = "VIP";
         else if (typeLower === 'couple') mappedType = "Couple";
         else if (typeLower === 'sweetbox') mappedType = "Sweetbox";
         else if (typeLower === 'accessible') mappedType = "Accessible";
-        else mappedType = "Normal";
       }
       setType(mappedType);
-      
-      // Map Status - CHỈ CHO PHÉP "Available" HOẶC "Booked"
+
       let currentStatus = "Available";
       if (seat.Status) {
-        const statusLower = seat.Status.toLowerCase();
-        if (statusLower === 'booked') {
-          currentStatus = "Booked";
-        } else {
-          currentStatus = "Available";
-        }
+        currentStatus = seat.Status.toLowerCase() === 'booked' ? "Booked" : "Available";
       } else if (seat.booked === true) {
         currentStatus = "Booked";
-      } else {
-        currentStatus = "Available";
       }
       setStatus(currentStatus);
     }
   }, [seat, isOpen]);
 
-  // Reset loading khi modal đóng
   useEffect(() => {
-    if (!isOpen) {
-      setIsLoading(false);
-    }
+    if (!isOpen) setIsLoading(false);
   }, [isOpen]);
 
   const handleSave = async () => {
-    if (!seat) {
-      toast({
-        title: "Không có ghế để sửa",
-        status: "warning",
-        duration: 3000,
-        isClosable: true,
-        position: "top-right",
-      });
-      return;
-    }
-
-    if (typeof onSave !== 'function') {
-      console.error("❌ onSave is not a function");
-      toast({
-        title: "Lỗi hệ thống",
-        description: "Không thể lưu thay đổi",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-        position: "top-right",
-      });
+    if (!seat || typeof onSave !== 'function') {
+      toast({ title: "Lỗi hệ thống", description: "Không thể lưu thay đổi", status: "error", duration: 3000, isClosable: true });
       return;
     }
 
     setIsLoading(true);
     try {
       const finalStatus = status === "Booked" ? "Booked" : "Available";
-      
       const updatedSeat = {
         ...seat,
         SeatType: type,
@@ -157,276 +81,271 @@ export default function EditSeatModal({
         booked: finalStatus === "Booked"
       };
       
-      console.log("📤 Saving seat - Payload:", {
-        SeatId: seat.SeatId || seat.id,
-        SeatType: type,
-        Status: finalStatus,
-        full: updatedSeat
-      });
-      
-      const result = await onSave(updatedSeat);
-      console.log("✅ Save result:", result);
+      await onSave(updatedSeat);
       
       toast({
         title: "✅ Cập nhật ghế thành công!",
-        description: `Loại: ${type} | Trạng thái: ${finalStatus === "Booked" ? "Đã đặt" : "Còn trống"}`,
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-        position: "top-right",
+        description: `Đã đổi sang ${SEAT_TYPES_CONFIG[type].label} - ${finalStatus === "Booked" ? "Đã đặt" : "Còn trống"}`,
+        status: "success", duration: 3000, isClosable: true,
       });
       
       onClose();
     } catch (error) {
       console.error("❌ Lỗi khi lưu ghế:", error);
-      
       let errorMessage = "Vui lòng thử lại";
-      if (error.response?.data?.errors) {
-        const errors = error.response.data.errors;
-        const errorValues = Object.values(errors).flat();
-        errorMessage = errorValues.join(", ");
-      } else if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
-      toast({
-        title: "❌ Lỗi cập nhật ghế",
-        description: errorMessage,
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-        position: "top-right",
-      });
+      if (error.response?.data?.errors) errorMessage = Object.values(error.response.data.errors).flat().join(", ");
+      else if (error.response?.data?.message) errorMessage = error.response.data.message;
+      else if (error.message) errorMessage = error.message;
+
+      toast({ title: "❌ Lỗi cập nhật ghế", description: errorMessage, status: "error", duration: 5000, isClosable: true });
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (!seat) {
-    return null;
-  }
+  if (!seat) return null;
 
   const seatId = seat.SeatId || seat.id || "N/A";
   const rowLabel = seat.row !== undefined ? ROW_LABELS[seat.row] : (seat.Row || "N/A");
   const seatNumber = seat.col !== undefined ? seat.col + 1 : (seat.Number || "N/A");
-
-  const seatTypes = [
-    { value: "Normal", label: "Ghế thường (Normal)", color: "#10b981" },
-    { value: "VIP", label: "Ghế VIP", color: "#8b5cf6" },
-    { value: "Couple", label: "Ghế đôi (Couple)", color: "#f59e0b" },
-    { value: "Sweetbox", label: "Sweetbox", color: "#ec4899" },
-    { value: "Accessible", label: "Ghế ưu tiên", color: "#3b82f6" },
-  ];
-
   const isLoadingState = isLoading || parentLoading;
 
+  const currentConfig = SEAT_TYPES_CONFIG[type] || SEAT_TYPES_CONFIG.Normal;
+  const isBooked = status === "Booked";
+
   return (
-    <Modal 
-      isOpen={isOpen} 
-      onClose={onClose} 
-      size="md" 
-      closeOnOverlayClick={!isLoadingState}
-      isCentered
-    >
-      <ModalOverlay backdropFilter="blur(4px)" />
+    <Modal isOpen={isOpen} onClose={onClose} size="4xl" closeOnOverlayClick={!isLoadingState} isCentered>
+      <ModalOverlay backdropFilter="blur(8px)" bg="rgba(0,0,0,0.6)" />
       <ModalContent 
         bg={colors.bgCard} 
-        borderRadius="20px" 
+        borderRadius="24px" 
         border={`1px solid ${colors.borderCard}`}
-        boxShadow={isDark ? "0 20px 60px rgba(0,0,0,0.5)" : "0 20px 60px rgba(0,0,0,0.15)"}
+        boxShadow={isDark ? "0 25px 80px rgba(0,0,0,0.6)" : "0 25px 80px rgba(0,0,0,0.2)"}
+        overflow="hidden"
       >
-        <ModalHeader color={colors.textColor} fontWeight="800" fontSize="18px" borderBottom={`1px solid ${colors.borderCard}`}>
-          <Flex align="center" gap="10px">
-            <Box 
-              w="32px" 
-              h="32px" 
-              borderRadius="10px" 
-              bg="linear-gradient(135deg, #f97316, #fb923c)"
-              display="flex" 
-              alignItems="center" 
-              justifyContent="center"
-            >
-              <Icon as={MdEdit} boxSize="16px" color="white" />
-            </Box>
-            <Text>Chỉnh sửa ghế</Text>
-          </Flex>
-        </ModalHeader>
-        <ModalCloseButton 
-          color={colors.subColor} 
-          isDisabled={isLoadingState} 
-          mt="8px"
-          mr="8px"
-        />
-        <ModalBody pb="24px" pt="20px">
-          <VStack spacing="16px" align="stretch">
-            {/* Thông tin ghế */}
-            <Box 
-              p="14px 16px" 
-              borderRadius="12px" 
-              bg={isDark ? "#2d3748" : "#f8fafc"}
-              border={`1px solid ${isDark ? "#374151" : "#e2e8f0"}`}
-            >
-              <Flex direction="column" gap="6px">
-                <Flex justify="space-between">
-                  <Text fontSize="12px" color={colors.subColor}>Phòng:</Text>
-                  <Text fontSize="12px" fontWeight="700" color={colors.textColor}>{roomName || "N/A"}</Text>
-                </Flex>
-                <Flex justify="space-between">
-                  <Text fontSize="12px" color={colors.subColor}>Ghế:</Text>
-                  <Text fontSize="12px" fontWeight="700" color={colors.textColor}>{seatId}</Text>
-                </Flex>
-                <Flex justify="space-between">
-                  <Text fontSize="12px" color={colors.subColor}>Vị trí:</Text>
-                  <Text fontSize="12px" fontWeight="700" color={colors.textColor}>Hàng {rowLabel} - Số {seatNumber}</Text>
-                </Flex>
-              </Flex>
-            </Box>
-
-            {/* Loại ghế */}
-            <FormControl>
-              <FormLabel fontSize="13px" fontWeight="700" color={colors.subColor} display="flex" alignItems="center" gap="8px">
-                <Icon as={MdEdit} boxSize="14px" color="#f97316" />
-                Loại ghế
-              </FormLabel>
-              <Select
-                bg={colors.bgInput}
-                border={`1.5px solid ${colors.borderInput}`}
-                borderRadius="10px"
-                color={colors.textColor}
-                value={type}
-                onChange={(e) => setType(e.target.value)}
-                isDisabled={isLoadingState}
-                _focus={{ border: "1.5px solid #f97316", boxShadow: "0 0 0 3px rgba(249,115,22,0.1)" }}
-                _hover={{ border: "1.5px solid #f97316" }}
-                transition="all 0.2s"
-                size="lg"
-              >
-                {seatTypes.map((st) => (
-                  <option key={st.value} value={st.value}>
-                    {st.label}
-                  </option>
-                ))}
-              </Select>
-            </FormControl>
-
-            {/* Trạng thái */}
-            <FormControl>
-              <FormLabel fontSize="13px" fontWeight="700" color={colors.subColor} display="flex" alignItems="center" gap="8px">
-                <Icon as={MdEdit} boxSize="14px" color="#f97316" />
-                Trạng thái
-              </FormLabel>
-              <Select
-                bg={colors.bgInput}
-                border={`1.5px solid ${colors.borderInput}`}
-                borderRadius="10px"
-                color={colors.textColor}
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                isDisabled={isLoadingState}
-                _focus={{ border: "1.5px solid #f97316", boxShadow: "0 0 0 3px rgba(249,115,22,0.1)" }}
-                _hover={{ border: "1.5px solid #f97316" }}
-                transition="all 0.2s"
-                size="lg"
-              >
-                <option value="Available">🟢 Còn trống</option>
-                <option value="Booked">🔴 Đã đặt</option>
-              </Select>
-            </FormControl>
-
-            {/* ✅ Preview - SỬA MÀU CHO COUPLE */}
-            <Box 
-              p="12px 14px" 
-              borderRadius="10px" 
-              bg={isDark ? "#1a2744" : "#f0fdf4"}
-              border={`1px solid ${isDark ? "#1a3a5c" : "#86efac"}`}
-            >
-              <Flex align="center" gap="12px">
-                <Box
-                  w="40px"
-                  h="40px"
-                  borderRadius="8px"
-                  bg={getSeatColor(type)}
-                  border={`2px solid ${getSeatBorder(type)}`}
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  fontSize="16px"
-                  fontWeight="700"
-                  color={getSeatTextColor(type)}
-                >
-                  {getSeatIcon(type)}
-                </Box>
-                <Box>
-                  <Text fontSize="14px" fontWeight="700" color={colors.textColor}>
-                    {seatTypes.find(t => t.value === type)?.label || "Ghế thường"}
-                  </Text>
-                  <Text fontSize="12px" color={status === "Booked" ? "#dc2626" : "#059669"}>
-                    {status === "Booked" ? "🔴 Đã đặt" : "🟢 Còn trống"}
-                  </Text>
-                </Box>
-              </Flex>
-            </Box>
-
-            {/* Cảnh báo */}
-            <Box 
-              p="12px 14px" 
-              borderRadius="10px" 
-              bg="#fef2f2" 
-              border="1px solid #fca5a5"
-            >
-              <Flex align="center" gap="8px">
-                <Icon as={MdWarning} boxSize="16px" color="#dc2626" />
-                <Text fontSize="11px" color="#dc2626" fontWeight="500">
-                  Thay đổi này sẽ ảnh hưởng đến sơ đồ ghế của phòng
+        {/* Header */}
+        <Box 
+          px="24px" py="18px" 
+          bg={isDark ? "linear-gradient(135deg, #0f1f3a, #1a3a5c)" : "linear-gradient(135deg, #fff7ed, #ffedd5)"}
+          borderBottom={`1px solid ${colors.borderCard}`} position="relative"
+        >
+          <Box position="absolute" top="-50%" right="-10%" w="200px" h="200px" borderRadius="full"
+            bg={isDark ? "rgba(74, 158, 255, 0.08)" : "rgba(249, 115, 22, 0.08)"} filter="blur(40px)" />
+          <Flex align="center" justify="space-between" position="relative">
+            <Flex align="center" gap="14px">
+              <Box w="44px" h="44px" borderRadius="12px" bg="linear-gradient(135deg, #f97316, #fb923c)"
+                display="flex" alignItems="center" justifyContent="center" boxShadow="0 8px 24px rgba(249, 115, 22, 0.35)">
+                <Icon as={MdEdit} boxSize="22px" color="white" />
+              </Box>
+              <Box>
+                <Text fontSize="18px" fontWeight="800" color={colors.textColor} letterSpacing="-0.3px">
+                  Chỉnh sửa ghế
                 </Text>
-              </Flex>
-            </Box>
-          </VStack>
-
-          {/* Buttons */}
-          <Flex gap="10px" mt="24px" justify="flex-end">
-            <Button
-              h="44px"
-              px="24px"
-              variant="ghost"
-              color={colors.subColor}
-              borderRadius="10px"
-              fontWeight="600"
-              fontSize="14px"
-              border={`1.5px solid ${colors.borderCard}`}
-              _hover={{ bg: isDark ? "#2d3748" : "#f8fafc" }}
-              onClick={onClose}
-              isDisabled={isLoadingState}
-            >
-              Hủy bỏ
-            </Button>
-            <Button
-              h="44px"
-              px="32px"
-              borderRadius="10px"
-              fontWeight="700"
-              fontSize="14px"
-              bg="linear-gradient(135deg, #f97316 0%, #fb923c 60%, #fbbf24 100%)"
-              color="white"
-              boxShadow="0 4px 16px rgba(249,115,22,0.35)"
-              _hover={{ 
-                boxShadow: "0 8px 24px rgba(249,115,22,0.45)", 
-                transform: "translateY(-2px)",
-                bg: "linear-gradient(135deg, #ea580c 0%, #f97316 60%, #fb923c 100%)"
-              }}
-              _active={{ transform: "translateY(0)" }}
-              transition="all 0.2s"
-              onClick={handleSave}
-              isLoading={isLoadingState}
-              loadingText="Đang lưu..."
-              isDisabled={!seat}
-            >
-              💾 Lưu thay đổi
-            </Button>
+                <Flex align="center" gap="6px" mt="2px">
+                  <Badge px="6px" py="1px" borderRadius="4px" fontSize="10px" fontWeight="700"
+                    bg={isDark ? "rgba(74, 158, 255, 0.15)" : "rgba(249, 115, 22, 0.15)"}
+                    color={isDark ? "#6ab0ff" : "#f97316"}>
+                    {roomName || "Phòng chiếu"}
+                  </Badge>
+                  <Text fontSize="12px" color={colors.subColor}>•</Text>
+                  <Text fontSize="12px" color={colors.subColor} fontWeight="600">
+                    Hàng {rowLabel} - Ghế {seatNumber}
+                  </Text>
+                </Flex>
+              </Box>
+            </Flex>
+            <ModalCloseButton position="static" color={colors.subColor} isDisabled={isLoadingState} borderRadius="8px" />
           </Flex>
+        </Box>
+
+        <ModalBody p="24px">
+          <Grid templateColumns={{ base: "1fr", md: "1fr 300px" }} gap="24px">
+            
+            {/* Cột trái: Chọn Loại ghế và Trạng thái */}
+            <Box>
+              <Text fontSize="12px" fontWeight="800" color={colors.labelColor} textTransform="uppercase" letterSpacing="1px" mb="12px">
+                Loại ghế
+              </Text>
+              <Grid templateColumns="1fr 1fr" gap="10px" mb="20px">
+                {Object.entries(SEAT_TYPES_CONFIG).map(([key, cfg]) => {
+                  const isActive = type === key;
+                  return (
+                    <Box
+                      key={key}
+                      p="12px"
+                      borderRadius="12px"
+                      cursor={isLoadingState ? "not-allowed" : "pointer"}
+                      bg={isActive ? (isDark ? "rgba(249, 115, 22, 0.15)" : "#fff7ed") : (isDark ? "#1a2744" : "#f8fafc")}
+                      border={isActive ? `2px solid #f97316` : `1.5px solid ${isDark ? "#1a3a5c" : "#e2e8f0"}`}
+                      boxShadow={isActive ? "0 4px 12px rgba(249, 115, 22, 0.15)" : "none"}
+                      onClick={() => !isLoadingState && setType(key)}
+                      opacity={isLoadingState ? 0.6 : 1}
+                      transition="all 0.2s"
+                      _hover={!isActive && !isLoadingState ? { border: `1.5px solid #f97316`, bg: isDark ? "#142d4f" : "#fff7ed" } : {}}
+                    >
+                      <Flex align="center" gap="10px">
+                        <Box w="28px" h="28px" borderRadius="8px" bg={cfg.bg} border={`1.5px solid ${cfg.border}`}
+                          display="flex" alignItems="center" justifyContent="center" fontSize="12px" fontWeight="800" color={cfg.text}>
+                          {cfg.icon}
+                        </Box>
+                        <Box flex="1">
+                          <Text fontSize="13px" fontWeight="800" color={isActive ? "#f97316" : colors.textColor}>
+                            {cfg.label}
+                          </Text>
+                          <Text fontSize="10px" color={colors.subColor}>{cfg.desc}</Text>
+                        </Box>
+                      </Flex>
+                    </Box>
+                  );
+                })}
+              </Grid>
+
+              <Text fontSize="12px" fontWeight="800" color={colors.labelColor} textTransform="uppercase" letterSpacing="1px" mb="12px">
+                Trạng thái ghế
+              </Text>
+              <Flex gap="12px">
+                <Box
+                  flex="1"
+                  p="14px"
+                  borderRadius="12px"
+                  cursor={isLoadingState ? "not-allowed" : "pointer"}
+                  bg={!isBooked ? (isDark ? "rgba(16, 185, 129, 0.15)" : "#ecfdf5") : (isDark ? "#1a2744" : "#f8fafc")}
+                  border={!isBooked ? `2px solid #10b981` : `1.5px solid ${isDark ? "#1a3a5c" : "#e2e8f0"}`}
+                  boxShadow={!isBooked ? "0 4px 12px rgba(16, 185, 129, 0.15)" : "none"}
+                  onClick={() => !isLoadingState && setStatus("Available")}
+                  opacity={isLoadingState ? 0.6 : 1}
+                  transition="all 0.2s"
+                >
+                  <Flex align="center" gap="10px">
+                    <Box w="10px" h="10px" borderRadius="full" bg="#10b981" boxShadow="0 0 0 3px rgba(16,185,129,0.2)" />
+                    <Box>
+                      <Text fontSize="13px" fontWeight="800" color={!isBooked ? (isDark ? "#6ee7b7" : "#059669") : colors.textColor}>
+                        Còn trống
+                      </Text>
+                      <Text fontSize="10px" color={colors.subColor}>Sẵn sàng đặt vé</Text>
+                    </Box>
+                  </Flex>
+                </Box>
+
+                <Box
+                  flex="1"
+                  p="14px"
+                  borderRadius="12px"
+                  cursor={isLoadingState ? "not-allowed" : "pointer"}
+                  bg={isBooked ? (isDark ? "rgba(220, 38, 38, 0.15)" : "#fef2f2") : (isDark ? "#1a2744" : "#f8fafc")}
+                  border={isBooked ? `2px solid #dc2626` : `1.5px solid ${isDark ? "#1a3a5c" : "#e2e8f0"}`}
+                  boxShadow={isBooked ? "0 4px 12px rgba(220, 38, 38, 0.15)" : "none"}
+                  onClick={() => !isLoadingState && setStatus("Booked")}
+                  opacity={isLoadingState ? 0.6 : 1}
+                  transition="all 0.2s"
+                >
+                  <Flex align="center" gap="10px">
+                    <Box w="10px" h="10px" borderRadius="full" bg="#dc2626" boxShadow="0 0 0 3px rgba(220,38,38,0.2)" />
+                    <Box>
+                      <Text fontSize="13px" fontWeight="800" color={isBooked ? (isDark ? "#fca5a5" : "#dc2626") : colors.textColor}>
+                        Đã đặt
+                      </Text>
+                      <Text fontSize="10px" color={colors.subColor}>Không thể chọn</Text>
+                    </Box>
+                  </Flex>
+                </Box>
+              </Flex>
+
+              <Box mt="20px" p="12px 14px" borderRadius="10px" bg={isDark ? "rgba(249, 115, 22, 0.08)" : "#fff7ed"} border={`1px solid ${isDark ? "rgba(249,115,22,0.2)" : "#fed7aa"}`}>
+                <Flex align="center" gap="8px">
+                  <Icon as={MdWarning} boxSize="16px" color="#f97316" />
+                  <Text fontSize="11px" color={isDark ? "#fdba74" : "#b45309"} fontWeight="600">
+                    Thay đổi này sẽ cập nhật trực tiếp vào sơ đồ ghế phòng chiếu.
+                  </Text>
+                </Flex>
+              </Box>
+            </Box>
+
+            {/* Cột phải: Preview */}
+            <Box
+              p="20px"
+              borderRadius="16px"
+              bg={isDark ? "rgba(15, 31, 58, 0.6)" : "rgba(248, 250, 252, 0.8)"}
+              border={`1.5px dashed ${isDark ? "#1a3a5c" : "#e2e8f0"}`}
+              display="flex"
+              flexDirection="column"
+              justifyContent="center"
+              alignItems="center"
+            >
+              <Text fontSize="11px" fontWeight="700" color={colors.labelColor} textTransform="uppercase" letterSpacing="1px" mb="16px">
+                Xem trước
+              </Text>
+              
+              <Box
+                w="100px"
+                h="100px"
+                borderRadius="20px"
+                bg={currentConfig.bg}
+                border={`3px solid ${currentConfig.border}`}
+                display="flex"
+                flexDirection="column"
+                alignItems="center"
+                justifyContent="center"
+                boxShadow={`0 12px 32px ${currentConfig.border}66`}
+                position="relative"
+                mb="16px"
+                transition="all 0.3s"
+              >
+                <Text fontSize="32px" mb="2px">{currentConfig.icon}</Text>
+                <Text fontSize="12px" fontWeight="800" color={currentConfig.text}>
+                  {currentConfig.label}
+                </Text>
+                {/* Badge trạng thái */}
+                <Box position="absolute" top="-8px" right="-8px" px="6px" py="2px" borderRadius="full"
+                  bg={isBooked ? "#dc2626" : "#10b981"} color="white" fontSize="9px" fontWeight="800" boxShadow="md">
+                  {isBooked ? "ĐÃ ĐẶT" : "TRỐNG"}
+                </Box>
+              </Box>
+
+              <Box textAlign="center" mb="16px">
+                <Text fontSize="18px" fontWeight="900" color={colors.textColor} mb="2px">
+                  {rowLabel}{seatNumber}
+                </Text>
+                <Text fontSize="12px" color={colors.subColor}>
+                  Hàng {rowLabel} - Vị trí {seatNumber}
+                </Text>
+              </Box>
+
+              <Divider mb="16px" borderColor={isDark ? "#1a3a5c" : "#e2e8f0"} />
+
+              <Box w="100%" p="12px" borderRadius="10px" bg={isDark ? "#1a2744" : "#ffffff"} border={`1px solid ${isDark ? "#2d4a6b" : "#e2e8f0"}`}>
+                <Flex justify="space-between" mb="6px">
+                  <Text fontSize="11px" color={colors.subColor}>Mã ghế:</Text>
+                  <Text fontSize="11px" fontWeight="700" color={colors.textColor}>#{seatId}</Text>
+                </Flex>
+                <Flex justify="space-between">
+                  <Text fontSize="11px" color={colors.subColor}>Giá vé dự kiến:</Text>
+                  <Text fontSize="11px" fontWeight="700" color="#f97316">
+                    {type === "VIP" ? "150.000đ" : type === "Couple" ? "200.000đ" : type === "Sweetbox" ? "250.000đ" : "80.000đ"}
+                  </Text>
+                </Flex>
+              </Box>
+            </Box>
+          </Grid>
         </ModalBody>
+
+        {/* Footer */}
+        <Flex px="24px" py="18px" borderTop={`1px solid ${colors.borderCard}`}
+          bg={isDark ? "rgba(10, 22, 40, 0.5)" : "rgba(248, 250, 252, 0.5)"} gap="10px" justify="flex-end">
+          <Button h="44px" px="24px" variant="ghost" color={colors.subColor} borderRadius="12px"
+            fontWeight="600" fontSize="13px" border={`1.5px solid ${colors.borderCard}`}
+            _hover={{ bg: isDark ? "#1a2744" : "#f8fafc" }} onClick={onClose} isDisabled={isLoadingState}>
+            Hủy bỏ
+          </Button>
+          <Button h="44px" px="32px" borderRadius="12px" fontWeight="700" fontSize="13px"
+            bg="linear-gradient(135deg, #f97316 0%, #fb923c 60%, #fbbf24 100%)" color="white"
+            boxShadow="0 4px 16px rgba(249,115,22,0.35)"
+            _hover={{ boxShadow: "0 8px 24px rgba(249,115,22,0.45)", transform: "translateY(-1px)" }}
+            _active={{ transform: "translateY(0)" }} transition="all 0.2s"
+            onClick={handleSave} isLoading={isLoadingState} loadingText="Đang lưu...">
+            💾 Lưu thay đổi
+          </Button>
+        </Flex>
       </ModalContent>
     </Modal>
   );

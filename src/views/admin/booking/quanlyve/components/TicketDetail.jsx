@@ -2,403 +2,281 @@
 
 import React from "react";
 import {
-  Box,
-  Flex,
-  Text,
-  Button,
-  Icon,
-  VStack,
-  HStack,
-  Wrap,
-  WrapItem,
-  Divider,
-  useToast,
+  Box, Flex, Text, Button, Icon, HStack,
+  Wrap, WrapItem, useToast
 } from "@chakra-ui/react";
 import {
-  MdArrowBack,
-  MdEdit,
-  MdPerson,
-  MdEmail,
-  MdPhone,
-  MdCalendarToday,
-  MdAccessTime,
-  MdLocationOn,
-  MdEventSeat,
-  MdDelete,
-  MdCancel,
-  MdLocalOffer,
-  MdStickyNote2,
-  MdContentCopy,
-  MdLocalMovies,
+  MdArrowBack, MdEdit, MdPerson, MdPhone,
+  MdCalendarToday, MdAccessTime, MdLocationOn, MdOutlineTheaters,
+  MdDelete, MdCancel, MdContentCopy, MdMovie
 } from "react-icons/md";
 import { QRCodeCanvas } from "qrcode.react";
 
-const STATUS_CFG = {
-  "Đã thanh toán": { color: "#059669", bg: "#ecfdf5", border: "#6ee7b7", dot: "#10b981" },
-  "Paid": { color: "#059669", bg: "#ecfdf5", border: "#6ee7b7", dot: "#10b981" },
-  "Đã check-in": { color: "#ea580c", bg: "#fff7ed", border: "#fed7aa", dot: "#fb923c" },
-  "Chờ xử lý": { color: "#d97706", bg: "#fffbeb", border: "#fcd34d", dot: "#f59e0b" },
-  "Pending": { color: "#d97706", bg: "#fffbeb", border: "#fcd34d", dot: "#f59e0b" },
-  "Đã hủy": { color: "#dc2626", bg: "#fef2f2", border: "#fca5a5", dot: "#ef4444" },
-  "Cancelled": { color: "#dc2626", bg: "#fef2f2", border: "#fca5a5", dot: "#ef4444" },
-  "Hết hạn": { color: "#6b7280", bg: "#f9fafb", border: "#e5e7eb", dot: "#9ca3af" },
+// Cấu hình màu trạng thái
+const getStatusStyle = (status) => {
+  const s = String(status).toLowerCase();
+  if (s.includes("thanh toán") || s.includes("paid")) return { bg: "rgba(16,185,129,0.15)", border: "#10b981", color: "#10b981", icon: "✓" };
+  if (s.includes("check-in")) return { bg: "rgba(245,158,11,0.15)", border: "#f59e0b", color: "#f59e0b", icon: "🎟" };
+  if (s.includes("hủy") || s.includes("cancel")) return { bg: "rgba(239,68,68,0.15)", border: "#ef4444", color: "#ef4444", icon: "✕" };
+  return { bg: "rgba(245,158,11,0.15)", border: "#f59e0b", color: "#f59e0b", icon: "⏳" };
 };
 
-const StatusBadge = ({ status, light }) => {
-  const cfg = STATUS_CFG[status] || STATUS_CFG["Hết hạn"];
-  if (light) {
-    return (
-      <HStack spacing="6px" bg="rgba(255,255,255,0.12)" px="10px" py="4px" borderRadius="full" w="fit-content">
-        <Box w="6px" h="6px" borderRadius="full" bg={cfg.dot} />
-        <Text fontSize="11px" fontWeight="700" color="white">
-          {status}
-        </Text>
-      </HStack>
-    );
-  }
-  return (
-    <Flex align="center" gap="6px" px="10px" py="5px" borderRadius="8px" bg={cfg.bg} border={`1px solid ${cfg.border}`} display="inline-flex" w="fit-content">
-      <Box w="6px" h="6px" borderRadius="full" bg={cfg.dot} />
-      <Text fontSize="11.5px" fontWeight="700" color={cfg.color} whiteSpace="nowrap">
-        {status}
-      </Text>
-    </Flex>
-  );
-};
-
-const DetailItem = ({ icon, label, value, isDark, children }) => (
-  <HStack spacing="12px" align="flex-start" w="100%">
-    <Flex
-      w="36px"
-      h="36px"
-      minW="36px"
-      borderRadius="10px"
-      bg={isDark ? "rgba(249,115,22,0.12)" : "#fff1e6"}
-      align="center"
-      justify="center"
+// Component con: Thẻ thông tin
+const InfoBox = ({ icon, label, value, highlight, isDark }) => (
+  <Flex direction="column" gap={1}>
+    <HStack spacing={2} color={isDark ? "rgba(255,255,255,0.6)" : "#64748b"}>
+      <Icon as={icon} boxSize="14px" />
+      <Text fontSize="11px" fontWeight="700" textTransform="uppercase" letterSpacing="1px">{label}</Text>
+    </HStack>
+    <Text 
+      fontSize="16px" 
+      fontWeight="800" 
+      color={highlight ? (isDark ? "#fb923c" : "#ea580c") : (isDark ? "white" : "#0f172a")} 
+      letterSpacing="0.5px"
     >
-      <Icon as={icon} boxSize="16px" color="#f97316" />
-    </Flex>
-    <Box minW="0" flex={1}>
-      <Text fontSize="10px" fontWeight="700" color={isDark ? "#7787ac" : "#94a3b8"} letterSpacing=".6px" textTransform="uppercase" mb="3px">
-        {label}
-      </Text>
-      {children || (
-        <Text fontSize="14px" fontWeight="700" color={isDark ? "#f7fafc" : "#0f172a"} noOfLines={2}>
-          {value || "—"}
-        </Text>
-      )}
-    </Box>
-  </HStack>
-);
-
-const SectionLabel = ({ children, isDark }) => (
-  <Text
-    fontSize="11px"
-    fontWeight="800"
-    letterSpacing="1px"
-    textTransform="uppercase"
-    color={isDark ? "#5b6b93" : "#b6bece"}
-    mb="14px"
-  >
-    {children}
-  </Text>
+      {value || "—"}
+    </Text>
+  </Flex>
 );
 
 export const TicketDetail = ({ ticket, onBack, onEdit, onDelete, onCancel, isDark }) => {
-  const OR = "#f97316";
-  const ORL = "#fb923c";
-  const ORSW = "rgba(249,115,22,0.35)";
   const toast = useToast();
+  const statusStyle = getStatusStyle(ticket.status);
 
-  const cardBg = isDark ? "#0b1437" : "white";
-  const cardBorder = isDark ? "rgba(255,255,255,0.08)" : "#eef0f6";
-  const textPrimary = isDark ? "#f7fafc" : "#0f172a";
-  const textMuted = isDark ? "#7787ac" : "#94a3b8";
-  const dashColor = "rgba(255,255,255,0.28)";
-  const posterUrl = ticket.poster || ticket.image || ticket.thumbnail || null;
+  const seats = String(ticket.seat || "").split(",").map((s) => s.trim()).filter(Boolean);
+  
+  // ✅ SỬA LỖI TÁCH NGÀY / GIỜ / PHÒNG
+  // Vì ticket.showtime đang có dạng: "08:00 27/10/2026 - Phòng Vip 01"
+  // Ta cần tách lấy ngày, giờ và tên phòng một cách chính xác
+  const showtimeParts = String(ticket.showtime || "").split(" - ");
+  const timeAndDate = showtimeParts[0] || ""; 
+  const roomName = showtimeParts[1]?.replace("Phòng", "").trim() || ticket.room || "—";
+  
+  // Tách ngày và giờ từ chuỗi "08:00 27/10/2026"
+  const [timePart, datePart] = timeAndDate.split(" ");
 
-  const seats = String(ticket.seat || "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
+  const qrData = JSON.stringify({ code: ticket.code, id: ticket.id });
 
-  const [datePart, ...timeRest] = String(ticket.showtime || "").split(" ");
-  const timePart = timeRest.join(" ");
-
-  const canCancel = ticket.status !== "Đã check-in" && ticket.status !== "Cancelled";
-
-  // ✅ Tạo dữ liệu QR
-  const qrData = JSON.stringify({
-    ticketId: ticket.id,
-    code: ticket.code,
-    customer: ticket.customer,
-    movie: ticket.movie,
-    showtime: ticket.showtime,
-    seat: ticket.seat,
-    status: ticket.status,
-    timestamp: new Date().toISOString(),
-  });
-
-  const handleCancel = () => {
-    if (window.confirm(`Bạn có chắc chắn muốn hủy vé ${ticket.code}?`)) {
-      if (onCancel) onCancel(ticket.id, ticket.showtimeSeatId);
-    }
+  const handleCopy = () => {
+    navigator.clipboard.writeText(ticket.code);
+    toast({ title: "Đã sao chép mã vé!", status: "success", duration: 2000, position: "top-right" });
   };
 
-  const handleDelete = () => {
-    if (window.confirm(`Bạn có chắc chắn muốn xóa vé ${ticket.code}?`)) {
-      if (onDelete) onDelete(ticket.id, ticket.showtimeSeatId);
-    }
-  };
+  const bgPoster = ticket.posterUrl || "https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=2025&auto=format&fit=crop";
 
-  const copyQr = () => {
-    if (ticket.qr) {
-      navigator.clipboard.writeText(ticket.qr);
-      toast({ title: "Đã sao chép mã QR", status: "success", duration: 1800, isClosable: true, position: "top-right" });
-    }
-  };
+  // 🎨 Bộ màu thay đổi theo Sáng/Tối (Đã chuyển Tối sang màu xanh giống Sidebar)
+  const bgPage = isDark ? "#0a1628" : "#f1f5f9"; // Xanh đen
+  const cardBg = isDark ? "rgba(15, 31, 58, 0.7)" : "rgba(255, 255, 255, 0.85)"; // Xanh đậm mờ
+  const cardBorder = isDark ? "rgba(26, 58, 92, 0.8)" : "rgba(0,0,0,0.05)";
+  const textPrimary = isDark ? "white" : "#0f172a";
+  const textMuted = isDark ? "#88b4d8" : "#64748b"; // Xanh nhạt
+  const boxBg = isDark ? "rgba(26, 58, 92, 0.3)" : "rgba(0,0,0,0.02)";
+  const boxBorder = isDark ? "rgba(26, 58, 92, 0.6)" : "rgba(0,0,0,0.05)";
+  const dashColor = isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)";
+  const notchBg = isDark ? "#0a1628" : "#f1f5f9"; 
+  const btnGhostBg = isDark ? "rgba(26, 58, 92, 0.5)" : "white";
+  const btnGhostColor = isDark ? "#e8f4f8" : "#475569";
+  const btnGhostBorder = isDark ? "rgba(26, 58, 92, 0.8)" : "rgba(0,0,0,0.1)";
 
   return (
-    <Box sx={{ animation: `fadeIn .3s ease both` }}>
-      {/* Thanh hành động */}
-      <Flex align="center" justify="space-between" mb="20px" flexWrap="wrap" gap="8px">
-        <Button
-          leftIcon={<Icon as={MdArrowBack} />}
-          variant="ghost"
-          color={isDark ? "#a0aec0" : "#64748b"}
-          borderRadius="10px"
-          h="38px"
-          fontSize="13px"
-          fontWeight="600"
-          border={isDark ? "1.5px solid #4a5568" : "1.5px solid #e2e8f0"}
-          _hover={{ bg: isDark ? "#2d3748" : "#f8fafc" }}
-          onClick={onBack}
-        >
-          Quay lại
-        </Button>
-        <Flex gap="8px" flexWrap="wrap">
-          {canCancel && onCancel && (
-            <Button
-              h="40px"
-              px="20px"
-              borderRadius="10px"
-              fontWeight="700"
-              fontSize="13px"
-              variant="outline"
-              borderColor={OR}
-              color={OR}
-              _hover={{ bg: isDark ? "rgba(249,115,22,0.1)" : "#fff1e6" }}
-              leftIcon={<Icon as={MdCancel} />}
-              onClick={handleCancel}
-            >
-              Hủy vé
-            </Button>
-          )}
-          <Button
-            h="40px"
-            px="20px"
-            borderRadius="10px"
-            fontWeight="700"
-            fontSize="13px"
-            bg={`linear-gradient(135deg,${OR},${ORL})`}
-            color="white"
-            boxShadow={`0 4px 14px ${ORSW}`}
-            _hover={{ boxShadow: `0 6px 20px rgba(249,115,22,.4)`, transform: "translateY(-1px)" }}
-            _active={{ transform: "translateY(0)" }}
-            leftIcon={<Icon as={MdEdit} />}
-            onClick={() => onEdit(ticket)}
-          >
-            Chỉnh sửa
-          </Button>
-          <Button
-            h="40px"
-            px="20px"
-            borderRadius="10px"
-            fontWeight="700"
-            fontSize="13px"
-            bg="red.500"
-            color="white"
-            _hover={{ bg: "red.600" }}
-            leftIcon={<Icon as={MdDelete} />}
-            onClick={handleDelete}
-          >
-            Xóa
-          </Button>
-        </Flex>
-      </Flex>
+    <Box 
+      minH="100vh" 
+      position="relative" 
+      overflow="hidden" 
+      bg={bgPage} 
+      fontFamily="'Plus Jakarta Sans', sans-serif"
+      transition="background 0.3s"
+    >
+      {/* 🌟 BACKGROUND LAYER */}
+      <Box 
+        position="absolute" 
+        inset={0} 
+        bgImage={`url(${bgPoster})`} 
+        bgSize="cover" 
+        bgPosition="center"
+        opacity={isDark ? 0.15 : 0.1} // Giảm độ mờ để không bị đen
+        filter="blur(30px)"
+        transform="scale(1.1)"
+      />
+      <Box 
+        position="absolute" 
+        inset={0} 
+        bgGradient={isDark 
+          ? "linear(to-b, rgba(10,22,40,0.8) 0%, #0a1628 100%)" // Gradient xanh đen
+          : "linear(to-b, rgba(241,245,249,0.6) 0%, #f1f5f9 100%)"
+        } 
+      />
 
-      {/* Bố cục 2 cột */}
-      <Flex gap={{ base: "16px", lg: "20px" }} align="flex-start" direction={{ base: "column", lg: "row" }}>
-        {/* ===== Cột trái: chi tiết đặt vé ===== */}
-        <Box
-          flex="1"
-          w="100%"
-          bg={cardBg}
-          borderRadius="18px"
+      {/* 🌟 MAIN CONTENT */}
+      <Box position="relative" zIndex={2} maxW="1200px" mx="auto" p={{ base: 4, md: 8 }}>
+        
+        {/* HEADER ACTIONS */}
+        <Flex justify="space-between" align="center" mb={10}>
+          <Button
+            leftIcon={<Icon as={MdArrowBack} />}
+            variant="unstyled" color={textMuted} fontSize="14px" fontWeight="600"
+            _hover={{ color: isDark ? "white" : "#0f172a", transform: "translateX(-4px)" }} transition="all 0.2s"
+            onClick={onBack}
+          >
+            Trở về danh sách
+          </Button>
+          <HStack spacing={4}>
+            {onCancel && (
+              <Button
+                h="42px" px={6} borderRadius="full" fontSize="13px" fontWeight="700"
+                bg={btnGhostBg} color={btnGhostColor} border={`1px solid ${btnGhostBorder}`}
+                backdropFilter="blur(10px)" _hover={{ bg: isDark ? "rgba(26, 58, 92, 0.8)" : "gray.100" }}
+                leftIcon={<Icon as={MdCancel} />} onClick={() => onCancel(ticket.id, ticket.showtimeSeatId)}
+              >
+                Hủy vé
+              </Button>
+            )}
+            <Button
+              h="42px" px={6} borderRadius="full" fontSize="13px" fontWeight="700"
+              bg="#f97316" color="white" boxShadow="0 0 20px rgba(249,115,22,0.4)"
+              _hover={{ bg: "#ea580c", boxShadow: "0 0 30px rgba(249,115,22,0.6)" }}
+              leftIcon={<Icon as={MdEdit} />} onClick={() => onEdit(ticket)}
+            >
+              Chỉnh sửa
+            </Button>
+          </HStack>
+        </Flex>
+
+        {/* 🌟 TẤM VÉ GLASSMORPHISM */}
+        <Flex 
+          direction={{ base: "column", lg: "row" }} 
+          bg={cardBg} 
+          backdropFilter="blur(30px)"
+          borderRadius="32px" 
           border={`1px solid ${cardBorder}`}
-          boxShadow={isDark ? "0 4px 20px rgba(0,0,0,.35)" : "0 2px 16px rgba(15,23,42,.05)"}
-          p={{ base: "20px", md: "28px" }}
+          boxShadow={isDark ? "0 30px 80px rgba(0,0,0,0.5)" : "0 30px 80px rgba(15,23,42,0.1)"}
+          overflow="hidden"
+          transition="all 0.3s"
         >
-          <HStack spacing="10px" mb="6px" flexWrap="wrap">
-            <Box px="9px" py="4px" borderRadius="7px" bg={isDark ? "rgba(249,115,22,0.12)" : "#fff1e6"}>
-              <Text fontFamily="mono" fontSize="11.5px" fontWeight="800" color={OR} letterSpacing=".5px">
+          {/* CỘT TRÁI: THÔNG TIN PHIM */}
+          <Box flex={1} p={{ base: 6, md: 10 }} position="relative">
+            
+            <HStack spacing={4} mb={8}>
+              <Flex align="center" gap={2} px={4} py={2} borderRadius="full" bg={statusStyle.bg} border={`1px solid ${statusStyle.border}`}>
+                <Text color={statusStyle.color} fontSize="13px" fontWeight="800">{statusStyle.icon} {ticket.status}</Text>
+              </Flex>
+              <Text color={textMuted} fontFamily="mono" fontSize="14px" fontWeight="700" letterSpacing="2px">
                 #{ticket.code}
               </Text>
-            </Box>
-            <StatusBadge status={ticket.status} />
-          </HStack>
-          <Text fontSize={{ base: "19px", md: "23px" }} fontWeight="800" color={textPrimary} letterSpacing="-.3px" lineHeight="1.25" mb="24px">
-            {ticket.movie}
-          </Text>
-
-          <SectionLabel isDark={isDark}>Suất chiếu</SectionLabel>
-          <VStack spacing="18px" align="stretch" mb="26px">
-            <HStack spacing="18px" align="flex-start">
-              <Box flex={1}>
-                <DetailItem icon={MdCalendarToday} label="Ngày chiếu" value={datePart || "—"} isDark={isDark} />
-              </Box>
-              <Box flex={1}>
-                <DetailItem icon={MdAccessTime} label="Giờ chiếu" value={timePart || ticket.showtime || "—"} isDark={isDark} />
-              </Box>
             </HStack>
-            <DetailItem icon={MdLocationOn} label="Rạp & phòng chiếu" value={ticket.cinema || ticket.room || "Gấu Phim Cinema"} isDark={isDark} />
-            <DetailItem icon={MdEventSeat} label="Ghế ngồi" isDark={isDark}>
-              <Wrap spacing="6px">
-                {(seats.length ? seats : ["—"]).map((s) => (
+
+            <Text 
+              fontSize={{ base: "36px", md: "52px" }} 
+              fontWeight="900" 
+              color={textPrimary} 
+              lineHeight="1.1" 
+              letterSpacing="-1.5px"
+              textShadow={isDark ? "0 10px 30px rgba(0,0,0,0.5)" : "none"}
+              mb={10}
+            >
+              {ticket.movie}
+            </Text>
+
+            {/* ✅ ĐÃ SỬA LẠI GRID 4 CỘT: NGÀY - GIỜ - RẠP - PHÒNG */}
+            <Wrap spacing={10} mb={10}>
+              <WrapItem><InfoBox icon={MdCalendarToday} label="Ngày chiếu" value={datePart} highlight isDark={isDark} /></WrapItem>
+              <WrapItem><InfoBox icon={MdAccessTime} label="Giờ chiếu" value={timePart} highlight isDark={isDark} /></WrapItem>
+              <WrapItem><InfoBox icon={MdLocationOn} label="Rạp" value={ticket.cinema || "Gấu Phim"} isDark={isDark} /></WrapItem>
+              <WrapItem><InfoBox icon={MdOutlineTheaters} label="Phòng" value={roomName} isDark={isDark} /></WrapItem>
+            </Wrap>
+
+            <Box mb={10}>
+              <Text color={textMuted} fontSize="11px" fontWeight="700" textTransform="uppercase" letterSpacing="1px" mb={4}>
+                Vị trí ghế ngồi
+              </Text>
+              <Wrap spacing={3}>
+                {seats.map(s => (
                   <WrapItem key={s}>
-                    <Box px="9px" py="3px" borderRadius="6px" bg={`linear-gradient(135deg,${OR},${ORL})`} color="white" fontSize="12px" fontWeight="800">
-                      {s}
-                    </Box>
+                    <Flex 
+                      w="50px" h="50px" borderRadius="12px" 
+                      bg={isDark ? "linear-gradient(135deg, rgba(249,115,22,0.2), rgba(249,115,22,0.05))" : "#fff7ed"}
+                      border={`1px solid ${isDark ? "rgba(249,115,22,0.5)" : "#fed7aa"}`}
+                      boxShadow={isDark ? "0 0 15px rgba(249,115,22,0.3)" : "0 4px 10px rgba(249,115,22,0.1)"}
+                      align="center" justify="center"
+                    >
+                      <Text fontSize="18px" fontWeight="900" color={isDark ? "#fb923c" : "#ea580c"}>{s}</Text>
+                    </Flex>
                   </WrapItem>
                 ))}
               </Wrap>
-            </DetailItem>
-          </VStack>
-
-          <Divider borderColor={cardBorder} mb="22px" />
-
-          <SectionLabel isDark={isDark}>Khách hàng</SectionLabel>
-          <VStack spacing="18px" align="stretch" mb="26px">
-            <HStack spacing="18px" align="flex-start">
-              <Box flex={1}>
-                <DetailItem icon={MdPerson} label="Họ tên" value={ticket.customer} isDark={isDark} />
-              </Box>
-              <Box flex={1}>
-                <DetailItem icon={MdPhone} label="Số điện thoại" value={ticket.phone || "---"} isDark={isDark} />
-              </Box>
-            </HStack>
-            <DetailItem icon={MdEmail} label="Email" value={ticket.email} isDark={isDark} />
-          </VStack>
-
-          <Divider borderColor={cardBorder} mb="22px" />
-
-          <SectionLabel isDark={isDark}>Khác</SectionLabel>
-          <HStack spacing="18px" align="flex-start">
-            <Box flex={1}>
-              {/* ✅ Hiển thị combo */}
-              <DetailItem icon={MdLocalOffer} label="Combo" isDark={isDark}>
-                <Text fontSize="14px" fontWeight="700" color={isDark ? "#f7fafc" : "#0f172a"}>
-                  {ticket.combo && ticket.combo !== "Không có" ? ticket.combo : "Không có"}
-                </Text>
-              </DetailItem>
             </Box>
-            <Box flex={1}>
-              <DetailItem icon={MdStickyNote2} label="Ghi chú" value={ticket.note || "Không có"} isDark={isDark} />
+
+            <Box p={5} borderRadius="16px" bg={boxBg} border={`1px solid ${boxBorder}`}>
+               <HStack spacing={8} flexWrap="wrap">
+                 <InfoBox icon={MdPerson} label="Khách hàng" value={ticket.customer} isDark={isDark} />
+                 <InfoBox icon={MdPhone} label="SĐT" value={ticket.phone} isDark={isDark} />
+               </HStack>
             </Box>
-          </HStack>
-        </Box>
 
-        {/* ===== Cột phải: thẻ vé (boarding-pass) với QR ===== */}
-        <Box
-          w={{ base: "100%", lg: "300px" }}
-          minW={{ lg: "300px" }}
-          borderRadius="18px"
-          overflow="hidden"
-          boxShadow="0 20px 50px rgba(15,23,42,0.25)"
-          position={{ lg: "sticky" }}
-          top={{ lg: "20px" }}
-        >
-          {/* Phần hero cinematic */}
-          <Box position="relative" h="120px">
-            {posterUrl ? (
-              <Box position="absolute" inset="0" bgImage={`url(${posterUrl})`} bgSize="cover" bgPosition="center" />
-            ) : (
-              <Box position="absolute" inset="0" bg={`linear-gradient(135deg, #1a1033 0%, #2b1650 55%, ${OR}66 100%)`} />
-            )}
-            <Box position="absolute" inset="0" bg="linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(11,20,55,0.9) 100%)" />
-            <Flex position="absolute" inset="0" direction="column" justify="flex-end" p="16px">
-              <HStack spacing="5px" mb="4px">
-                <Icon as={MdLocalMovies} boxSize="11px" color={OR} />
-                <Text fontSize="9px" fontWeight="800" letterSpacing="1.5px" color={OR} textTransform="uppercase">
-                  Gấu Phim Cinema
-                </Text>
-              </HStack>
-              <StatusBadge status={ticket.status} light />
-            </Flex>
           </Box>
 
-          {/* Thân thẻ vé */}
-          <Box bg="#0b1437" px="20px" pt="20px" pb="18px">
-            <Text fontSize="10px" fontWeight="700" color="#7787ac" letterSpacing=".8px" textTransform="uppercase" mb="4px" textAlign="center">
-              Giá vé
-            </Text>
-            <Text fontSize="26px" fontWeight="800" color="white" textAlign="center" mb="18px">
-              {ticket.price}
-            </Text>
+          {/* ĐƯỜNG XÉ VÉ (Vertical Divider) */}
+          <Box 
+            display={{ base: "none", lg: "block" }} 
+            w="2px" 
+            bgImage={`linear-gradient(to bottom, ${dashColor} 50%, transparent 50%)`}
+            bgSize="2px 20px"
+            position="relative"
+          >
+            <Box position="absolute" top="-20px" left="-19px" w="40px" h="40px" borderRadius="full" bg={notchBg} boxShadow={isDark ? "inset 0 5px 10px rgba(0,0,0,0.5)" : "inset 0 5px 10px rgba(0,0,0,0.05)"} />
+            <Box position="absolute" bottom="-20px" left="-19px" w="40px" h="40px" borderRadius="full" bg={notchBg} boxShadow={isDark ? "inset 0 -5px 10px rgba(0,0,0,0.5)" : "inset 0 -5px 10px rgba(0,0,0,0.05)"} />
+          </Box>
 
-            {/* ✅ QR Code thực tế */}
-            <Flex justify="center" mb="14px">
-              <Box p="10px" borderRadius="12px" bg="white">
-                <QRCodeCanvas
-                  value={qrData}
-                  size={132}
-                  level="H"
-                  bgColor="#ffffff"
-                  fgColor="#0f172a"
-                />
+          {/* CỘT PHẢI: QR & THANH TOÁN */}
+          <Box w={{ base: "100%", lg: "380px" }} p={{ base: 6, md: 10 }} display="flex" flexDirection="column" justify="space-between">
+            
+            <Box textAlign="center" mb={8}>
+              <Box 
+                display="inline-block" p={4} borderRadius="24px" 
+                bg="white" 
+                boxShadow={isDark ? "0 0 40px rgba(74, 158, 255, 0.2), 0 20px 40px rgba(0,0,0,0.5)" : "0 20px 40px rgba(0,0,0,0.1)"}
+                mb={6}
+              >
+                <QRCodeCanvas value={qrData} size={200} level="H" />
               </Box>
-            </Flex>
+              <Text color={textMuted} fontSize="13px" fontWeight="500">
+                Đưa mã này cho nhân viên soát vé
+              </Text>
+            </Box>
 
-            <Text fontFamily="mono" fontSize="13px" fontWeight="800" color="white" letterSpacing="2px" textAlign="center" mb="2px">
-              {ticket.code}
-            </Text>
-            <Text fontSize="10.5px" color="#7787ac" textAlign="center" mb="16px">
-              Quét mã QR để check-in tại rạp
-            </Text>
+            <Box>
+              <Box h="1px" bg={dashColor} mb={6} />
+              <Flex justify="space-between" align="flex-end" mb={6}>
+                <Box>
+                  <Text color={textMuted} fontSize="12px" fontWeight="600" textTransform="uppercase" mb={1}>Tổng thanh toán</Text>
+                  <Text color="#10b981" fontSize="32px" fontWeight="900" letterSpacing="-1px">{ticket.price}</Text>
+                </Box>
+              </Flex>
+              
+              <Button
+                w="100%" h="50px" borderRadius="12px" fontSize="14px" fontWeight="800"
+                bg={btnGhostBg} color={btnGhostColor} border={`1px solid ${btnGhostBorder}`}
+                backdropFilter="blur(10px)" _hover={{ bg: isDark ? "rgba(26, 58, 92, 0.8)" : "gray.100" }}
+                leftIcon={<Icon as={MdContentCopy} />} onClick={handleCopy}
+              >
+                Sao chép mã vé
+              </Button>
+            </Box>
+          </Box>
+        </Flex>
 
-            <Button
-              w="100%"
-              h="38px"
-              borderRadius="9px"
-              fontSize="12.5px"
-              fontWeight="700"
-              bg="rgba(255,255,255,0.08)"
-              color="white"
-              leftIcon={<Icon as={MdContentCopy} boxSize="13px" />}
-              _hover={{ bg: "rgba(255,255,255,0.14)" }}
-              onClick={copyQr}
-            >
-              Sao chép mã
-            </Button>
-          </Box>
+        {/* Nút Xóa (Ẩn dưới cùng, tinh tế) */}
+        <Flex justify="center" mt={10}>
+          <Button 
+            variant="unstyled" color={isDark ? "rgba(239,68,68,0.6)" : "rgba(239,68,68,0.8)"} fontSize="13px" fontWeight="600"
+            _hover={{ color: "#ef4444", textDecoration: "underline" }}
+            leftIcon={<Icon as={MdDelete} />} onClick={() => onDelete(ticket.id, ticket.showtimeSeatId)}
+          >
+            Xóa vĩnh viễn vé này
+          </Button>
+        </Flex>
 
-          {/* Đường xé vé + mã vạch */}
-          <Box bg="#0b1437" position="relative">
-            <Box position="absolute" top="0" left="-1px" right="-1px" borderTop={`2px dashed ${dashColor}`} />
-          </Box>
-          <Box bg="#0b1437" px="20px" pt="16px" pb="18px">
-            <HStack spacing="2px" h="18px" w="100%" justify="center" overflow="hidden" mb="8px">
-              {Array.from({ length: 34 }).map((_, i) => (
-                <Box key={i} w={i % 5 === 0 ? "2.5px" : "1px"} h={i % 3 === 0 ? "18px" : "10px"} bg="rgba(255,255,255,0.18)" />
-              ))}
-            </HStack>
-            <Text fontSize="9.5px" color="#5b6b93" textAlign="center" fontFamily="mono">
-              #{ticket.code}
-            </Text>
-          </Box>
-        </Box>
-      </Flex>
+      </Box>
     </Box>
   );
 };

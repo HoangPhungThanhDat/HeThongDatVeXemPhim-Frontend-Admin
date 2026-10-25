@@ -1,4 +1,4 @@
-
+// src/views/admin/quanlysuatchieu/components/ShowtimeCard.jsx
 
 import React from "react";
 import { Box, Flex, Text, Button, Icon, useColorModeValue, Tooltip, Badge } from "@chakra-ui/react";
@@ -30,22 +30,45 @@ export const ShowtimeCard = ({
   const textColor = useColorModeValue("#0f172a", "#f7fafc");
   const subColor = useColorModeValue("#64748b", "#a0aec0");
 
-  // Format date time
+  // ✅ Hàm parse ngày giờ "siêu bền"
   const formatDateTime = (dateStr) => {
-    if (!dateStr) return "N/A";
+    if (!dateStr) return { date: "N/A", time: "N/A" };
     try {
-      const date = new Date(dateStr);
-      return date.toLocaleString('vi-VN', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
+      let date;
+      if (typeof dateStr === 'string') {
+        const parts = dateStr.split(' ');
+        if (parts.length === 2) {
+          const datePart = parts[0];
+          const timePart = parts[1];
+          if (datePart.includes('-')) {
+            const dateParts = datePart.split('-');
+            if (dateParts[0].length === 2 && dateParts[2].length === 4) {
+              date = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}T${timePart}`);
+            } else {
+              date = new Date(dateStr.replace(' ', 'T'));
+            }
+          } else {
+            date = new Date(dateStr.replace(' ', 'T'));
+          }
+        } else {
+           date = new Date(dateStr);
+        }
+      } else {
+        date = new Date(dateStr);
+      }
+
+      if (isNaN(date.getTime())) return { date: "N/A", time: "N/A" };
+
+      return {
+        date: date.toLocaleDateString('vi-VN'),
+        time: date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+      };
     } catch {
-      return dateStr;
+      return { date: "N/A", time: "N/A" };
     }
   };
+
+  const { date, time } = formatDateTime(s.StartTime);
 
   return (
     <Box
@@ -76,14 +99,10 @@ export const ShowtimeCard = ({
         <Flex justify="space-between" align="flex-start" mb="10px">
           <StatusPill status={s.Status} size="sm" />
           <Box
-            w="32px"
-            h="32px"
-            borderRadius="8px"
+            w="32px" h="32px" borderRadius="8px"
             bg="linear-gradient(135deg, #fff7ed, #ffedd5)"
             border="1px solid #fed7aa"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
+            display="flex" alignItems="center" justifyContent="center"
           >
             <Icon as={BsCameraReelsFill} boxSize="13px" color="#f97316" />
           </Box>
@@ -91,12 +110,8 @@ export const ShowtimeCard = ({
 
         {/* Movie Title */}
         <Text
-          fontSize="14px"
-          fontWeight="800"
-          color={textColor}
-          noOfLines={2}
-          lineHeight="1.4"
-          mb="8px"
+          fontSize="14px" fontWeight="800" color={textColor}
+          noOfLines={2} lineHeight="1.4" mb="8px"
         >
           {movieTitle || "Chưa có phim"}
         </Text>
@@ -115,7 +130,7 @@ export const ShowtimeCard = ({
           <Flex align="center" gap="4px">
             <Icon as={MdCalendarToday} boxSize="11px" color={subColor} />
             <Text fontSize="11px" fontWeight="600" color={subColor}>
-              {formatDateTime(s.StartTime).split(' ')[0] || "N/A"}
+              {date}
             </Text>
           </Flex>
           
@@ -124,7 +139,7 @@ export const ShowtimeCard = ({
           <Flex align="center" gap="4px">
             <Icon as={MdAccessTime} boxSize="11px" color={subColor} />
             <Text fontSize="11px" fontWeight="600" color={subColor}>
-              {formatDateTime(s.StartTime).split(' ')[1] || "N/A"}
+              {time}
             </Text>
           </Flex>
         </Flex>
@@ -140,52 +155,35 @@ export const ShowtimeCard = ({
         {/* Actions */}
         <Flex gap="7px" onClick={e => e.stopPropagation()}>
           <Button
-            flex="1"
-            size="xs"
-            h="30px"
-            borderRadius="8px"
+            flex="1" size="xs" h="30px" borderRadius="8px"
             bg={useColorModeValue("#f8fafc", "#2d3748")}
             color={useColorModeValue("#64748b", "#a0aec0")}
-            border={`1px solid ${borderColor}`}
-            fontSize="11px"
-            fontWeight="600"
+            border={`1px solid ${borderColor}`} fontSize="11px" fontWeight="600"
             leftIcon={<Icon as={MdVisibility} boxSize="12px" />}
             _hover={{ bg: "#f97316", color: "white", borderColor: "#f97316" }}
-            transition="all 0.15s"
-            onClick={() => onView(s)}
+            transition="all 0.15s" onClick={() => onView(s)}
           >
             Xem
           </Button>
           <Button
-            flex="1"
-            size="xs"
-            h="30px"
-            borderRadius="8px"
+            flex="1" size="xs" h="30px" borderRadius="8px"
             bg="linear-gradient(135deg, #f97316, #fb923c)"
-            color="white"
-            fontSize="11px"
-            fontWeight="700"
+            color="white" fontSize="11px" fontWeight="700"
             leftIcon={<Icon as={MdEdit} boxSize="12px" />}
             _hover={{ opacity: 0.88, transform: "translateY(-1px)" }}
             boxShadow="0 2px 8px rgba(249,115,22,0.25)"
-            transition="all 0.15s"
-            onClick={() => onEdit(s)}
+            transition="all 0.15s" onClick={() => onEdit(s)}
           >
             Sửa
           </Button>
           <Tooltip label="Xóa" placement="top" hasArrow>
             <Button
-              size="xs"
-              h="30px"
-              w="30px"
-              minW="30px"
-              borderRadius="8px"
+              size="xs" h="30px" w="30px" minW="30px" borderRadius="8px"
               bg={useColorModeValue("#fef2f2", "#2d3748")}
               color={useColorModeValue("#dc2626", "#f87171")}
               border={useColorModeValue("1px solid #fca5a5", "1px solid #4a5568")}
               _hover={{ bg: "#fee2e2", transform: "translateY(-1px)" }}
-              transition="all 0.15s"
-              onClick={() => onDelete(s.ShowtimeId)}
+              transition="all 0.15s" onClick={() => onDelete(s.ShowtimeId)}
             >
               <Icon as={MdDelete} boxSize="14px" />
             </Button>

@@ -1,4 +1,4 @@
-
+// src/views/admin/quanlysuatchieu/components/AddModal.jsx
 
 import React from "react";
 import {
@@ -26,6 +26,7 @@ export const AddModal = ({
   isDark,
   movies = [],
   rooms = [],
+  isSubmitting = false, // ✅ Thêm prop này
 }) => {
   const canAdd = value.movieId && value.roomId && value.startTime && value.endTime && value.price;
   const styles = inputStyle(isDark);
@@ -65,6 +66,7 @@ export const AddModal = ({
             transition="all 0.2s"
             onClick={onClose}
             leftIcon={<Icon as={FaTimes} />}
+            isDisabled={isSubmitting}
           >
             Hủy bỏ
           </Button>
@@ -86,9 +88,11 @@ export const AddModal = ({
             } : {}}
             _active={{ transform: "translateY(0)" }}
             transition="all 0.2s"
-            isDisabled={!canAdd}
+            isDisabled={!canAdd || isSubmitting}
             leftIcon={<Icon as={FaSave} />}
             onClick={onAdd}
+            isLoading={isSubmitting} // ✅ Thêm prop này
+            loadingText="Đang lưu..."    // ✅ Thêm prop này
           >
             Lưu suất chiếu
           </Button>

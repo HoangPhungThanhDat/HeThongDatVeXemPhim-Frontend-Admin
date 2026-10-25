@@ -1,4 +1,4 @@
-
+// src/views/admin/quanlysuatchieu/components/EditModal.jsx
 
 import React from "react";
 import {
@@ -26,6 +26,7 @@ export const EditModal = ({
   isDark,
   movies = [],
   rooms = [],
+  isSubmitting = false, // ✅ Thêm prop này
 }) => {
   if (!value) return null;
 
@@ -68,6 +69,7 @@ export const EditModal = ({
             transition="all 0.2s"
             onClick={onClose}
             leftIcon={<Icon as={FaTimes} />}
+            isDisabled={isSubmitting}
           >
             Hủy
           </Button>
@@ -88,6 +90,8 @@ export const EditModal = ({
             transition="all 0.2s"
             leftIcon={<Icon as={FaSave} />}
             onClick={onSave}
+            isLoading={isSubmitting} // ✅ Thêm prop này
+            loadingText="Đang lưu..."    // ✅ Thêm prop này
           >
             Lưu thay đổi
           </Button>

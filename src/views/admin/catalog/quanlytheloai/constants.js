@@ -21,34 +21,25 @@ export const STATUS_CONFIG = {
       darkBorder: "#374151",
       darkColor: "#9ca3af"
     },
-    "Banned": { 
-      label: "Cấm",
-      color: "#dc2626", 
-      bg: "#fef2f2", 
-      border: "#fca5a5", 
-      dot: "#ef4444", 
-      darkBg: "#3d1515", 
-      darkBorder: "#7f1d1d",
-      darkColor: "#f87171"
-    },
+    
   };
   
   export const STATUS_MAP = {
     "Active": "Hoạt động",
     "Inactive": "Không hoạt động",
-    "Banned": "Cấm",
+    
   };
   
   export const STATUS_REVERSE_MAP = {
     "Hoạt động": "Active",
     "Không hoạt động": "Inactive",
-    "Cấm": "Banned",
+    
   };
   
   export const STATUS_OPTS = [
     { value: "Active", label: "Hoạt động" },
     { value: "Inactive", label: "Không hoạt động" },
-    { value: "Banned", label: "Cấm" },
+   
   ];
   
   export const ICON_OPTIONS = [

@@ -1,9 +1,10 @@
 // PhimForm.jsx - SỬA HOÀN CHỈNH
 import { useState, useRef, useEffect } from "react";
 import {
-  Box, Grid, Text, Button, Flex, SimpleGrid, FormControl,
+  Box, Grid, Text, Button, Flex, FormControl,
   Input, Select, Textarea, Icon, useColorModeValue,
-  useBreakpointValue, Spinner, Image, Badge, Tag, TagLabel, TagCloseButton
+  Spinner, Image, Badge, Tag, TagLabel, TagCloseButton,
+  useToast
 } from "@chakra-ui/react";
 import {
   MdArrowBack, MdClose, MdCheckCircle, MdAccessTime,
@@ -16,13 +17,21 @@ import { AgeBadge } from "./shared/AgeBadge";
 import { scaleIn, fadeIn } from "./shared/animations";
 import { STATUS_OPTS, LANGUAGE_OPTS, AGE_MAP, FORMAT_OPTS } from "../constants";
 
+// ✅ Helper: luôn trả về string an toàn
+const toStr = (v) => (v === null || v === undefined ? "" : String(v));
+
+// ✅ Helper: tạo id tạm duy nhất
+const makeTempId = () =>
+  `temp_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
 export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }) {
   const isDark = useColorModeValue(false, true);
   const fileInputRef = useRef(null);
+  const toast = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
 
-  // ✅ State quản lý danh sách diễn viên/đạo diễn - TÁCH RIÊNG
+  // ✅ State quản lý danh sách diễn viên/đạo diễn
   const [castMembers, setCastMembers] = useState([]);
   const [newCastName, setNewCastName] = useState("");
   const [newCastRole, setNewCastRole] = useState("Actor");
@@ -45,29 +54,29 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
     language: [],
   };
 
-  // ✅ Khởi tạo form và castMembers
+  // ✅ Khởi tạo form + castMembers (id LUÔN là string)
   const [form, setForm] = useState(() => {
     if (movie) {
       let language = movie.Language || movie.language || [];
       if (!Array.isArray(language)) {
-        language = language.split(",").filter(Boolean);
+        language = String(language).split(",").filter(Boolean);
       }
 
-      // ✅ Khởi tạo cast members từ movie
+      // ✅ Khởi tạo cast members từ movie — ép id về string
       let initialCast = [];
       if (movie.castMembers && Array.isArray(movie.castMembers)) {
-        initialCast = movie.castMembers.map(c => ({
-          id: c.CastId || c.castId || c.id || `cast_${Date.now()}_${Math.random()}`,
+        initialCast = movie.castMembers.map((c) => ({
+          id: toStr(c.CastId || c.castId || c.id) || makeTempId(),
           name: c.Name || c.name || "",
           role: c.Role || c.role || "Actor",
           isNew: false,
         }));
       }
-      
+
       // Nếu có chuỗi cast cũ
       if (initialCast.length === 0 && (movie.cast || movie.Cast)) {
         const castStr = movie.Cast || movie.cast || "";
-        const names = castStr.split(",").filter(Boolean);
+        const names = String(castStr).split(",").filter(Boolean);
         initialCast = names.map((name, index) => ({
           id: `temp_${Date.now()}_${index}`,
           name: name.trim(),
@@ -76,7 +85,6 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
         }));
       }
 
-      // ✅ Gán vào state
       setCastMembers(initialCast);
 
       return {
@@ -94,71 +102,77 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
         posterFile: null,
         trailer: movie.TrailerUrl || movie.trailerUrl || movie.trailer || "",
         description: movie.Description || movie.description || "",
-        language: language,
+        language,
       };
     }
     return { ...empty };
   });
 
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
-  // ✅ Hàm thêm diễn viên/đạo diễn
+  // ✅ Thêm diễn viên/đạo diễn
   const handleAddCastMember = () => {
     const trimmedName = newCastName.trim();
-    if (!trimmedName) {
-      return;
-    }
+    if (!trimmedName) return;
 
-    // Kiểm tra trùng lặp
     const exists = castMembers.some(
-      m => m.name.toLowerCase() === trimmedName.toLowerCase() && m.role === newCastRole
+      (m) =>
+        m.name.toLowerCase() === trimmedName.toLowerCase() &&
+        m.role === newCastRole
     );
     if (exists) {
+      toast({
+        title: "Đã tồn tại",
+        description: `"${trimmedName}" đã có trong danh sách ${newCastRole === "Director" ? "đạo diễn" : "diễn viên"}.`,
+        status: "warning",
+        duration: 2000,
+        isClosable: true,
+      });
       return;
     }
 
-    const newMember = {
-      id: `temp_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
-      name: trimmedName,
-      role: newCastRole,
-      isNew: true,
-    };
-
-    setCastMembers(prev => [...prev, newMember]);
+    setCastMembers((prev) => [
+      ...prev,
+      {
+        id: makeTempId(),
+        name: trimmedName,
+        role: newCastRole,
+        isNew: true,
+      },
+    ]);
     setNewCastName("");
     setNewCastRole("Actor");
   };
 
-  // ✅ Hàm xóa diễn viên/đạo diễn
+  // ✅ Xóa diễn viên/đạo diễn
   const handleRemoveCastMember = (id) => {
-    setCastMembers(prev => prev.filter(m => m.id !== id));
+    setCastMembers((prev) => prev.filter((m) => m.id !== id));
   };
 
-  // ✅ LOG: Kiểm tra castMembers khi thay đổi
+  // ✅ Log debug (có thể xóa khi production)
   useEffect(() => {
-    console.log('📊 [PhimForm] Current castMembers:', castMembers);
+    console.log("📊 [PhimForm] Current castMembers:", castMembers);
   }, [castMembers]);
 
-  // ✅ Hàm submit
+  // ✅ Submit — không còn crash, không còn im lặng
   const handleSubmit = async () => {
-    console.log('🚀 [PhimForm] handleSubmit started');
-    console.log('📊 [PhimForm] castMembers before submit:', castMembers);
-    
+    if (isSubmitting) return;
+
     // Validation
     if (!form.title.trim()) {
-      alert("Vui lòng nhập tên phim");
+      toast({ title: "Thiếu thông tin", description: "Vui lòng nhập tên phim.", status: "warning", duration: 2500, isClosable: true });
       return;
     }
     if (!form.genre) {
-      alert("Vui lòng chọn thể loại phim");
+      toast({ title: "Thiếu thông tin", description: "Vui lòng chọn thể loại phim.", status: "warning", duration: 2500, isClosable: true });
       return;
     }
-    if (!form.duration || parseInt(form.duration) <= 0) {
-      alert("Vui lòng nhập thời lượng phim hợp lệ");
+    if (!form.duration || parseInt(form.duration, 10) <= 0) {
+      toast({ title: "Thiếu thông tin", description: "Vui lòng nhập thời lượng phim hợp lệ.", status: "warning", duration: 2500, isClosable: true });
       return;
     }
     if (!form.releaseDate) {
-      alert("Vui lòng chọn ngày khởi chiếu");
+      toast({ title: "Thiếu thông tin", description: "Vui lòng chọn ngày khởi chiếu.", status: "warning", duration: 2500, isClosable: true });
       return;
     }
 
@@ -168,21 +182,21 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
       let language = Array.isArray(form.language) ? form.language : [];
       if (language.length === 0) language = ["Vietsub"];
       const languageString = language.join(",");
-      
-      // ✅ Lấy danh sách cast members để gửi (CHỈ LẤY CAST MỚI)
+
+      // ✅ GỬI TOÀN BỘ cast (cũ + mới) — an toàn với mọi kiểu id
       const castMembersToSend = castMembers
-        .filter(m => m.isNew || m.id?.startsWith('temp_'))
-        .map(m => ({
-          name: m.name,
-          role: m.role
+        .filter((m) => m && m.name && m.name.trim())
+        .map((m) => ({
+          name: String(m.name).trim(),
+          role: m.role || "Actor",
         }));
-      
-      console.log('📤 [PhimForm] castMembersToSend:', castMembersToSend);
-      
+
+      console.log("📤 [PhimForm] castMembersToSend:", castMembersToSend);
+
       const submitData = {
         Title: form.title.trim(),
         GenreId: form.genre,
-        Duration: parseInt(form.duration),
+        Duration: parseInt(form.duration, 10),
         ReleaseDate: form.releaseDate,
         Status: form.status || "NowShowing",
         Rated: form.rated || "P",
@@ -193,20 +207,28 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
         TrailerUrl: form.trailer || "",
         Description: form.description || "",
         Language: languageString,
-        // ✅ Gửi CastMembers
+        // ✅ Gửi toàn bộ CastMembers (không chỉ cast mới)
         CastMembers: castMembersToSend,
       };
-
-      console.log('📤 [PhimForm] Final submitData:', JSON.stringify(submitData, null, 2));
 
       if (form.posterFile instanceof File) {
         submitData.PosterFile = form.posterFile;
       }
 
-      await onSave(submitData);
-      console.log('✅ [PhimForm] Submit completed');
+      const ok = await onSave(submitData);
+      if (ok === false) {
+        // onSave trả false nghĩa là API lỗi nhưng đã tự toast — không cần làm gì
+        return;
+      }
     } catch (error) {
       console.error("❌ [PhimForm] Lỗi khi submit form:", error);
+      toast({
+        title: "Có lỗi xảy ra",
+        description: error?.response?.data?.message || error?.message || "Vui lòng thử lại.",
+        status: "error",
+        duration: 4000,
+        isClosable: true,
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -225,8 +247,6 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
   const textFaint = useColorModeValue("#cbd5e1", "#3c4b70");
   const dashedBg = useColorModeValue("#f8fafc", "rgba(255,255,255,0.03)");
   const dashedBorder = useColorModeValue("#e2e8f0", "rgba(255,255,255,0.18)");
-  const tagBg = useColorModeValue("#fff7ed", "rgba(194,65,12,0.16)");
-  const tagBorder = useColorModeValue("#fed7aa", "rgba(253,186,116,0.35)");
   const secondaryBtnBg = useColorModeValue("#f8fafc", "rgba(255,255,255,0.05)");
   const secondaryBtnBorder = useColorModeValue("#e2e8f0", "rgba(255,255,255,0.14)");
   const secondaryBtnColor = useColorModeValue("#475569", "#cbd5e1");
@@ -241,21 +261,21 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
     px: "14px",
     h: { base: "48px", md: "44px" },
     _placeholder: { color: placeholderColor, fontWeight: "400" },
-    _focus: { 
-      border: "1.5px solid #f97316", 
-      boxShadow: "0 0 0 3px rgba(249,115,22,0.10)", 
-      bg: useColorModeValue("#ffffff", "#111C44") 
+    _focus: {
+      border: "1.5px solid #f97316",
+      boxShadow: "0 0 0 3px rgba(249,115,22,0.10)",
+      bg: useColorModeValue("#ffffff", "#111C44"),
     },
     _hover: { border: "1.5px solid #f97316", bg: useColorModeValue("#ffffff", "#111C44") },
     transition: "all 0.2s ease",
   };
 
   const labelStyle = {
-    fontSize: "10.5px", 
-    fontWeight: "800", 
+    fontSize: "10.5px",
+    fontWeight: "800",
     letterSpacing: "0.9px",
-    textTransform: "uppercase", 
-    color: useColorModeValue("#64748b", "#8b9bc4"), 
+    textTransform: "uppercase",
+    color: useColorModeValue("#64748b", "#8b9bc4"),
     mb: "7px",
   };
 
@@ -265,7 +285,7 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
     boxShadow: isDark ? "0 1px 4px rgba(0,0,0,0.3)" : "0 1px 4px rgba(0,0,0,0.04)",
   };
 
-  // ✅ Render danh sách cast members - SỬA: dùng state castMembers
+  // ✅ Render danh sách cast
   const renderCastMembers = () => {
     if (castMembers.length === 0) {
       return (
@@ -329,7 +349,7 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
         </Button>
         <Box>
           <Text fontSize={{ base: "17px", md: "20px" }} fontWeight="800" color={textPrimary} letterSpacing="-0.4px">
-            {isAdd ? "Thêm phim mới" : `Chỉnh sửa: ${movie?.title}`}
+            {isAdd ? "Thêm phim mới" : `Chỉnh sửa: ${movie?.title || movie?.Title || ""}`}
           </Text>
           <Text fontSize="12px" color={textMuted} mt="2px">
             {isAdd ? "Điền đầy đủ thông tin để thêm phim vào hệ thống" : "Cập nhật thông tin phim"}
@@ -341,16 +361,14 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
         {/* Left */}
         <Flex direction="column" gap="0">
           {/* Basic info */}
-          <Box {...cardStyle} borderRadius="16px" border={`1px solid ${cardBorder}`}
-            boxShadow="0 1px 4px rgba(0,0,0,0.04)" p={{ base: "16px", md: "20px" }} mb="14px"
-          >
+          <Box {...cardStyle} borderRadius="16px" p={{ base: "16px", md: "20px" }} mb="14px">
             <SectionTitle label="Thông tin cơ bản" />
             <Grid templateColumns="1fr" gap="14px" mb="14px">
               <Box>
                 <Text sx={labelStyle}>Tên phim *</Text>
                 <FormControl>
                   <Input {...inputStyle} placeholder="VD: Avengers: Endgame"
-                    value={form.title} 
+                    value={form.title}
                     isDisabled={isSubmitting}
                     onChange={(e) => set("title", e.target.value)} />
                 </FormControl>
@@ -390,7 +408,7 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
                 <Text sx={labelStyle}>Thời lượng (phút) *</Text>
                 <FormControl>
                   <Input {...inputStyle} type="number" placeholder="VD: 120"
-                    value={form.duration} 
+                    value={form.duration}
                     isDisabled={isSubmitting}
                     onChange={(e) => set("duration", e.target.value)} />
                 </FormControl>
@@ -409,7 +427,7 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
                   <Select {...inputStyle} value={form.format}
                     isDisabled={isSubmitting}
                     onChange={(e) => set("format", e.target.value)}>
-                    {FORMAT_OPTS.map(opt => (
+                    {FORMAT_OPTS.map((opt) => (
                       <option key={opt} value={opt}>{opt}</option>
                     ))}
                   </Select>
@@ -419,20 +437,15 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
           </Box>
 
           {/* Cast & crew */}
-          <Box {...cardStyle} borderRadius="16px" border={`1px solid ${cardBorder}`}
-            boxShadow="0 1px 4px rgba(0,0,0,0.04)" p={{ base: "16px", md: "20px" }} mb="14px"
-          >
+          <Box {...cardStyle} borderRadius="16px" p={{ base: "16px", md: "20px" }} mb="14px">
             <SectionTitle label="Diễn viên & Đạo diễn" />
-            
-            {/* Hiển thị danh sách */}
             {renderCastMembers()}
 
-            {/* Form thêm mới */}
             <Grid templateColumns={{ base: "1fr", sm: "2fr 1fr auto" }} gap="10px" mt="12px">
               <Box>
                 <FormControl>
-                  <Input 
-                    {...inputStyle} 
+                  <Input
+                    {...inputStyle}
                     placeholder="Nhập tên diễn viên/đạo diễn..."
                     value={newCastName}
                     isDisabled={isSubmitting}
@@ -448,8 +461,8 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
               </Box>
               <Box>
                 <FormControl>
-                  <Select 
-                    {...inputStyle} 
+                  <Select
+                    {...inputStyle}
                     value={newCastRole}
                     isDisabled={isSubmitting}
                     onChange={(e) => setNewCastRole(e.target.value)}
@@ -479,13 +492,12 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
               </Button>
             </Grid>
 
-            {/* Thông tin bổ sung */}
             <Grid templateColumns={{ base: "1fr", sm: "1fr 1fr" }} gap="14px" mt="14px">
               <Box>
                 <Text sx={labelStyle}>Nhà phát hành</Text>
                 <FormControl>
                   <Input {...inputStyle} placeholder="VD: Marvel Studios"
-                    value={form.distributor} 
+                    value={form.distributor}
                     isDisabled={isSubmitting}
                     onChange={(e) => set("distributor", e.target.value)} />
                 </FormControl>
@@ -494,7 +506,7 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
                 <Text sx={labelStyle}>Quốc gia sản xuất</Text>
                 <FormControl>
                   <Input {...inputStyle} placeholder="VD: Mỹ"
-                    value={form.country} 
+                    value={form.country}
                     isDisabled={isSubmitting}
                     onChange={(e) => set("country", e.target.value)} />
                 </FormControl>
@@ -503,9 +515,7 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
           </Box>
 
           {/* Status & content */}
-          <Box {...cardStyle} borderRadius="16px" border={`1px solid ${cardBorder}`}
-            boxShadow="0 1px 4px rgba(0,0,0,0.04)" p={{ base: "16px", md: "20px" }}
-          >
+          <Box {...cardStyle} borderRadius="16px" p={{ base: "16px", md: "20px" }}>
             <SectionTitle label="Trạng thái & Nội dung" />
             <Grid templateColumns={{ base: "1fr", sm: "1fr 1fr" }} gap="14px" mb="14px">
               <Box>
@@ -514,7 +524,7 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
                   <Select {...inputStyle} value={form.status}
                     isDisabled={isSubmitting}
                     onChange={(e) => set("status", e.target.value)}>
-                    {STATUS_OPTS.map(opt => (
+                    {STATUS_OPTS.map((opt) => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
                     ))}
                   </Select>
@@ -524,7 +534,7 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
                 <Text sx={labelStyle}>Link trailer (YouTube)</Text>
                 <FormControl>
                   <Input {...inputStyle} placeholder="https://youtu.be/..."
-                    value={form.trailer} 
+                    value={form.trailer}
                     isDisabled={isSubmitting}
                     onChange={(e) => set("trailer", e.target.value)} />
                 </FormControl>
@@ -533,7 +543,7 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
             <Box mb="14px">
               <Text sx={labelStyle}>Ngôn ngữ</Text>
               <Flex gap="16px" flexWrap="wrap">
-                {LANGUAGE_OPTS.map(lang => (
+                {LANGUAGE_OPTS.map((lang) => (
                   <label key={lang} style={{ display: "flex", alignItems: "center", gap: "8px", cursor: isSubmitting ? "not-allowed" : "pointer" }}>
                     <input
                       type="checkbox"
@@ -541,7 +551,7 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
                       onChange={() => {
                         const current = Array.isArray(form.language) ? form.language : [];
                         const newLangs = current.includes(lang)
-                          ? current.filter(l => l !== lang)
+                          ? current.filter((l) => l !== lang)
                           : [...current, lang];
                         set("language", newLangs);
                       }}
@@ -564,7 +574,7 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
                   _hover={{ border: "1.5px solid #f97316" }}
                   transition="all 0.2s"
                   rows={4} placeholder="Nhập mô tả nội dung phim..."
-                  value={form.description} 
+                  value={form.description}
                   isDisabled={isSubmitting}
                   onChange={(e) => set("description", e.target.value)}
                 />
@@ -575,22 +585,20 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
 
         {/* Right - Poster */}
         <Flex direction="column" gap="14px">
-          <Box {...cardStyle} borderRadius="16px" border={`1px solid ${cardBorder}`}
-            boxShadow="0 1px 4px rgba(0,0,0,0.04)" p={{ base: "16px", md: "18px" }}
-          >
+          <Box {...cardStyle} borderRadius="16px" p={{ base: "16px", md: "18px" }}>
             <SectionTitle label="Poster phim" />
             <Text sx={labelStyle} mb="7px">URL poster (dọc)</Text>
             <FormControl mb="10px">
               <Input {...inputStyle} placeholder="https://..."
-                value={form.poster} 
+                value={form.poster}
                 isDisabled={isSubmitting}
                 onChange={(e) => set("poster", e.target.value)} />
             </FormControl>
 
             {(form.poster || imagePreview) && (
               <Box position="relative" mb="12px" borderRadius="10px" overflow="hidden" border={`1px solid ${cardBorder}`}>
-                <Image 
-                  src={imagePreview || form.poster} 
+                <Image
+                  src={imagePreview || form.poster}
                   alt="Poster preview"
                   objectFit="cover"
                   w="100%"
@@ -606,7 +614,7 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
                   borderRadius="full"
                   onClick={() => {
                     set("posterFile", null);
-                    set("poster", null);
+                    set("poster", "");
                     setImagePreview(null);
                   }}
                   isDisabled={isSubmitting}
@@ -625,11 +633,11 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
                 const file = e.target.files[0];
                 if (!file) return;
                 if (!file.type.startsWith("image/")) {
-                  alert("Vui lòng chọn file ảnh");
+                  toast({ title: "File không hợp lệ", description: "Vui lòng chọn file ảnh.", status: "warning", duration: 2500, isClosable: true });
                   return;
                 }
                 if (file.size > 5 * 1024 * 1024) {
-                  alert("Ảnh phải nhỏ hơn 5MB");
+                  toast({ title: "Ảnh quá lớn", description: "Ảnh phải nhỏ hơn 5MB.", status: "warning", duration: 2500, isClosable: true });
                   return;
                 }
                 set("posterFile", file);
@@ -654,7 +662,7 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
               isDisabled={isSubmitting}
               mb="12px"
             >
-              {form.posterFile ? 'Thay đổi ảnh' : 'Tải ảnh lên từ máy tính'}
+              {form.posterFile ? "Thay đổi ảnh" : "Tải ảnh lên từ máy tính"}
             </Button>
 
             {!form.poster && !imagePreview && (
@@ -667,10 +675,9 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
             )}
           </Box>
 
-          {/* Quick preview - SỬA: dùng state castMembers */}
+          {/* Quick preview */}
           {(form.title || form.status) && (
-            <Box {...cardStyle} borderRadius="16px" border={`1px solid ${cardBorder}`}
-              boxShadow="0 1px 4px rgba(0,0,0,0.04)" p={{ base: "16px", md: "18px" }}
+            <Box {...cardStyle} borderRadius="16px" p={{ base: "16px", md: "18px" }}
               sx={{ animation: `${fadeIn} 0.3s ease both` }}
             >
               <SectionTitle label="Xem trước" />
@@ -693,11 +700,11 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
                     <Text fontSize="12px" color={textSecondary} fontWeight="600">{form.duration} phút</Text>
                   </Flex>
                 )}
-                {form.genre && genres.find(g => (g.GenreId || g.id) === form.genre) && (
+                {form.genre && genres.find((g) => (g.GenreId || g.id) === form.genre) && (
                   <Flex align="center" gap="6px">
                     <Icon as={MdCategory} boxSize="12px" color={textMuted} />
                     <Text fontSize="12px" color={textSecondary} fontWeight="600">
-                      {genres.find(g => (g.GenreId || g.id) === form.genre)?.Name || form.genre}
+                      {genres.find((g) => (g.GenreId || g.id) === form.genre)?.Name || form.genre}
                     </Text>
                   </Flex>
                 )}
@@ -705,7 +712,7 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
                   <Flex align="center" gap="6px" flexWrap="wrap">
                     <Icon as={MdPerson} boxSize="12px" color={textMuted} />
                     <Text fontSize="11px" color={textSecondary} fontWeight="500">
-                      {castMembers.slice(0, 5).map(m => m.name).join(", ")}
+                      {castMembers.slice(0, 5).map((m) => m.name).join(", ")}
                       {castMembers.length > 5 && ` +${castMembers.length - 5}`}
                     </Text>
                   </Flex>
@@ -717,8 +724,7 @@ export function PhimForm({ movie, genres = [], onCancel, onSave, isAdd = false }
       </Grid>
 
       {/* Save bar */}
-      <Box {...cardStyle} borderRadius="14px" border={`1px solid ${cardBorder}`}
-        boxShadow="0 1px 4px rgba(0,0,0,0.04)"
+      <Box {...cardStyle} borderRadius="14px"
         p={{ base: "14px 16px", md: "16px 20px" }} mt="16px"
         position={{ base: "sticky", md: "static" }}
         bottom={{ base: "0", md: "auto" }}

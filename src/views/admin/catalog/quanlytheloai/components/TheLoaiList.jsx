@@ -190,7 +190,6 @@ export function TheLoaiList({
                   { key: "all", label: "Tất cả", color: "#f97316" },
                   { key: "Active", label: "Đang hiện", color: "#10b981" },
                   { key: "Inactive", label: "Đang ẩn", color: "#94a3b8" },
-                  { key: "Banned", label: "Cấm", color: "#ef4444" },
                 ].map(({ key, label, color }) => (
                   <Button key={key}
                     h={{ base: "42px", md: "36px" }} px="14px" borderRadius="9px"

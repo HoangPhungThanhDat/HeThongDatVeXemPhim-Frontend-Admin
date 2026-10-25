@@ -21,15 +21,12 @@ export const useShowtime = () => {
   const [viewMode, setViewMode] = useState('list');
   const [showDetail, setShowDetail] = useState(false);
 
-  // Load dữ liệu ban đầu
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (targetPage = page) => {
     try {
       setLoading(true);
-
-      // Gọi API song song
       const [showtimeRes, movieRes, roomRes] = await Promise.all([
         ShowtimeApi.getPaged({
-          page,
+          page: targetPage,
           limit: PAGE_SIZE,
           search,
           status: filterStatus,
@@ -38,17 +35,17 @@ export const useShowtime = () => {
         RoomApi.getAll(),
       ]);
 
-      // Xử lý showtimes
-      let showtimeData = showtimeRes.data.data || showtimeRes.data || [];
-      // Nếu API trả về dạng { data: [...], total, totalPages }
+      let showtimeData = [];
       if (showtimeRes.data && showtimeRes.data.data) {
         showtimeData = showtimeRes.data.data;
         setTotal(showtimeRes.data.total || 0);
         setTotalPages(showtimeRes.data.totalPages || 1);
       } else if (Array.isArray(showtimeRes.data)) {
+        showtimeData = showtimeRes.data;
         setTotal(showtimeData.length);
         setTotalPages(Math.ceil(showtimeData.length / PAGE_SIZE));
       } else {
+        showtimeData = showtimeRes.data.data || showtimeRes.data || [];
         setTotal(showtimeData.length || 0);
         setTotalPages(Math.ceil((showtimeData.length || 0) / PAGE_SIZE));
       }
@@ -66,52 +63,36 @@ export const useShowtime = () => {
     }
   }, [page, search, filterStatus]);
 
-  // Load khi page, search, filter thay đổi
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    fetchData(page);
+  }, [fetchData, page]);
 
-  // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => {
       setSearch(searchInput);
-      setPage(1);
+      setPage(1); // Reset về trang 1 khi tìm kiếm
     }, 400);
     return () => clearTimeout(timer);
   }, [searchInput]);
 
-  // Helper: Lấy tên phim
-  const getMovieTitle = useCallback(
-    (id) => {
-      if (!id) return 'N/A';
-      if (typeof id === 'object' && id.Title) return id.Title;
-      const movie = movies.find(
-        (m) => m.MovieId === id || m.MovieId === parseInt(id),
-      );
-      return movie?.Title || id || 'N/A';
-    },
-    [movies],
-  );
+  const getMovieTitle = useCallback((id) => {
+    if (!id) return 'N/A';
+    if (typeof id === 'object' && id.Title) return id.Title;
+    const movie = movies.find((m) => m.MovieId === id || m.MovieId === parseInt(id));
+    return movie?.Title || id || 'N/A';
+  }, [movies]);
 
-  // Helper: Lấy tên phòng
-  const getRoomName = useCallback(
-    (id) => {
-      if (!id) return 'N/A';
-      if (typeof id === 'object' && id.Name) return id.Name;
-      const room = rooms.find(
-        (r) => r.RoomId === id || r.RoomId === parseInt(id),
-      );
-      return room?.Name || id || 'N/A';
-    },
-    [rooms],
-  );
+  const getRoomName = useCallback((id) => {
+    if (!id) return 'N/A';
+    if (typeof id === 'object' && id.Name) return id.Name;
+    const room = rooms.find((r) => r.RoomId === id || r.RoomId === parseInt(id));
+    return room?.Name || id || 'N/A';
+  }, [rooms]);
 
-  // Helper: Lấy label trạng thái
   const getStatusLabel = useCallback((status) => {
     return STATUS_LABELS[status] || status || 'N/A';
   }, []);
 
-  // Tạo suất chiếu mới
   const handleAdd = useCallback(async (newShowtime, onClose) => {
     try {
       const payload = {
@@ -123,237 +104,156 @@ export const useShowtime = () => {
         Status: newShowtime.status || 'Scheduled',
       };
 
-      const res = await ShowtimeApi.create(payload);
-      const created = res.data.data || res.data;
-
-      setShowtimes((prev) => [created, ...prev]);
-      setTotal((prev) => prev + 1);
+      await ShowtimeApi.create(payload);
 
       Swal.fire({
-        toast: true,
-        position: 'top-end',
-        icon: 'success',
+        toast: true, position: 'top-end', icon: 'success',
         title: '🎉 Thêm suất chiếu thành công!',
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
+        showConfirmButton: false, timer: 3000, timerProgressBar: true,
       });
 
       onClose();
-      return created;
+      
+      // ✅ SỬA LỖI: Quay về trang 1 và load lại để thấy suất chiếu mới
+      setPage(1);
+      if (page === 1) fetchData(1); // Nếu đang ở trang 1 thì gọi trực tiếp vì useEffect không trigger
+      return true;
     } catch (error) {
       console.error('❌ Lỗi tạo suất chiếu:', error);
       Swal.fire({
-        toast: true,
-        position: 'top-end',
-        icon: 'error',
+        toast: true, position: 'top-end', icon: 'error',
         title: error.response?.data?.message || '❌ Thêm thất bại!',
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
+        showConfirmButton: false, timer: 3000, timerProgressBar: true,
       });
       throw error;
     }
-  }, []);
+  }, [page, fetchData]);
 
-  // Cập nhật suất chiếu
-  const handleUpdate = useCallback(
-    async (editingData, onClose) => {
+  const handleUpdate = useCallback(async (editingData, onClose) => {
+    try {
+      const payload = {
+        MovieId: Number(editingData.movieId),
+        RoomId: Number(editingData.roomId),
+        StartTime: editingData.startTime,
+        EndTime: editingData.endTime,
+        Price: Number(editingData.price),
+        Status: editingData.status,
+      };
+
+      await ShowtimeApi.update(editingData.showtimeId, payload);
+
+      Swal.fire({
+        toast: true, position: 'top-end', icon: 'success',
+        title: '✅ Cập nhật thành công!',
+        showConfirmButton: false, timer: 2000, timerProgressBar: true,
+      });
+
+      onClose();
+      fetchData(page); // Load lại trang hiện tại
+      return true;
+    } catch (error) {
+      console.error('❌ Lỗi cập nhật:', error);
+      Swal.fire({
+        toast: true, position: 'top-end', icon: 'error',
+        title: error.response?.data?.message || '❌ Cập nhật thất bại!',
+        showConfirmButton: false, timer: 3000, timerProgressBar: true,
+      });
+      throw error;
+    }
+  }, [page, fetchData]);
+
+  const handleDelete = useCallback(async (id) => {
+    const result = await Swal.fire({
+      title: 'Bạn có chắc chắn muốn xóa?',
+      text: 'Hành động này không thể hoàn tác!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Xóa',
+      cancelButtonText: 'Hủy',
+    });
+
+    if (result.isConfirmed) {
       try {
-        const payload = {
-          MovieId: Number(editingData.movieId),
-          RoomId: Number(editingData.roomId),
-          StartTime: editingData.startTime,
-          EndTime: editingData.endTime,
-          Price: Number(editingData.price),
-          Status: editingData.status,
-        };
-
-        const res = await ShowtimeApi.update(editingData.showtimeId, payload);
-        const updated = res.data.data || res.data;
-
-        setShowtimes((prev) =>
-          prev.map((s) =>
-            s.ShowtimeId === editingData.showtimeId ? updated : s,
-          ),
-        );
-
-        if (selected?.ShowtimeId === editingData.showtimeId) {
-          setSelected(updated);
-        }
-
+        await ShowtimeApi.delete(id);
         Swal.fire({
-          toast: true,
-          position: 'top-end',
-          icon: 'success',
-          title: '✅ Cập nhật suất chiếu thành công!',
-          showConfirmButton: false,
-          timer: 2000,
-          timerProgressBar: true,
+          toast: true, position: 'top-end', icon: 'success',
+          title: '🗑️ Đã xóa thành công!',
+          showConfirmButton: false, timer: 3000, timerProgressBar: true,
         });
-
-        onClose();
-        return updated;
+        // Nếu xóa suất chiếu cuối cùng của trang hiện tại, lùi về trang trước
+        const isLastItemOnPage = showtimes.length === 1;
+        if (isLastItemOnPage && page > 1) {
+          setPage(page - 1);
+        } else {
+          fetchData(page);
+        }
+        if (selected?.ShowtimeId === id) {
+          setSelected(null);
+          setShowDetail(false);
+        }
+        return true;
       } catch (error) {
-        console.error('❌ Lỗi cập nhật suất chiếu:', error);
+        console.error('❌ Lỗi xóa:', error);
         Swal.fire({
-          toast: true,
-          position: 'top-end',
-          icon: 'error',
-          title: error.response?.data?.message || '❌ Cập nhật thất bại!',
-          showConfirmButton: false,
-          timer: 3000,
-          timerProgressBar: true,
+          toast: true, position: 'top-end', icon: 'error',
+          title: '❌ Xóa thất bại!',
+          showConfirmButton: false, timer: 3000, timerProgressBar: true,
         });
         throw error;
       }
-    },
-    [selected],
-  );
+    }
+    return false;
+  }, [page, fetchData, showtimes.length, selected]);
 
-  // Xóa suất chiếu
-  const handleDelete = useCallback(
-    async (id) => {
-      const result = await Swal.fire({
-        title: 'Bạn có chắc chắn muốn xóa?',
-        text: 'Hành động này không thể hoàn tác!',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Xóa',
-        cancelButtonText: 'Hủy',
+  const handleToggleStatus = useCallback(async (id) => {
+    const showtime = showtimes.find((s) => s.ShowtimeId === id);
+    if (!showtime) return;
+
+    const newStatus = showtime.Status === 'Scheduled' ? 'Cancelled' : 'Scheduled';
+
+    try {
+      const payload = {
+        MovieId: Number(showtime.MovieId),
+        RoomId: Number(showtime.RoomId),
+        StartTime: showtime.StartTime,
+        EndTime: showtime.EndTime,
+        Price: Number(showtime.Price),
+        Status: newStatus,
+      };
+
+      await ShowtimeApi.update(id, payload);
+      
+      setShowtimes((prev) => prev.map((s) => s.ShowtimeId === id ? { ...s, Status: newStatus } : s));
+      if (selected?.ShowtimeId === id) setSelected({ ...selected, Status: newStatus });
+
+      Swal.fire({
+        toast: true, position: 'top-end', icon: 'success',
+        title: `✅ Đã ${newStatus === 'Scheduled' ? 'kích hoạt' : 'hủy'}!`,
+        showConfirmButton: false, timer: 2000, timerProgressBar: true,
       });
+    } catch (error) {
+      console.error('❌ Lỗi cập nhật trạng thái:', error);
+      Swal.fire({
+        toast: true, position: 'top-end', icon: 'error',
+        title: '❌ Không thể cập nhật trạng thái!',
+        showConfirmButton: false, timer: 3000, timerProgressBar: true,
+      });
+    }
+  }, [showtimes, selected]);
 
-      if (result.isConfirmed) {
-        try {
-          await ShowtimeApi.delete(id);
-          setShowtimes((prev) => prev.filter((s) => s.ShowtimeId !== id));
-          setTotal((prev) => prev - 1);
+  const handleView = useCallback((s) => { setSelected(s); setShowDetail(true); }, []);
+  const goToPage = useCallback((newPage) => { if (newPage >= 1 && newPage <= totalPages) setPage(newPage); }, [totalPages]);
+  const reload = useCallback(() => { fetchData(page); }, [fetchData, page]);
 
-          if (selected?.ShowtimeId === id) {
-            setSelected(null);
-            setShowDetail(false);
-          }
+  const counts = useMemo(() => ({
+    total: total,
+    scheduled: showtimes.filter((s) => s.Status === 'Scheduled').length,
+    cancelled: showtimes.filter((s) => s.Status === 'Cancelled').length,
+    finished: showtimes.filter((s) => s.Status === 'Finished').length,
+  }), [showtimes, total]);
 
-          Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: 'success',
-            title: '🗑️ Đã xóa suất chiếu thành công!',
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-          });
-          return true;
-        } catch (error) {
-          console.error('❌ Lỗi xóa suất chiếu:', error);
-          Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: 'error',
-            title: '❌ Xóa suất chiếu thất bại!',
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-          });
-          throw error;
-        }
-      }
-      return false;
-    },
-    [selected],
-  );
-
-  // Chuyển trạng thái
-  const handleToggleStatus = useCallback(
-    async (id) => {
-      const showtime = showtimes.find((s) => s.ShowtimeId === id);
-      if (!showtime) return;
-
-      const newStatus =
-        showtime.Status === 'Scheduled' ? 'Cancelled' : 'Scheduled';
-
-      try {
-        const payload = {
-          MovieId: Number(showtime.MovieId),
-          RoomId: Number(showtime.RoomId),
-          StartTime: showtime.StartTime,
-          EndTime: showtime.EndTime,
-          Price: Number(showtime.Price),
-          Status: newStatus,
-        };
-
-        await ShowtimeApi.update(id, payload);
-
-        setShowtimes((prev) =>
-          prev.map((s) =>
-            s.ShowtimeId === id ? { ...s, Status: newStatus } : s,
-          ),
-        );
-
-        if (selected?.ShowtimeId === id) {
-          setSelected({ ...selected, Status: newStatus });
-        }
-
-        Swal.fire({
-          toast: true,
-          position: 'top-end',
-          icon: 'success',
-          title: `✅ Đã ${newStatus === 'Scheduled' ? 'kích hoạt' : 'hủy'} suất chiếu!`,
-          showConfirmButton: false,
-          timer: 2000,
-          timerProgressBar: true,
-        });
-      } catch (error) {
-        console.error('❌ Lỗi cập nhật trạng thái:', error);
-        Swal.fire({
-          toast: true,
-          position: 'top-end',
-          icon: 'error',
-          title: '❌ Không thể cập nhật trạng thái!',
-          showConfirmButton: false,
-          timer: 3000,
-          timerProgressBar: true,
-        });
-      }
-    },
-    [showtimes, selected],
-  );
-
-  // Xem chi tiết
-  const handleView = useCallback((s) => {
-    setSelected(s);
-    setShowDetail(true);
-  }, []);
-
-  // Chuyển trang
-  const goToPage = useCallback(
-    (newPage) => {
-      if (newPage >= 1 && newPage <= totalPages) {
-        setPage(newPage);
-      }
-    },
-    [totalPages],
-  );
-
-  // Refresh dữ liệu
-  const reload = useCallback(() => {
-    fetchData();
-  }, [fetchData]);
-
-  // Tính toán counts
-  const counts = useMemo(
-    () => ({
-      total: total,
-      scheduled: showtimes.filter((s) => s.Status === 'Scheduled').length,
-      cancelled: showtimes.filter((s) => s.Status === 'Cancelled').length,
-      finished: showtimes.filter((s) => s.Status === 'Finished').length,
-    }),
-    [showtimes, total],
-  );
-
-  // Lọc dữ liệu (client-side fallback)
   const filtered = useMemo(() => {
     if (!search && !filterStatus) return showtimes;
     return showtimes.filter((s) => {
@@ -365,39 +265,10 @@ export const useShowtime = () => {
   }, [showtimes, search, filterStatus, getMovieTitle]);
 
   return {
-    showtimes,
-    setShowtimes,
-    movies,
-    rooms,
-    loading,
-    total,
-    totalPages,
-    page,
-    goToPage,
-    search,
-    setSearch,
-    searchInput,
-    setSearchInput,
-    filterStatus,
-    setFilterStatus,
-    selected,
-    setSelected,
-    editing,
-    setEditing,
-    viewMode,
-    setViewMode,
-    showDetail,
-    setShowDetail,
-    filtered,
-    counts,
-    handleAdd,
-    handleUpdate,
-    handleDelete,
-    handleToggleStatus,
-    handleView,
-    reload,
-    getMovieTitle,
-    getRoomName,
-    getStatusLabel,
+    showtimes, setShowtimes, movies, rooms, loading, total, totalPages, page, goToPage,
+    search, setSearch, searchInput, setSearchInput, filterStatus, setFilterStatus,
+    selected, setSelected, editing, setEditing, viewMode, setViewMode, showDetail, setShowDetail,
+    filtered, counts, handleAdd, handleUpdate, handleDelete, handleToggleStatus, handleView, reload,
+    getMovieTitle, getRoomName, getStatusLabel,
   };
 };
