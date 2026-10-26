@@ -1,4 +1,4 @@
-// src/api/auth/AuthApi.js
+
 import AxiosAdmin from "api/client/AxiosAdmin";
 
 const AuthApi = {
@@ -14,12 +14,12 @@ const AuthApi = {
   Me: () => AxiosAdmin.get("/auth/me"),
 
   // ============================================
-  // GOOGLE OAUTH METHODS (Dùng fwd.host)
+  // GOOGLE OAUTH METHODS (Dùng fwd.host + localhost)
   // ============================================
 
   googleLogin: () => {
-    // Dùng fwd.host để đánh lừa Google
-    window.location.href = "https://fwd.host/http://movie-api.local/api/auth/google";
+    // Chuyển sang localhost
+    window.location.href = "https://fwd.host/http://localhost/api/auth/google";
   },
 
   verifyGoogleToken: (token) => {
@@ -33,8 +33,8 @@ const AuthApi = {
   },
 
   getGoogleAuthUrl: () => {
-    // Dùng fwd.host để đánh lừa Google
-    return "https://fwd.host/http://movie-api.local/api/auth/google";
+    // Chuyển sang localhost
+    return "https://fwd.host/http://localhost/api/auth/google";
   },
 
   handleGoogleCallback: (token) => AuthApi.verifyGoogleToken(token),

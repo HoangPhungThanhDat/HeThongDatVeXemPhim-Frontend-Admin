@@ -1,21 +1,17 @@
-MIT License
+Copyright (c) 2026 Hoàng Đạt. All Rights Reserved.
 
-Copyright (c) 2023 Horizon UI
+This source code is provided strictly for VIEWING, REFERENCE, and EDUCATIONAL purposes only.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+1. PERMITTED USE:
+   - You are allowed to read, study, and learn from the source code provided in this repository.
+   - You may reference concepts or ideas for your own personal learning.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+2. PROHIBITED USE:
+   - You may NOT copy, reproduce, or replicate any part of this source code into your own projects.
+   - You may NOT modify, distribute, sublicense, or sell this code for any commercial or non-commercial purposes.
+   - You may NOT claim this code (in whole or in part) as your own work or use it in any academic submission (such as graduation projects or assignments).
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+3. ATTRIBUTION:
+   - If you write an article, tutorial, or documentation referencing this project, you must clearly credit the original author (Hoàng Đạt) and include a link back to this repository.
+
+Any unauthorized use, copying, or distribution of this Software is strictly prohibited.
