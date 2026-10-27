@@ -1,5 +1,3 @@
-
-
 import { useState, useCallback } from 'react';
 import { useToast } from '@chakra-ui/react';
 import TicketApi from 'api/booking/TicketApi';
@@ -17,7 +15,7 @@ export const useTicket = () => {
   const [users, setUsers] = useState({});
 
   const formatDate = useCallback((dateStr) => {
-    if (!dateStr) return '';
+    if (!dateStr) return { datePart: '', timePart: '' };
     try {
       let date;
       if (typeof dateStr === 'string' && dateStr.includes(' ')) {
@@ -25,16 +23,14 @@ export const useTicket = () => {
       } else {
         date = new Date(dateStr);
       }
-      if (isNaN(date.getTime())) return 'Invalid Date';
-      return date.toLocaleString('vi-VN', {
-        hour: '2-digit',
-        minute: '2-digit',
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      });
+      if (isNaN(date.getTime())) return { datePart: 'Invalid Date', timePart: '' };
+      
+      const timePart = date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+      const datePart = date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      
+      return { datePart, timePart };
     } catch {
-      return dateStr;
+      return { datePart: dateStr, timePart: '' };
     }
   }, []);
 
@@ -150,31 +146,26 @@ export const useTicket = () => {
       const comboMap = await fetchCombosForTickets(ticketIds);
 
       const mappedData = data.map((item) => {
-        // ⭐ FIX: Lấy dữ liệu từ item.showtime và item.seat
         const showtime = item.showtime || {}; 
         const seat = item.seat || {};
 
         const userId = item.UserId || item.userId || '';
         const userInfo = userMap[userId] || {};
 
-        // Map Tên phim
         let movieId = showtime.movie?.MovieId || '';
         const movieTitle = movieMap[movieId] || showtime.movie?.Title || 'Phim chưa xác định';
 
-        // Map Tên phòng
         let roomId = showtime.room?.RoomId || '';
         const roomName = roomMap[roomId] || showtime.room?.Name || 'Chưa xác định';
 
         const startTime = showtime.StartTime || '';
-        const formattedTime = formatDate(startTime);
+        const { datePart, timePart } = formatDate(startTime);
 
         const seatRow = seat.Row || '';
         const seatNumber = seat.Number || '';
         const seatLabel = seatRow + seatNumber || 'A1';
         
-        // ⭐ FIX: Đảm bảo lấy đúng giá vé từ API
         let price = Number(showtime.Price) || 0; 
-        // Nếu không có giá từ showtime, thử lấy từ item (nếu có)
         if (price === 0 && item.Price) price = Number(item.Price);
 
         let ticketId = item.TicketId || item.id;
@@ -197,9 +188,9 @@ export const useTicket = () => {
           email: item.user?.Email || userInfo.email || '',
           phone: item.user?.PhoneNumber || userInfo.phone || '',
           movie: movieTitle,
-          showtime: formattedTime ? `${formattedTime} - ${roomName}` : '',
+          showtime: `${timePart} ${datePart} - ${roomName}`, // Vẫn giữ để tương thích cũ
           seat: seatLabel,
-          price: price ? `${Number(price).toLocaleString('vi-VN')}đ` : '0đ', // Format chuẩn VN
+          price: price ? `${Number(price).toLocaleString('vi-VN')}đ` : '0đ',
           status: status,
           note: item.Note || item.note || '',
           combo: comboName,
@@ -209,6 +200,12 @@ export const useTicket = () => {
           showtimeId: showtime.ShowtimeId || item.ShowtimeId || null,
           seatId: seat.SeatId || item.SeatId || null,
           showtimeSeatId: item.ShowtimeSeatId || null,
+          
+          // ⭐ THÊM CÁC TRƯỜNG TÁCH BIỆT CHO QR MODAL
+          room: roomName,
+          date: datePart,
+          time: timePart,
+          total: price ? `${Number(price).toLocaleString('vi-VN')}` : '0',
         };
       });
 
@@ -232,7 +229,6 @@ export const useTicket = () => {
     }
   }, [toast, fetchUsers, fetchMoviesMap, fetchRoomsMap, formatDate, fetchCombosForTickets]);
   
-  // ... (Các hàm createTicket, updateTicket, deleteTicket, cancelTicket giữ nguyên)
   const createTicket = useCallback(async (data) => {
     try {
       const apiData = {
